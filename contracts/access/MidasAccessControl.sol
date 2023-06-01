@@ -6,16 +6,19 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./MidasAccessControlRoles.sol";
 
 contract MidasAccessControl is AccessControl, MidasAccessControlRoles {
-    constructor() { 
-        _setupRoles();    
+    constructor() {
+        _setupRoles();
     }
 
     function _setupRoles() private {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
+        _setRoleAdmin(BLACKLISTED_ROLE, BLACKLIST_OPERATOR_ROLE);
+        _setRoleAdmin(WHITELISTED_ROLE, WHITELIST_OPERATOR_ROLE);
+
         _setupRole(WHITELIST_OPERATOR_ROLE, msg.sender);
         _setupRole(BLACKLIST_OPERATOR_ROLE, msg.sender);
-        
+
         _setupRole(ST_USD_MINT_OPERATOR_ROLE, msg.sender);
         _setupRole(ST_USD_BURN_OPERATOR_ROLE, msg.sender);
         _setupRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender);
