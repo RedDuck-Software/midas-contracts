@@ -14,18 +14,35 @@ contract stUSD is ERC20Pausable, Blacklistable {
 
     constructor(address _ac) ERC20("stUSD", "stUSD") Blacklistable(_ac) {}
 
-    function pause() external onlyRole(ST_USD_PAUSE_OPERATOR_ROLE) {
+    function pause() external onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender) {
         _pause();
     }
 
-    function unpause() external onlyRole(ST_USD_PAUSE_OPERATOR_ROLE) {
+    function unpause()
+        external
+        onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender)
+    {
         _unpause();
     }
 
     function setMetadata(
         bytes32 key,
         bytes memory data
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
         metadata[key] = data;
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    )
+        internal
+        virtual
+        override(ERC20Pausable)
+        onlyNotBlacklisted(from)
+        onlyNotBlacklisted(to)
+    {
+        ERC20Pausable._beforeTokenTransfer(from, to, amount);
     }
 }

@@ -8,13 +8,13 @@ abstract contract WithMidasAccessControl is MidasAccessControlRoles {
 
     MidasAccessControl public accessControl;
 
-    modifier onlyRole(bytes32 role) {
-        require(accessControl.hasRole(role, msg.sender), "WMAC: hasnt role");
+    modifier onlyRole(bytes32 role, address account) {
+        require(accessControl.hasRole(role, account), "WMAC: hasnt role");
         _;
     }
 
-    modifier onlyNotRole(bytes32 role) {
-        require(!accessControl.hasRole(role, msg.sender), "WMAC: has role");
+    modifier onlyNotRole(bytes32 role, address account) {
+        require(!accessControl.hasRole(role, account), "WMAC: has role");
         _;
     }
 
@@ -25,7 +25,7 @@ abstract contract WithMidasAccessControl is MidasAccessControlRoles {
     function grantRole(
         bytes32 role,
         address account
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
         accessControl.grantRole(role, account);
     }
 
@@ -33,7 +33,7 @@ abstract contract WithMidasAccessControl is MidasAccessControlRoles {
     function revokeRole(
         bytes32 role,
         address account
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
         accessControl.revokeRole(role, account);
 
     }
