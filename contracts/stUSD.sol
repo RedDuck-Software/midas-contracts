@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 
+import "./access/Blacklistable.sol";
 
 contract stUSD is ERC20Pausable { 
     bytes32 public constant TERMS_URL_METADATA_KEY = keccak256("urls.terms");
