@@ -3,9 +3,10 @@ import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import {
-    MidasAccessControl__factory,
-    StUSD__factory,
-    WithMidasAccessControlTester__factory
+  BlacklistableTester__factory,
+  MidasAccessControl__factory,
+  StUSD__factory,
+  WithMidasAccessControlTester__factory
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -14,6 +15,7 @@ export const defaultDeploy = async () => {
   const accessControl = await new MidasAccessControl__factory(owner).deploy();
   const stUSD = await new StUSD__factory(owner).deploy(accessControl.address);
   const wAccessControlTester = await new WithMidasAccessControlTester__factory(owner).deploy(accessControl.address);
+  const blackListableTester = await new BlacklistableTester__factory(owner).deploy(accessControl.address);
 
   const roles = {
     blacklisted: await accessControl.BLACKLISTED_ROLE(),
@@ -25,15 +27,17 @@ export const defaultDeploy = async () => {
     blacklistedOperator: await accessControl.BLACKLIST_OPERATOR_ROLE(),
     defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
   }
-  
+
   await accessControl.grantRole(roles.blacklistedOperator, stUSD.address);
-  
+  await accessControl.grantRole(roles.blacklistedOperator, blackListableTester.address);
+
   return {
     stUSD,
     accessControl,
     wAccessControlTester,
     roles,
     owner,
-    regularAccounts
+    regularAccounts,
+    blackListableTester
   }
 }
