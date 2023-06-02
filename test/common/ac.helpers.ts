@@ -5,7 +5,6 @@ import { getAddress } from 'ethers/lib/utils';
 import { Account, OptionalCommonParams, getAccount } from './common.helpers';
 
 import {
-  AccessControl__factory,
   Blacklistable,
   Greenlistable,
   MidasAccessControl,
