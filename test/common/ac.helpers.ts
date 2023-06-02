@@ -39,4 +39,37 @@ export const blackList = async (
     await expect(blacklistable.connect(owner).addToBlackList(account))
         .to.emit(accessControl, accessControl.interface.events['RoleGranted(bytes32,address,address)'].name)
         .to.not.reverted
+
+    expect(await accessControl.hasRole(
+        await accessControl.BLACKLISTED_ROLE(), 
+        account
+    )).eq(true)
+}
+
+
+export const unBlackList = async (
+    { 
+        blacklistable, 
+        accessControl, 
+        owner
+    }: CommonParams,
+    account: Account,
+    opt?: OptionalCommonParams
+) => {
+    account = getAccount(account);
+
+    if (opt?.revertMessage) {
+        await expect(blacklistable.connect(opt?.from ?? owner).removeFromBlackList(account))
+            .revertedWith(opt?.revertMessage);
+        return;
+    }
+
+    await expect(blacklistable.connect(owner).removeFromBlackList(account))
+        .to.emit(accessControl, accessControl.interface.events['RoleRevoked(bytes32,address,address)'].name)
+        .to.not.reverted
+
+    expect(await accessControl.hasRole(
+        await accessControl.BLACKLISTED_ROLE(), 
+        account
+    )).eq(false)
 }

@@ -6,7 +6,7 @@ import { defaultDeploy } from './common/fixtures';
 import { defaultAbiCoder, getAddress, parseUnits, solidityKeccak256 } from 'ethers/lib/utils';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { burn, mint, setMetadataTest } from './common/stUSD.helpers';
-import { blackList, acErrors } from './common/ac.helpers';
+import { blackList, acErrors, unBlackList } from './common/ac.helpers';
 
 describe('stUSD', function () {
   it('deployment', async () => {
@@ -223,6 +223,24 @@ describe('stUSD', function () {
       await stUSD.connect(from).approve(blacklisted.address, 1);
 
       await expect(stUSD.connect(blacklisted).transferFrom(from.address, to.address, 1))
+        .not.reverted;
+    })
+
+    it('transfer(...) when caller address was blacklisted and then un-blacklisted', async () => {
+      const { owner, stUSD, regularAccounts, accessControl } = await loadFixture(defaultDeploy)
+
+      const blacklisted = regularAccounts[0];
+      const to = regularAccounts[2];
+
+      await mint({ stUSD, owner }, blacklisted, 1);
+      await blackList({ blacklistable: stUSD, accessControl, owner }, blacklisted);
+
+      await expect(stUSD.connect(blacklisted).transfer(to.address, 1))
+        .revertedWith(acErrors.WMAC_HAS_ROLE);
+ 
+      await unBlackList({ blacklistable: stUSD, accessControl, owner }, blacklisted);
+
+      await expect(stUSD.connect(blacklisted).transfer(to.address, 1))
         .not.reverted;
     })
   })
