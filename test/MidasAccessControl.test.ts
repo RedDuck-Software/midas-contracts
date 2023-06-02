@@ -21,6 +21,15 @@ describe('MidasAccessControl', function () {
       roles.blacklistedOperator,
     );
   });
+
+  it('initialize', async () => {
+    const { accessControl, mockedAggregator } =
+      await loadFixture(defaultDeploy);
+
+    await expect(
+      accessControl.initialize(),
+    ).revertedWith('Initializable: contract is already initialized');
+  })
 });
 
 describe('WithMidasAccessControl', function () {
