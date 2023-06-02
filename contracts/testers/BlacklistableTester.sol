@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 import "../access/Blacklistable.sol";
 
 contract BlacklistableTester is Blacklistable {
-    constructor(address _accessControl) Blacklistable(_accessControl) {}
+    function initialize(address _accessControl) external initializer {
+        __Blacklistable_init(_accessControl);
+    }
 
     function onlyNotBlacklistedTester(
         address account

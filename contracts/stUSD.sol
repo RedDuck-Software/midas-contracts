@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 
 import "./access/Blacklistable.sol";
 
-contract stUSD is ERC20Pausable, Blacklistable {
+contract stUSD is ERC20PausableUpgradeable, Blacklistable {
     bytes32 public constant TERMS_URL_METADATA_KEY = keccak256("urls.terms");
 
     bytes32 public constant DESCRIPTION_URL_METADATA_KEY =
@@ -13,7 +13,10 @@ contract stUSD is ERC20Pausable, Blacklistable {
 
     mapping(bytes32 => bytes) public metadata;
 
-    constructor(address _ac) ERC20("stUSD", "stUSD") Blacklistable(_ac) {}
+    function initialize(address _accessControl) external initializer {
+        __Blacklistable_init(_accessControl);
+        __ERC20_init("stUSD", "stUSD");
+    }
 
     function mint(
         address to,
@@ -54,10 +57,10 @@ contract stUSD is ERC20Pausable, Blacklistable {
     )
         internal
         virtual
-        override(ERC20Pausable)
+        override(ERC20PausableUpgradeable)
         onlyNotBlacklisted(from)
         onlyNotBlacklisted(to)
     {
-        ERC20Pausable._beforeTokenTransfer(from, to, amount);
+        ERC20PausableUpgradeable._beforeTokenTransfer(from, to, amount);
     }
 }

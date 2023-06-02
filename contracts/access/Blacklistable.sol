@@ -9,7 +9,11 @@ abstract contract Blacklistable is WithMidasAccessControl {
         _;
     }
 
-    constructor(address _ac) WithMidasAccessControl(_ac) {}
+    function __Blacklistable_init(
+        address _accessControl
+    ) internal onlyInitializing {
+        __WithMidasAccessControl_init(_accessControl);
+    }
 
     function addToBlackList(
         address account
@@ -23,5 +27,7 @@ abstract contract Blacklistable is WithMidasAccessControl {
         accessControl.revokeRole(BLACKLISTED_ROLE, account);
     }
 
-    function _onlyNotBlacklisted(address account) private view onlyNotRole(BLACKLISTED_ROLE, account) {}
+    function _onlyNotBlacklisted(
+        address account
+    ) private view onlyNotRole(BLACKLISTED_ROLE, account) {}
 }

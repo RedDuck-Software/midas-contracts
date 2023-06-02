@@ -1,25 +1,30 @@
 import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import {
+  BlacklistableTester,
   BlacklistableTester__factory,
+  GreenlistableTester,
   GreenlistableTester__factory,
+  MidasAccessControl,
   MidasAccessControl__factory,
   StUSD__factory,
+  WithMidasAccessControlTester,
   WithMidasAccessControlTester__factory
 } from '../../typechain-types';
+import { StUSD } from '../../typechain-types/contracts/BondToken.sol';
 
 export const defaultDeploy = async () => {
   const [owner, ...regularAccounts] = await ethers.getSigners();
 
-  const accessControl = await new MidasAccessControl__factory(owner).deploy();
-  const stUSD = await new StUSD__factory(owner).deploy(accessControl.address);
+  const accessControl = await upgrades.deployProxy(await ethers.getContractFactory('MidasAccessControl'), []) as MidasAccessControl;
+  const stUSD = await upgrades.deployProxy(await ethers.getContractFactory('stUSD'), [accessControl.address]) as StUSD 
 
   // testers
-  const wAccessControlTester = await new WithMidasAccessControlTester__factory(owner).deploy(accessControl.address);
-  const blackListableTester = await new BlacklistableTester__factory(owner).deploy(accessControl.address);
-  const greenListableTester = await new GreenlistableTester__factory(owner).deploy(accessControl.address);
+  const wAccessControlTester = await upgrades.deployProxy(await ethers.getContractFactory('WithMidasAccessControlTester'), [accessControl.address]) as WithMidasAccessControlTester
+  const blackListableTester = await upgrades.deployProxy(await ethers.getContractFactory('BlacklistableTester'), [accessControl.address]) as BlacklistableTester
+  const greenListableTester = await upgrades.deployProxy(await ethers.getContractFactory('GreenlistableTester'), [accessControl.address]) as GreenlistableTester
 
   const roles = {
     blacklisted: await accessControl.BLACKLISTED_ROLE(),

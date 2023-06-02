@@ -9,7 +9,11 @@ abstract contract Greenlistable is WithMidasAccessControl {
         _;
     }
 
-    constructor(address _ac) WithMidasAccessControl(_ac) {}
+    function __Greenlistable_init(
+        address _accessControl
+    ) internal onlyInitializing {
+        __WithMidasAccessControl_init(_accessControl);
+    }
 
     function addToGreenList(
         address account
