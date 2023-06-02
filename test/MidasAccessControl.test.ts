@@ -8,7 +8,7 @@ describe('MidasAccessControl', function () {
   it('deployment', async () => {
     const { accessControl, roles, owner, stUSD } = await loadFixture(defaultDeploy)
 
-    const { blacklisted: _, whitelisted: __, ...rolesToCheck } = roles;
+    const { blacklisted: _, greenlisted: __, ...rolesToCheck } = roles;
 
     for (const role of Object.values(rolesToCheck)) {
       expect(await accessControl.hasRole(role, owner.address)).to.eq(true);

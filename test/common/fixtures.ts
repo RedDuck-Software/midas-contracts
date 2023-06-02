@@ -19,11 +19,11 @@ export const defaultDeploy = async () => {
 
   const roles = {
     blacklisted: await accessControl.BLACKLISTED_ROLE(),
-    whitelisted: await accessControl.WHITELISTED_ROLE(),
+    greenlisted: await accessControl.GREENLISTED_ROLE(),
     minter: await accessControl.ST_USD_MINT_OPERATOR_ROLE(),
     burner: await accessControl.ST_USD_BURN_OPERATOR_ROLE(),
     pauser: await accessControl.ST_USD_PAUSE_OPERATOR_ROLE(),
-    whitelistedOperator: await accessControl.WHITELIST_OPERATOR_ROLE(),
+    greenlistedOperator: await accessControl.GREENLIST_OPERATOR_ROLE(),
     blacklistedOperator: await accessControl.BLACKLIST_OPERATOR_ROLE(),
     defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
   }
