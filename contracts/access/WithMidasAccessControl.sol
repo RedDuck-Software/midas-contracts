@@ -25,16 +25,14 @@ abstract contract WithMidasAccessControl is MidasAccessControlRoles {
     function grantRole(
         bytes32 role,
         address account
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    ) internal {
         accessControl.grantRole(role, account);
     }
-
 
     function revokeRole(
         bytes32 role,
         address account
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    ) internal {
         accessControl.revokeRole(role, account);
-
     }
 }

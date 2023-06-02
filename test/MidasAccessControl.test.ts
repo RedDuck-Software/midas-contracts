@@ -24,15 +24,31 @@ describe('WithMidasAccessControl', function () {
     expect(await wAccessControlTester.accessControl()).eq(accessControl.address);
   });
 
-  describe('grantRole()', () => {
-    describe('should fail', () => {
-      it('call from non DEFAULT_ADMIN_ROLE address', async () => {
-        const { wAccessControlTester, regularAccounts, roles } = await loadFixture(defaultDeploy)
-        await expect(wAccessControlTester.connect(regularAccounts[1]).grantRole(roles.blacklisted, regularAccounts[0].address))
-          .revertedWith(
-            'WMAC: hasnt role'
-          );
-      })
-    })
-  });
+  it('onlyRole: should fail when call from non DEFAULT_ADMIN_ROLE address', async () => {
+    const { wAccessControlTester, regularAccounts, roles } = await loadFixture(defaultDeploy)
+    await expect(wAccessControlTester.connect(regularAccounts[1]).withOnlyRole(roles.blacklisted, regularAccounts[0].address))
+      .revertedWith(
+        'WMAC: hasnt role'
+      );
+  })
+
+  it('onlyRole: call from DEFAULT_ADMIN_ROLE address', async () => {
+    const { wAccessControlTester, owner, roles } = await loadFixture(defaultDeploy)
+    await expect(wAccessControlTester.withOnlyRole(roles.blacklistedOperator, owner.address))
+      .not.reverted;
+  })
+
+  it('onlyNotRole: should fail when call from DEFAULT_ADMIN_ROLE address', async () => {
+    const { wAccessControlTester, owner, roles } = await loadFixture(defaultDeploy)
+    await expect(wAccessControlTester.withOnlyNotRole(roles.blacklistedOperator, owner.address))
+      .revertedWith(
+        'WMAC: has role'
+      );
+  })
+  
+  it('onlyRole: call from non DEFAULT_ADMIN_ROLE address', async () => {
+    const { wAccessControlTester, owner, regularAccounts, roles } = await loadFixture(defaultDeploy)
+    await expect(wAccessControlTester.withOnlyNotRole(roles.blacklisted, regularAccounts[1].address))
+      .not.reverted;
+  })
 });
