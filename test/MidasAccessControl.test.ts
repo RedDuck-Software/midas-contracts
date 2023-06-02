@@ -5,7 +5,7 @@ import { ethers } from 'hardhat';
 import { defaultDeploy } from './common/fixtures';
 
 describe('MidasAccessControl', function () {
-  it('Deployment', async () => {
+  it('deployment', async () => {
     const { accessControl, roles, owner, stUSD } = await loadFixture(defaultDeploy)
 
     const { blacklisted: _, whitelisted: __, ...rolesToCheck } = roles;
@@ -19,7 +19,7 @@ describe('MidasAccessControl', function () {
 });
 
 describe('WithMidasAccessControl', function () {
-  it('Deployment', async () => {
+  it('deployment', async () => {
     const { accessControl, wAccessControlTester } = await loadFixture(defaultDeploy)
     expect(await wAccessControlTester.accessControl()).eq(accessControl.address);
   });
@@ -73,7 +73,7 @@ describe('WithMidasAccessControl', function () {
     })
   })
 
-  describe.only('revokeRole()', () => { 
+  describe('revokeRole()', () => { 
     it('should fail when call from non role admin', async () => {
       const { wAccessControlTester, accessControl, owner, regularAccounts, roles } = await loadFixture(defaultDeploy)
       expect(await accessControl.hasRole(roles.blacklistedOperator, wAccessControlTester.address)).eq(false)
@@ -85,7 +85,7 @@ describe('WithMidasAccessControl', function () {
       const { accessControl, wAccessControlTester, owner, regularAccounts, stUSD,  roles } = await loadFixture(defaultDeploy)
       await accessControl.grantRole(roles.blacklistedOperator, wAccessControlTester.address);
       await wAccessControlTester.grantRoleTester(roles.blacklisted, regularAccounts[1].address);
-      
+
       await expect(wAccessControlTester.revokeRoleTester(roles.blacklisted, regularAccounts[1].address))
         .not.reverted;
 
