@@ -4,12 +4,15 @@ import { expect } from 'chai';
 import { ethers, upgrades } from 'hardhat';
 
 import {
+  AggregatorV3Mock__factory,
   BlacklistableTester__factory,
+  DataFeed__factory,
   GreenlistableTester__factory,
   MidasAccessControl__factory,
   StUSD__factory,
   WithMidasAccessControlTester__factory,
 } from '../../typechain-types';
+import { parseUnits } from 'ethers/lib/utils';
 
 export const defaultDeploy = async () => {
   const [owner, ...regularAccounts] = await ethers.getSigners();
@@ -20,6 +23,14 @@ export const defaultDeploy = async () => {
 
   const stUSD = await new StUSD__factory(owner).deploy();
   await stUSD.initialize(accessControl.address);
+
+  const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
+  const mockedAggregatorDecimals = await mockedAggregator.decimals();
+
+  await mockedAggregator.setRoundData(parseUnits('5', mockedAggregatorDecimals));
+
+  const dataFeed = await new DataFeed__factory(owner).deploy();
+  await dataFeed.initialize(accessControl.address, mockedAggregator.address);
 
   // testers
   const wAccessControlTester = await new WithMidasAccessControlTester__factory(
@@ -70,5 +81,8 @@ export const defaultDeploy = async () => {
     regularAccounts,
     blackListableTester,
     greenListableTester,
+    dataFeed,
+    mockedAggregator,
+    mockedAggregatorDecimals
   };
 };
