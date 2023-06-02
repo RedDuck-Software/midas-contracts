@@ -8,6 +8,20 @@ contract WithMidasAccessControlTester is WithMidasAccessControl {
         address _accessControl
     ) WithMidasAccessControl(_accessControl) {}
 
+
+    function grantRoleTester(
+        bytes32 role,
+        address account
+    ) external {
+        grantRole(role, account);
+    }
+
+    function revokeRoleTester(
+        bytes32 role,
+        address account
+    ) external {
+        revokeRole(role, account);
+    }
     function withOnlyRole(
         bytes32 role,
         address account
