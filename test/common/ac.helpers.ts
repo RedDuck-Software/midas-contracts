@@ -1,11 +1,17 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { getAddress } from "ethers/lib/utils"
-import { AccessControl__factory, Blacklistable, MidasAccessControl } from "../../typechain-types"
+import { AccessControl__factory, Blacklistable, Greenlistable, MidasAccessControl } from "../../typechain-types"
 import { Account, OptionalCommonParams, getAccount } from "./common.helpers"
 import { expect } from "chai"
 
-type CommonParams = { 
+type CommonParamsBlackList = { 
     blacklistable: Blacklistable, 
+    accessControl: MidasAccessControl,
+    owner: SignerWithAddress 
+}
+
+type CommonParamsGreenList = { 
+    greenlistable: Greenlistable, 
     accessControl: MidasAccessControl,
     owner: SignerWithAddress 
 }
@@ -24,7 +30,7 @@ export const blackList = async (
         blacklistable, 
         accessControl, 
         owner
-    }: CommonParams,
+    }: CommonParamsBlackList,
     account: Account,
     opt?: OptionalCommonParams
 ) => {
@@ -52,7 +58,7 @@ export const unBlackList = async (
         blacklistable, 
         accessControl, 
         owner
-    }: CommonParams,
+    }: CommonParamsBlackList,
     account: Account,
     opt?: OptionalCommonParams
 ) => {
@@ -70,6 +76,61 @@ export const unBlackList = async (
 
     expect(await accessControl.hasRole(
         await accessControl.BLACKLISTED_ROLE(), 
+        account
+    )).eq(false)
+}
+
+export const greenList = async (
+    { 
+        greenlistable, 
+        accessControl, 
+        owner
+    }: CommonParamsGreenList,
+    account: Account,
+    opt?: OptionalCommonParams
+) => {
+    account = getAccount(account);
+
+    if (opt?.revertMessage) {
+        await expect(greenlistable.connect(opt?.from ?? owner).addToGreenList(account))
+            .revertedWith(opt?.revertMessage);
+        return;
+    }
+
+    await expect(greenlistable.connect(owner).addToGreenList(account))
+        .to.emit(accessControl, accessControl.interface.events['RoleGranted(bytes32,address,address)'].name)
+        .to.not.reverted
+
+    expect(await accessControl.hasRole(
+        await accessControl.GREENLISTED_ROLE(), 
+        account
+    )).eq(true)
+}
+
+
+export const unGreenList = async (
+    { 
+        greenlistable, 
+        accessControl, 
+        owner
+    }: CommonParamsGreenList,
+    account: Account,
+    opt?: OptionalCommonParams
+) => {
+    account = getAccount(account);
+
+    if (opt?.revertMessage) {
+        await expect(greenlistable.connect(opt?.from ?? owner).removeFromGreenList(account))
+            .revertedWith(opt?.revertMessage);
+        return;
+    }
+
+    await expect(greenlistable.connect(owner).removeFromGreenList(account))
+        .to.emit(accessControl, accessControl.interface.events['RoleRevoked(bytes32,address,address)'].name)
+        .to.not.reverted
+
+    expect(await accessControl.hasRole(
+        await accessControl.GREENLISTED_ROLE(), 
         account
     )).eq(false)
 }

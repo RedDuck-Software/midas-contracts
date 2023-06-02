@@ -5,7 +5,7 @@ import { ethers } from 'hardhat';
 import { defaultDeploy } from './common/fixtures';
 import { acErrors, blackList, unBlackList } from './common/ac.helpers';
 
-describe.only('Blacklistable', function () {
+describe('Blacklistable', function () {
   it('deployment', async () => {
     const { accessControl, blackListableTester, roles, owner } = await loadFixture(defaultDeploy)
 
