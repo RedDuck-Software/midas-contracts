@@ -7,11 +7,14 @@ import {
   AggregatorV3Mock__factory,
   BlacklistableTester__factory,
   DataFeed__factory,
+  DepositVault__factory,
+  ERC20Mock__factory,
   GreenlistableTester__factory,
   MidasAccessControl__factory,
   StUSD__factory,
   WithMidasAccessControlTester__factory,
 } from '../../typechain-types';
+
 import { parseUnits } from 'ethers/lib/utils';
 
 export const defaultDeploy = async () => {
@@ -31,6 +34,15 @@ export const defaultDeploy = async () => {
 
   const dataFeed = await new DataFeed__factory(owner).deploy();
   await dataFeed.initialize(accessControl.address, mockedAggregator.address);
+
+  const depositVault = await new DepositVault__factory(owner).deploy();
+  await depositVault.initialize(accessControl.address, stUSD.address, dataFeed.address, 0);
+
+  const stableCoins = { 
+    usdc: await new ERC20Mock__factory(owner).deploy(8),
+    usdt: await new ERC20Mock__factory(owner).deploy(18),
+    dai: await new ERC20Mock__factory(owner).deploy(18),
+  }
 
   // testers
   const wAccessControlTester = await new WithMidasAccessControlTester__factory(
@@ -57,10 +69,13 @@ export const defaultDeploy = async () => {
     greenlistedOperator: await accessControl.GREENLIST_OPERATOR_ROLE(),
     blacklistedOperator: await accessControl.BLACKLIST_OPERATOR_ROLE(),
     defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
+    depositVaultAdmin: await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
   };
 
   // role granting main
   await accessControl.grantRole(roles.blacklistedOperator, stUSD.address);
+  await accessControl.grantRole(roles.greenlistedOperator, depositVault.address);
+  await accessControl.grantRole(roles.minter, depositVault.address);
 
   // role granting testers
   await accessControl.grantRole(
@@ -83,6 +98,8 @@ export const defaultDeploy = async () => {
     greenListableTester,
     dataFeed,
     mockedAggregator,
-    mockedAggregatorDecimals
+    mockedAggregatorDecimals,
+    depositVault,
+    stableCoins
   };
 };
