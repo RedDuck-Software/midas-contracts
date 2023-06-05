@@ -25,7 +25,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         require(_aggregator != address(0), "DF: invalid address");
         
         aggregator = AggregatorV3Interface(_aggregator);
-    }
+}
 
     function fetchDataInBase18() external returns (uint256 answer) {
         (uint80 roundId, uint256 _answer) = _getDataInBase18();
