@@ -9,7 +9,7 @@ import "../libraries/DecimalsCorrectionLibrary.sol";
 import "../interfaces/IDataFeed.sol";
 
 contract DataFeed is WithMidasAccessControl, IDataFeed {
-    using DecimalCorrectionLibrary for uint256;
+    using DecimalsCorrectionLibrary for uint256;
     AggregatorV3Interface public aggregator;
 
     IDataFeed.RecordedDataFetch public _lastRecordedDataFetch;

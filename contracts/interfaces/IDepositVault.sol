@@ -21,6 +21,8 @@ interface IDepositVault {
 
     event RemovePaymentToken(address indexed token, address indexed caller);
 
+    event SetMinAmountToDeposit(address indexed caller, uint256 newValue);
+
     event SetFee(address indexed caller, uint256 newFee);
 
     function deposit(
@@ -45,9 +47,11 @@ interface IDepositVault {
 
     function setFee(uint256 newFee) external;
 
+    function setMinAmountToDeposit(uint256 newValue) external;
+
     function getOutputAmountWithFee(
         uint256 amountIn
     ) external view returns (uint256 amountOut);
 
-    function fee() external view returns (uint256);
+    function getFee() external view returns (uint256);
 }

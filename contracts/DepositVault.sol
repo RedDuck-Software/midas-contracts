@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 import {IERC20Upgradeable as IERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {IERC20MetadataUpgradeable as IERC20Metadata} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
@@ -11,8 +13,11 @@ import "./interfaces/IDataFeed.sol";
 
 import "./access/Greenlistable.sol";
 
+import "./libraries/DecimalsCorrectionLibrary.sol";
+
 contract DepositVault is Greenlistable, IDepositVault {
     using EnumerableSet for EnumerableSet.AddressSet;
+    using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
     address public constant MANUAL_FULLFILMENT_TOKEN_IN = address(0);
@@ -22,6 +27,8 @@ contract DepositVault is Greenlistable, IDepositVault {
     IDataFeed public etfDataFeed;
 
     IStUSD public stUSD;
+
+    uint256 public minUsdAmountToDeposit;
 
     EnumerableSet.AddressSet private _paymentTokens;
 
@@ -34,22 +41,24 @@ contract DepositVault is Greenlistable, IDepositVault {
     function initialize(
         address _ac,
         address _stUSD,
-        address _etfDataFeed
+        address _etfDataFeed,
+        uint256 _minUsdAmountToDeposit
     ) external initializer {
         stUSD = IStUSD(_stUSD);
         etfDataFeed = IDataFeed(_etfDataFeed);
+        minUsdAmountToDeposit = _minUsdAmountToDeposit;
         __Greenlistable_init(_ac);
     }
 
     function deposit(
         address tokenIn,
         uint256 amountUsdIn
-    ) external returns (uint256) {
+    ) external onlyGreenlisted(msg.sender) returns (uint256) {
         _requireTokenExists(tokenIn);
         IERC20(tokenIn).safeTransferFrom(
             msg.sender,
             address(this),
-            amountUsdIn
+            amountUsdIn.convertFromBase18(IERC20Metadata(tokenIn).decimals())
         );
         return _deposit(msg.sender, tokenIn, amountUsdIn, false);
     }
@@ -57,7 +66,11 @@ contract DepositVault is Greenlistable, IDepositVault {
     function fulfillManualDeposit(
         address user,
         uint256 amountUsdIn
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) returns (uint256) {
+    )
+        external
+        onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender)
+        returns (uint256)
+    {
         return _deposit(user, MANUAL_FULLFILMENT_TOKEN_IN, amountUsdIn, true);
     }
 
@@ -65,29 +78,36 @@ contract DepositVault is Greenlistable, IDepositVault {
         address token,
         uint256 amount,
         address withdrawTo
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) {
-        _requireTokenExists(token);
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
         IERC20(token).transfer(withdrawTo, amount);
         emit Withdraw(msg.sender, token, withdrawTo, amount);
     }
 
     function addPaymentToken(
         address token
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) {
-        require(_paymentTokens.add(token), "DP: already added");
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
+        require(token != address(0), "DV: invalid token");
+        require(_paymentTokens.add(token), "DV: already added");
         emit AddPaymentToken(token, msg.sender);
     }
 
     function removePaymentToken(
         address token
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) {
-        require(_paymentTokens.remove(token), "DP: not exists");
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
+        require(_paymentTokens.remove(token), "DV: not exists");
         emit RemovePaymentToken(token, msg.sender);
+    }
+
+    function setMinAmountToDeposit(
+        uint256 newValue
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
+        minUsdAmountToDeposit = newValue;
+        emit SetMinAmountToDeposit(msg.sender, newValue);
     }
 
     function setFee(
         uint256 newFee
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) {
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
         _fee = newFee;
         emit SetFee(msg.sender, newFee);
     }
@@ -98,7 +118,11 @@ contract DepositVault is Greenlistable, IDepositVault {
         return _getOutputAmountWithFee(amountUsdIn);
     }
 
-    function fee() public view returns (uint256) {
+    function getPaymentTokens() external view returns (address[] memory) {
+        return _paymentTokens.values();
+    }
+
+    function getFee() public view returns (uint256) {
         return _fee;
     }
 
@@ -108,14 +132,16 @@ contract DepositVault is Greenlistable, IDepositVault {
         uint256 amountUsdIn,
         bool isManuallyFilled
     ) internal returns (uint256 amountStUsdOut) {
-        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn);
-
+        require(amountUsdIn > 0, "DV: invalid amount");
+        
         if (!isManuallyFilled) {
             _validateAmountUsdIn(amountUsdIn);
-            // TODO: out amount validation
         }
 
-        stUSD.mint(user, amountUsdIn);
+        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn);
+        require(amountStUsdOut > 0, "DV: invalid amount out");
+
+        stUSD.mint(user, amountStUsdOut);
 
         emit Deposit(
             user,
@@ -129,18 +155,20 @@ contract DepositVault is Greenlistable, IDepositVault {
     function _getOutputAmountWithFee(
         uint256 amountUsdIn
     ) internal view returns (uint256) {
+        if(amountUsdIn == 0) return 0;
+
         uint256 price = etfDataFeed.getDataInBase18();
-        uint256 amountOutWithoutFee = (amountUsdIn * (10 ** 18)) / (price);
+        uint256 amountOutWithoutFee = price == 0 ? 0 : (amountUsdIn * (10 ** 18)) / (price);
         return
             amountOutWithoutFee -
-            ((amountOutWithoutFee * fee()) / PERCENTAGE_BPS);
+            ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));
     }
 
-    function _validateAmountUsdIn(uint256 amountUsdIn) internal pure {
-        require(amountUsdIn > 0, "DP: invalid usd amount");
+    function _validateAmountUsdIn(uint256 amountUsdIn) internal view {
+        require(amountUsdIn > minUsdAmountToDeposit, "DV: usd amount < min");
     }
 
     function _requireTokenExists(address token) internal view {
-        require(_paymentTokens.contains(token), "DP: token no exists");
+        require(_paymentTokens.contains(token), "DV: token no exists");
     }
 }
