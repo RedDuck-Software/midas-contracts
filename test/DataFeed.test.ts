@@ -64,7 +64,7 @@ describe('DataFeed', function () {
             const { dataFeed, mockedAggregatorDecimals, mockedAggregator, regularAccounts } =
                 await loadFixture(defaultDeploy);
             const price = '4';
-            await setRoundData({ mockedAggregatorDecimals, mockedAggregator }, price);
+            await setRoundData({  mockedAggregator }, +price);
             expect(await dataFeed.getDataInBase18()).eq(parseUnits(price));
         })
 
@@ -72,7 +72,7 @@ describe('DataFeed', function () {
             const { dataFeed, mockedAggregatorDecimals, mockedAggregator, regularAccounts } =
                 await loadFixture(defaultDeploy);
             const price = '0.001';
-            await setRoundData({ mockedAggregatorDecimals, mockedAggregator }, price);
+            await setRoundData({  mockedAggregator }, +price);
             expect(await dataFeed.getDataInBase18()).eq(parseUnits(price));
         })
     })
@@ -83,7 +83,7 @@ describe('DataFeed', function () {
             const { dataFeed, mockedAggregatorDecimals, mockedAggregator, regularAccounts } =
                 await loadFixture(defaultDeploy);
             const price = '4';
-            await setRoundData({ mockedAggregatorDecimals, mockedAggregator }, price);
+            await setRoundData({  mockedAggregator }, +price);
             await expect(dataFeed.fetchDataInBase18()).not.reverted;
             const lastRecorded = await dataFeed.lastRecordedDataFetch();
             expect(lastRecorded.answer).eq(parseUnits(price));
@@ -93,7 +93,7 @@ describe('DataFeed', function () {
             const { dataFeed, mockedAggregatorDecimals, mockedAggregator, regularAccounts } =
                 await loadFixture(defaultDeploy);
             const price = '0.001';
-            await setRoundData({ mockedAggregatorDecimals, mockedAggregator }, price);
+            await setRoundData({  mockedAggregator }, +price);
             await expect(dataFeed.fetchDataInBase18()).not.reverted;
             const lastRecorded = await dataFeed.lastRecordedDataFetch();
             expect(lastRecorded.answer).eq(parseUnits(price));
