@@ -5,13 +5,13 @@ import {IERC20Upgradeable as IERC20} from "@openzeppelin/contracts-upgradeable/t
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
-import "./interfaces/IDepositPool.sol";
+import "./interfaces/IDepositVault.sol";
 import "./interfaces/IStUSD.sol";
 import "./interfaces/IDataFeed.sol";
 
 import "./access/Greenlistable.sol";
 
-contract DepositPool is Greenlistable, IDepositPool {
+contract DepositVault is Greenlistable, IDepositVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
 
@@ -109,8 +109,8 @@ contract DepositPool is Greenlistable, IDepositPool {
         bool isManuallyFilled
     ) internal returns (uint256 amountStUsdOut) {
         amountStUsdOut = _getOutputAmountWithFee(amountUsdIn);
-        
-        if(!isManuallyFilled) {
+
+        if (!isManuallyFilled) {
             _validateAmountUsdIn(amountUsdIn);
             // TODO: out amount validation
         }
@@ -136,7 +136,7 @@ contract DepositPool is Greenlistable, IDepositPool {
             ((amountOutWithoutFee * fee()) / PERCENTAGE_BPS);
     }
 
-    function _validateAmountUsdIn(uint256 amountUsdIn) internal view {
+    function _validateAmountUsdIn(uint256 amountUsdIn) internal pure {
         require(amountUsdIn > 0, "DP: invalid usd amount");
     }
 
