@@ -271,7 +271,6 @@ export const getOutputAmountWithFeeTest = async (
 
     await depositVault.setFee(fee);
 
-    console.log('getOutputAmountWithFeeTest')
     const realValue = await depositVault.getOutputAmountWithFee(amount);
 
     expect(realValue).eq(expectedValue);

@@ -11,7 +11,7 @@ import { DepositVault, ERC20Mock } from '../typechain-types';
 import { addPaymentTokenTest, depositTest, fulfillManualDepositTest, getOutputAmountWithFeeTest, removePaymentTokenTest, setMinAmountToDepositTest, withdrawTest } from './common/deposit-vault.helpers';
 import { approveBase18, mintToken } from './common/common.helpers';
 
-describe.only('DepositVault', function () {
+describe('DepositVault', function () {
     it('deployment', async () => {
         const {
             depositVault,
@@ -240,7 +240,7 @@ describe.only('DepositVault', function () {
             })
 
 
-            it.only('should fail: call for amount <= minAmountToDepositTest', async () => {
+            it('should fail: call for amount <= minAmountToDepositTest', async () => {
                 const { depositVault, accessControl, mockedAggregator, owner, stUSD, stableCoins, } = await loadFixture(defaultDeploy);
                 await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
                 await setRoundData({ mockedAggregator }, 4)
@@ -291,7 +291,7 @@ describe.only('DepositVault', function () {
             })
         })
 
-        describe.only('fulfillManualDeposit()', () => {
+        describe('fulfillManualDeposit()', () => {
             it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
                 const { depositVault, regularAccounts, owner, stUSD, stableCoins, } = await loadFixture(defaultDeploy);
                 await fulfillManualDepositTest({ depositVault, owner, stUSD }, regularAccounts[0], 0, { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] });
