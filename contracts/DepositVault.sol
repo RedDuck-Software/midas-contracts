@@ -57,7 +57,7 @@ contract DepositVault is Greenlistable, IDepositVault {
     function fulfillManualDeposit(
         address user,
         uint256 amountUsdIn
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) returns (uint256) {
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) returns (uint256) {
         return _deposit(user, MANUAL_FULLFILMENT_TOKEN_IN, amountUsdIn, true);
     }
 
@@ -65,7 +65,7 @@ contract DepositVault is Greenlistable, IDepositVault {
         address token,
         uint256 amount,
         address withdrawTo
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) {
         _requireTokenExists(token);
         IERC20(token).transfer(withdrawTo, amount);
         emit Withdraw(msg.sender, token, withdrawTo, amount);
@@ -73,21 +73,21 @@ contract DepositVault is Greenlistable, IDepositVault {
 
     function addPaymentToken(
         address token
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) {
         require(_paymentTokens.add(token), "DP: already added");
         emit AddPaymentToken(token, msg.sender);
     }
 
     function removePaymentToken(
         address token
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) {
         require(_paymentTokens.remove(token), "DP: not exists");
         emit RemovePaymentToken(token, msg.sender);
     }
 
     function setFee(
         uint256 newFee
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    ) external onlyRole(DEPOSIT_VAULT_ADMIN, msg.sender) {
         _fee = newFee;
         emit SetFee(msg.sender, newFee);
     }

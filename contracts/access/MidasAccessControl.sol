@@ -25,8 +25,21 @@ contract MidasAccessControl is
         }
     }
 
+    function revokeRoleMult(
+        bytes32[] memory roles,
+        address[] memory addresses
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(roles.length == addresses.length, "MAC: mismatch arrays");
+
+        for (uint i; i < roles.length; i++) {
+            _revokeRole(roles[i], addresses[i]);
+        }
+    }
+
     function _setupRoles() private {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        _setupRole(DEPOSIT_VAULT_ADMIN, msg.sender);
 
         _setRoleAdmin(BLACKLISTED_ROLE, BLACKLIST_OPERATOR_ROLE);
         _setRoleAdmin(GREENLISTED_ROLE, GREENLIST_OPERATOR_ROLE);
