@@ -21,7 +21,16 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
-    address public constant MANUAL_FULLFILMENT_TOKEN_OUT = address(0);
+    struct RedemptionRequest {
+        address user;
+        address tokenOut;
+        uint256 amountStUsdIn;
+        bool exists;
+    }
+
+    mapping(uint256 => RedemptionRequest) public requests;
+
+    uint256 public lastRequestId;
 
     uint256 public minUsdAmountToRedeem;
 
@@ -41,33 +50,90 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     function initiateRedemptionRequest(
         address tokenOut,
         uint256 amountStUsdIn
-    ) external returns (uint256 requestId) {}
+    ) external onlyGreenlisted(msg.sender) returns (uint256 requestId) {
+        _requireTokenExists(tokenOut);
+
+        require(amountStUsdIn > 0, "RV: 0 amount");
+
+        address user = msg.sender;
+
+        // estimate out amount and validate that it`s >= min allowed
+        _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn));
+
+        stUSD.burn(user, amountStUsdIn);
+
+        requestId = lastRequestId++;
+        requests[requestId] = RedemptionRequest({
+            user: user,
+            tokenOut: tokenOut,
+            amountStUsdIn: amountStUsdIn,
+            exists: true
+        });
+
+        emit InitiateRedeemptionRequest(
+            requestId,
+            user,
+            tokenOut,
+            amountStUsdIn
+        );
+    }
 
     function fulfillRedemptionRequest(
         uint256 requestId
-    ) external returns (uint256 amountUsdOut) {}
+    )
+        external
+        onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender)
+        returns (uint256 amountUsdOut)
+    {
+        RedemptionRequest memory request = _getRequest(requestId);
+        amountUsdOut = _getOutputAmountWithFee(request.amountStUsdIn);
+        _fulfillRedemptionRequest(request, requestId, amountUsdOut);
+    }
 
-    function cancelRedemptionRequest(uint256 requestId) external {}
+    function fulfillRedemptionRequest(
+        uint256 requestId,
+        uint256 amountUsdOut
+    ) external onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender) {
+        RedemptionRequest memory request = _getRequest(requestId);
+        _fulfillRedemptionRequest(request, requestId, amountUsdOut);
+    }
 
     function cancelRedemptionRequest(
-        uint256 requestId,
-        bytes32 reasone
-    ) external {}
+        uint256 requestId
+    ) external onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender) {
+        RedemptionRequest memory request = _getRequest(requestId);
+        stUSD.mint(request.user, request.amountStUsdIn);
+        delete requests[requestId];
+        emit CancelRedemptionRequest(requestId);
+    }
 
     function manuallyRedeem(
         address user,
         address tokenOut,
         uint256 amountStUsdIn
-    ) external {}
+    )
+        external
+        onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender)
+        returns (uint256 amountUsdOut)
+    {
+        require(amountStUsdIn > 0, "RV: 0 amount");
+        amountUsdOut = _getOutputAmountWithFee(amountStUsdIn);
+        _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
+    }
 
     function manuallyRedeem(
         address user,
         address tokenOut,
         uint256 amountStUsdIn,
-        uint256 amoutUsdOut
-    ) external {}
+        uint256 amountUsdOut
+    ) external onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender) {
+        require(amountStUsdIn > 0 || amountUsdOut > 0, "RV: invalid amounts");
+        _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
+    }
 
-    function depositToken(address token, uint256 amount) external {}
+    function depositToken(address token, uint256 amount) external {
+        _tokenTransferFrom(msg.sender, token, amount);
+    }
 
     function setMinAmountToRedeem(uint256 newValue) external {
         minUsdAmountToRedeem = newValue;
@@ -76,7 +142,91 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     function getOutputAmountWithFee(
         uint256 amountIn
-    ) external view returns (uint256 amountOut) {}
+    ) external view returns (uint256 amountOut) {
+        return _getOutputAmountWithFee(amountIn);
+    }
 
-    function getFee() external view returns (uint256) {}
+    function getFee() public view returns (uint256) {
+        return _fee;
+    }
+
+    function vaultRole() public pure override returns (bytes32) {
+        return REDEMPTION_VAULT_ADMIN_ROLE;
+    }
+
+    function _getRequest(
+        uint256 requestId
+    ) internal view returns (RedemptionRequest memory request) {
+        request = requests[requestId];
+        require(request.exists, "RV: r not exists");
+    }
+
+    function _fulfillRedemptionRequest(
+        RedemptionRequest memory request,
+        uint256 requestId,
+        uint256 amountUsdOut
+    ) internal {
+        delete requests[requestId];
+
+        _transferToken(request.user, request.tokenOut, amountUsdOut);
+
+        emit FulfillRedeemptionRequest(msg.sender, requestId, amountUsdOut);
+    }
+
+    function _manuallyRedeem(
+        address user,
+        address tokenOut,
+        uint256 amountStUsdIn,
+        uint256 amountUsdOut
+    ) internal {
+        require(user != address(0), "RV: invalid user");
+
+        _requireTokenExists(tokenOut);
+        stUSD.burn(user, amountStUsdIn);
+        _transferToken(user, tokenOut, amountUsdOut);
+
+        emit ManuallyRedeem(
+            msg.sender,
+            user,
+            tokenOut,
+            amountStUsdIn,
+            amountUsdOut
+        );
+    }
+
+    function _transferToken(
+        address user,
+        address token,
+        uint256 amount
+    ) internal {
+        if (token == MANUAL_FULLFILMENT_TOKEN) return;
+
+        IERC20(token).safeTransfer(
+            user,
+            amount.convertFromBase18(_tokenDecimals(token))
+        );
+    }
+
+    function _getOutputAmountWithFee(
+        uint256 amountStUsdIn
+    ) internal view returns (uint256) {
+        if (amountStUsdIn == 0) return 0;
+
+        uint256 price = etfDataFeed.getDataInBase18();
+        uint256 amountOutWithoutFee = price == 0
+            ? 0
+            : (amountStUsdIn * price) / (10 ** 18);
+        return
+            amountOutWithoutFee -
+            ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));
+    }
+
+    function _validateAmountUsdOut(uint256 amount) internal view {
+        require(amount >= minUsdAmountToRedeem, "RV: amount < min");
+    }
+
+    function _requireTokenExists(address token) internal view override {
+        if (token == MANUAL_FULLFILMENT_TOKEN) return;
+        super._requireTokenExists(token);
+    }
 }

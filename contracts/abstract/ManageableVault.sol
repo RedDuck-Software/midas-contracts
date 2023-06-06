@@ -20,6 +20,8 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
+    address public constant MANUAL_FULLFILMENT_TOKEN = address(0x0);
+
     uint256 public constant PERCENTAGE_BPS = 100;
 
     IDataFeed public etfDataFeed;
@@ -45,34 +47,54 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
         address token,
         uint256 amount,
         address withdrawTo
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
+    ) external onlyRole(vaultRole(), msg.sender) {
         IERC20(token).transfer(withdrawTo, amount);
         emit WithdrawToken(msg.sender, token, withdrawTo, amount);
     }
 
     function addPaymentToken(
         address token
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
-        require(token != address(0), "DV: invalid token");
-        require(_paymentTokens.add(token), "DV: already added");
+    ) external onlyRole(vaultRole(), msg.sender) {
+        require(token != address(0), "MV: invalid token");
+        require(_paymentTokens.add(token), "MV: already added");
         emit AddPaymentToken(token, msg.sender);
     }
 
     function removePaymentToken(
         address token
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
-        require(_paymentTokens.remove(token), "DV: not exists");
+    ) external onlyRole(vaultRole(), msg.sender) {
+        require(_paymentTokens.remove(token), "MV: not exists");
         emit RemovePaymentToken(token, msg.sender);
     }
 
-    function setFee(
-        uint256 newFee
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
+    function setFee(uint256 newFee) external onlyRole(vaultRole(), msg.sender) {
         _fee = newFee;
         emit SetFee(msg.sender, newFee);
     }
 
     function getPaymentTokens() external view returns (address[] memory) {
         return _paymentTokens.values();
+    }
+
+    function vaultRole() public view virtual returns (bytes32);
+
+    function _tokenTransferFrom(
+        address user,
+        address token,
+        uint256 amount
+    ) internal {
+        IERC20(token).safeTransferFrom(
+            user,
+            address(this),
+            amount.convertFromBase18(_tokenDecimals(token))
+        );
+    }
+
+    function _tokenDecimals(address token) internal view returns (uint8) {
+        return IERC20Metadata(token).decimals();
+    }
+
+    function _requireTokenExists(address token) internal view virtual {
+        require(_paymentTokens.contains(token), "MV: token not exists");
     }
 }

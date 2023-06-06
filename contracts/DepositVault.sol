@@ -21,8 +21,6 @@ contract DepositVault is ManageableVault, IDepositVault {
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
-    address public constant MANUAL_FULLFILMENT_TOKEN_IN = address(0);
-
     uint256 public minUsdAmountToDeposit;
 
     /// @dev leaving a storage gap for futures updates
@@ -43,11 +41,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountUsdIn
     ) external onlyGreenlisted(msg.sender) returns (uint256) {
         _requireTokenExists(tokenIn);
-        IERC20(tokenIn).safeTransferFrom(
-            msg.sender,
-            address(this),
-            amountUsdIn.convertFromBase18(IERC20Metadata(tokenIn).decimals())
-        );
+        _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
         return _deposit(msg.sender, tokenIn, amountUsdIn, false);
     }
 
@@ -59,7 +53,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender)
         returns (uint256)
     {
-        return _deposit(user, MANUAL_FULLFILMENT_TOKEN_IN, amountUsdIn, true);
+        return _deposit(user, MANUAL_FULLFILMENT_TOKEN, amountUsdIn, true);
     }
 
     function setMinAmountToDeposit(
@@ -77,6 +71,10 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     function getFee() public view returns (uint256) {
         return _fee;
+    }
+
+    function vaultRole() public pure override returns (bytes32) {
+        return DEPOSIT_VAULT_ADMIN_ROLE;
     }
 
     function _deposit(
@@ -121,9 +119,5 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     function _validateAmountUsdIn(uint256 amountUsdIn) internal view {
         require(amountUsdIn > minUsdAmountToDeposit, "DV: usd amount < min");
-    }
-
-    function _requireTokenExists(address token) internal view {
-        require(_paymentTokens.contains(token), "DV: token no exists");
     }
 }

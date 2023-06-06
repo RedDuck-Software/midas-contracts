@@ -8,18 +8,23 @@ interface IRedemptionVault is IManageableVault {
         uint256 indexed requestId,
         address indexed user,
         address indexed tokenOut,
-        uint256 amountStUsdIn,
-        uint256 amountUsdOut
+        uint256 amountStUsdIn
     );
 
     event FulfillRedeemptionRequest(
         address indexed caller,
-        uint256 indexed requestId
+        uint256 indexed requestId,
+        uint256 amountUsdOut
     );
 
-    event CancelRedemptionRequest(
-        uint256 indexed requestId,
-        bytes32 indexed reasone
+    event CancelRedemptionRequest(uint256 indexed requestId);
+
+    event ManuallyRedeem(
+        address indexed caller,
+        address indexed user,
+        address indexed tokenOut,
+        uint256 amountStUsdIn,
+        uint256 amountUsdOut
     );
 
     event DepositToken(
@@ -39,24 +44,24 @@ interface IRedemptionVault is IManageableVault {
         uint256 requestId
     ) external returns (uint256 amountUsdOut);
 
-    function cancelRedemptionRequest(uint256 requestId) external;
-
-    function cancelRedemptionRequest(
+    function fulfillRedemptionRequest(
         uint256 requestId,
-        bytes32 reasone
+        uint256 amountUsdOut
     ) external;
+
+    function cancelRedemptionRequest(uint256 requestId) external;
 
     function manuallyRedeem(
         address user,
         address tokenOut,
         uint256 amountStUsdIn
-    ) external;
+    ) external returns (uint256 amountUsdOut);
 
     function manuallyRedeem(
         address user,
         address tokenOut,
         uint256 amountStUsdIn,
-        uint256 amoutUsdOut
+        uint256 amountUsdOut
     ) external;
 
     function depositToken(address token, uint256 amount) external;

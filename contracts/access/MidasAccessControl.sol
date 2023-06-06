@@ -40,6 +40,7 @@ contract MidasAccessControl is
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         _setupRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender);
 
         _setRoleAdmin(BLACKLISTED_ROLE, BLACKLIST_OPERATOR_ROLE);
         _setRoleAdmin(GREENLISTED_ROLE, GREENLIST_OPERATOR_ROLE);

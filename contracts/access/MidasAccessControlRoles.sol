@@ -14,7 +14,8 @@ abstract contract MidasAccessControlRoles {
         keccak256("ST_USD_PAUSE_OPERATOR_ROLE");
     bytes32 public constant DEPOSIT_VAULT_ADMIN_ROLE =
         keccak256("DEPOSIT_VAULT_ADMIN_ROLE");
-
+    bytes32 public constant REDEMPTION_VAULT_ADMIN_ROLE =
+        keccak256("REDEMPTION_VAULT_ADMIN_ROLE");
     bytes32 public constant GREENLISTED_ROLE = keccak256("GREENLISTED_ROLE");
     bytes32 public constant BLACKLISTED_ROLE = keccak256("BLACKLISTED_ROLE");
 }
