@@ -44,8 +44,6 @@ type CommonParamsGetOutputAmount = Pick<
   'depositVault' | 'mockedAggregator'
 >;
 
-
-
 export const setMinAmountToDepositTest = async (
   { depositVault, owner }: CommonParams,
   valueN: number,
@@ -144,11 +142,10 @@ export const fulfillManualDepositTest = (
   opt?: OptionalCommonParams,
 ) => {
   return {
-    ['fulfillManualDeposit(address,uint256)']: async (
+    'fulfillManualDeposit(address,uint256)': async (
       user: Account,
       amountUsdIn: number,
     ) => {
-
       user = getAccount(user);
 
       const sender = opt?.from ?? owner;
@@ -157,7 +154,9 @@ export const fulfillManualDepositTest = (
 
       if (opt?.revertMessage) {
         await expect(
-          depositVault.connect(sender)['fulfillManualDeposit(address,uint256)'](user, amountIn),
+          depositVault
+            .connect(sender)
+            ['fulfillManualDeposit(address,uint256)'](user, amountIn),
         ).revertedWith(opt?.revertMessage);
         return;
       }
@@ -182,7 +181,9 @@ export const fulfillManualDepositTest = (
       );
 
       await expect(
-        depositVault.connect(sender)['fulfillManualDeposit(address,uint256)'](user, amountIn),
+        depositVault
+          .connect(sender)
+          ['fulfillManualDeposit(address,uint256)'](user, amountIn),
       ).to.emit(
         depositVault,
         depositVault.interface.events[
@@ -197,16 +198,13 @@ export const fulfillManualDepositTest = (
         balanceStUsdBeforeUser.add(expectedOutAmount),
       );
 
-      expect(supplyAfter).eq(
-        supplyBefore.add(expectedOutAmount),
-      );
+      expect(supplyAfter).eq(supplyBefore.add(expectedOutAmount));
     },
-    ['fulfillManualDeposit(address,uint256,uint256)']: async (
+    'fulfillManualDeposit(address,uint256,uint256)': async (
       user: Account,
       amountUsdIn: number,
       amountStUsdOut: number,
     ) => {
-
       user = getAccount(user);
 
       const sender = opt?.from ?? owner;
@@ -216,7 +214,13 @@ export const fulfillManualDepositTest = (
 
       if (opt?.revertMessage) {
         await expect(
-          depositVault.connect(sender)['fulfillManualDeposit(address,uint256,uint256)'](user, amountIn, amountOut),
+          depositVault
+            .connect(sender)
+            ['fulfillManualDeposit(address,uint256,uint256)'](
+              user,
+              amountIn,
+              amountOut,
+            ),
         ).revertedWith(opt?.revertMessage);
         return;
       }
@@ -226,7 +230,13 @@ export const fulfillManualDepositTest = (
       const expectedOutAmount = amountOut;
 
       await expect(
-        depositVault.connect(sender)['fulfillManualDeposit(address,uint256,uint256)'](user, amountIn, amountOut),
+        depositVault
+          .connect(sender)
+          ['fulfillManualDeposit(address,uint256,uint256)'](
+            user,
+            amountIn,
+            amountOut,
+          ),
       ).to.emit(
         depositVault,
         depositVault.interface.events[
@@ -239,9 +249,8 @@ export const fulfillManualDepositTest = (
       expect(balanceStUsdAfterUser).eq(
         balanceStUsdBeforeUser.add(expectedOutAmount),
       );
-    }
-  }
-
+    },
+  };
 };
 
 export const getOutputAmountWithFeeTest = async (

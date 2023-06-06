@@ -51,15 +51,16 @@ export const defaultDeploy = async () => {
     stUSD.address,
     dataFeed.address,
     0,
-  )
-  
+  );
+
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),
     usdt: await new ERC20Mock__factory(owner).deploy(18),
-    dai: await new ERC20Mock__factory(owner).deploy(9)
+    dai: await new ERC20Mock__factory(owner).deploy(9),
   };
-  
-  const manualFulfillmentToken = await redemptionVault.MANUAL_FULLFILMENT_TOKEN();
+
+  const manualFulfillmentToken =
+    await redemptionVault.MANUAL_FULLFILMENT_TOKEN();
 
   // testers
   const wAccessControlTester = await new WithMidasAccessControlTester__factory(
@@ -115,7 +116,6 @@ export const defaultDeploy = async () => {
     greenListableTester.address,
   );
 
-
   return {
     stUSD,
     accessControl,
@@ -131,6 +131,6 @@ export const defaultDeploy = async () => {
     depositVault,
     redemptionVault,
     stableCoins,
-    manualFulfillmentToken
+    manualFulfillmentToken,
   };
 };

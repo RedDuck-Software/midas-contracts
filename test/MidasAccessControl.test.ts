@@ -32,49 +32,56 @@ describe('MidasAccessControl', function () {
     );
   });
 
-
   describe('grantRoleMult()', () => {
     it('should fail: call from address without DEFAULT_ADMIN_ROLE role', async () => {
       const { accessControl, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
-  
-      await expect(accessControl.connect(regularAccounts[0]).grantRoleMult([], [])).reverted;
-    })
+
+      await expect(
+        accessControl.connect(regularAccounts[0]).grantRoleMult([], []),
+      ).reverted;
+    });
 
     it('should fail: arrays length mismatch', async () => {
       const { accessControl, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
-  
-      await expect(accessControl.grantRoleMult([], [ethers.constants.AddressZero])).revertedWith(
-        'MAC: mismatch arrays',
-      );
-    })
+
+      await expect(
+        accessControl.grantRoleMult([], [ethers.constants.AddressZero]),
+      ).revertedWith('MAC: mismatch arrays');
+    });
 
     it('should fail: arrays length mismatch', async () => {
       const { accessControl, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
-      
+
       const arr = [
         {
           role: await accessControl.BLACKLIST_OPERATOR_ROLE(),
-          user: regularAccounts[0].address
+          user: regularAccounts[0].address,
         },
         {
           role: await accessControl.GREENLIST_OPERATOR_ROLE(),
-          user: regularAccounts[0].address
+          user: regularAccounts[0].address,
         },
-      ]
-  
-      await expect(accessControl.grantRoleMult(arr.map(v=>v.role), arr.map(v=>v.user))).not.reverted
+      ];
+
+      await expect(
+        accessControl.grantRoleMult(
+          arr.map((v) => v.role),
+          arr.map((v) => v.user),
+        ),
+      ).not.reverted;
 
       for (const setRoles of arr) {
-        expect(await accessControl.hasRole(setRoles.role, setRoles.user)).eq(true);
+        expect(await accessControl.hasRole(setRoles.role, setRoles.user)).eq(
+          true,
+        );
       }
-
-    })
+    });
   });
 
   describe('revokeRoleMult()', () => {
@@ -82,46 +89,58 @@ describe('MidasAccessControl', function () {
       const { accessControl, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
-  
-      await expect(accessControl.connect(regularAccounts[0]).revokeRoleMult([], [])).reverted;
-    })
+
+      await expect(
+        accessControl.connect(regularAccounts[0]).revokeRoleMult([], []),
+      ).reverted;
+    });
 
     it('should fail: arrays length mismatch', async () => {
       const { accessControl, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
-  
-      await expect(accessControl.revokeRoleMult([], [ethers.constants.AddressZero])).revertedWith(
-        'MAC: mismatch arrays',
-      );
-    })
+
+      await expect(
+        accessControl.revokeRoleMult([], [ethers.constants.AddressZero]),
+      ).revertedWith('MAC: mismatch arrays');
+    });
 
     it('should fail: arrays length mismatch', async () => {
       const { accessControl, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
-      
+
       const arr = [
         {
           role: await accessControl.BLACKLIST_OPERATOR_ROLE(),
-          user: regularAccounts[0].address
+          user: regularAccounts[0].address,
         },
         {
           role: await accessControl.GREENLIST_OPERATOR_ROLE(),
-          user: regularAccounts[0].address
+          user: regularAccounts[0].address,
         },
-      ]
+      ];
 
-      await expect(accessControl.grantRoleMult(arr.map(v=>v.role), arr.map(v=>v.user))).not.reverted
-      await expect(accessControl.revokeRoleMult(arr.map(v=>v.role), arr.map(v=>v.user))).not.reverted
+      await expect(
+        accessControl.grantRoleMult(
+          arr.map((v) => v.role),
+          arr.map((v) => v.user),
+        ),
+      ).not.reverted;
+      await expect(
+        accessControl.revokeRoleMult(
+          arr.map((v) => v.role),
+          arr.map((v) => v.user),
+        ),
+      ).not.reverted;
 
       for (const setRoles of arr) {
-        expect(await accessControl.hasRole(setRoles.role, setRoles.user)).eq(false);
+        expect(await accessControl.hasRole(setRoles.role, setRoles.user)).eq(
+          false,
+        );
       }
-
-    })
+    });
   });
-
 });
 
 describe('WithMidasAccessControl', function () {

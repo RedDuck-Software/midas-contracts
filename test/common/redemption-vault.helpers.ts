@@ -44,7 +44,6 @@ type CommonParamsGetOutputAmount = Pick<
   'redemptionVault' | 'mockedAggregator'
 >;
 
-
 export const setMinAmountToRedeemTest = async (
   { redemptionVault, owner }: CommonParams,
   valueN: number,
@@ -85,20 +84,24 @@ export const initiateRedemptionRequestTest = async (
 
   if (opt?.revertMessage) {
     await expect(
-      redemptionVault.connect(sender).initiateRedemptionRequest(tokenOut, amountIn),
+      redemptionVault
+        .connect(sender)
+        .initiateRedemptionRequest(tokenOut, amountIn),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  const balanceBeforeUser = await stUSD.balanceOf(
-    sender.address
-  );
+  const balanceBeforeUser = await stUSD.balanceOf(sender.address);
 
   const supplyBefore = await stUSD.totalSupply();
 
   const lastRequestId = await redemptionVault.lastRequestId();
 
-  await expect(redemptionVault.connect(sender).initiateRedemptionRequest(tokenOut, amountIn)).to.emit(
+  await expect(
+    redemptionVault
+      .connect(sender)
+      .initiateRedemptionRequest(tokenOut, amountIn),
+  ).to.emit(
     redemptionVault,
     redemptionVault.interface.events[
       'InitiateRedeemptionRequest(uint256,address,address,uint256)'
@@ -107,12 +110,9 @@ export const initiateRedemptionRequestTest = async (
 
   const request = await redemptionVault.requests(lastRequestId);
 
-  const balanceAfterUser = await stUSD.balanceOf(
-    sender.address
-  );
+  const balanceAfterUser = await stUSD.balanceOf(sender.address);
 
   const supplyAfter = await stUSD.totalSupply();
-
 
   expect(request.exists).eq(true);
   expect(request.user).eq(sender.address);
@@ -128,22 +128,19 @@ export const fulfillRedemptionRequestTest = (
   opt?: OptionalCommonParams,
 ) => {
   return {
-    ['fulfillRedemptionRequest(uint256)']: async (
-      requestId: BigNumberish
-    ) => {
+    'fulfillRedemptionRequest(uint256)': async (requestId: BigNumberish) => {
       const sender = opt?.from ?? owner;
 
       if (opt?.revertMessage) {
         await expect(
-          redemptionVault.connect(sender)['fulfillRedemptionRequest(uint256)'](requestId),
+          redemptionVault
+            .connect(sender)
+            ['fulfillRedemptionRequest(uint256)'](requestId),
         ).revertedWith(opt?.revertMessage);
         return;
       }
 
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(
-        sender.address
-      );
-
+      const balanceBeforeStUsdUser = await stUSD.balanceOf(sender.address);
 
       const dataFeed = DataFeed__factory.connect(
         await redemptionVault.etfDataFeed(),
@@ -158,7 +155,8 @@ export const fulfillRedemptionRequestTest = (
       let request = await redemptionVault.requests(requestId);
 
       const tokenContract = ERC20__factory.connect(request.tokenOut, owner);
-      const isManualFillToken = request.tokenOut === ethers.constants.AddressZero
+      const isManualFillToken =
+        request.tokenOut === ethers.constants.AddressZero;
 
       const balanceBeforeContract = await balanceOfBase18(
         tokenContract,
@@ -177,19 +175,18 @@ export const fulfillRedemptionRequestTest = (
         },
       );
 
-      await expect(redemptionVault.connect(sender)['fulfillRedemptionRequest(uint256)'](requestId))
-        .to.emit(
-          redemptionVault,
-          redemptionVault.interface.events[
-            'FulfillRedeemptionRequest(address,uint256,uint256)'
-          ].name,
-        )
-        .to.not.reverted;
+      await expect(
+        redemptionVault
+          .connect(sender)
+          ['fulfillRedemptionRequest(uint256)'](requestId),
+      ).to.emit(
+        redemptionVault,
+        redemptionVault.interface.events[
+          'FulfillRedeemptionRequest(address,uint256,uint256)'
+        ].name,
+      ).to.not.reverted;
 
-
-      const balanceAfterStUsdUser = await stUSD.balanceOf(
-        sender.address
-      );
+      const balanceAfterStUsdUser = await stUSD.balanceOf(sender.address);
 
       const balanceAfterContract = await balanceOfBase18(
         tokenContract,
@@ -211,38 +208,38 @@ export const fulfillRedemptionRequestTest = (
       expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser);
 
       if (!isManualFillToken) {
-        expect(balanceAfterContract).eq(balanceBeforeContract.sub(expectedOutAmount));
+        expect(balanceAfterContract).eq(
+          balanceBeforeContract.sub(expectedOutAmount),
+        );
         expect(balanceAfterUser).eq(balanceBeforeUser.add(expectedOutAmount));
       } else {
         expect(balanceAfterContract).eq(balanceBeforeContract);
         expect(balanceAfterUser).eq(balanceBeforeUser);
       }
     },
-    ['fulfillRedemptionRequest(uint256,uint256)']: async (
+    'fulfillRedemptionRequest(uint256,uint256)': async (
       requestId: BigNumberish,
       amountUsdOut: number,
     ) => {
       const sender = opt?.from ?? owner;
-      const amountOut = parseUnits(amountUsdOut.toString())
+      const amountOut = parseUnits(amountUsdOut.toString());
 
       if (opt?.revertMessage) {
         await expect(
-          redemptionVault.connect(sender)['fulfillRedemptionRequest(uint256,uint256)'](
-            requestId,
-            amountOut
-          ),
+          redemptionVault
+            .connect(sender)
+            ['fulfillRedemptionRequest(uint256,uint256)'](requestId, amountOut),
         ).revertedWith(opt?.revertMessage);
         return;
       }
 
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(
-        sender.address
-      );
+      const balanceBeforeStUsdUser = await stUSD.balanceOf(sender.address);
 
       let request = await redemptionVault.requests(requestId);
 
       const tokenContract = ERC20__factory.connect(request.tokenOut, owner);
-      const isManualFillToken = request.tokenOut === ethers.constants.AddressZero
+      const isManualFillToken =
+        request.tokenOut === ethers.constants.AddressZero;
 
       const balanceBeforeContract = await balanceOfBase18(
         tokenContract,
@@ -256,19 +253,18 @@ export const fulfillRedemptionRequestTest = (
 
       const expectedOutAmount = amountOut;
 
-      await expect(redemptionVault.connect(sender)['fulfillRedemptionRequest(uint256,uint256)'](requestId, amountOut))
-        .to.emit(
-          redemptionVault,
-          redemptionVault.interface.events[
-            'FulfillRedeemptionRequest(address,uint256,uint256)'
-          ].name,
-        )
-        .to.not.reverted;
+      await expect(
+        redemptionVault
+          .connect(sender)
+          ['fulfillRedemptionRequest(uint256,uint256)'](requestId, amountOut),
+      ).to.emit(
+        redemptionVault,
+        redemptionVault.interface.events[
+          'FulfillRedeemptionRequest(address,uint256,uint256)'
+        ].name,
+      ).to.not.reverted;
 
-
-      const balanceAfterStUsdUser = await stUSD.balanceOf(
-        sender.address
-      );
+      const balanceAfterStUsdUser = await stUSD.balanceOf(sender.address);
 
       const balanceAfterContract = await balanceOfBase18(
         tokenContract,
@@ -290,15 +286,17 @@ export const fulfillRedemptionRequestTest = (
       expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser);
 
       if (!isManualFillToken) {
-        expect(balanceAfterContract).eq(balanceBeforeContract.sub(expectedOutAmount));
+        expect(balanceAfterContract).eq(
+          balanceBeforeContract.sub(expectedOutAmount),
+        );
         expect(balanceAfterUser).eq(balanceBeforeUser.add(expectedOutAmount));
       } else {
         expect(balanceAfterContract).eq(balanceBeforeContract);
         expect(balanceAfterUser).eq(balanceBeforeUser);
       }
-    }
-  }
-}
+    },
+  };
+};
 export const cancelRedemptionRequestTest = async (
   { redemptionVault, owner, stUSD }: CommonParamsDeposit,
   requestId: BigNumberish,
@@ -315,25 +313,20 @@ export const cancelRedemptionRequestTest = async (
 
   const requestBefore = await redemptionVault.requests(requestId);
 
-  const balanceBeforeUser = await stUSD.balanceOf(
-    requestBefore.user
-  );
+  const balanceBeforeUser = await stUSD.balanceOf(requestBefore.user);
 
   const supplyBefore = await stUSD.totalSupply();
 
-
-  await expect(redemptionVault.connect(sender).cancelRedemptionRequest(requestId)).to.emit(
+  await expect(
+    redemptionVault.connect(sender).cancelRedemptionRequest(requestId),
+  ).to.emit(
     redemptionVault,
-    redemptionVault.interface.events[
-      'CancelRedemptionRequest(uint256)'
-    ].name,
+    redemptionVault.interface.events['CancelRedemptionRequest(uint256)'].name,
   ).to.not.reverted;
 
   const request = await redemptionVault.requests(requestId);
 
-  const balanceAfterUser = await stUSD.balanceOf(
-    requestBefore.user
-  );
+  const balanceAfterUser = await stUSD.balanceOf(requestBefore.user);
 
   const supplyAfter = await stUSD.totalSupply();
 
@@ -343,7 +336,9 @@ export const cancelRedemptionRequestTest = async (
   expect(request.amountStUsdIn).eq('0');
 
   expect(supplyAfter).eq(supplyBefore.add(requestBefore.amountStUsdIn));
-  expect(balanceAfterUser).eq(balanceBeforeUser.add(requestBefore.amountStUsdIn));
+  expect(balanceAfterUser).eq(
+    balanceBeforeUser.add(requestBefore.amountStUsdIn),
+  );
 };
 
 export const manualRedeemTest = (
@@ -351,10 +346,10 @@ export const manualRedeemTest = (
   opt?: OptionalCommonParams,
 ) => {
   return {
-    ['manuallyRedeem(address,address,uint256)']: async (
+    'manuallyRedeem(address,address,uint256)': async (
       user: Account,
       tokenOut: ERC20 | string,
-      amountStUsdIn: number
+      amountStUsdIn: number,
     ) => {
       const sender = opt?.from ?? owner;
 
@@ -366,29 +361,27 @@ export const manualRedeemTest = (
 
       if (opt?.revertMessage) {
         await expect(
-          redemptionVault.connect(sender)['manuallyRedeem(address,address,uint256)'](user, tokenOut, amountIn),
+          redemptionVault
+            .connect(sender)
+            ['manuallyRedeem(address,address,uint256)'](
+              user,
+              tokenOut,
+              amountIn,
+            ),
         ).revertedWith(opt?.revertMessage);
         return;
       }
 
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(
-        user
-      );
+      const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
 
-
-      const balanceBeforeUser = await balanceOfBase18(
-        token,
-        user
-      );
-
+      const balanceBeforeUser = await balanceOfBase18(token, user);
 
       const balanceBeforeContract = await balanceOfBase18(
         token,
-        redemptionVault
+        redemptionVault,
       );
 
       const supplyBefore = await stUSD.totalSupply();
-
 
       const dataFeed = DataFeed__factory.connect(
         await redemptionVault.etfDataFeed(),
@@ -400,29 +393,31 @@ export const manualRedeemTest = (
         owner,
       );
 
-      const amountOut = await getOutputAmountWithFeeRedeemTest({ redemptionVault, mockedAggregator: aggregator }, {
-        amountN: amountStUsdIn
-      })
+      const amountOut = await getOutputAmountWithFeeRedeemTest(
+        { redemptionVault, mockedAggregator: aggregator },
+        {
+          amountN: amountStUsdIn,
+        },
+      );
 
-      await expect(redemptionVault.connect(sender)['manuallyRedeem(address,address,uint256)'](user, tokenOut, amountIn)).to.emit(
+      await expect(
+        redemptionVault
+          .connect(sender)
+          ['manuallyRedeem(address,address,uint256)'](user, tokenOut, amountIn),
+      ).to.emit(
         redemptionVault,
         redemptionVault.interface.events[
           'ManuallyRedeem(address,address,address,uint256,uint256)'
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterStUsdUser = await stUSD.balanceOf(
-        user
-      );
+      const balanceAfterStUsdUser = await stUSD.balanceOf(user);
 
-      const balanceAfterUser = await balanceOfBase18(
-        token,
-        user
-      );
+      const balanceAfterUser = await balanceOfBase18(token, user);
 
       const balanceAfterContract = await balanceOfBase18(
         token,
-        redemptionVault
+        redemptionVault,
       );
 
       const supplyAfter = await stUSD.totalSupply();
@@ -433,7 +428,7 @@ export const manualRedeemTest = (
       expect(balanceAfterUser).eq(balanceBeforeUser.add(amountOut));
       expect(balanceAfterContract).eq(balanceBeforeContract.sub(amountOut));
     },
-    ['manuallyRedeem(address,address,uint256,uint256)']: async (
+    'manuallyRedeem(address,address,uint256,uint256)': async (
       user: Account,
       tokenOut: ERC20 | string,
       amountStUsdIn: number,
@@ -450,47 +445,52 @@ export const manualRedeemTest = (
 
       if (opt?.revertMessage) {
         await expect(
-          redemptionVault.connect(sender)['manuallyRedeem(address,address,uint256,uint256)'](user, tokenOut, amountIn, amountOut),
+          redemptionVault
+            .connect(sender)
+            ['manuallyRedeem(address,address,uint256,uint256)'](
+              user,
+              tokenOut,
+              amountIn,
+              amountOut,
+            ),
         ).revertedWith(opt?.revertMessage);
         return;
       }
 
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(
-        user
-      );
+      const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
 
-
-      const balanceBeforeUser = await balanceOfBase18(
-        token,
-        user
-      );
+      const balanceBeforeUser = await balanceOfBase18(token, user);
 
       const balanceBeforeContract = await balanceOfBase18(
         token,
-        redemptionVault
+        redemptionVault,
       );
 
       const supplyBefore = await stUSD.totalSupply();
 
-      await expect(redemptionVault.connect(sender)['manuallyRedeem(address,address,uint256,uint256)'](user, tokenOut, amountIn, amountOut)).to.emit(
+      await expect(
+        redemptionVault
+          .connect(sender)
+          ['manuallyRedeem(address,address,uint256,uint256)'](
+            user,
+            tokenOut,
+            amountIn,
+            amountOut,
+          ),
+      ).to.emit(
         redemptionVault,
         redemptionVault.interface.events[
           'ManuallyRedeem(address,address,address,uint256,uint256)'
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterStUsdUser = await stUSD.balanceOf(
-        user
-      );
+      const balanceAfterStUsdUser = await stUSD.balanceOf(user);
 
-      const balanceAfterUser = await balanceOfBase18(
-        token,
-        user
-      );
+      const balanceAfterUser = await balanceOfBase18(token, user);
 
       const balanceAfterContract = await balanceOfBase18(
         token,
-        redemptionVault
+        redemptionVault,
       );
 
       const supplyAfter = await stUSD.totalSupply();
@@ -500,10 +500,9 @@ export const manualRedeemTest = (
 
       expect(balanceAfterUser).eq(balanceBeforeUser.add(amountOut));
       expect(balanceAfterContract).eq(balanceBeforeContract.sub(amountOut));
-    }
-  }
+    },
+  };
 };
-
 
 export const getOutputAmountWithFeeRedeemTest = async (
   { redemptionVault, mockedAggregator }: CommonParamsGetOutputAmount,
