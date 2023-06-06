@@ -52,14 +52,14 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
         address token,
         uint256 amount,
         address withdrawTo
-    ) external onlyRole(vaultRole(), msg.sender) {
+    ) external onlyVaultAdmin {
         IERC20(token).transfer(withdrawTo, amount);
         emit WithdrawToken(msg.sender, token, withdrawTo, amount);
     }
 
     function addPaymentToken(
         address token
-    ) external onlyRole(vaultRole(), msg.sender) {
+    ) external onlyVaultAdmin {
         require(token != address(0), "MV: invalid token");
         require(_paymentTokens.add(token), "MV: already added");
         emit AddPaymentToken(token, msg.sender);
@@ -67,12 +67,12 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
 
     function removePaymentToken(
         address token
-    ) external onlyRole(vaultRole(), msg.sender) {
+    ) external onlyVaultAdmin {
         require(_paymentTokens.remove(token), "MV: not exists");
         emit RemovePaymentToken(token, msg.sender);
     }
 
-    function setFee(uint256 newFee) external onlyRole(vaultRole(), msg.sender) {
+    function setFee(uint256 newFee) external onlyVaultAdmin {
         _fee = newFee;
         emit SetFee(msg.sender, newFee);
     }
