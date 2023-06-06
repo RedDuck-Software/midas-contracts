@@ -14,21 +14,19 @@ import {
 import { approveBase18, mintToken } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import {
-  addPaymentTokenTest,
   depositTest,
   fulfillManualDepositTest,
   getOutputAmountWithFeeTest,
-  removePaymentTokenTest,
   setMinAmountToDepositTest,
-  withdrawTest,
 } from './common/deposit-vault.helpers';
 import { defaultDeploy } from './common/fixtures';
 
 import { DepositVault, ERC20Mock } from '../typechain-types';
+import { addPaymentTokenTest, removePaymentTokenTest, withdrawTest } from './common/manageable-vault.helpers';
 
 describe('DepositVault', function () {
   it('deployment', async () => {
-    const { depositVault, stUSD, dataFeed } = await loadFixture(defaultDeploy);
+    const { depositVault, stUSD, dataFeed, roles } = await loadFixture(defaultDeploy);
 
     expect(await depositVault.stUSD()).eq(stUSD.address);
 
@@ -36,7 +34,11 @@ describe('DepositVault', function () {
 
     expect(await depositVault.PERCENTAGE_BPS()).eq('100');
 
-    expect(await depositVault.MANUAL_FULLFILMENT_TOKEN_IN()).eq(
+    expect(await depositVault.minUsdAmountToDeposit()).eq('0');
+
+    expect(await depositVault.vaultRole()).eq(roles.depositVaultAdmin);
+
+    expect(await depositVault.MANUAL_FULLFILMENT_TOKEN()).eq(
       ethers.constants.AddressZero,
     );
   });
@@ -82,7 +84,7 @@ describe('DepositVault', function () {
         defaultDeploy,
       );
       await addPaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         ethers.constants.AddressZero,
         { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
       );
@@ -93,34 +95,34 @@ describe('DepositVault', function () {
         defaultDeploy,
       );
       await addPaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         ethers.constants.AddressZero,
-        { revertMessage: 'DV: invalid token' },
+        { revertMessage: 'MV: invalid token' },
       );
     });
 
     it('should fail: when token is already added', async () => {
       const { depositVault, regularAccounts, stableCoins, owner } =
         await loadFixture(defaultDeploy);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai, {
-        revertMessage: 'DV: already added',
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai, {
+        revertMessage: 'MV: already added',
       });
     });
 
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { depositVault, regularAccounts, stableCoins, owner } =
         await loadFixture(defaultDeploy);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
     });
 
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role and add 3 options on a row', async () => {
       const { depositVault, regularAccounts, stableCoins, owner } =
         await loadFixture(defaultDeploy);
 
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.usdc);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.usdt);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.usdc);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.usdt);
     });
   });
 
@@ -130,7 +132,7 @@ describe('DepositVault', function () {
         defaultDeploy,
       );
       await removePaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         ethers.constants.AddressZero,
         { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
       );
@@ -140,18 +142,18 @@ describe('DepositVault', function () {
       const { owner, depositVault, regularAccounts, stableCoins } =
         await loadFixture(defaultDeploy);
       await removePaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         stableCoins.dai.address,
-        { revertMessage: 'DV: not exists' },
+        { revertMessage: 'MV: not exists' },
       );
     });
 
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { depositVault, regularAccounts, stableCoins, owner } =
         await loadFixture(defaultDeploy);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await removePaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         stableCoins.dai.address,
       );
     });
@@ -160,27 +162,27 @@ describe('DepositVault', function () {
       const { depositVault, regularAccounts, owner, stableCoins } =
         await loadFixture(defaultDeploy);
 
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.usdc);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.usdt);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.usdc);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.usdt);
 
       await removePaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         stableCoins.dai.address,
       );
       await removePaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         stableCoins.usdc.address,
       );
       await removePaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         stableCoins.usdt.address,
       );
 
       await removePaymentTokenTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         stableCoins.usdt.address,
-        { revertMessage: 'DV: not exists' },
+        { revertMessage: 'MV: not exists' },
       );
     });
   })
@@ -190,7 +192,7 @@ describe('DepositVault', function () {
         defaultDeploy,
       );
       await withdrawTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         ethers.constants.AddressZero,
         0,
         ethers.constants.AddressZero,
@@ -202,7 +204,7 @@ describe('DepositVault', function () {
       const { owner, depositVault, regularAccounts, stableCoins } =
         await loadFixture(defaultDeploy);
       await withdrawTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         stableCoins.dai,
         1,
         regularAccounts[0],
@@ -215,7 +217,7 @@ describe('DepositVault', function () {
         await loadFixture(defaultDeploy);
       await mintToken(stableCoins.dai, depositVault, 1);
       await withdrawTest(
-        { depositVault, owner },
+        { vault: depositVault, owner },
         stableCoins.dai,
         1,
         regularAccounts[0],
@@ -286,7 +288,7 @@ describe('DepositVault', function () {
         owner,
       );
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 0, {
-        revertMessage: 'DV: token no exists',
+        revertMessage: 'MV: token not exists',
       });
     });
 
@@ -303,7 +305,7 @@ describe('DepositVault', function () {
         { accessControl, greenlistable: depositVault, owner },
         owner,
       );
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 0, {
         revertMessage: 'DV: invalid amount',
       });
@@ -323,7 +325,7 @@ describe('DepositVault', function () {
         owner,
       );
       await mintToken(stableCoins.dai, owner, 10);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 1, {
         revertMessage: 'ERC20: insufficient allowance',
       });
@@ -343,7 +345,7 @@ describe('DepositVault', function () {
         owner,
       );
       await approveBase18(owner, stableCoins.dai, depositVault, 10);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 1, {
         revertMessage: 'ERC20: transfer amount exceeds balance',
       });
@@ -365,7 +367,7 @@ describe('DepositVault', function () {
       );
       await mintToken(stableCoins.dai, owner, 10);
       await approveBase18(owner, stableCoins.dai, depositVault, 10);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await setRoundData({ mockedAggregator }, 0);
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 1, {
         revertMessage: 'DV: invalid amount out',
@@ -388,7 +390,7 @@ describe('DepositVault', function () {
       );
       await mintToken(stableCoins.dai, owner, 100);
       await approveBase18(owner, stableCoins.dai, depositVault, 100);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await setRoundData({ mockedAggregator }, 5);
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 100);
 
@@ -413,7 +415,7 @@ describe('DepositVault', function () {
         stUSD,
         stableCoins,
       } = await loadFixture(defaultDeploy);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await setRoundData({ mockedAggregator }, 4);
 
       await mintToken(stableCoins.dai, owner, 100);
@@ -445,7 +447,7 @@ describe('DepositVault', function () {
       );
       await mintToken(stableCoins.dai, owner, 100);
       await approveBase18(owner, stableCoins.dai, depositVault, 100);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await setRoundData({ mockedAggregator }, 5);
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 100);
     });
@@ -473,9 +475,9 @@ describe('DepositVault', function () {
       await approveBase18(owner, stableCoins.usdc, depositVault, 25);
       await approveBase18(owner, stableCoins.usdt, depositVault, 14);
 
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.usdc);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.usdt);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.usdc);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.usdt);
 
       await setRoundData({ mockedAggregator }, 5);
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 100);
@@ -509,7 +511,7 @@ describe('DepositVault', function () {
         stUSD,
         stableCoins,
       } = await loadFixture(defaultDeploy);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await fulfillManualDepositTest(
         { depositVault, owner, stUSD },
         regularAccounts[0],
@@ -527,7 +529,7 @@ describe('DepositVault', function () {
         stUSD,
         stableCoins,
       } = await loadFixture(defaultDeploy);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await setRoundData({ mockedAggregator }, 0);
       await fulfillManualDepositTest(
         { depositVault, owner, stUSD },
@@ -546,7 +548,7 @@ describe('DepositVault', function () {
         stUSD,
         stableCoins,
       } = await loadFixture(defaultDeploy);
-      await addPaymentTokenTest({ depositVault, owner }, stableCoins.dai);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await setRoundData({ mockedAggregator }, 5);
       await setMinAmountToDepositTest({ depositVault, owner }, 11);
       await fulfillManualDepositTest(
