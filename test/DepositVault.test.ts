@@ -262,6 +262,7 @@ describe('DepositVault', function () {
     test({ priceN: 1, feeN: 0.01, amountN: 50, expectedValue: 9.8 });
     test({ priceN: 5, feeN: 0, amountN: 100, expectedValue: 20 });
     test({ priceN: 0, feeN: 1, amountN: 100, expectedValue: 0 });
+    test({ priceN: 1, feeN: 1, amountN: 0, expectedValue: 0 });
   });
 
   describe('deposit()', () => {

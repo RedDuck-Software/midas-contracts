@@ -27,12 +27,6 @@ interface IRedemptionVault is IManageableVault {
         uint256 amountUsdOut
     );
 
-    event DepositToken(
-        address indexed caller,
-        address indexed token,
-        uint256 amount
-    );
-
     event SetMinAmountToRedeem(address indexed caller, uint256 newValue);
 
     function initiateRedemptionRequest(
@@ -63,8 +57,6 @@ interface IRedemptionVault is IManageableVault {
         uint256 amountStUsdIn,
         uint256 amountUsdOut
     ) external;
-
-    function depositToken(address token, uint256 amount) external;
 
     function setMinAmountToRedeem(uint256 newValue) external;
 }

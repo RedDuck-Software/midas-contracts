@@ -282,7 +282,6 @@ export const fulfillRedemptionRequestTest = (
 
       request = await redemptionVault.requests(requestId);
 
-      console.log(formatUnits(balanceAfterContract), formatUnits(balanceBeforeContract), formatUnits(expectedOutAmount),)
       expect(request.exists).eq(false);
       expect(request.user).eq(ethers.constants.AddressZero);
       expect(request.tokenOut).eq(ethers.constants.AddressZero);

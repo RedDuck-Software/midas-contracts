@@ -2,7 +2,7 @@
   "norpc": true,
   "testCommand": "yarn test",
   "compileCommand": "yarn compile",
-  "skipFiles": ["mocks"],
+  "skipFiles": ["mocks", "testers"],
   "configureYulOptimizer": true,
   "providerOptions": {
     "default_balance_ether": "10000000000000000000000000"

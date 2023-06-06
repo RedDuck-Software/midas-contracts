@@ -131,10 +131,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
     }
 
-    function depositToken(address token, uint256 amount) external {
-        _tokenTransferFrom(msg.sender, token, amount);
-    }
-
     function setMinAmountToRedeem(uint256 newValue) external {
         minUsdAmountToRedeem = newValue;
         emit SetMinAmountToRedeem(msg.sender, newValue);

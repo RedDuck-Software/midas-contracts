@@ -68,7 +68,7 @@ describe('RedemptionVault', function () {
     await setMinAmountToRedeemTest({ redemptionVault, owner }, 1.1);
   })
 
-  describe.only('getOutputAmountWithFee()', () => {
+  describe('getOutputAmountWithFee()', () => {
     const test = ({
       priceN,
       amountN,
@@ -101,6 +101,7 @@ describe('RedemptionVault', function () {
     test({ priceN: 1, feeN: 0.01, amountN: 50, expectedValue: 49.9 });
     test({ priceN: 5, feeN: 0, amountN: 100, expectedValue: 500 });
     test({ priceN: 0, feeN: 1, amountN: 100, expectedValue: 0 });
+    test({ priceN: 1, feeN: 1, amountN: 0, expectedValue: 0 });
   });
 
 
