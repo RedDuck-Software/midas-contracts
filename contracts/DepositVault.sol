@@ -12,28 +12,18 @@ import "./interfaces/IStUSD.sol";
 import "./interfaces/IDataFeed.sol";
 
 import "./access/Greenlistable.sol";
+import "./abstract/ManageableVault.sol";
 
 import "./libraries/DecimalsCorrectionLibrary.sol";
 
-contract DepositVault is Greenlistable, IDepositVault {
+contract DepositVault is ManageableVault, IDepositVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
     address public constant MANUAL_FULLFILMENT_TOKEN_IN = address(0);
 
-    uint256 public constant PERCENTAGE_BPS = 100;
-
-    IDataFeed public etfDataFeed;
-
-    IStUSD public stUSD;
-
     uint256 public minUsdAmountToDeposit;
-
-    EnumerableSet.AddressSet private _paymentTokens;
-
-    /// @dev _fee value with PERCENTAGE_BPS
-    uint256 private _fee;
 
     /// @dev leaving a storage gap for futures updates
     uint256[50] private __gap;
@@ -44,10 +34,8 @@ contract DepositVault is Greenlistable, IDepositVault {
         address _etfDataFeed,
         uint256 _minUsdAmountToDeposit
     ) external initializer {
-        stUSD = IStUSD(_stUSD);
-        etfDataFeed = IDataFeed(_etfDataFeed);
+        __ManageableVault_init(_ac, _stUSD, _etfDataFeed);
         minUsdAmountToDeposit = _minUsdAmountToDeposit;
-        __Greenlistable_init(_ac);
     }
 
     function deposit(
@@ -74,30 +62,6 @@ contract DepositVault is Greenlistable, IDepositVault {
         return _deposit(user, MANUAL_FULLFILMENT_TOKEN_IN, amountUsdIn, true);
     }
 
-    function withdrawToken(
-        address token,
-        uint256 amount,
-        address withdrawTo
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
-        IERC20(token).transfer(withdrawTo, amount);
-        emit WithdrawToken(msg.sender, token, withdrawTo, amount);
-    }
-
-    function addPaymentToken(
-        address token
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
-        require(token != address(0), "DV: invalid token");
-        require(_paymentTokens.add(token), "DV: already added");
-        emit AddPaymentToken(token, msg.sender);
-    }
-
-    function removePaymentToken(
-        address token
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
-        require(_paymentTokens.remove(token), "DV: not exists");
-        emit RemovePaymentToken(token, msg.sender);
-    }
-
     function setMinAmountToDeposit(
         uint256 newValue
     ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
@@ -105,21 +69,10 @@ contract DepositVault is Greenlistable, IDepositVault {
         emit SetMinAmountToDeposit(msg.sender, newValue);
     }
 
-    function setFee(
-        uint256 newFee
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
-        _fee = newFee;
-        emit SetFee(msg.sender, newFee);
-    }
-
     function getOutputAmountWithFee(
         uint256 amountUsdIn
     ) external view returns (uint256) {
         return _getOutputAmountWithFee(amountUsdIn);
-    }
-
-    function getPaymentTokens() external view returns (address[] memory) {
-        return _paymentTokens.values();
     }
 
     function getFee() public view returns (uint256) {
@@ -133,7 +86,7 @@ contract DepositVault is Greenlistable, IDepositVault {
         bool isManuallyFilled
     ) internal returns (uint256 amountStUsdOut) {
         require(amountUsdIn > 0, "DV: invalid amount");
-        
+
         if (!isManuallyFilled) {
             _validateAmountUsdIn(amountUsdIn);
         }
@@ -155,10 +108,12 @@ contract DepositVault is Greenlistable, IDepositVault {
     function _getOutputAmountWithFee(
         uint256 amountUsdIn
     ) internal view returns (uint256) {
-        if(amountUsdIn == 0) return 0;
+        if (amountUsdIn == 0) return 0;
 
         uint256 price = etfDataFeed.getDataInBase18();
-        uint256 amountOutWithoutFee = price == 0 ? 0 : (amountUsdIn * (10 ** 18)) / (price);
+        uint256 amountOutWithoutFee = price == 0
+            ? 0
+            : (amountUsdIn * (10 ** 18)) / (price);
         return
             amountOutWithoutFee -
             ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));

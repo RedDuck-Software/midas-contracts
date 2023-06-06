@@ -149,7 +149,7 @@ export const withdrawTest = async (
       .withdrawToken(token, amount, withdrawTo),
   ).to.emit(
     depositVault,
-    depositVault.interface.events['Withdraw(address,address,address,uint256)']
+    depositVault.interface.events['WithdrawToken(address,address,address,uint256)']
       .name,
   ).to.not.reverted;
 
