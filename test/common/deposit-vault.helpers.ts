@@ -133,7 +133,7 @@ export const withdrawTest = async (
     await expect(
       depositVault
         .connect(opt?.from ?? owner)
-        .withdraw(token, amount, withdrawTo),
+        .withdrawToken(token, amount, withdrawTo),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -146,7 +146,7 @@ export const withdrawTest = async (
   await expect(
     depositVault
       .connect(opt?.from ?? owner)
-      .withdraw(token, amount, withdrawTo),
+      .withdrawToken(token, amount, withdrawTo),
   ).to.emit(
     depositVault,
     depositVault.interface.events['Withdraw(address,address,address,uint256)']

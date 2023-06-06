@@ -74,13 +74,13 @@ contract DepositVault is Greenlistable, IDepositVault {
         return _deposit(user, MANUAL_FULLFILMENT_TOKEN_IN, amountUsdIn, true);
     }
 
-    function withdraw(
+    function withdrawToken(
         address token,
         uint256 amount,
         address withdrawTo
     ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
         IERC20(token).transfer(withdrawTo, amount);
-        emit Withdraw(msg.sender, token, withdrawTo, amount);
+        emit WithdrawToken(msg.sender, token, withdrawTo, amount);
     }
 
     function addPaymentToken(

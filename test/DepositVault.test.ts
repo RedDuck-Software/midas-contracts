@@ -184,7 +184,7 @@ describe('DepositVault', function () {
       );
     });
   })
-  describe('withdraw()', () => {
+  describe('withdrawToken()', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { depositVault, regularAccounts, owner } = await loadFixture(
         defaultDeploy,
