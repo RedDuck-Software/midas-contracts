@@ -56,6 +56,29 @@ describe('DepositVault', function () {
     ).revertedWith('Initializable: contract is already initialized');
   });
 
+  describe('setMinAmountToDeposit()', () => {
+    it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () =>{ 
+      const {
+        owner,
+        depositVault,
+        regularAccounts
+      } = await loadFixture(defaultDeploy);
+  
+      await setMinAmountToDepositTest({ depositVault, owner }, 1.1,{
+        from: regularAccounts[0],
+        revertMessage: acErrors.WMAC_HASNT_ROLE
+      });
+    })
+
+    it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () =>{ 
+      const {
+        owner,
+        depositVault,
+      } = await loadFixture(defaultDeploy);
+      await setMinAmountToDepositTest({ depositVault, owner }, 1.1);
+    })
+  })
+
   describe('setFee(),getFee()', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { depositVault, regularAccounts } = await loadFixture(
