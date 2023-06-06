@@ -12,6 +12,7 @@ import {
   ERC20Mock__factory,
   GreenlistableTester__factory,
   MidasAccessControl__factory,
+  RedemptionVault__factory,
   StUSD__factory,
   WithMidasAccessControlTester__factory,
 } from '../../typechain-types';
@@ -44,11 +45,22 @@ export const defaultDeploy = async () => {
     0,
   );
 
+  const redemptionVault = await new RedemptionVault__factory(owner).deploy();
+  await redemptionVault.initialize(
+    accessControl.address,
+    stUSD.address,
+    dataFeed.address,
+    0,
+  );
+
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),
     usdt: await new ERC20Mock__factory(owner).deploy(18),
-    dai: await new ERC20Mock__factory(owner).deploy(18),
+    dai: await new ERC20Mock__factory(owner).deploy(9),
   };
+
+  const manualFulfillmentToken =
+    await redemptionVault.MANUAL_FULLFILMENT_TOKEN();
 
   // testers
   const wAccessControlTester = await new WithMidasAccessControlTester__factory(
@@ -76,6 +88,7 @@ export const defaultDeploy = async () => {
     blacklistedOperator: await accessControl.BLACKLIST_OPERATOR_ROLE(),
     defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
     depositVaultAdmin: await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
+    redemptionVaultAdmin: await accessControl.REDEMPTION_VAULT_ADMIN_ROLE(),
   };
 
   // role granting main
@@ -84,7 +97,14 @@ export const defaultDeploy = async () => {
     roles.greenlistedOperator,
     depositVault.address,
   );
+  await accessControl.grantRole(
+    roles.greenlistedOperator,
+    redemptionVault.address,
+  );
   await accessControl.grantRole(roles.minter, depositVault.address);
+
+  await accessControl.grantRole(roles.minter, redemptionVault.address);
+  await accessControl.grantRole(roles.burner, redemptionVault.address);
 
   // role granting testers
   await accessControl.grantRole(
@@ -109,6 +129,8 @@ export const defaultDeploy = async () => {
     mockedAggregator,
     mockedAggregatorDecimals,
     depositVault,
+    redemptionVault,
     stableCoins,
+    manualFulfillmentToken,
   };
 };
