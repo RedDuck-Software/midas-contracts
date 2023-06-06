@@ -42,23 +42,46 @@ contract DepositVault is ManageableVault, IDepositVault {
     ) external onlyGreenlisted(msg.sender) returns (uint256) {
         _requireTokenExists(tokenIn);
         _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
-        return _deposit(msg.sender, tokenIn, amountUsdIn, false);
+
+        return
+            _deposit(
+                msg.sender,
+                tokenIn,
+                amountUsdIn,
+                _getOutputAmountWithFee(amountUsdIn),
+                false
+            );
     }
 
     function fulfillManualDeposit(
         address user,
         uint256 amountUsdIn
-    )
-        external
-        onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender)
-        returns (uint256)
-    {
-        return _deposit(user, MANUAL_FULLFILMENT_TOKEN, amountUsdIn, true);
+    ) external onlyVaultAdmin returns (uint256) {
+        return
+            _deposit(
+                user,
+                MANUAL_FULLFILMENT_TOKEN,
+                amountUsdIn,
+                _getOutputAmountWithFee(amountUsdIn),
+                true
+            );
     }
 
-    function setMinAmountToDeposit(
-        uint256 newValue
-    ) external onlyRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender) {
+    function fulfillManualDeposit(
+        address user,
+        uint256 amountUsdIn,
+        uint256 amountStUsdOut
+    ) external onlyVaultAdmin {
+        _deposit(
+            user,
+            MANUAL_FULLFILMENT_TOKEN,
+            amountUsdIn,
+            amountStUsdOut,
+            true
+        );
+    }
+
+    function setMinAmountToDeposit(uint256 newValue) external onlyVaultAdmin {
         minUsdAmountToDeposit = newValue;
         emit SetMinAmountToDeposit(msg.sender, newValue);
     }
@@ -81,15 +104,15 @@ contract DepositVault is ManageableVault, IDepositVault {
         address user,
         address tokenIn,
         uint256 amountUsdIn,
+        uint256 amountStUsdOut,
         bool isManuallyFilled
-    ) internal returns (uint256 amountStUsdOut) {
+    ) internal returns (uint256) {
         require(amountUsdIn > 0, "DV: invalid amount");
 
         if (!isManuallyFilled) {
             _validateAmountUsdIn(amountUsdIn);
         }
 
-        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn);
         require(amountStUsdOut > 0, "DV: invalid amount out");
 
         stUSD.mint(user, amountStUsdOut);
@@ -101,6 +124,8 @@ contract DepositVault is ManageableVault, IDepositVault {
             amountUsdIn,
             amountStUsdOut
         );
+
+        return amountStUsdOut;
     }
 
     function _getOutputAmountWithFee(

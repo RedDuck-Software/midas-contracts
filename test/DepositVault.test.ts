@@ -57,20 +57,20 @@ describe('DepositVault', function () {
   });
 
   describe('setMinAmountToDeposit()', () => {
-    it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () =>{ 
+    it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const {
         owner,
         depositVault,
         regularAccounts
       } = await loadFixture(defaultDeploy);
-  
-      await setMinAmountToDepositTest({ depositVault, owner }, 1.1,{
+
+      await setMinAmountToDepositTest({ depositVault, owner }, 1.1, {
         from: regularAccounts[0],
         revertMessage: acErrors.WMAC_HASNT_ROLE
       });
     })
 
-    it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () =>{ 
+    it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const {
         owner,
         depositVault,
@@ -514,16 +514,16 @@ describe('DepositVault', function () {
     });
   });
 
-  describe('fulfillManualDeposit()', () => {
+  describe('fulfillManualDeposit(address,uint256)', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
         await loadFixture(defaultDeploy);
       await fulfillManualDepositTest(
         { depositVault, owner, stUSD },
-        regularAccounts[0],
-        0,
+
         { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
-      );
+      )['fulfillManualDeposit(address,uint256)'](regularAccounts[0],
+        0,);
     });
 
     it('should fail: call for amountUsdIn = 0', async () => {
@@ -538,10 +538,10 @@ describe('DepositVault', function () {
       await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
       await fulfillManualDepositTest(
         { depositVault, owner, stUSD },
-        regularAccounts[0],
-        0,
+
         { revertMessage: 'DV: invalid amount' },
-      );
+      )['fulfillManualDeposit(address,uint256)'](regularAccounts[0],
+        0,);
     });
 
     it('should fail: call for amountStUsdOut = 0', async () => {
@@ -557,10 +557,10 @@ describe('DepositVault', function () {
       await setRoundData({ mockedAggregator }, 0);
       await fulfillManualDepositTest(
         { depositVault, owner, stUSD },
-        regularAccounts[0],
-        10,
+
         { revertMessage: 'DV: invalid amount out' },
-      );
+      )['fulfillManualDeposit(address,uint256)'](regularAccounts[0],
+        10,);
     });
 
     it('call for amount <= minAmountToDepositTest', async () => {
@@ -577,9 +577,78 @@ describe('DepositVault', function () {
       await setMinAmountToDepositTest({ depositVault, owner }, 11);
       await fulfillManualDepositTest(
         { depositVault, owner, stUSD },
-        regularAccounts[0],
-        10,
-      );
+
+      )['fulfillManualDeposit(address,uint256)'](regularAccounts[0],
+        10,);
+    });
+  });
+
+  describe('fulfillManualDeposit(address,uint256,uint256)', () => {
+    it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
+      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
+        await loadFixture(defaultDeploy);
+      await fulfillManualDepositTest(
+        { depositVault, owner, stUSD },
+
+        { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
+      )['fulfillManualDeposit(address,uint256,uint256)'](regularAccounts[0],
+        0, 0);
+    });
+
+    it('should fail: call for amountUsdIn = 0', async () => {
+      const {
+        depositVault,
+        regularAccounts,
+        mockedAggregator,
+        owner,
+        stUSD,
+        stableCoins,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
+      await fulfillManualDepositTest(
+        { depositVault, owner, stUSD },
+
+        { revertMessage: 'DV: invalid amount' },
+      )['fulfillManualDeposit(address,uint256,uint256)'](regularAccounts[0],
+        0, 0);
+    });
+
+    it('should fail: call for amountStUsdOut = 0', async () => {
+      const {
+        depositVault,
+        regularAccounts,
+        mockedAggregator,
+        owner,
+        stUSD,
+        stableCoins,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
+      await setRoundData({ mockedAggregator }, 0);
+      await fulfillManualDepositTest(
+        { depositVault, owner, stUSD },
+
+        { revertMessage: 'DV: invalid amount out' },
+      )['fulfillManualDeposit(address,uint256,uint256)'](regularAccounts[0],
+        10, 0);
+    });
+
+    it('call for amount <= minAmountToDepositTest', async () => {
+      const {
+        depositVault,
+        regularAccounts,
+        mockedAggregator,
+        owner,
+        stUSD,
+        stableCoins,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest({ vault: depositVault, owner }, stableCoins.dai);
+      await setRoundData({ mockedAggregator }, 5);
+      await setMinAmountToDepositTest({ depositVault, owner }, 11);
+      await fulfillManualDepositTest(
+        { depositVault, owner, stUSD },
+
+      )['fulfillManualDeposit(address,uint256,uint256)'](regularAccounts[0],
+        10, 1);
     });
   });
 });

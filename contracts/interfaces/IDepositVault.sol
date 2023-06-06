@@ -24,5 +24,11 @@ interface IDepositVault is IManageableVault {
         uint256 amountIn
     ) external returns (uint256 amountOut);
 
+    function fulfillManualDeposit(
+        address user,
+        uint256 amountUsdIn,
+        uint256 amountStUsdOut
+    ) external;
+
     function setMinAmountToDeposit(uint256 newValue) external;
 }

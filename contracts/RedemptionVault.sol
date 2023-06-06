@@ -80,11 +80,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     function fulfillRedemptionRequest(
         uint256 requestId
-    )
-        external
-        onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender)
-        returns (uint256 amountUsdOut)
-    {
+    ) external onlyVaultAdmin returns (uint256 amountUsdOut) {
         RedemptionRequest memory request = _getRequest(requestId);
         amountUsdOut = _getOutputAmountWithFee(request.amountStUsdIn);
         _fulfillRedemptionRequest(request, requestId, amountUsdOut);
@@ -93,14 +89,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     function fulfillRedemptionRequest(
         uint256 requestId,
         uint256 amountUsdOut
-    ) external onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender) {
+    ) external onlyVaultAdmin {
         RedemptionRequest memory request = _getRequest(requestId);
         _fulfillRedemptionRequest(request, requestId, amountUsdOut);
     }
 
     function cancelRedemptionRequest(
         uint256 requestId
-    ) external onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender) {
+    ) external onlyVaultAdmin {
         RedemptionRequest memory request = _getRequest(requestId);
         stUSD.mint(request.user, request.amountStUsdIn);
         delete requests[requestId];
@@ -111,11 +107,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address user,
         address tokenOut,
         uint256 amountStUsdIn
-    )
-        external
-        onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender)
-        returns (uint256 amountUsdOut)
-    {
+    ) external onlyVaultAdmin returns (uint256 amountUsdOut) {
         require(amountStUsdIn > 0, "RV: 0 amount");
         amountUsdOut = _getOutputAmountWithFee(amountStUsdIn);
         _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
@@ -126,7 +118,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address tokenOut,
         uint256 amountStUsdIn,
         uint256 amountUsdOut
-    ) external onlyRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender) {
+    ) external onlyVaultAdmin {
         require(amountStUsdIn > 0 || amountUsdOut > 0, "RV: invalid amounts");
         _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
     }

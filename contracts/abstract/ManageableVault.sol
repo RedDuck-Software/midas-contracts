@@ -33,6 +33,11 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
     /// @dev _fee value with PERCENTAGE_BPS
     uint256 internal _fee;
 
+    modifier onlyVaultAdmin  {
+        _onlyRole(vaultRole(), msg.sender);
+        _;
+    }
+
     function __ManageableVault_init(
         address _ac,
         address _stUSD,
