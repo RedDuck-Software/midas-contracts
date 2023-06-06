@@ -23,13 +23,14 @@ describe('MidasAccessControl', function () {
   });
 
   it('initialize', async () => {
-    const { accessControl, mockedAggregator } =
-      await loadFixture(defaultDeploy);
+    const { accessControl, mockedAggregator } = await loadFixture(
+      defaultDeploy,
+    );
 
-    await expect(
-      accessControl.initialize(),
-    ).revertedWith('Initializable: contract is already initialized');
-  })
+    await expect(accessControl.initialize()).revertedWith(
+      'Initializable: contract is already initialized',
+    );
+  });
 });
 
 describe('WithMidasAccessControl', function () {

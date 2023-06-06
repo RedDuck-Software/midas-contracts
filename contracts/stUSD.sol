@@ -3,15 +3,18 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 
+import "./interfaces/IStUSD.sol";
 import "./access/Blacklistable.sol";
 
-contract stUSD is ERC20PausableUpgradeable, Blacklistable {
+contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     bytes32 public constant TERMS_URL_METADATA_KEY = keccak256("urls.terms");
 
     bytes32 public constant DESCRIPTION_URL_METADATA_KEY =
         keccak256("urls.description");
 
     mapping(bytes32 => bytes) public metadata;
+
+    uint256[50] private __gap;
 
     function initialize(address _accessControl) external initializer {
         __Blacklistable_init(_accessControl);

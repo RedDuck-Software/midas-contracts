@@ -31,15 +31,12 @@ describe('stUSD', function () {
   });
 
   it('initialize', async () => {
-    const { stUSD, mockedAggregator } =
-      await loadFixture(defaultDeploy);
+    const { stUSD, mockedAggregator } = await loadFixture(defaultDeploy);
 
-    await expect(
-      stUSD.initialize(
-        ethers.constants.AddressZero,
-      ),
-    ).revertedWith('Initializable: contract is already initialized');
-  })
+    await expect(stUSD.initialize(ethers.constants.AddressZero)).revertedWith(
+      'Initializable: contract is already initialized',
+    );
+  });
 
   describe('pause()', () => {
     it('should fail: call from address without ST_USD_PAUSE_OPERATOR_ROLE role', async () => {

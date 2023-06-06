@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-library DecimalCorrectionLibrary {
+library DecimalsCorrectionLibrary {
     function convert(
         uint256 originalAmount,
         uint256 originalDecimals,
