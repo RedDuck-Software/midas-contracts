@@ -38,7 +38,7 @@ const config: HardhatUserConfig = {
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),
-    localhost: getNetworkConfig('localhost'),
+    localhost: getNetworkConfig('localhost' ),
   },
   gasReporter: {
     enabled: REPORT_GAS,

@@ -1,6 +1,6 @@
 import { HardhatNetworkUserConfig, NetworkUserConfig } from 'hardhat/types';
 
-import { GWEI } from '../constants';
+import { GWEI, MOCK_AGGREGATOR_NETWORK_TAG } from '../constants';
 import { ENV } from '../env';
 import { ConfigPerNetwork, Network, RpcUrl } from '../types';
 
@@ -66,7 +66,10 @@ export const initialBasesFeePerGas: ConfigPerNetwork<number | undefined> = {
   localhost: undefined,
 };
 
-export const getBaseNetworkConfig = (network: Network): NetworkUserConfig => ({
+export const getBaseNetworkConfig = (
+  network: Network, 
+  tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG]
+): NetworkUserConfig => ({
   accounts: mnemonics[network]
     ? {
         mnemonic: mnemonics[network],
@@ -78,18 +81,20 @@ export const getBaseNetworkConfig = (network: Network): NetworkUserConfig => ({
   blockGasLimit: blockGasLimits[network],
   timeout: timeouts[network],
   initialBaseFeePerGas: initialBasesFeePerGas[network],
+  tags
 });
 
-export const getNetworkConfig = (network: Network): NetworkUserConfig => ({
-  ...getBaseNetworkConfig(network),
+export const getNetworkConfig = (network: Network, tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG] ): NetworkUserConfig => ({
+  ...getBaseNetworkConfig(network, tags),
   url: rpcUrls[network],
   saveDeployments: true,
 });
 
 export const getForkNetworkConfig = (
-  network: Network,
+  network: Network, 
+  tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG]
 ): HardhatNetworkUserConfig => ({
-  ...getBaseNetworkConfig(network),
+  ...getBaseNetworkConfig(network, tags),
   accounts: {
     mnemonic: mnemonics[network],
   },
