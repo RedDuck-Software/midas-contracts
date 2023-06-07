@@ -17,3 +17,6 @@ yarn-error.log
 
 # Docgen
 docgen
+
+deployments/localhost
+deployments/hardhat
