@@ -1,10 +1,8 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { MIDAS_AC_DEPLOY_TAG } from './deploy_MidasAccessControl';
 import { StUSD__factory } from '../typechain-types';
+import { MIDAS_AC_DEPLOY_TAG, ST_USD_CONTRACT_NAME, ST_USD_DEPLOY_TAG } from '../config';
 
-export const ST_USD_DEPLOY_TAG = 'stUSD';
-export const ST_USD_CONTRACT_NAME = 'stUSD';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy, get } = hre.deployments;

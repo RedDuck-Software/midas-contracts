@@ -1,14 +1,11 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { MIDAS_AC_DEPLOY_TAG } from './deploy_MidasAccessControl';
-import { MOCK_AGGREGATOR_NETWORK_TAG } from '../config';
+import { DATA_FEED_CONTRACT_NAME, DATA_FEED_DEPLOY_TAG, MIDAS_AC_DEPLOY_TAG, MOCK_AGGREGATOR_NETWORK_TAG } from '../config';
 import { expect } from 'chai';
 import { AggregatorV3Mock__factory } from '../typechain-types';
 import { parseUnits } from 'ethers/lib/utils';
 import chalk from 'chalk';
 
-export const DATA_FEED_DEPLOY_TAG = 'DataFeed';
-export const DATA_FEED_CONTRACT_NAME = 'DataFeed';
 
 const aggregatorsByNetwork: Record<number, string> = {
   [1]: '',
@@ -16,7 +13,7 @@ const aggregatorsByNetwork: Record<number, string> = {
 }
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const { deploy, get } = hre.deployments;
+  const { deploy, get, execute } = hre.deployments;
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
 
@@ -35,7 +32,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     });
 
     const aggregatorContract = AggregatorV3Mock__factory.connect(aggregatorDeploy.address, owner)
-    await aggregatorContract.setRoundData(parseUnits('5', await aggregatorContract.decimals()));
+
+    if((await aggregatorContract.latestRoundData()).answer.eq('0')) {
+      const newData = parseUnits('5', await aggregatorContract.decimals()).toString()
+      await execute('AggregatorV3Mock', { from: deployer } , 'setRoundData', newData);
+    }
 
     aggregator = aggregatorContract.address;
   } else {

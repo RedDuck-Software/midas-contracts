@@ -1,8 +1,7 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { MIDAS_AC_CONTRACT_NAME, MIDAS_AC_DEPLOY_TAG } from '../config';
 
-export const MIDAS_AC_DEPLOY_TAG = 'MidasAccessControl';
-export const MIDAS_AC_CONTRACT_NAME = 'MidasAccessControl';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy, get } = hre.deployments;
@@ -22,10 +21,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     log: true,
     autoMine: true,
   });
-
-  const res = await get(MIDAS_AC_CONTRACT_NAME);
-
-  console.log({ address: res.address });
 };
 
 func.tags = [MIDAS_AC_DEPLOY_TAG];

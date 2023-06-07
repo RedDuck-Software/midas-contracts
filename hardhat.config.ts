@@ -6,6 +6,8 @@ import 'hardhat-contract-sizer';
 import 'hardhat-deploy';
 import 'hardhat-docgen';
 
+import "./tasks";
+
 import {
   ENV,
   getForkNetworkConfig,
@@ -30,7 +32,12 @@ const config: HardhatUserConfig = {
     ],
   },
   namedAccounts: {
-    deployer: 0,
+    deployer: '0xA22Cf0bcf57383AABA162D46dc4b1FebA5AF4FC8',
+  },
+  verify: { 
+    etherscan: { 
+      apiKey: ETHERSCAN_API_KEY,
+    }
   },
   networks: {
     main: getNetworkConfig('main'),

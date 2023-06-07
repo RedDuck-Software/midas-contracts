@@ -1,13 +1,9 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { MIDAS_AC_DEPLOY_TAG } from './deploy_MidasAccessControl';
 import { StUSD__factory } from '../typechain-types';
-import { ST_USD_DEPLOY_TAG } from './deploy_stUSD';
-import { DATA_FEED_DEPLOY_TAG } from './deploy_DataFeed';
 import { parseUnits } from 'ethers/lib/utils';
+import { DATA_FEED_DEPLOY_TAG, MIDAS_AC_DEPLOY_TAG, REDEMPTION_VAULT_CONTRACT_NAME, REDEMPTION_VAULT_DEPLOY_TAG, ST_USD_DEPLOY_TAG } from '../config';
 
-export const REDEMPTION_VAULT_DEPLOY_TAG = 'RedemptionVault';
-export const REDEMPTION_VAULT_CONTRACT_NAME = 'RedemptionVault';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy, get } = hre.deployments;
@@ -16,9 +12,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const ac = await get(MIDAS_AC_DEPLOY_TAG);
   const stUsd = await get(ST_USD_DEPLOY_TAG);
   const dataFeed = await get(DATA_FEED_DEPLOY_TAG);
-  const config = {
-    minUsdAmount: parseUnits('0')
-  }
 
   await deploy(REDEMPTION_VAULT_CONTRACT_NAME, {
     from: deployer,
@@ -31,7 +24,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
             ac.address,
             stUsd.address,
             dataFeed.address,
-            config.minUsdAmount
+            '0'
           ]
         }
       }
