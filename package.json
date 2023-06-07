@@ -12,6 +12,8 @@
     "build": "run-s clean compile",
     "test": "hardhat test",
     "coverage": "cross-env COVERAGE=true hardhat coverage --solcoverjs ./.solcover.json",
+    "slither": "slither . --config-file ./slither.config.json",
+    "slither:summary": "yarn slither --print human-summary --config-file ./slither.config.json",
     "deploy": "hardhat deploy",
     "lint:ts": "eslint \"**/*.{js,ts}\"",
     "lint:ts:fix": "eslint \"**/*.{js,ts}\" --fix",
