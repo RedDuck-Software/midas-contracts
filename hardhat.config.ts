@@ -32,7 +32,7 @@ const config: HardhatUserConfig = {
     ],
   },
   namedAccounts: {
-    deployer: 0,
+    deployer: '0xA22Cf0bcf57383AABA162D46dc4b1FebA5AF4FC8',
   },
   networks: {
     main: getNetworkConfig('main'),

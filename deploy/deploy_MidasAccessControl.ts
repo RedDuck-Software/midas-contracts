@@ -21,10 +21,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     log: true,
     autoMine: true,
   });
-
-  const res = await get(MIDAS_AC_CONTRACT_NAME);
-
-  console.log({ address: res.address });
 };
 
 func.tags = [MIDAS_AC_DEPLOY_TAG];

@@ -13,7 +13,7 @@ const aggregatorsByNetwork: Record<number, string> = {
 }
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const { deploy, get } = hre.deployments;
+  const { deploy, get, execute } = hre.deployments;
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
 
@@ -32,7 +32,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     });
 
     const aggregatorContract = AggregatorV3Mock__factory.connect(aggregatorDeploy.address, owner)
-    await aggregatorContract.setRoundData(parseUnits('5', await aggregatorContract.decimals()));
+
+    if((await aggregatorContract.latestRoundData()).answer.eq('0')) {
+      const newData = parseUnits('5', await aggregatorContract.decimals()).toString()
+      await execute('AggregatorV3Mock', { from: deployer } , 'setRoundData', newData);
+    }
 
     aggregator = aggregatorContract.address;
   } else {

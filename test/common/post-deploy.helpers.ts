@@ -11,7 +11,8 @@ type Params = {
     aggregator: AggregatorV3Interface,
     depositVault: DepositVault,
     redemptionVault: RedemptionVault,
-    owner: SignerWithAddress
+    owner: SignerWithAddress,
+    execute?: (role: string, address: string)=> Promise<any>
 }
 
 export const initGrantRoles = async ({
@@ -19,23 +20,29 @@ export const initGrantRoles = async ({
     depositVault,
     redemptionVault,
     stUsd,
-    owner
+    owner,
+    execute
 }: Omit<Params, 'aggregator' | 'dataFeed'>) => {
     const roles = await getAllRoles(accessControl);
 
-    await accessControl.connect(owner).grantRole(roles.blacklistedOperator, stUsd.address);
-    await accessControl.connect(owner).grantRole(
-        roles.greenlistedOperator,
-        depositVault.address,
-    );
-    await accessControl.connect(owner).grantRole(
-        roles.greenlistedOperator,
-        redemptionVault.address,
-    );
-    await accessControl.connect(owner).grantRole(roles.minter, depositVault.address);
+    const checkAndExecute = async (role: string, address: string) =>{ 
+        if (!await accessControl.hasRole(role, address)) {
+            if(execute) await execute(role, address)
+            else await accessControl.connect(owner).grantRole(role, address);
+        }
+    }
+    
+    await checkAndExecute(roles.blacklistedOperator, stUsd.address)
 
-    await accessControl.connect(owner).grantRole(roles.minter, redemptionVault.address);
-    await accessControl.connect(owner).grantRole(roles.burner, redemptionVault.address);
+    await checkAndExecute(roles.greenlistedOperator, depositVault.address)
+
+    await checkAndExecute(roles.greenlistedOperator, redemptionVault.address)
+
+    await checkAndExecute(roles.minter, depositVault.address)
+
+    await checkAndExecute(roles.minter, redemptionVault.address)
+
+    await checkAndExecute(roles.burner, redemptionVault.address)
 }
 
 export const postDeploymentTest = async ({ ethers }: HardhatRuntimeEnvironment, {
