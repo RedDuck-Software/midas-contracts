@@ -15,6 +15,8 @@
     "slither": "slither . --config-file ./slither.config.json",
     "slither:summary": "yarn slither --print human-summary --config-file ./slither.config.json",
     "deploy": "hardhat deploy",
+    "verify": "hardhat etherscan-verify",
+    "verify:sepolia": "hardhat etherscan-verify --network sepolia --api-url 'https://api-sepolia.etherscan.io'",
     "lint:ts": "eslint \"**/*.{js,ts}\"",
     "lint:ts:fix": "eslint \"**/*.{js,ts}\" --fix",
     "lint:sol": "solhint \"contracts/**/*.sol\"",
