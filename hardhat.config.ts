@@ -6,6 +6,8 @@ import 'hardhat-contract-sizer';
 import 'hardhat-deploy';
 import 'hardhat-docgen';
 
+import "./tasks";
+
 import {
   ENV,
   getForkNetworkConfig,
