@@ -16,8 +16,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const ac = await get(MIDAS_AC_DEPLOY_TAG);
   const stUsd = await get(ST_USD_DEPLOY_TAG);
   const dataFeed = await get(DATA_FEED_DEPLOY_TAG);
+  
   const config = {
-    minUsdAmount: parseUnits('10')
+    minUsdAmount: parseUnits('0')
   }
 
   await deploy(DEPOSIT_VAULT_CONTRACT_NAME, {
