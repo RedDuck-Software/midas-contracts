@@ -1,10 +1,9 @@
 import chalk from "chalk";
 import { task, types } from "hardhat/config";
 import { PopulatedTransaction } from "ethers";
-import { ST_USD_DEPLOY_TAG } from "../../deploy/deploy_stUSD";
 import { logPopulatedTx } from "..";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { REDEMPTION_VAULT_DEPLOY_TAG } from "../../deploy/deploy_RedemptionVault";
+import { REDEMPTION_VAULT_DEPLOY_TAG } from "../../config";
 
 export const getRedemptionVault = async (hre: HardhatRuntimeEnvironment) => {
     const { get } = hre.deployments;

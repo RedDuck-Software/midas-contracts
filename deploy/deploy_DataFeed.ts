@@ -1,14 +1,11 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { MIDAS_AC_DEPLOY_TAG } from './deploy_MidasAccessControl';
-import { MOCK_AGGREGATOR_NETWORK_TAG } from '../config';
+import { DATA_FEED_CONTRACT_NAME, DATA_FEED_DEPLOY_TAG, MIDAS_AC_DEPLOY_TAG, MOCK_AGGREGATOR_NETWORK_TAG } from '../config';
 import { expect } from 'chai';
 import { AggregatorV3Mock__factory } from '../typechain-types';
 import { parseUnits } from 'ethers/lib/utils';
 import chalk from 'chalk';
 
-export const DATA_FEED_DEPLOY_TAG = 'DataFeed';
-export const DATA_FEED_CONTRACT_NAME = 'DataFeed';
 
 const aggregatorsByNetwork: Record<number, string> = {
   [1]: '',

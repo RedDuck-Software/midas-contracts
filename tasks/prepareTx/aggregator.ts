@@ -1,7 +1,4 @@
-import chalk from "chalk";
 import { task, types } from "hardhat/config";
-import { PopulatedTransaction } from "ethers";
-import { ST_USD_DEPLOY_TAG } from "../../deploy/deploy_stUSD";
 import { logPopulatedTx } from "..";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 

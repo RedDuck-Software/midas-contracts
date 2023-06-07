@@ -1,11 +1,10 @@
 import chalk from "chalk";
 import { task, types } from "hardhat/config";
 import { PopulatedTransaction } from "ethers";
-import { ST_USD_DEPLOY_TAG } from "../../deploy/deploy_stUSD";
 import { logPopulatedTx } from "..";
 import { expect } from "chai";
-import { MIDAS_AC_DEPLOY_TAG } from "../../deploy/deploy_MidasAccessControl";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { MIDAS_AC_DEPLOY_TAG } from "../../config";
 
 export const getAc = async (hre: HardhatRuntimeEnvironment) => {
     const { get } = hre.deployments;

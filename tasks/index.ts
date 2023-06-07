@@ -1,10 +1,8 @@
 import chalk from "chalk";
 import { task, types } from "hardhat/config";
-import { ST_USD_DEPLOY_TAG } from "../deploy/deploy_stUSD";
 import { PopulatedTransaction } from "ethers";
 
 import './prepareTx'
-
 
 export const logPopulatedTx = (tx: PopulatedTransaction) => {
     console.log(
