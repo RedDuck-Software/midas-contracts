@@ -34,7 +34,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     main: getNetworkConfig('main'),
-    goerli: getNetworkConfig('goerli'),
+    sepolia: getNetworkConfig('sepolia'),
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),

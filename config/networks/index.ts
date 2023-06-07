@@ -10,58 +10,58 @@ export const rpcUrls: ConfigPerNetwork<RpcUrl> = {
   main: ALCHEMY_KEY
     ? `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
     : `https://mainnet.infura.io/v3/${INFURA_KEY}`,
-  goerli: ALCHEMY_KEY
-    ? `https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}`
-    : `https://goerli.infura.io/v3/${INFURA_KEY}`,
+  sepolia: ALCHEMY_KEY
+    ? `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}`
+    : `https://sepolia.infura.io/v3/${INFURA_KEY}`,
   hardhat: 'http://localhost:8545',
   localhost: 'http://localhost:8545',
 };
 
 export const gasPrices: ConfigPerNetwork<number | undefined> = {
   main: 1 * GWEI,
-  goerli: undefined,
+  sepolia: undefined,
   hardhat: 1 * GWEI,
   localhost: 70 * GWEI,
 };
 
 export const chainIds: ConfigPerNetwork<number> = {
   main: 1,
-  goerli: 5,
+  sepolia: 11155111,
   hardhat: 31337,
   localhost: 31337,
 };
 
 export const mnemonics: ConfigPerNetwork<string | undefined> = {
   main: MNEMONIC_PROD,
-  goerli: MNEMONIC_DEV,
+  sepolia: MNEMONIC_DEV,
   hardhat: MNEMONIC_DEV,
   localhost: MNEMONIC_DEV,
 };
 
 export const gases: ConfigPerNetwork<number | undefined> = {
   main: undefined,
-  goerli: 1_250_000,
+  sepolia: 1_250_000,
   hardhat: undefined,
   localhost: 1_250_000,
 };
 
 export const timeouts: ConfigPerNetwork<number | undefined> = {
   main: undefined,
-  goerli: 999999,
+  sepolia: 999999,
   hardhat: undefined,
   localhost: 999999,
 };
 
 export const blockGasLimits: ConfigPerNetwork<number | undefined> = {
   main: 300 * 10 ** 6,
-  goerli: undefined,
+  sepolia: undefined,
   hardhat: 300 * 10 ** 6,
   localhost: undefined,
 };
 
 export const initialBasesFeePerGas: ConfigPerNetwork<number | undefined> = {
   main: undefined,
-  goerli: undefined,
+  sepolia: undefined,
   hardhat: 0,
   localhost: undefined,
 };

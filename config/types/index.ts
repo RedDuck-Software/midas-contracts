@@ -1,4 +1,4 @@
-type NetworkBase = 'goerli';
+type NetworkBase = 'sepolia';
 type RpcNetwork = NetworkBase | 'mainnet';
 export type Network = NetworkBase | 'main' | 'hardhat' | 'localhost';
 export type RpcUrl =
