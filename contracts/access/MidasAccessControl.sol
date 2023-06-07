@@ -37,19 +37,21 @@ contract MidasAccessControl is
     }
 
     function _setupRoles() private {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        address admin = msg.sender;
 
-        _setupRole(DEPOSIT_VAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(REDEMPTION_VAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+
+        _setupRole(DEPOSIT_VAULT_ADMIN_ROLE, admin);
+        _setupRole(REDEMPTION_VAULT_ADMIN_ROLE, admin);
 
         _setRoleAdmin(BLACKLISTED_ROLE, BLACKLIST_OPERATOR_ROLE);
         _setRoleAdmin(GREENLISTED_ROLE, GREENLIST_OPERATOR_ROLE);
 
-        _setupRole(GREENLIST_OPERATOR_ROLE, msg.sender);
-        _setupRole(BLACKLIST_OPERATOR_ROLE, msg.sender);
+        _setupRole(GREENLIST_OPERATOR_ROLE, admin);
+        _setupRole(BLACKLIST_OPERATOR_ROLE, admin);
 
-        _setupRole(ST_USD_MINT_OPERATOR_ROLE, msg.sender);
-        _setupRole(ST_USD_BURN_OPERATOR_ROLE, msg.sender);
-        _setupRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender);
+        _setupRole(ST_USD_MINT_OPERATOR_ROLE, admin);
+        _setupRole(ST_USD_BURN_OPERATOR_ROLE, admin);
+        _setupRole(ST_USD_PAUSE_OPERATOR_ROLE, admin);
     }
 }

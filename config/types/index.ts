@@ -1,4 +1,4 @@
-type NetworkBase = 'goerli';
+type NetworkBase = 'sepolia';
 type RpcNetwork = NetworkBase | 'mainnet';
 export type Network = NetworkBase | 'main' | 'hardhat' | 'localhost';
 export type RpcUrl =
@@ -19,3 +19,4 @@ export interface Environment {
   readonly MNEMONIC_PROD: string;
   readonly FORKING_NETWORK?: Network;
 }
+

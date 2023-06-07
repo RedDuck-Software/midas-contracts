@@ -3,7 +3,7 @@ import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers, upgrades } from 'hardhat';
-
+import * as hre from 'hardhat';
 import {
   AggregatorV3Mock__factory,
   BlacklistableTester__factory,
@@ -16,6 +16,8 @@ import {
   StUSD__factory,
   WithMidasAccessControlTester__factory,
 } from '../../typechain-types';
+import { getAllRoles } from './common.helpers';
+import { initGrantRoles, postDeploymentTest } from './post-deploy.helpers';
 
 export const defaultDeploy = async () => {
   const [owner, ...regularAccounts] = await ethers.getSigners();
@@ -78,33 +80,16 @@ export const defaultDeploy = async () => {
   ).deploy();
   await greenListableTester.initialize(accessControl.address);
 
-  const roles = {
-    blacklisted: await accessControl.BLACKLISTED_ROLE(),
-    greenlisted: await accessControl.GREENLISTED_ROLE(),
-    minter: await accessControl.ST_USD_MINT_OPERATOR_ROLE(),
-    burner: await accessControl.ST_USD_BURN_OPERATOR_ROLE(),
-    pauser: await accessControl.ST_USD_PAUSE_OPERATOR_ROLE(),
-    greenlistedOperator: await accessControl.GREENLIST_OPERATOR_ROLE(),
-    blacklistedOperator: await accessControl.BLACKLIST_OPERATOR_ROLE(),
-    defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
-    depositVaultAdmin: await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
-    redemptionVaultAdmin: await accessControl.REDEMPTION_VAULT_ADMIN_ROLE(),
-  };
+  const roles = await getAllRoles(accessControl);
 
   // role granting main
-  await accessControl.grantRole(roles.blacklistedOperator, stUSD.address);
-  await accessControl.grantRole(
-    roles.greenlistedOperator,
-    depositVault.address,
-  );
-  await accessControl.grantRole(
-    roles.greenlistedOperator,
-    redemptionVault.address,
-  );
-  await accessControl.grantRole(roles.minter, depositVault.address);
-
-  await accessControl.grantRole(roles.minter, redemptionVault.address);
-  await accessControl.grantRole(roles.burner, redemptionVault.address);
+  await initGrantRoles({
+    accessControl,
+    depositVault,
+    owner,
+    redemptionVault,
+    stUsd: stUSD
+  })
 
   // role granting testers
   await accessControl.grantRole(
@@ -115,6 +100,16 @@ export const defaultDeploy = async () => {
     roles.greenlistedOperator,
     greenListableTester.address,
   );
+
+  await postDeploymentTest(hre, {
+    accessControl,
+    aggregator: mockedAggregator,
+    dataFeed,
+    depositVault,
+    owner,
+    redemptionVault,
+    stUsd: stUSD
+  })
 
   return {
     stUSD,
