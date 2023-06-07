@@ -98,8 +98,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         uint256 requestId
     ) external onlyVaultAdmin {
         RedemptionRequest memory request = _getRequest(requestId);
-        stUSD.mint(request.user, request.amountStUsdIn);
         delete requests[requestId];
+        stUSD.mint(request.user, request.amountStUsdIn);
         emit CancelRedemptionRequest(requestId);
     }
 
