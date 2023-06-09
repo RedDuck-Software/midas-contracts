@@ -16,6 +16,8 @@ import {
 } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
+  delay,
+  logDeploy,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
   verify,
@@ -39,9 +41,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         'MOCK_AGGREGATOR_NETWORK_TAG is true, deploying mocked data aggregator',
       ),
     );
-    const aggregatorDeploy = await (
+    const aggregatorDeploy = await (await (
       await hre.ethers.getContractFactory('AggregatorV3Mock', owner)
-    ).deploy();
+    ).deploy()).deployed();
 
     const aggregatorContract = AggregatorV3Mock__factory.connect(
       aggregatorDeploy.address,
@@ -57,6 +59,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     }
 
     aggregator = aggregatorContract.address;
+
+    logDeploy('AggregatorV3Mock', undefined, aggregatorContract.address);
   } else {
     console.log(
       chalk.bold.yellow(
@@ -75,7 +79,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     [addresses?.accessControl, aggregator],
   );
 
-  await logDeployProxy(hre, DEPOSIT_VAULT_CONTRACT_NAME, deployment.address);
+  await delay(5_000);
+  await logDeployProxy(hre, DATA_FEED_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };
 

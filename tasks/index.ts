@@ -3,6 +3,7 @@ import { PopulatedTransaction } from 'ethers';
 import { task, types } from 'hardhat/config';
 
 import './prepareTx';
+import { etherscanVerify, etherscanVerifyImplementation } from '../helpers/utils';
 
 export const logPopulatedTx = (tx: PopulatedTransaction) => {
   console.log({
@@ -10,6 +11,19 @@ export const logPopulatedTx = (tx: PopulatedTransaction) => {
     to: tx.to,
   });
 };
+
+task('verifyProxy')
+  .addPositionalParam('proxyAddress')
+  .setAction(async ({ proxyAddress }, hre) => {
+    await etherscanVerifyImplementation(hre, proxyAddress);
+  })
+
+task('verifyRegular')
+  .addPositionalParam('address')
+  .setAction(async ({ address }, hre) => {
+    await etherscanVerify(hre, address);
+  })
+
 
 task('executeTx')
   .addPositionalParam('to', undefined, undefined, types.string)

@@ -2,17 +2,17 @@ import { task, types } from 'hardhat/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { logPopulatedTx } from '..';
+import { getCurrentAddresses } from '../../config/constants/addresses';
 
-export const getAggregator = async (hre: HardhatRuntimeEnvironment) => {
-  const { get } = hre.deployments;
-  const aggregator = await get('AggregatorV3Mock');
-  return await hre.ethers.getContractAt('AggregatorV3Mock', aggregator.address);
+export const getAggregator = async (hre: HardhatRuntimeEnvironment, address: string) => {
+  return await hre.ethers.getContractAt('AggregatorV3Mock', address);
 };
 
 task('prepareTx:aggregator:setRoundData')
+  .addPositionalParam('address', undefined, undefined, types.string)
   .addPositionalParam('data', undefined, undefined, types.float)
-  .setAction(async ({ data }, hre) => {
-    const aggregatorContract = await getAggregator(hre);
+  .setAction(async ({ data, address }, hre) => {
+    const aggregatorContract = await getAggregator(hre, address);
 
     const dataParsed = hre.ethers.utils.parseUnits(
       data.toString(),

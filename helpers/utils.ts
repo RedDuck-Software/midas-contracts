@@ -12,6 +12,10 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import fs from 'fs';
 
+export function delay(ms: number) {
+  return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
 export const getImplAddressFromProxy = async (
   hre: HardhatRuntimeEnvironment,
   proxyAddress: string,

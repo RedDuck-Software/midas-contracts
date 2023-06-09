@@ -11,6 +11,7 @@ import {
 } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
+  delay,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
   verify,
@@ -33,6 +34,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ],
   );
 
+  await delay(5_000);
   await logDeployProxy(hre, DEPOSIT_VAULT_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };

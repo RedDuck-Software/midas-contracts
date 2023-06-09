@@ -6,6 +6,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { MIDAS_AC_CONTRACT_NAME, MIDAS_AC_DEPLOY_TAG } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
+  delay,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
   verify,
@@ -22,6 +23,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     [],
   );
 
+  await delay(5_000);
   await logDeployProxy(hre, MIDAS_AC_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };

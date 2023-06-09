@@ -5,11 +5,11 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { logPopulatedTx } from '..';
 import { ST_USD_DEPLOY_TAG } from '../../config';
+import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getStUsd = async (hre: HardhatRuntimeEnvironment) => {
-  const { get } = hre.deployments;
-  const stUsd = await get(ST_USD_DEPLOY_TAG);
-  return await hre.ethers.getContractAt('stUSD', stUsd.address);
+  const addresses = getCurrentAddresses(hre)
+  return await hre.ethers.getContractAt('stUSD', addresses?.stUSD ?? '');
 };
 
 task('prepareTx:stUsd:mint')

@@ -16,12 +16,12 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
 > = {
   main: undefined,
   sepolia: {
-    depositVault: '',
-    redemptionVault: '',
-    stUSD: '',
-    etfDataFeed: '',
-    eurToUsdFeed: '',
-    accessControl: '0x53D493424694874Edb368144b60b5F36C6c70c37',
+    depositVault: '0x45A1392c1086B36e2c4c40bB5A4bbbb86415e8D7',
+    redemptionVault: '0x0d38dA23a47c36A41fa1BB32A048c43d368600F7',
+    stUSD: '0xe8eb39bE793b2ebf9116Cb43a2f34b43DF20D879',
+    etfDataFeed: '0x3e0F40FC4750C3793C89E848E60cdAA6b4D7E545',
+    eurToUsdFeed: '0xE23c07Ecad6D822500CbE8306d72A90578CA9F11',
+    accessControl: '0xE3ec78422DC778AC081d410BCf96f01CAd18be4e',
   },
   hardhat: {
     depositVault: '',

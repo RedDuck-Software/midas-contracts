@@ -5,11 +5,11 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { logPopulatedTx } from '..';
 import { REDEMPTION_VAULT_DEPLOY_TAG } from '../../config';
+import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getRedemptionVault = async (hre: HardhatRuntimeEnvironment) => {
-  const { get } = hre.deployments;
-  const stUsd = await get(REDEMPTION_VAULT_DEPLOY_TAG);
-  return await hre.ethers.getContractAt('RedemptionVault', stUsd.address);
+  const addresses = getCurrentAddresses(hre)
+  return await hre.ethers.getContractAt('RedemptionVault', addresses?.redemptionVault ?? '');
 };
 
 // task('prepareTx:redemptionVault:fulfillRedemptionRequest(uin256)')
