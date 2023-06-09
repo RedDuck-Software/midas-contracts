@@ -37,3 +37,20 @@ task('executeTx')
             chalk.yellow('Transaction hash: ', tx.hash)
         )
     })
+
+task('deployTestToken')
+    .addOptionalPositionalParam('decimals', undefined, 18, types.int)
+    .addOptionalPositionalParam('name', undefined, 'TestToken', types.string)
+    .addOptionalPositionalParam('symbol', undefined, 'TestToken', types.string)
+
+    .setAction(async ({ decimals, name, symbol }, hre) => {
+        const { deployer } = await hre.getNamedAccounts()
+
+        const signer = await hre.ethers.getSigner(deployer);
+
+        const token = await (await hre.ethers.getContractFactory('ERC20MockWithName', signer)).deploy(decimals, name, symbol);
+
+        console.log(
+            chalk.yellow('Token deployed at: ', token.address)
+        )
+    })
