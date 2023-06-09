@@ -40,7 +40,7 @@ describe('DepositVault', function () {
 
     expect(await depositVault.PERCENTAGE_BPS()).eq('100');
 
-    expect(await depositVault.minUsdAmountToDeposit()).eq('0');
+    expect(await depositVault.minAmountToDepositInEuro()).eq('0');
 
     expect(await depositVault.vaultRole()).eq(roles.depositVaultAdmin);
 
@@ -54,6 +54,7 @@ describe('DepositVault', function () {
 
     await expect(
       depositVault.initialize(
+        ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,

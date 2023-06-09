@@ -79,7 +79,7 @@ export const postDeploymentTest = async ({ ethers }: HardhatRuntimeEnvironment, 
 
     expect(await depositVault.PERCENTAGE_BPS()).eq('100');
 
-    expect(await depositVault.minUsdAmountToDeposit()).eq('0');
+    expect(await depositVault.minAmountToDepositInEuro()).eq('0');
 
     expect(await depositVault.vaultRole()).eq(await accessControl.DEPOSIT_VAULT_ADMIN_ROLE());
 

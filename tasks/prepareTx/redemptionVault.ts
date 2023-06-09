@@ -11,21 +11,21 @@ export const getRedemptionVault = async (hre: HardhatRuntimeEnvironment) => {
     return await hre.ethers.getContractAt('RedemptionVault', stUsd.address);
 }
 
-task('prepareTx:redemptionVault:fulfillRedemptionRequest(uin256)')
-    .addPositionalParam('requestId', undefined, undefined, types.string)
-    .setAction(async ({
-        requestId
-    }, hre) => {
-        const redemptionVaultContract = await getRedemptionVault(hre);
+// task('prepareTx:redemptionVault:fulfillRedemptionRequest(uin256)')
+//     .addPositionalParam('requestId', undefined, undefined, types.string)
+//     .setAction(async ({
+//         requestId
+//     }, hre) => {
+//         const redemptionVaultContract = await getRedemptionVault(hre);
 
-        const populatedTx = await redemptionVaultContract.populateTransaction[
-            'fulfillRedemptionRequest(uint256)'
-        ](requestId);
+//         const populatedTx = await redemptionVaultContract.populateTransaction[
+//             'fulfillRedemptionRequest(uint256)'
+//         ](requestId);
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
+//         logPopulatedTx(
+//             populatedTx
+//         )
+//     })
 
 
 task('prepareTx:redemptionVault:fulfillRedemptionRequest(uin256,uint256)')
