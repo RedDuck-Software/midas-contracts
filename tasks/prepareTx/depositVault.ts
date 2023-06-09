@@ -1,182 +1,146 @@
-import chalk from "chalk";
-import { task, types } from "hardhat/config";
-import { PopulatedTransaction } from "ethers";
-import { logPopulatedTx } from "..";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DEPOSIT_VAULT_DEPLOY_TAG } from "../../config";
+import chalk from 'chalk';
+import { PopulatedTransaction } from 'ethers';
+import { task, types } from 'hardhat/config';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+import { logPopulatedTx } from '..';
+import { DEPOSIT_VAULT_DEPLOY_TAG } from '../../config';
 
 export const getDepositVault = async (hre: HardhatRuntimeEnvironment) => {
-    const { get } = hre.deployments;
-    const stUsd = await get(DEPOSIT_VAULT_DEPLOY_TAG);
-    return await hre.ethers.getContractAt('DepositVault', stUsd.address);
-}
+  const { get } = hre.deployments;
+  const stUsd = await get(DEPOSIT_VAULT_DEPLOY_TAG);
+  return await hre.ethers.getContractAt('DepositVault', stUsd.address);
+};
 
 task('prepareTx:depositVault:fulfillManualDeposit(address,uin256)')
-    .addPositionalParam('user', undefined, undefined, types.string)
-    .addPositionalParam('amountUsdIn', undefined, undefined, types.float)
-    .setAction(async ({
-        user, amountUsdIn
-    }, hre) => {
-        const amountParsed = hre.ethers.utils.parseUnits(amountUsdIn.toString())
+  .addPositionalParam('user', undefined, undefined, types.string)
+  .addPositionalParam('amountUsdIn', undefined, undefined, types.float)
+  .setAction(async ({ user, amountUsdIn }, hre) => {
+    const amountParsed = hre.ethers.utils.parseUnits(amountUsdIn.toString());
 
-        const depositVaultContract = await getDepositVault(hre);
+    const depositVaultContract = await getDepositVault(hre);
 
-        const populatedTx = await depositVaultContract.populateTransaction[
-            'fulfillManualDeposit(address,uint256)'
-        ](user, amountParsed);
+    const populatedTx = await depositVaultContract.populateTransaction[
+      'fulfillManualDeposit(address,uint256)'
+    ](user, amountParsed);
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
-
+    logPopulatedTx(populatedTx);
+  });
 
 task('prepareTx:depositVault:fulfillManualDeposit(address,uin256,uin256)')
-    .addPositionalParam('user', undefined, undefined, types.string)
-    .addPositionalParam('amountUsdIn', undefined, undefined, types.float)
-    .addPositionalParam('amountStUsdOut', undefined, undefined, types.float)
-    .setAction(async ({
-        user, amountUsdIn, amountStUsdOut
-    }, hre) => {
-        const amountInParsed = hre.ethers.utils.parseUnits(amountUsdIn.toString())
-        const amountOutParsed = hre.ethers.utils.parseUnits(amountStUsdOut.toString())
+  .addPositionalParam('user', undefined, undefined, types.string)
+  .addPositionalParam('amountUsdIn', undefined, undefined, types.float)
+  .addPositionalParam('amountStUsdOut', undefined, undefined, types.float)
+  .setAction(async ({ user, amountUsdIn, amountStUsdOut }, hre) => {
+    const amountInParsed = hre.ethers.utils.parseUnits(amountUsdIn.toString());
+    const amountOutParsed = hre.ethers.utils.parseUnits(
+      amountStUsdOut.toString(),
+    );
 
-        const depositVaultContract = await getDepositVault(hre);
+    const depositVaultContract = await getDepositVault(hre);
 
-        const populatedTx = await depositVaultContract.populateTransaction[
-            'fulfillManualDeposit(address,uint256,uint256)'
-        ](
-            user,
-            amountInParsed,
-            amountOutParsed
-        );
+    const populatedTx = await depositVaultContract.populateTransaction[
+      'fulfillManualDeposit(address,uint256,uint256)'
+    ](user, amountInParsed, amountOutParsed);
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
+    logPopulatedTx(populatedTx);
+  });
 
 task('prepareTx:depositVault:setMinAmountToDeposit')
-    .addPositionalParam('value', undefined, undefined, types.float)
-    .setAction(async ({
-        value
-    }, hre) => {
-        const valueParsed = hre.ethers.utils.parseUnits(value.toString())
+  .addPositionalParam('value', undefined, undefined, types.float)
+  .setAction(async ({ value }, hre) => {
+    const valueParsed = hre.ethers.utils.parseUnits(value.toString());
 
-        const depositVaultContract = await getDepositVault(hre);
+    const depositVaultContract = await getDepositVault(hre);
 
-        const populatedTx = await depositVaultContract.populateTransaction.setMinAmountToDeposit(valueParsed);
+    const populatedTx =
+      await depositVaultContract.populateTransaction.setMinAmountToDeposit(
+        valueParsed,
+      );
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
-
+    logPopulatedTx(populatedTx);
+  });
 
 task('prepareTx:depositVault:withdrawToken')
-    .addPositionalParam('token', undefined, undefined, types.string)
-    .addPositionalParam('amount', undefined, undefined, types.float)
-    .addPositionalParam('withdrawTo', undefined, undefined, types.string)
+  .addPositionalParam('token', undefined, undefined, types.string)
+  .addPositionalParam('amount', undefined, undefined, types.float)
+  .addPositionalParam('withdrawTo', undefined, undefined, types.string)
 
-    .setAction(async ({
-        token, amount, withdrawTo
-    }, hre) => {
-        const amountParsed = hre.ethers.utils.parseUnits(amount.toString())
+  .setAction(async ({ token, amount, withdrawTo }, hre) => {
+    const amountParsed = hre.ethers.utils.parseUnits(amount.toString());
 
-        const depositVaultContract = await getDepositVault(hre);
+    const depositVaultContract = await getDepositVault(hre);
 
-        const populatedTx = await depositVaultContract.populateTransaction.withdrawToken(
-            token,
-            amountParsed,
-            withdrawTo
-        );
+    const populatedTx =
+      await depositVaultContract.populateTransaction.withdrawToken(
+        token,
+        amountParsed,
+        withdrawTo,
+      );
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
-
+    logPopulatedTx(populatedTx);
+  });
 
 task('prepareTx:depositVault:addPaymentToken')
-    .addPositionalParam('token', undefined, undefined, types.string)
-    .setAction(async ({
-        token
-    }, hre) => {
-        const depositVaultContract = await getDepositVault(hre);
+  .addPositionalParam('token', undefined, undefined, types.string)
+  .setAction(async ({ token }, hre) => {
+    const depositVaultContract = await getDepositVault(hre);
 
-        const populatedTx = await depositVaultContract.populateTransaction.addPaymentToken(
-            token,
-        );
+    const populatedTx =
+      await depositVaultContract.populateTransaction.addPaymentToken(token);
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
+    logPopulatedTx(populatedTx);
+  });
 
 task('prepareTx:depositVault:removePaymentToken')
-    .addPositionalParam('token', undefined, undefined, types.string)
-    .setAction(async ({
-        token
-    }, hre) => {
-        const depositVaultContract = await getDepositVault(hre);
+  .addPositionalParam('token', undefined, undefined, types.string)
+  .setAction(async ({ token }, hre) => {
+    const depositVaultContract = await getDepositVault(hre);
 
-        const populatedTx = await depositVaultContract.populateTransaction.removePaymentToken(
-            token,
-        );
+    const populatedTx =
+      await depositVaultContract.populateTransaction.removePaymentToken(token);
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
+    logPopulatedTx(populatedTx);
+  });
 
 task('prepareTx:depositVault:setFee')
-    .addPositionalParam('newValue', undefined, undefined, types.float)
-    .setAction(async ({
-        newValue
-    }, hre) => {
-        const depositVaultContract = await getDepositVault(hre);
+  .addPositionalParam('newValue', undefined, undefined, types.float)
+  .setAction(async ({ newValue }, hre) => {
+    const depositVaultContract = await getDepositVault(hre);
 
-        const newValueParsed = Math.floor(newValue * (await depositVaultContract.PERCENTAGE_BPS()).toNumber());
+    const newValueParsed = Math.floor(
+      newValue * (await depositVaultContract.PERCENTAGE_BPS()).toNumber(),
+    );
 
-        console.log({ newValueParsed });
+    console.log({ newValueParsed });
 
-        const populatedTx = await depositVaultContract.populateTransaction.setFee(
-            newValueParsed,
-        );
+    const populatedTx = await depositVaultContract.populateTransaction.setFee(
+      newValueParsed,
+    );
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
+    logPopulatedTx(populatedTx);
+  });
 
 task('prepareTx:depositVault:addToGreenList')
-    .addPositionalParam('account', undefined, undefined, types.string)
-    .setAction(async ({
-        account
-    }, hre) => {
-        const depositVaultContract = await getDepositVault(hre);
+  .addPositionalParam('account', undefined, undefined, types.string)
+  .setAction(async ({ account }, hre) => {
+    const depositVaultContract = await getDepositVault(hre);
 
-        const populatedTx = await depositVaultContract.populateTransaction.addToGreenList(
-            account,
-        );
+    const populatedTx =
+      await depositVaultContract.populateTransaction.addToGreenList(account);
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
+    logPopulatedTx(populatedTx);
+  });
 
 task('prepareTx:depositVault:removeFromGreenList')
-    .addPositionalParam('account', undefined, undefined, types.string)
-    .setAction(async ({
-        account
-    }, hre) => {
-        const depositVaultContract = await getDepositVault(hre);
+  .addPositionalParam('account', undefined, undefined, types.string)
+  .setAction(async ({ account }, hre) => {
+    const depositVaultContract = await getDepositVault(hre);
 
-        const populatedTx = await depositVaultContract.populateTransaction.removeFromGreenList(
-            account,
-        );
+    const populatedTx =
+      await depositVaultContract.populateTransaction.removeFromGreenList(
+        account,
+      );
 
-        logPopulatedTx(
-            populatedTx
-        )
-    })
+    logPopulatedTx(populatedTx);
+  });

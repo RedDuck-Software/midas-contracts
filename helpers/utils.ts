@@ -1,5 +1,5 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { getImplementationAddress } from "@openzeppelin/upgrades-core";
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { getImplementationAddress } from '@openzeppelin/upgrades-core';
 import {
   BigNumberish,
   constants,
@@ -7,31 +7,30 @@ import {
   ContractReceipt,
   ContractTransaction,
   Signature,
-} from "ethers";
-import fs from "fs";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+} from 'ethers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+import fs from 'fs';
 
 export const getImplAddressFromProxy = async (
   hre: HardhatRuntimeEnvironment,
-  proxyAddress: string
+  proxyAddress: string,
 ): Promise<string> =>
   await getImplementationAddress(hre.ethers.provider, proxyAddress);
 
 export const logDeploy = (
   contractName: string,
   contractType: string | undefined,
-  address: string
+  address: string,
 ) =>
   console.info(
-    `\x1b[32m${contractName}\x1b[0m${contractType ? " " : ""}${
-      contractType ?? ""
+    `\x1b[32m${contractName}\x1b[0m${contractType ? ' ' : ''}${
+      contractType ?? ''
     }:\t`,
-    "\x1b[36m",
+    '\x1b[36m',
     address,
-    "\x1b[0m"
+    '\x1b[0m',
   );
-
-
 
 export const etherscanVerify = async (
   hre: HardhatRuntimeEnvironment,
@@ -55,18 +54,18 @@ export const etherscanVerifyImplementation = async (
 export const logDeployProxy = async (
   hre: HardhatRuntimeEnvironment,
   contractName: string,
-  address: string
+  address: string,
 ) => {
-  logDeploy(contractName, "Proxy", address);
+  logDeploy(contractName, 'Proxy', address);
 
   try {
     logDeploy(
       contractName,
-      "Impl",
-      await getImplAddressFromProxy(hre, address)
+      'Impl',
+      await getImplAddressFromProxy(hre, address),
     );
   } catch (err) {
-    console.error("Log impl error. ", err);
+    console.error('Log impl error. ', err);
   }
 };
 
@@ -77,7 +76,7 @@ export const tryEtherscanVerify = async (
 ) => {
   return await etherscanVerify(hre, contractAddress, ...constructorArguments)
     .catch((err) => {
-      console.error("Unable to verify. Error: ", err);
+      console.error('Unable to verify. Error: ', err);
       return false;
     })
     .then((_) => {
@@ -93,10 +92,10 @@ export const tryEtherscanVerifyImplementation = async (
   return await etherscanVerifyImplementation(
     hre,
     proxyAddress,
-    ...constructorArguments
+    ...constructorArguments,
   )
     .catch((err) => {
-      console.error("Unable to verify. Error: ", err);
+      console.error('Unable to verify. Error: ', err);
       return false;
     })
     .then((_) => {
@@ -104,14 +103,12 @@ export const tryEtherscanVerifyImplementation = async (
     });
 };
 
-
-
 export const processDeployer = async (
   deployer: any,
-  hre: HardhatRuntimeEnvironment
+  hre: HardhatRuntimeEnvironment,
 ): Promise<SignerWithAddress> => {
   if (deployer && !hre.ethers.utils.isAddress(deployer))
-    throw new Error("Deployer address is invalid");
+    throw new Error('Deployer address is invalid');
 
   const [owner] = deployer
     ? [await hre.ethers.getSigner(deployer)]
@@ -123,28 +120,26 @@ export const processDeployer = async (
 export const processAddress = (
   address: unknown,
   hre: HardhatRuntimeEnvironment,
-  name = "Current"
+  name = 'Current',
 ): void => {
   if (
     !address ||
-    typeof address !== "string" ||
+    typeof address !== 'string' ||
     !hre.ethers.utils.isAddress(address)
   ) {
     throw new Error(`${name} address is invalid`);
   }
 };
 
-
-
 export const verify = async (
   hre: HardhatRuntimeEnvironment,
   contractAddress: string,
   ...constructorArguments: any[]
 ) => {
-  console.log("Arguments: ", constructorArguments);
+  console.log('Arguments: ', constructorArguments);
 
-  await hre.run("verify:verify", {
+  await hre.run('verify:verify', {
     address: contractAddress,
-    constructorArguments: constructorArguments,
+    constructorArguments,
   });
 };

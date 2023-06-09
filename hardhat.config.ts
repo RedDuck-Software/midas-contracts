@@ -6,7 +6,7 @@ import 'hardhat-contract-sizer';
 import 'hardhat-deploy';
 import 'hardhat-docgen';
 
-import "./tasks";
+import './tasks';
 
 import {
   ENV,
@@ -34,10 +34,10 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: '0xA22Cf0bcf57383AABA162D46dc4b1FebA5AF4FC8',
   },
-  verify: { 
-    etherscan: { 
+  verify: {
+    etherscan: {
       apiKey: ETHERSCAN_API_KEY,
-    }
+    },
   },
   networks: {
     main: getNetworkConfig('main'),
@@ -45,7 +45,7 @@ const config: HardhatUserConfig = {
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),
-    localhost: getNetworkConfig('localhost' ),
+    localhost: getNetworkConfig('localhost'),
   },
   gasReporter: {
     enabled: REPORT_GAS,

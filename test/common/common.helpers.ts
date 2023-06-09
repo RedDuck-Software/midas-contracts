@@ -4,7 +4,12 @@ import { BigNumber, BigNumberish, Contract, Signer } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
-import { ERC20, ERC20Mock, MidasAccessControl, StUSD } from '../../typechain-types';
+import {
+  ERC20,
+  ERC20Mock,
+  MidasAccessControl,
+  StUSD,
+} from '../../typechain-types';
 
 export type OptionalCommonParams = {
   from?: SignerWithAddress;
@@ -22,7 +27,7 @@ export const getAccount = (account: AccountOrContract) => {
   );
 };
 
-export const getAllRoles = async (accessControl: MidasAccessControl) => { 
+export const getAllRoles = async (accessControl: MidasAccessControl) => {
   const roles = {
     blacklisted: await accessControl.BLACKLISTED_ROLE(),
     greenlisted: await accessControl.GREENLISTED_ROLE(),
@@ -36,10 +41,8 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
     redemptionVaultAdmin: await accessControl.REDEMPTION_VAULT_ADMIN_ROLE(),
   };
 
-  return roles
-}
-
-
+  return roles;
+};
 
 export const mintToken = async (
   token: ERC20Mock | StUSD,

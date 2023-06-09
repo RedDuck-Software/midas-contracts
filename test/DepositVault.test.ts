@@ -30,13 +30,14 @@ import { DepositVault, ERC20Mock } from '../typechain-types';
 
 describe('DepositVault', function () {
   it('deployment', async () => {
-    const { depositVault, stUSD, dataFeed, roles } = await loadFixture(
-      defaultDeploy,
-    );
+    const { depositVault, stUSD, dataFeed, eurToUsdDataFeed, roles } =
+      await loadFixture(defaultDeploy);
 
     expect(await depositVault.stUSD()).eq(stUSD.address);
 
     expect(await depositVault.etfDataFeed()).eq(dataFeed.address);
+
+    expect(await depositVault.eurUsdDataFeed()).eq(eurToUsdDataFeed.address);
 
     expect(await depositVault.PERCENTAGE_BPS()).eq('100');
 
@@ -281,6 +282,64 @@ describe('DepositVault', function () {
     });
   });
 
+  describe('usdToEuro()', () => {
+    it('EUR price is 1$, minAmountToDepositInEuro is 100000 EUR, should return 100000 USD', async () => {
+      const {
+        depositVault,
+        mockedAggregatorEur: mockedAggregator,
+        owner,
+      } = await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 1);
+      await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+      expect(await depositVault.minAmountToDepositInUsd()).eq(
+        parseUnits('100000'),
+      );
+    });
+
+    it('EUR price is 1.1$, minAmountToDepositInEuro is 100000 EUR, should return 110000 USD', async () => {
+      const {
+        depositVault,
+        mockedAggregatorEur: mockedAggregator,
+        owner,
+      } = await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 1.1);
+      await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+      expect(await depositVault.minAmountToDepositInUsd()).eq(
+        parseUnits('110000'),
+      );
+    });
+  });
+
+  // describe('usdToEuro()', () => {
+  //   it('EUR price is 1$, amount is 1 USD, should return 1 EUR', async () => {
+
+  //     const {
+  //       depositVault,
+  //       mockedAggregatorEur: mockedAggregator,
+  //     } = await loadFixture(defaultDeploy);
+  //     await setRoundData({mockedAggregator}, 1);
+  //     expect(await depositVault.usdToEuro(parseUnits('1'))).eq(parseUnits('1'));
+  //   })
+
+  //   it('EUR price is 1.078$, amount is 2 USD, should return 1.8552875695732838 EUR', async () => {
+  //     const {
+  //       depositVault,
+  //       mockedAggregatorEur: mockedAggregator,
+  //     } = await loadFixture(defaultDeploy);
+  //     await setRoundData({mockedAggregator}, 1.078);
+  //     expect(await depositVault.usdToEuro(parseUnits('2'))).approximately(parseUnits('1.8552875695732838'), parseUnits('0.00001'));
+  //   })
+
+  //   it('EUR price is 0.91$, amount is 2 USD, should return 2.197802198 EUR', async () => {
+  //     const {
+  //       depositVault,
+  //       mockedAggregatorEur: mockedAggregator,
+  //     } = await loadFixture(defaultDeploy);
+  //     await setRoundData({mockedAggregator}, 0.91);
+  //     expect(await depositVault.usdToEuro(parseUnits('2'))).approximately(parseUnits('2.197802198'), parseUnits('0.00001'));
+  //   })
+
+  // })
   describe('getOutputAmountWithFee()', () => {
     const test = ({
       priceN,
@@ -475,11 +534,12 @@ describe('DepositVault', function () {
       });
     });
 
-    it('should fail: call for amount <= minAmountToDepositTest', async () => {
+    it('should fail: call for amount < minAmountToDepositTest', async () => {
       const {
         depositVault,
         accessControl,
         mockedAggregator,
+        mockedAggregatorEur,
         owner,
         stUSD,
         stableCoins,
@@ -490,17 +550,24 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 4);
 
-      await mintToken(stableCoins.dai, owner, 100);
-      await approveBase18(owner, stableCoins.dai, depositVault, 100);
+      await mintToken(stableCoins.dai, owner, 100_000);
+      await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
         owner,
       );
 
-      await setMinAmountToDepositTest({ depositVault, owner }, 11);
-      await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 10, {
-        revertMessage: 'DV: usd amount < min',
-      });
+      await setRoundData({ mockedAggregator: mockedAggregatorEur }, 1);
+      await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+
+      await depositTest(
+        { depositVault, owner, stUSD },
+        stableCoins.dai,
+        99_999,
+        {
+          revertMessage: 'DV: usd amount < min',
+        },
+      );
     });
 
     it('deposit 100 DAI, when price is 5$', async () => {
@@ -525,6 +592,73 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 5);
       await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 100);
+    });
+
+    it('call for amount == minAmountToDepositTest', async () => {
+      const {
+        depositVault,
+        accessControl,
+        mockedAggregator,
+        mockedAggregatorEur,
+        owner,
+        stUSD,
+        stableCoins,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+      );
+      await setRoundData({ mockedAggregator }, 4);
+
+      await mintToken(stableCoins.dai, owner, 100_000);
+      await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
+      await greenList(
+        { accessControl, greenlistable: depositVault, owner },
+        owner,
+      );
+
+      await setRoundData({ mockedAggregator: mockedAggregatorEur }, 1);
+      await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+
+      await depositTest(
+        { depositVault, owner, stUSD },
+        stableCoins.dai,
+        100_000,
+      );
+    });
+
+    it('call for amount == minAmountToDepositTest+1, then deposit with amount 1', async () => {
+      const {
+        depositVault,
+        accessControl,
+        mockedAggregator,
+        mockedAggregatorEur,
+        owner,
+        stUSD,
+        stableCoins,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+      );
+      await setRoundData({ mockedAggregator }, 4);
+
+      await mintToken(stableCoins.dai, owner, 100_002);
+      await approveBase18(owner, stableCoins.dai, depositVault, 100_002);
+      await greenList(
+        { accessControl, greenlistable: depositVault, owner },
+        owner,
+      );
+
+      await setRoundData({ mockedAggregator: mockedAggregatorEur }, 1);
+      await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+
+      await depositTest(
+        { depositVault, owner, stUSD },
+        stableCoins.dai,
+        100_001,
+      );
+      await depositTest({ depositVault, owner, stUSD }, stableCoins.dai, 1);
     });
 
     it('deposit 100 DAI, when price is 5$, 25 USDC when price is 5.1$, 14 USDT when price is 5.4$', async () => {

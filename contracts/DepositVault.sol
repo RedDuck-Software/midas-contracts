@@ -98,10 +98,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         return _getOutputAmountWithFee(amountUsdIn);
     }
 
-    function usdToEuro(
-        uint256 amountUsdIn
-    ) external view returns (uint256) {
-        return _usdToEuro(amountUsdIn);
+    function minAmountToDepositInUsd(
+    ) public view returns (uint256) {
+        return (minAmountToDepositInEuro * eurUsdDataFeed.getDataInBase18()) / 10 ** 18 ;
     }
 
     function getFee() public view returns (uint256) {
@@ -157,11 +156,6 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     function _validateAmountUsdIn(address user,uint256 amountUsdIn) internal view {
         if(totalDeposited[user] != 0) return;
-        require(_usdToEuro(amountUsdIn) >= minAmountToDepositInEuro, "DV: usd amount < min");
-    }
-
-    function _usdToEuro(uint256 usdAmount) internal view returns (uint256) { 
-        uint256 usdInEurPrice = 10 ** 36 / eurUsdDataFeed.getDataInBase18();
-        return (usdAmount * usdInEurPrice) / 10 ** 18;
+        require(amountUsdIn >= minAmountToDepositInUsd(), "DV: usd amount < min");
     }
 }

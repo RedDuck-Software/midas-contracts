@@ -67,8 +67,8 @@ export const initialBasesFeePerGas: ConfigPerNetwork<number | undefined> = {
 };
 
 export const getBaseNetworkConfig = (
-  network: Network, 
-  tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG]
+  network: Network,
+  tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG],
 ): NetworkUserConfig => ({
   accounts: mnemonics[network]
     ? {
@@ -81,18 +81,21 @@ export const getBaseNetworkConfig = (
   blockGasLimit: blockGasLimits[network],
   timeout: timeouts[network],
   initialBaseFeePerGas: initialBasesFeePerGas[network],
-  tags
+  tags,
 });
 
-export const getNetworkConfig = (network: Network, tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG] ): NetworkUserConfig => ({
+export const getNetworkConfig = (
+  network: Network,
+  tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG],
+): NetworkUserConfig => ({
   ...getBaseNetworkConfig(network, tags),
   url: rpcUrls[network],
   saveDeployments: true,
 });
 
 export const getForkNetworkConfig = (
-  network: Network, 
-  tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG]
+  network: Network,
+  tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG],
 ): HardhatNetworkUserConfig => ({
   ...getBaseNetworkConfig(network, tags),
   accounts: {
