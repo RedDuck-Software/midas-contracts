@@ -35,10 +35,6 @@ interface IRedemptionVault is IManageableVault {
     ) external returns (uint256 requestId);
 
     function fulfillRedemptionRequest(
-        uint256 requestId
-    ) external returns (uint256 amountUsdOut);
-
-    function fulfillRedemptionRequest(
         uint256 requestId,
         uint256 amountUsdOut
     ) external;

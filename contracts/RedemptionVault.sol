@@ -79,14 +79,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     function fulfillRedemptionRequest(
-        uint256 requestId
-    ) external onlyVaultAdmin returns (uint256 amountUsdOut) {
-        RedemptionRequest memory request = _getRequest(requestId);
-        amountUsdOut = _getOutputAmountWithFee(request.amountStUsdIn);
-        _fulfillRedemptionRequest(request, requestId, amountUsdOut);
-    }
-
-    function fulfillRedemptionRequest(
         uint256 requestId,
         uint256 amountUsdOut
     ) external onlyVaultAdmin {
