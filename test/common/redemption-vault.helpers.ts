@@ -128,95 +128,95 @@ export const fulfillRedemptionRequestTest = (
   opt?: OptionalCommonParams,
 ) => {
   return {
-    'fulfillRedemptionRequest(uint256)': async (requestId: BigNumberish) => {
-      const sender = opt?.from ?? owner;
+    // 'fulfillRedemptionRequest(uint256)': async (requestId: BigNumberish) => {
+    //   const sender = opt?.from ?? owner;
 
-      if (opt?.revertMessage) {
-        await expect(
-          redemptionVault
-            .connect(sender)
-            ['fulfillRedemptionRequest(uint256)'](requestId),
-        ).revertedWith(opt?.revertMessage);
-        return;
-      }
+    //   if (opt?.revertMessage) {
+    //     await expect(
+    //       redemptionVault
+    //         .connect(sender)
+    //         ['fulfillRedemptionRequest(uint256)'](requestId),
+    //     ).revertedWith(opt?.revertMessage);
+    //     return;
+    //   }
 
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(sender.address);
+    //   const balanceBeforeStUsdUser = await stUSD.balanceOf(sender.address);
 
-      const dataFeed = DataFeed__factory.connect(
-        await redemptionVault.etfDataFeed(),
-        owner,
-      );
+    //   const dataFeed = DataFeed__factory.connect(
+    //     await redemptionVault.etfDataFeed(),
+    //     owner,
+    //   );
 
-      const aggregator = AggregatorV3Mock__factory.connect(
-        await dataFeed.aggregator(),
-        owner,
-      );
+    //   const aggregator = AggregatorV3Mock__factory.connect(
+    //     await dataFeed.aggregator(),
+    //     owner,
+    //   );
 
-      let request = await redemptionVault.requests(requestId);
+    //   let request = await redemptionVault.requests(requestId);
 
-      const tokenContract = ERC20__factory.connect(request.tokenOut, owner);
-      const isManualFillToken =
-        request.tokenOut === ethers.constants.AddressZero;
+    //   const tokenContract = ERC20__factory.connect(request.tokenOut, owner);
+    //   const isManualFillToken =
+    //     request.tokenOut === ethers.constants.AddressZero;
 
-      const balanceBeforeContract = await balanceOfBase18(
-        tokenContract,
-        redemptionVault.address,
-      );
+    //   const balanceBeforeContract = await balanceOfBase18(
+    //     tokenContract,
+    //     redemptionVault.address,
+    //   );
 
-      const balanceBeforeUser = await balanceOfBase18(
-        tokenContract,
-        request.user,
-      );
+    //   const balanceBeforeUser = await balanceOfBase18(
+    //     tokenContract,
+    //     request.user,
+    //   );
 
-      const expectedOutAmount = await getOutputAmountWithFeeRedeemTest(
-        { redemptionVault, mockedAggregator: aggregator },
-        {
-          amountN: +formatUnits(request.amountStUsdIn),
-        },
-      );
+    //   const expectedOutAmount = await getOutputAmountWithFeeRedeemTest(
+    //     { redemptionVault, mockedAggregator: aggregator },
+    //     {
+    //       amountN: +formatUnits(request.amountStUsdIn),
+    //     },
+    //   );
 
-      await expect(
-        redemptionVault
-          .connect(sender)
-          ['fulfillRedemptionRequest(uint256)'](requestId),
-      ).to.emit(
-        redemptionVault,
-        redemptionVault.interface.events[
-          'FulfillRedeemptionRequest(address,uint256,uint256)'
-        ].name,
-      ).to.not.reverted;
+    //   await expect(
+    //     redemptionVault
+    //       .connect(sender)
+    //       ['fulfillRedemptionRequest(uint256)'](requestId),
+    //   ).to.emit(
+    //     redemptionVault,
+    //     redemptionVault.interface.events[
+    //       'FulfillRedeemptionRequest(address,uint256,uint256)'
+    //     ].name,
+    //   ).to.not.reverted;
 
-      const balanceAfterStUsdUser = await stUSD.balanceOf(sender.address);
+    //   const balanceAfterStUsdUser = await stUSD.balanceOf(sender.address);
 
-      const balanceAfterContract = await balanceOfBase18(
-        tokenContract,
-        redemptionVault.address,
-      );
+    //   const balanceAfterContract = await balanceOfBase18(
+    //     tokenContract,
+    //     redemptionVault.address,
+    //   );
 
-      const balanceAfterUser = await balanceOfBase18(
-        tokenContract,
-        request.user,
-      );
+    //   const balanceAfterUser = await balanceOfBase18(
+    //     tokenContract,
+    //     request.user,
+    //   );
 
-      request = await redemptionVault.requests(requestId);
+    //   request = await redemptionVault.requests(requestId);
 
-      expect(request.exists).eq(false);
-      expect(request.user).eq(ethers.constants.AddressZero);
-      expect(request.tokenOut).eq(ethers.constants.AddressZero);
-      expect(request.amountStUsdIn).eq('0');
+    //   expect(request.exists).eq(false);
+    //   expect(request.user).eq(ethers.constants.AddressZero);
+    //   expect(request.tokenOut).eq(ethers.constants.AddressZero);
+    //   expect(request.amountStUsdIn).eq('0');
 
-      expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser);
+    //   expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser);
 
-      if (!isManualFillToken) {
-        expect(balanceAfterContract).eq(
-          balanceBeforeContract.sub(expectedOutAmount),
-        );
-        expect(balanceAfterUser).eq(balanceBeforeUser.add(expectedOutAmount));
-      } else {
-        expect(balanceAfterContract).eq(balanceBeforeContract);
-        expect(balanceAfterUser).eq(balanceBeforeUser);
-      }
-    },
+    //   if (!isManualFillToken) {
+    //     expect(balanceAfterContract).eq(
+    //       balanceBeforeContract.sub(expectedOutAmount),
+    //     );
+    //     expect(balanceAfterUser).eq(balanceBeforeUser.add(expectedOutAmount));
+    //   } else {
+    //     expect(balanceAfterContract).eq(balanceBeforeContract);
+    //     expect(balanceAfterUser).eq(balanceBeforeUser);
+    //   }
+    // },
     'fulfillRedemptionRequest(uint256,uint256)': async (
       requestId: BigNumberish,
       amountUsdOut: number,

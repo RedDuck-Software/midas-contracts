@@ -21,7 +21,11 @@ contract DepositVault is ManageableVault, IDepositVault {
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
-    uint256 public minUsdAmountToDeposit;
+    uint256 public minAmountToDepositInEuro;
+
+    IDataFeed public eurUsdDataFeed;
+
+    mapping (address => uint256) public totalDeposited;
 
     /// @dev leaving a storage gap for futures updates
     uint256[50] private __gap;
@@ -30,10 +34,12 @@ contract DepositVault is ManageableVault, IDepositVault {
         address _ac,
         address _stUSD,
         address _etfDataFeed,
-        uint256 _minUsdAmountToDeposit
+        address _eurUsdDataFeed,
+        uint256 _minAmountToDepositInEuro
     ) external initializer {
         __ManageableVault_init(_ac, _stUSD, _etfDataFeed);
-        minUsdAmountToDeposit = _minUsdAmountToDeposit;
+        minAmountToDepositInEuro = _minAmountToDepositInEuro;
+        eurUsdDataFeed = IDataFeed(_eurUsdDataFeed);
     }
 
     function deposit(
@@ -82,7 +88,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     function setMinAmountToDeposit(uint256 newValue) external onlyVaultAdmin {
-        minUsdAmountToDeposit = newValue;
+        minAmountToDepositInEuro = newValue;
         emit SetMinAmountToDeposit(msg.sender, newValue);
     }
 
@@ -90,6 +96,11 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountUsdIn
     ) external view returns (uint256) {
         return _getOutputAmountWithFee(amountUsdIn);
+    }
+
+    function minAmountToDepositInUsd(
+    ) public view returns (uint256) {
+        return (minAmountToDepositInEuro * eurUsdDataFeed.getDataInBase18()) / 10 ** 18 ;
     }
 
     function getFee() public view returns (uint256) {
@@ -110,7 +121,8 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(amountUsdIn > 0, "DV: invalid amount");
 
         if (!isManuallyFilled) {
-            _validateAmountUsdIn(amountUsdIn);
+            _validateAmountUsdIn(user, amountUsdIn);
+            totalDeposited[user] += amountUsdIn;
         }
 
         require(amountStUsdOut > 0, "DV: invalid amount out");
@@ -142,7 +154,8 @@ contract DepositVault is ManageableVault, IDepositVault {
             ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));
     }
 
-    function _validateAmountUsdIn(uint256 amountUsdIn) internal view {
-        require(amountUsdIn > minUsdAmountToDeposit, "DV: usd amount < min");
+    function _validateAmountUsdIn(address user,uint256 amountUsdIn) internal view {
+        if(totalDeposited[user] != 0) return;
+        require(amountUsdIn >= minAmountToDepositInUsd(), "DV: usd amount < min");
     }
 }

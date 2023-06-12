@@ -4,6 +4,10 @@ import { expect } from 'chai';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers, upgrades } from 'hardhat';
 import * as hre from 'hardhat';
+
+import { getAllRoles } from './common.helpers';
+import { initGrantRoles, postDeploymentTest } from './post-deploy.helpers';
+
 import {
   AggregatorV3Mock__factory,
   BlacklistableTester__factory,
@@ -16,8 +20,6 @@ import {
   StUSD__factory,
   WithMidasAccessControlTester__factory,
 } from '../../typechain-types';
-import { getAllRoles } from './common.helpers';
-import { initGrantRoles, postDeploymentTest } from './post-deploy.helpers';
 
 export const defaultDeploy = async () => {
   const [owner, ...regularAccounts] = await ethers.getSigners();
@@ -32,18 +34,34 @@ export const defaultDeploy = async () => {
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
   const mockedAggregatorDecimals = await mockedAggregator.decimals();
 
+  const mockedAggregatorEur = await new AggregatorV3Mock__factory(
+    owner,
+  ).deploy();
+  const mockedAggregatorEurDecimals = await mockedAggregatorEur.decimals();
+
   await mockedAggregator.setRoundData(
     parseUnits('5', mockedAggregatorDecimals),
   );
 
+  await mockedAggregatorEur.setRoundData(
+    parseUnits('1.07778', mockedAggregatorEurDecimals),
+  );
+
   const dataFeed = await new DataFeed__factory(owner).deploy();
   await dataFeed.initialize(accessControl.address, mockedAggregator.address);
+
+  const eurToUsdDataFeed = await new DataFeed__factory(owner).deploy();
+  await eurToUsdDataFeed.initialize(
+    accessControl.address,
+    mockedAggregatorEur.address,
+  );
 
   const depositVault = await new DepositVault__factory(owner).deploy();
   await depositVault.initialize(
     accessControl.address,
     stUSD.address,
     dataFeed.address,
+    eurToUsdDataFeed.address,
     0,
   );
 
@@ -88,8 +106,8 @@ export const defaultDeploy = async () => {
     depositVault,
     owner,
     redemptionVault,
-    stUsd: stUSD
-  })
+    stUsd: stUSD,
+  });
 
   // role granting testers
   await accessControl.grantRole(
@@ -108,8 +126,10 @@ export const defaultDeploy = async () => {
     depositVault,
     owner,
     redemptionVault,
-    stUsd: stUSD
-  })
+    aggregatorEur: mockedAggregatorEur,
+    dataFeedEur: eurToUsdDataFeed,
+    stUsd: stUSD,
+  });
 
   return {
     stUSD,
@@ -127,5 +147,8 @@ export const defaultDeploy = async () => {
     redemptionVault,
     stableCoins,
     manualFulfillmentToken,
+    eurToUsdDataFeed,
+    mockedAggregatorEur,
+    mockedAggregatorEurDecimals,
   };
 };

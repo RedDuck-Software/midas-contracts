@@ -4,7 +4,7 @@ import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 const WAIT_BLOCKS = 5;
 const VERIFY_TASK = 'verify:verify';
 
-export const verify = async (
+export const __verify = async (
   { network, config, run, ethers }: HardhatRuntimeEnvironment,
   contractAddress: string,
   deployTxHash: string,

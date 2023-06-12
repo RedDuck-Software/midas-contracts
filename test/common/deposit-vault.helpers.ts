@@ -66,7 +66,7 @@ export const setMinAmountToDepositTest = async (
       .name,
   ).to.not.reverted;
 
-  const newMin = await depositVault.minUsdAmountToDeposit();
+  const newMin = await depositVault.minAmountToDepositInEuro();
   expect(newMin).eq(value);
 };
 
@@ -100,6 +100,10 @@ export const depositTest = async (
   );
   const balanceStUsdBeforeUser = await stUSD.balanceOf(sender.address);
 
+  const totalDepositedBefore = await depositVault.totalDeposited(
+    sender.address,
+  );
+
   const dataFeed = DataFeed__factory.connect(
     await depositVault.etfDataFeed(),
     owner,
@@ -123,6 +127,8 @@ export const depositTest = async (
     ].name,
   ).to.not.reverted;
 
+  const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
+
   const balanceAfterContract = await balanceOfBase18(
     tokenContract,
     depositVault.address,
@@ -130,6 +136,7 @@ export const depositTest = async (
   const balanceAfterUser = await balanceOfBase18(tokenContract, sender.address);
   const balanceStUsdAfterUser = await stUSD.balanceOf(sender.address);
 
+  expect(totalDepositedAfter).eq(totalDepositedBefore.add(amountIn));
   expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
   expect(balanceStUsdAfterUser).eq(
@@ -180,6 +187,8 @@ export const fulfillManualDepositTest = (
         },
       );
 
+      const totalDepositedBefore = await depositVault.totalDeposited(user);
+
       await expect(
         depositVault
           .connect(sender)
@@ -190,6 +199,7 @@ export const fulfillManualDepositTest = (
           'Deposit(address,address,bool,uint256,uint256)'
         ].name,
       ).to.not.reverted;
+      const totalDepositedAfter = await depositVault.totalDeposited(user);
 
       const balanceStUsdAfterUser = await stUSD.balanceOf(user);
       const supplyAfter = await stUSD.totalSupply();
@@ -197,6 +207,7 @@ export const fulfillManualDepositTest = (
       expect(balanceStUsdAfterUser).eq(
         balanceStUsdBeforeUser.add(expectedOutAmount),
       );
+      expect(totalDepositedBefore).eq(totalDepositedAfter);
 
       expect(supplyAfter).eq(supplyBefore.add(expectedOutAmount));
     },
@@ -228,6 +239,7 @@ export const fulfillManualDepositTest = (
       const balanceStUsdBeforeUser = await stUSD.balanceOf(user);
 
       const expectedOutAmount = amountOut;
+      const totalDepositedBefore = await depositVault.totalDeposited(user);
 
       await expect(
         depositVault
@@ -243,8 +255,11 @@ export const fulfillManualDepositTest = (
           'Deposit(address,address,bool,uint256,uint256)'
         ].name,
       ).to.not.reverted;
+      const totalDepositedAfter = await depositVault.totalDeposited(user);
 
       const balanceStUsdAfterUser = await stUSD.balanceOf(user);
+
+      expect(totalDepositedBefore).eq(totalDepositedAfter);
 
       expect(balanceStUsdAfterUser).eq(
         balanceStUsdBeforeUser.add(expectedOutAmount),

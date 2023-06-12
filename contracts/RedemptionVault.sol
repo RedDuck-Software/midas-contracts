@@ -35,7 +35,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     uint256 public minUsdAmountToRedeem;
 
     /// @dev leaving a storage gap for futures updates
-    uint256[50] private __gap;
+    uint256[51] private __gap;
 
     function initialize(
         address _ac,
@@ -57,7 +57,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         address user = msg.sender;
 
-        // estimate out amount and validate that it`s >= min allowed
+        // // estimate out amount and validate that it`s >= min allowed
         _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn));
 
         stUSD.burn(user, amountStUsdIn);
@@ -76,14 +76,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             tokenOut,
             amountStUsdIn
         );
-    }
-
-    function fulfillRedemptionRequest(
-        uint256 requestId
-    ) external onlyVaultAdmin returns (uint256 amountUsdOut) {
-        RedemptionRequest memory request = _getRequest(requestId);
-        amountUsdOut = _getOutputAmountWithFee(request.amountStUsdIn);
-        _fulfillRedemptionRequest(request, requestId, amountUsdOut);
     }
 
     function fulfillRedemptionRequest(

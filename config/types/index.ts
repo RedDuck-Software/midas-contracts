@@ -19,4 +19,3 @@ export interface Environment {
   readonly MNEMONIC_PROD: string;
   readonly FORKING_NETWORK?: Network;
 }
-
