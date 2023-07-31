@@ -31,4 +31,16 @@ interface IStUSD is IERC20Upgradeable {
      * @param data metadata map. value
      */
     function setMetadata(bytes32 key, bytes memory data) external;
+
+    /**
+     * @notice puts stUSD token on pause.
+     * should be called only from permissioned actor
+     */
+    function pause() external;
+
+    /**
+     * @notice puts stUSD token on pause.
+     * should be called only from permissioned actor
+     */
+    function unpause() external;
 }

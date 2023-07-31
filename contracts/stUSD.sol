@@ -6,21 +6,44 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 import "./interfaces/IStUSD.sol";
 import "./access/Blacklistable.sol";
 
+/**
+ * @title stUSD
+ * @author RedDuck Software
+ */
 contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
+    /**
+     * @notice default terms url metadata encoded key
+     */
     bytes32 public constant TERMS_URL_METADATA_KEY = keccak256("urls.terms");
 
+    /**
+     * @notice default description url metadata encoded key
+     */
     bytes32 public constant DESCRIPTION_URL_METADATA_KEY =
         keccak256("urls.description");
 
+    /**
+     * @notice metadata key => metadata value
+     */
     mapping(bytes32 => bytes) public metadata;
 
+    /**
+     * @dev leaving a storage gap for futures updates
+     */
     uint256[50] private __gap;
 
+    /**
+     * @notice upgradeable patter contract`s initializer
+     * @param _accessControl address of MidasAccessControll contract
+     */
     function initialize(address _accessControl) external initializer {
         __Blacklistable_init(_accessControl);
         __ERC20_init("stUSD", "stUSD");
     }
 
+    /**
+     * @inheritdoc IStUSD
+     */
     function mint(
         address to,
         uint256 amount
@@ -28,6 +51,9 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
         _mint(to, amount);
     }
 
+    /**
+     * @inheritdoc IStUSD
+     */
     function burn(
         address from,
         uint256 amount
@@ -35,17 +61,31 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
         _burn(from, amount);
     }
 
-    function pause() external onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender) {
+    /**
+     * @inheritdoc IStUSD
+     */
+    function pause()
+        external
+        override
+        onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender)
+    {
         _pause();
     }
 
+    /**
+     * @inheritdoc IStUSD
+     */
     function unpause()
         external
+        override
         onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender)
     {
         _unpause();
     }
 
+    /**
+     * @inheritdoc IStUSD
+     */
     function setMetadata(
         bytes32 key,
         bytes memory data
@@ -53,6 +93,10 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
         metadata[key] = data;
     }
 
+    /**
+     * @dev overrrides _beforeTokenTransfer function to ban
+     * blaclisted users from using the token functions
+     */
     function _beforeTokenTransfer(
         address from,
         address to,
