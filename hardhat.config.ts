@@ -4,8 +4,8 @@ import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
 import 'hardhat-contract-sizer';
 import 'hardhat-deploy';
-import 'hardhat-docgen';
-
+// import 'hardhat-docgen';
+import 'solidity-docgen';
 import './tasks';
 
 import {
@@ -61,9 +61,11 @@ const config: HardhatUserConfig = {
     deployments: 'deployments/',
   },
   docgen: {
-    path: './docgen',
-    clear: true,
-    runOnCompile: false,
+    outputDir: './docgen',
+    pages: 'single',
+    // path: './docgen',
+    // clear: true,
+    // runOnCompile: false,
   },
   external: FORKING_NETWORK
     ? {

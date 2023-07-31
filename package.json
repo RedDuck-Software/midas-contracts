@@ -8,6 +8,7 @@
     "prepare": "husky install",
     "hardhat": "hardhat",
     "clean": "hardhat clean",
+    "docgen": "hardhat run docgen",
     "compile": "hardhat compile",
     "build": "run-s clean compile",
     "test": "hardhat test",
@@ -73,6 +74,7 @@
     "prettier-plugin-solidity": "^1.0.0-beta.24",
     "solhint": "^3.3.7",
     "solidity-coverage": "^0.8.2",
+    "solidity-docgen": "^0.6.0-beta.35",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
     "typescript": "^4.8.4"
