@@ -73,13 +73,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @notice creates a stUSD redemption request.
-     * its a first step of stUSD redemption process
+     * @inheritdoc IRedemptionVault
      * @dev burns 'amountStUsdIn' amount from user
      * and saves redemption request to the storage
-     * @param tokenOut stable coin token address to redeem to
-     * @param amountStUsdIn amount of stUSD to redeem
-     * @return requestId id of created request
      */
     function initiateRedemptionRequest(
         address tokenOut,
@@ -113,13 +109,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @notice fulfills redemption request by a given `requestId`.
-     * can be called only from permissioned actor
+     * @inheritdoc IRedemptionVault
      * @dev deletes request by a given `requestId` from storage,
      * transfers `amountUsdOut` to user. USD token balance of the vault
      * should be sufficient to make the transfer
-     * @param requestId id of a redemption request
-     * @param amountUsdOut amount of USD token to transfer to user
      */
     function fulfillRedemptionRequest(
         uint256 requestId,
@@ -130,11 +123,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @notice cancels redemption request by a given `requestId`.
-     * can be called only from permissioned actor
+     * @inheritdoc IRedemptionVault
      * @dev deletes request by a given `requestId` from storage
      * and fires the event
-     * @param requestId id of a redemption request
      */
     function cancelRedemptionRequest(
         uint256 requestId
@@ -146,12 +137,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @notice burns stUSD and transfers `tokenOut` to the user.
-     * can be called only from permissioned actor
+     * @inheritdoc IRedemptionVault
      * @dev `tokenOut` amount is calculated using ETF data feed answer
-     * @param user address of user
-     * @param tokenOut address of output USD token
-     * @param amountStUsdIn amount of stUSD to redeem
      */
     function manuallyRedeem(
         address user,
@@ -164,12 +151,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @notice burns stUSD and transfers `amountUsdOut` of `tokenOut` to the user.
-     * can be called only from permissioned actor
-     * @param user address of user
-     * @param tokenOut address of output USD token
-     * @param amountStUsdIn amount of stUSD to redeem
-     * @param amountUsdOut amount of USD token to send to user
+     * @inheritdoc IRedemptionVault
      */
     function manuallyRedeem(
         address user,
@@ -182,9 +164,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @notice updates `minUsdAmountToRedeem` storage value.
-     * can be called only from permissioned actor
-     * @param newValue new value of `minUsdAmountToRedeem`
+     * @inheritdoc IRedemptionVault
      */
     function setMinAmountToRedeem(uint256 newValue) external {
         minUsdAmountToRedeem = newValue;
@@ -192,6 +172,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
+     * @inheritdoc IManageableVault
      * @notice returns output USD amount from a given stUSD amount
      * @return amountOut output USD amount
      */
@@ -202,6 +183,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
+     * @inheritdoc IManageableVault
      * @notice returns redemption fee
      * @dev fee applies to output USD amount
      * @return fee USD fee
@@ -217,7 +199,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     function vaultRole() public pure override returns (bytes32) {
         return REDEMPTION_VAULT_ADMIN_ROLE;
     }
-    
+
     /**
      * @dev checks that request is exists and copies it to memory
      * @return request request object
