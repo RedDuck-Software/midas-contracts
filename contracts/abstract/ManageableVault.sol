@@ -55,6 +55,9 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
      */
     uint256 internal _fee;
 
+    /**
+     * @dev checks that msg.sender do have a vaultRole() role
+     */
     modifier onlyVaultAdmin() {
         _onlyRole(vaultRole(), msg.sender);
         _;
@@ -93,10 +96,8 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
     }
 
     /**
-     * @notice adds a token to `_paymentTokens`.
-     * can be called only from permissioned actor.
+     * @inheritdoc IManageableVault
      * @dev reverts if token is already added
-     * @param token token address
      */
     function addPaymentToken(address token) external onlyVaultAdmin {
         require(token != address(0), "MV: invalid token");
@@ -105,10 +106,8 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
     }
 
     /**
-     * @notice removes a token from `_paymentTokens`.
-     * can be called only from permissioned actor.
+     * @inheritdoc IManageableVault
      * @dev reverts if token is not presented
-     * @param token token address
      */
     function removePaymentToken(address token) external onlyVaultAdmin {
         require(_paymentTokens.remove(token), "MV: not exists");
@@ -116,9 +115,7 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
     }
 
     /**
-     * @notice sets new `_fee` value
-     * can be called only from permissioned actor.
-     * @param newFee token address
+     * @inheritdoc IManageableVault
      */
     function setFee(uint256 newFee) external onlyVaultAdmin {
         _fee = newFee;

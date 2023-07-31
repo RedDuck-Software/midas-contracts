@@ -17,7 +17,8 @@ import "./access/Greenlistable.sol";
 import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
- * @title Smart contract that handles stUSD redemptions
+ * @title RedemptionVault
+ * @notice Smart contract that handles stUSD redemptions
  * @author RedDuck Software
  */
 contract RedemptionVault is ManageableVault, IRedemptionVault {
