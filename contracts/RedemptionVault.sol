@@ -18,7 +18,7 @@ import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
  * @title Smart contract that handles stUSD redemptions
- * @author Redduck Software
+ * @author RedDuck Software
  */
 contract RedemptionVault is ManageableVault, IRedemptionVault {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -193,8 +193,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @notice AC role of vault administrator
-     * @return role bytes32 role
+     * @inheritdoc ManageableVault
      */
     function vaultRole() public pure override returns (bytes32) {
         return REDEMPTION_VAULT_ADMIN_ROLE;
