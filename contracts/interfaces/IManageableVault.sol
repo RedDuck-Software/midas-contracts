@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+/**
+ * @title IManageableVault
+ * @author RedDuck Software
+ */
 interface IManageableVault {
     event WithdrawToken(
         address indexed caller,

@@ -15,6 +15,10 @@ import "../interfaces/IDataFeed.sol";
  */
 contract DataFeed is WithMidasAccessControl, IDataFeed {
     using DecimalsCorrectionLibrary for uint256;
+
+    /**
+     * @notice AggregatorV3Interface contract address
+     */
     AggregatorV3Interface public aggregator;
 
     /**
@@ -24,9 +28,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     IDataFeed.RecordedDataFetch public _lastRecordedDataFetch;
 
     /**
-     * @notice upgradeable patter contract`s initializer
-     * @param _ac MidasAccessControl contract address
-     * @param _aggregator AggregatorV3Interface contract address
+     * @inheritdoc IDataFeed
      */
     function initialize(address _ac, address _aggregator) external initializer {
         __WithMidasAccessControl_init(_ac);
@@ -34,8 +36,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     }
 
     /**
-     * @notice updates `aggregator` address
-     * @param _aggregator new AggregatorV3Interface contract address
+     * @inheritdoc IDataFeed
      */
     function changeAggregator(
         address _aggregator
@@ -46,8 +47,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     }
 
     /**
-     * @notice saves latest aggregator answer to storage and returns it
-     * @return answer fetched aggregator answer
+     * @inheritdoc IDataFeed
      */
     function fetchDataInBase18() external returns (uint256 answer) {
         (uint80 roundId, uint256 _answer) = _getDataInBase18();
@@ -61,17 +61,14 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     }
 
     /**
-     * @notice fetches answer from aggregator
-     * and converts it to the base18 precision
-     * @return answer fetched aggregator answer
+     * @inheritdoc IDataFeed
      */
     function getDataInBase18() external view returns (uint256 answer) {
         (, answer) = _getDataInBase18();
     }
 
     /**
-     * @notice returns last data saved via fetchDataInBase18()
-     * @return answer stored fetch object
+     * @inheritdoc IDataFeed
      */
     function lastRecordedDataFetch()
         external

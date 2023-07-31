@@ -3,6 +3,10 @@ pragma solidity ^0.8.0;
 
 import "./IManageableVault.sol";
 
+/**
+ * @title IRedemptionVault
+ * @author RedDuck Software
+ */
 interface IRedemptionVault is IManageableVault {
     event InitiateRedeemptionRequest(
         uint256 indexed requestId,
