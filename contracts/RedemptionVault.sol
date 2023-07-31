@@ -16,6 +16,10 @@ import "./abstract/ManageableVault.sol";
 import "./access/Greenlistable.sol";
 import "./libraries/DecimalsCorrectionLibrary.sol";
 
+/**
+ * @title Smart contract that handles stUSD redemptions
+ * @author Redduck Software
+ */
 contract RedemptionVault is ManageableVault, IRedemptionVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
@@ -28,15 +32,36 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         bool exists;
     }
 
+    /**
+     * @dev requestId => RedemptionRequest
+     * @notice stores requests id for redemption requests created by user
+     * deleted when request is fulfilled or cancelled by permissioned actor
+     * */
     mapping(uint256 => RedemptionRequest) public requests;
 
+    /**
+     * @notice counter for request ids
+     */
     uint256 public lastRequestId;
 
+    /**
+     * @notice min. amount of USD that should be redeemed from stUSD
+     * @dev min. amount should be validated only in request initiation
+     */
     uint256 public minUsdAmountToRedeem;
 
-    /// @dev leaving a storage gap for futures updates
+    /**
+     * @dev leaving a storage gap for futures updates
+     */
     uint256[51] private __gap;
 
+    /**
+     * @notice upgradeable patter contract`s initializer
+     * @param _ac address of MidasAccessControll contract
+     * @param _stUSD address of stUSD token
+     * @param _etfDataFeed address of CL`s data feed IB01/USD
+     * @param _minUsdAmountToRedeem init. value for minUsdAmountToRedeem
+     */
     function initialize(
         address _ac,
         address _stUSD,
@@ -47,6 +72,15 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         minUsdAmountToRedeem = _minUsdAmountToRedeem;
     }
 
+    /**
+     * @notice creates a stUSD redemption request.
+     * its a first step of stUSD redemption process
+     * @dev burns 'amountStUsdIn' amount from user
+     * and saves redemption request to the storage
+     * @param tokenOut stable coin token address to redeem to
+     * @param amountStUsdIn amount of stUSD to redeem
+     * @return requestId id of created request
+     */
     function initiateRedemptionRequest(
         address tokenOut,
         uint256 amountStUsdIn
@@ -78,6 +112,15 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         );
     }
 
+    /**
+     * @notice fulfills redemption request by a given `requestId`.
+     * can be called only from permissioned actor
+     * @dev deletes request by a given `requestId` from storage,
+     * transfers `amountUsdOut` to user. USD token balance of the vault
+     * should be sufficient to make the transfer
+     * @param requestId id of a redemption request
+     * @param amountUsdOut amount of USD token to transfer to user
+     */
     function fulfillRedemptionRequest(
         uint256 requestId,
         uint256 amountUsdOut
@@ -86,6 +129,13 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         _fulfillRedemptionRequest(request, requestId, amountUsdOut);
     }
 
+    /**
+     * @notice cancels redemption request by a given `requestId`.
+     * can be called only from permissioned actor
+     * @dev deletes request by a given `requestId` from storage
+     * and fires the event
+     * @param requestId id of a redemption request
+     */
     function cancelRedemptionRequest(
         uint256 requestId
     ) external onlyVaultAdmin {
@@ -95,6 +145,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         emit CancelRedemptionRequest(requestId);
     }
 
+    /**
+     * @notice burns stUSD and transfers `tokenOut` to the user.
+     * can be called only from permissioned actor
+     * @dev `tokenOut` amount is calculated using ETF data feed answer
+     * @param user address of user
+     * @param tokenOut address of output USD token
+     * @param amountStUsdIn amount of stUSD to redeem
+     */
     function manuallyRedeem(
         address user,
         address tokenOut,
@@ -105,6 +163,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
     }
 
+    /**
+     * @notice burns stUSD and transfers `amountUsdOut` of `tokenOut` to the user.
+     * can be called only from permissioned actor
+     * @param user address of user
+     * @param tokenOut address of output USD token
+     * @param amountStUsdIn amount of stUSD to redeem
+     * @param amountUsdOut amount of USD token to send to user
+     */
     function manuallyRedeem(
         address user,
         address tokenOut,
@@ -115,25 +181,47 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
     }
 
+    /**
+     * @notice updates `minUsdAmountToRedeem` storage value.
+     * can be called only from permissioned actor
+     * @param newValue new value of `minUsdAmountToRedeem`
+     */
     function setMinAmountToRedeem(uint256 newValue) external {
         minUsdAmountToRedeem = newValue;
         emit SetMinAmountToRedeem(msg.sender, newValue);
     }
 
+    /**
+     * @notice returns output USD amount from a given stUSD amount
+     * @return amountOut output USD amount
+     */
     function getOutputAmountWithFee(
         uint256 amountIn
     ) external view returns (uint256 amountOut) {
         return _getOutputAmountWithFee(amountIn);
     }
 
+    /**
+     * @notice returns redemption fee
+     * @dev fee applies to output USD amount
+     * @return fee USD fee
+     */
     function getFee() public view returns (uint256) {
         return _fee;
     }
 
+    /**
+     * @notice AC role of vault administrator
+     * @return role bytes32 role
+     */
     function vaultRole() public pure override returns (bytes32) {
         return REDEMPTION_VAULT_ADMIN_ROLE;
     }
-
+    
+    /**
+     * @dev checks that request is exists and copies it to memory
+     * @return request request object
+     */
     function _getRequest(
         uint256 requestId
     ) internal view returns (RedemptionRequest memory request) {
@@ -141,6 +229,13 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         require(request.exists, "RV: r not exists");
     }
 
+    /**
+     * @dev deletes request from storage, transfers USD token to user
+     * and fires the event
+     * @param request request object
+     * @param requestId id of the request object
+     * @param amountUsdOut amount of USD token to transfer to user
+     */
     function _fulfillRedemptionRequest(
         RedemptionRequest memory request,
         uint256 requestId,
@@ -153,6 +248,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         emit FulfillRedeemptionRequest(msg.sender, requestId, amountUsdOut);
     }
 
+    /**
+     * @dev burn `amountStUsdIn` amount of stUSd from `user`
+     * and transfers `amountUsdOut` amount of `tokenOut` to `user`
+     * @param user user address
+     * @param tokenOut address of output USD token
+     * @param amountUsdOut amount of USD token to transfer to `user`
+     * @param amountStUsdIn amount of stUSD token to burn from `user`
+     */
     function _manuallyRedeem(
         address user,
         address tokenOut,
@@ -174,11 +277,19 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         );
     }
 
+    /**
+     * @dev do safe transfer on a given token. Doesnt perform transfer if
+     * token is `MANUAL_FULLFILMENT_TOKEN` as it should be transfered off-chain
+     * @param user user address
+     * @param token address of token
+     * @param amount amount of `token` to transfer to `user`
+     */
     function _transferToken(
         address user,
         address token,
         uint256 amount
     ) internal {
+        // MANUAL_FULLFILMENT_TOKEN should be transfered off-chain to user`s bank account
         if (token == MANUAL_FULLFILMENT_TOKEN) return;
 
         IERC20(token).safeTransfer(
@@ -187,6 +298,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         );
     }
 
+    /**
+     * @dev calculates output USD amount based on ETF data feed answer
+     * @param amountStUsdIn amount of stUSD token
+     * @return amountUsdOut amount with fee of output USD token
+     */
     function _getOutputAmountWithFee(
         uint256 amountStUsdIn
     ) internal view returns (uint256) {
@@ -201,10 +317,18 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));
     }
 
+    /**
+     * @dev validates that provided `amount` is >= `minUsdAmountToRedeem`
+     * @param amount amount of USD token
+     */
     function _validateAmountUsdOut(uint256 amount) internal view {
         require(amount >= minUsdAmountToRedeem, "RV: amount < min");
     }
 
+    /**
+     * @dev checks that provided `token` is supported by the vault
+     * @param token token address
+     */
     function _requireTokenExists(address token) internal view override {
         if (token == MANUAL_FULLFILMENT_TOKEN) return;
         super._requireTokenExists(token);
