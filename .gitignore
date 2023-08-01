@@ -16,7 +16,7 @@ artifacts
 yarn-error.log
 
 # Docgen
-docgen
+# docgen
 
 deployments/localhost
 deployments/hardhat
