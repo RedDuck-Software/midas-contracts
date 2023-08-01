@@ -68,3 +68,15 @@ Administrator may also decide to cancel the redemption request. In this case, bu
 The whole redemption process can be made by vault administrator for any user, that owns stUSD tokens. This action is basically a wrapper of the stUSD's burn function, made for easier off-chain events listening
 
 Redemption Vault can have a fee on stUSD burning. Because the output USD amount currently determined off-chain by the vault administrator, the value that stores in the contract currently is not used for the resulting USD output amount.
+
+
+## Smart contract addresses
+
+|Contract Name|Sepolia|Mainnet| 
+|-|-|-|
+|**stUSD**|`0xe8eb39bE793b2ebf9116Cb43a2f34b43DF20D879`|-|
+|**MidasAccessControl**|`0xE3ec78422DC778AC081d410BCf96f01CAd18be4e`|-|
+|**DataFeed IB01/USD**|`0x3e0F40FC4750C3793C89E848E60cdAA6b4D7E545`|-|
+|**DataFeed EUR/USD**|`0xE23c07Ecad6D822500CbE8306d72A90578CA9F11`|-|
+|**DepositVault**|`0x45A1392c1086B36e2c4c40bB5A4bbbb86415e8D7`|-|
+|**RedemptionVault**|`0x0d38dA23a47c36A41fa1BB32A048c43d368600F7`|-|
