@@ -14,6 +14,46 @@ This repository contains all smart contracts related to the [midas.app](https://
 - [tasks/](./tasks/) - hardhat tasks. Currently contains calldata generator scripts
 - [test/](./test/) - smart contracts tests
 
+## How to run?
+
+First, install the dependencies using `yarn`
+
+```
+yarn install
+```
+
+To build smart contracts, execute
+
+```
+yarn build
+```
+
+To run tests, execute
+
+```
+yarn test
+```
+
+To run test`s coverage, execute
+
+```
+yarn coverage
+```
+
+To use Slither analyzer, first install it. [Link](https://github.com/crytic/slither)
+
+To run the analyzer, execute
+
+```
+yarn slither
+```
+
+
+To generate smart contract`s documentation, execute
+
+```
+yarn docgen
+```
 
 ## Smart contracts API documentation
 
