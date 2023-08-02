@@ -5,15 +5,30 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 
 import "./MidasAccessControlRoles.sol";
 
+/**
+ * @title MidasAccessControl
+ * @notice Smart contract that stores all roles for Midas project
+ * @author RedDuck Software
+ */
 contract MidasAccessControl is
     AccessControlUpgradeable,
     MidasAccessControlRoles
 {
+    /**
+     * @notice upgradeable patter contract`s initializer
+     */
     function initialize() external initializer {
         __AccessControl_init();
         _setupRoles();
     }
 
+    /**
+     * @notice grant multiple roles to multiple users
+     * in one transaction
+     * @dev length`s of 2 arays should match
+     * @param roles array of bytes32 roles
+     * @param addresses array of user addresses
+     */
     function grantRoleMult(
         bytes32[] memory roles,
         address[] memory addresses
@@ -25,6 +40,13 @@ contract MidasAccessControl is
         }
     }
 
+    /**
+     * @notice revoke multiple roles from multiple users
+     * in one transaction
+     * @dev length`s of 2 arays should match
+     * @param roles array of bytes32 roles
+     * @param addresses array of user addresses
+     */
     function revokeRoleMult(
         bytes32[] memory roles,
         address[] memory addresses
@@ -36,6 +58,9 @@ contract MidasAccessControl is
         }
     }
 
+    /**
+     * @dev setup roles during the contracts initialization
+     */
     function _setupRoles() private {
         address admin = msg.sender;
 

@@ -8,25 +8,47 @@ import "../access/WithMidasAccessControl.sol";
 import "../libraries/DecimalsCorrectionLibrary.sol";
 import "../interfaces/IDataFeed.sol";
 
+/**
+ * @title DataFeed
+ * @notice Wrapper of ChainLink`s AggregatorV3 data feeds
+ * @author RedDuck Software
+ */
 contract DataFeed is WithMidasAccessControl, IDataFeed {
     using DecimalsCorrectionLibrary for uint256;
+
+    /**
+     * @notice AggregatorV3Interface contract address
+     */
     AggregatorV3Interface public aggregator;
 
+    /**
+     * @notice checks that a given `account`
+     * have GREENLISTED_ROLE
+     */
     IDataFeed.RecordedDataFetch public _lastRecordedDataFetch;
 
+    /**
+     * @inheritdoc IDataFeed
+     */
     function initialize(address _ac, address _aggregator) external initializer {
         __WithMidasAccessControl_init(_ac);
         aggregator = AggregatorV3Interface(_aggregator);
     }
 
+    /**
+     * @inheritdoc IDataFeed
+     */
     function changeAggregator(
         address _aggregator
     ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
         require(_aggregator != address(0), "DF: invalid address");
-        
-        aggregator = AggregatorV3Interface(_aggregator);
-}
 
+        aggregator = AggregatorV3Interface(_aggregator);
+    }
+
+    /**
+     * @inheritdoc IDataFeed
+     */
     function fetchDataInBase18() external returns (uint256 answer) {
         (uint80 roundId, uint256 _answer) = _getDataInBase18();
         answer = _answer;
@@ -38,10 +60,16 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         );
     }
 
+    /**
+     * @inheritdoc IDataFeed
+     */
     function getDataInBase18() external view returns (uint256 answer) {
         (, answer) = _getDataInBase18();
     }
 
+    /**
+     * @inheritdoc IDataFeed
+     */
     function lastRecordedDataFetch()
         external
         view
@@ -50,6 +78,12 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         return _lastRecordedDataFetch;
     }
 
+    /**
+     * @dev fetches answer from aggregator
+     * and converts it to the base18 precision
+     * @return roundId fetched aggregator answer roundId
+     * @return answer fetched aggregator answer
+     */
     function _getDataInBase18()
         private
         view

@@ -2,7 +2,19 @@
 
 pragma solidity ^0.8.0;
 
+/**
+ * @title DecimalsCorrectionLibrary
+ * @author RedDuck Software
+ */
 library DecimalsCorrectionLibrary {
+    /**
+     * @dev converts `originalAmount` with `originalDecimals` into
+     * amount with `decidedDecimals`
+     * @param originalAmount amount to convert
+     * @param originalDecimals decimals of the original amount
+     * @param decidedDecimals decimals for the output amount
+     * @return amount converted amount with `decidedDecimals`
+     */
     function convert(
         uint256 originalAmount,
         uint256 originalDecimals,
@@ -26,6 +38,13 @@ library DecimalsCorrectionLibrary {
         return adjustedAmount;
     }
 
+    /**
+     * @dev converts `originalAmount` with decimals 18 into
+     * amount with `decidedDecimals`
+     * @param originalAmount amount to convert
+     * @param decidedDecimals decimals for the output amount
+     * @return amount converted amount with `decidedDecimals`
+     */
     function convertFromBase18(
         uint256 originalAmount,
         uint256 decidedDecimals
@@ -33,6 +52,13 @@ library DecimalsCorrectionLibrary {
         return convert(originalAmount, 18, decidedDecimals);
     }
 
+    /**
+     * @dev converts `originalAmount` with `originalDecimals` into
+     * amount with decimals 18
+     * @param originalAmount amount to convert
+     * @param originalDecimals decimals of the original amount
+     * @return amount converted amount with 18 decimals
+     */
     function convertToBase18(
         uint256 originalAmount,
         uint256 originalDecimals
