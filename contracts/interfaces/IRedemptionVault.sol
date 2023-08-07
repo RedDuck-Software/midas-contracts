@@ -17,10 +17,9 @@ interface IRedemptionVault is IManageableVault {
      * @param amountStUsdIn amount of stUSD to redeem
      * @return requestId id of created request
      */
-    function initiateRedemptionRequest(
-        address tokenOut,
-        uint256 amountStUsdIn
-    ) external returns (uint256 requestId);
+    function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn)
+        external
+        returns (uint256 requestId);
 
     /**
      * @notice fulfills redemption request by a given `requestId`.
@@ -28,10 +27,8 @@ interface IRedemptionVault is IManageableVault {
      * @param requestId id of a redemption request
      * @param amountUsdOut amount of USD token to transfer to user
      */
-    function fulfillRedemptionRequest(
-        uint256 requestId,
-        uint256 amountUsdOut
-    ) external;
+    function fulfillRedemptionRequest(uint256 requestId, uint256 amountUsdOut)
+        external;
 
     /**
      * @notice cancels redemption request by a given `requestId`.

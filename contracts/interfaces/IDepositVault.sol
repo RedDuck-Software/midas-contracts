@@ -17,10 +17,9 @@ interface IDepositVault is IManageableVault {
      * @param amountIn amount of `tokenIn` that will be taken from user
      * @return amountOut amount of stUSD that minted to user
      */
-    function initiateDepositRequest(
-        address tokenIn,
-        uint256 amountIn
-    ) external returns (uint256 amountOut);
+    function initiateDepositRequest(address tokenIn, uint256 amountIn)
+        external
+        returns (uint256 amountOut);
 
     /**
      * @notice mints stUSD to a `user` and doesnt transfer USD
@@ -29,10 +28,8 @@ interface IDepositVault is IManageableVault {
      * @param requestId id of a deposit request
      * @param amountStUsdOut amount of stUSD calculated by admin
      */
-    function fulfillDepositRequest(
-        uint256 requestId,
-        uint256 amountStUsdOut
-    ) external;
+    function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut)
+        external;
 
     /**
      * @notice cancels deposit request by a given `requestId`.

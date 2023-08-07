@@ -90,10 +90,11 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev transfers `tokenIn` from msg.sender and mints
      * stUSD according to ETF data feed price
      */
-    function initiateDepositRequest(
-        address tokenIn,
-        uint256 amountUsdIn
-    ) external onlyGreenlisted(msg.sender) returns (uint256) {
+    function initiateDepositRequest(address tokenIn, uint256 amountUsdIn)
+        external
+        onlyGreenlisted(msg.sender)
+        returns (uint256)
+    {
         address user = msg.sender;
 
         uint256 requestId = lastRequestId++;
@@ -104,12 +105,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         totalDeposited[user] += amountUsdIn;
 
-        requests[requestId] = DepositRequest(
-            user,
-            tokenIn,
-            amountUsdIn,
-            true
-        );
+        requests[requestId] = DepositRequest(user, tokenIn, amountUsdIn, true);
 
         emit InitiateRequest(lastRequestId, user, tokenIn, amountUsdIn);
 
@@ -120,7 +116,10 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @inheritdoc IDepositVault
      * @dev mints stUSD according to ETF data feed price
      */
-    function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut) external onlyVaultAdmin {
+    function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut)
+        external
+        onlyVaultAdmin
+    {
         DepositRequest memory request = _getRequest(requestId);
 
         _fullfillDepositRequest(
@@ -136,9 +135,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev deletes request by a given `requestId` from storage
      * and fires the event
      */
-    function cancelDepositRequest(
-        uint256 requestId
-    ) external onlyVaultAdmin {
+    function cancelDepositRequest(uint256 requestId) external onlyVaultAdmin {
         DepositRequest memory request = _getRequest(requestId);
 
         delete requests[requestId];
@@ -188,9 +185,11 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IManageableVault
      */
-    function getOutputAmountWithFee(
-        uint256 amountUsdIn
-    ) external view returns (uint256) {
+    function getOutputAmountWithFee(uint256 amountUsdIn)
+        external
+        view
+        returns (uint256)
+    {
         return _getOutputAmountWithFee(amountUsdIn);
     }
 
@@ -200,7 +199,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function minAmountToDepositInUsd() public view returns (uint256) {
         return
             (minAmountToDepositInEuro * eurUsdDataFeed.getDataInBase18()) /
-            10 ** 18;
+            10**18;
     }
 
     /**
@@ -237,11 +236,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         stUSD.mint(user, amountStUsdOut);
 
-        emit FulfillRequest(
-            msg.sender,
-            requestId,
-            amountStUsdOut
-        );
+        emit FulfillRequest(msg.sender, requestId, amountStUsdOut);
     }
 
     /**
@@ -249,15 +244,17 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param amountUsdIn amount of USD
      * @return outputStUsd amount of stUSD that should be minted to user
      */
-    function _getOutputAmountWithFee(
-        uint256 amountUsdIn
-    ) internal view returns (uint256) {
+    function _getOutputAmountWithFee(uint256 amountUsdIn)
+        internal
+        view
+        returns (uint256)
+    {
         if (amountUsdIn == 0) return 0;
 
         uint256 price = etfDataFeed.getDataInBase18();
         uint256 amountOutWithoutFee = price == 0
             ? 0
-            : (amountUsdIn * (10 ** 18)) / (price);
+            : (amountUsdIn * (10**18)) / (price);
         return
             amountOutWithoutFee -
             ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));
@@ -268,10 +265,10 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param user user address
      * @param amountUsdIn amount of USD
      */
-    function _validateAmountUsdIn(
-        address user,
-        uint256 amountUsdIn
-    ) internal view {
+    function _validateAmountUsdIn(address user, uint256 amountUsdIn)
+        internal
+        view
+    {
         if (totalDeposited[user] != 0) return;
         require(
             amountUsdIn >= minAmountToDepositInUsd(),
@@ -304,9 +301,11 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev checks that request is exists and copies it to memory
      * @return request request object
      */
-    function _getRequest(
-        uint256 requestId
-    ) internal view returns (DepositRequest memory request) {
+    function _getRequest(uint256 requestId)
+        internal
+        view
+        returns (DepositRequest memory request)
+    {
         request = requests[requestId];
         require(request.exists, "RV: r not exists");
     }

@@ -80,9 +80,10 @@ interface IManageableVault {
      * @notice returns output amount from a given amount
      * @return amountOut output amount
      */
-    function getOutputAmountWithFee(
-        uint256 amountIn
-    ) external view returns (uint256 amountOut);
+    function getOutputAmountWithFee(uint256 amountIn)
+        external
+        view
+        returns (uint256 amountOut);
 
     /**
      * @notice returns vault fee
