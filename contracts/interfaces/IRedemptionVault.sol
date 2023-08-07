@@ -8,29 +8,6 @@ import "./IManageableVault.sol";
  * @author RedDuck Software
  */
 interface IRedemptionVault is IManageableVault {
-    event InitiateRedeemptionRequest(
-        uint256 indexed requestId,
-        address indexed user,
-        address indexed tokenOut,
-        uint256 amountStUsdIn
-    );
-
-    event FulfillRedeemptionRequest(
-        address indexed caller,
-        uint256 indexed requestId,
-        uint256 amountUsdOut
-    );
-
-    event CancelRedemptionRequest(uint256 indexed requestId);
-
-    event ManuallyRedeem(
-        address indexed caller,
-        address indexed user,
-        address indexed tokenOut,
-        uint256 amountStUsdIn,
-        uint256 amountUsdOut
-    );
-
     event SetMinAmountToRedeem(address indexed caller, uint256 newValue);
 
     /**

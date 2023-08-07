@@ -88,7 +88,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         address user = msg.sender;
 
-        // // estimate out amount and validate that it`s >= min allowed
+        // estimate out amount and validate that it`s >= min allowed
         _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn));
 
         stUSD.burn(user, amountStUsdIn);
@@ -101,7 +101,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             exists: true
         });
 
-        emit InitiateRedeemptionRequest(
+        emit InitiateRequest(
             requestId,
             user,
             tokenOut,
@@ -134,7 +134,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         RedemptionRequest memory request = _getRequest(requestId);
         delete requests[requestId];
         stUSD.mint(request.user, request.amountStUsdIn);
-        emit CancelRedemptionRequest(requestId);
+        emit CancelRequest(requestId);
     }
 
     /**
@@ -227,7 +227,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         _transferToken(request.user, request.tokenOut, amountUsdOut);
 
-        emit FulfillRedeemptionRequest(msg.sender, requestId, amountUsdOut);
+        emit FulfillRequest(msg.sender, requestId, amountUsdOut);
     }
 
     /**
@@ -250,7 +250,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         stUSD.burn(user, amountStUsdIn);
         _transferToken(user, tokenOut, amountUsdOut);
 
-        emit ManuallyRedeem(
+        emit PerformManualAction(
             msg.sender,
             user,
             tokenOut,

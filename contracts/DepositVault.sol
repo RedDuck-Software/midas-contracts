@@ -26,6 +26,13 @@ contract DepositVault is ManageableVault, IDepositVault {
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
+    struct DepositRequest {
+        address user;
+        address tokenIn;
+        uint256 amountUsdIn;
+        bool exists;
+    }
+
     /**
      * @notice minimal USD deposit amount in EUR
      */
@@ -40,6 +47,18 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @notice depositor address => amount deposited
      */
     mapping(address => uint256) public totalDeposited;
+
+    /**
+     * @dev requestId => DepositRequest
+     * @notice stores requests id for deposit requests created by user
+     * deleted when request is fulfilled or cancelled by permissioned actor
+     * */
+    mapping(uint256 => DepositRequest) public requests;
+
+    /**
+     * @notice last deposit request id
+     */
+    uint256 public lastRequestId;
 
     /**
      * @dev leaving a storage gap for futures updates
@@ -71,57 +90,91 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev transfers `tokenIn` from msg.sender and mints
      * stUSD according to ETF data feed price
      */
-    function deposit(
+    function initiateDepositRequest(
         address tokenIn,
         uint256 amountUsdIn
     ) external onlyGreenlisted(msg.sender) returns (uint256) {
+        address user = msg.sender;
+
+        uint256 requestId = lastRequestId++;
+
         _requireTokenExists(tokenIn);
+        _validateAmountUsdIn(user, amountUsdIn);
         _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
 
-        return
-            _deposit(
-                msg.sender,
-                tokenIn,
-                amountUsdIn,
-                _getOutputAmountWithFee(amountUsdIn),
-                false
-            );
+        totalDeposited[user] += amountUsdIn;
+
+        requests[requestId] = DepositRequest(
+            user,
+            tokenIn,
+            amountUsdIn,
+            true
+        );
+
+        emit InitiateRequest(lastRequestId, user, tokenIn, amountUsdIn);
+
+        return requestId;
     }
 
     /**
      * @inheritdoc IDepositVault
      * @dev mints stUSD according to ETF data feed price
      */
-    function fulfillManualDeposit(
-        address user,
-        uint256 amountUsdIn
-    ) external onlyVaultAdmin returns (uint256) {
-        return
-            _deposit(
-                user,
-                MANUAL_FULLFILMENT_TOKEN,
-                amountUsdIn,
-                _getOutputAmountWithFee(amountUsdIn),
-                true
-            );
+    function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut) external onlyVaultAdmin {
+        DepositRequest memory request = _getRequest(requestId);
+
+        _fullfillDepositRequest(
+            requestId,
+            request.user,
+            request.amountUsdIn,
+            amountStUsdOut
+        );
     }
 
     /**
      * @inheritdoc IDepositVault
-     * @dev mints `amountStUsdOut` of stUSD
+     * @dev deletes request by a given `requestId` from storage
+     * and fires the event
      */
-    function fulfillManualDeposit(
+    function cancelDepositRequest(
+        uint256 requestId
+    ) external onlyVaultAdmin {
+        DepositRequest memory request = _getRequest(requestId);
+
+        delete requests[requestId];
+
+        IERC20(request.tokenIn).safeTransfer(request.user, request.amountUsdIn);
+
+        emit CancelRequest(requestId);
+    }
+
+    /**
+     * @inheritdoc IDepositVault
+     * @dev `tokenIn` amount is calculated using ETF data feed answer
+     */
+    function manuallyDeposit(
         address user,
+        address tokenIn,
+        uint256 amountUsdIn
+    ) external onlyVaultAdmin returns (uint256 amountStUsdOut) {
+        require(amountUsdIn > 0, "RV: 0 amount");
+
+        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn);
+        _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
+    }
+
+    /**
+     * @inheritdoc IDepositVault
+     */
+    function manuallyDeposit(
+        address user,
+        address tokenIn,
         uint256 amountUsdIn,
         uint256 amountStUsdOut
     ) external onlyVaultAdmin {
-        _deposit(
-            user,
-            MANUAL_FULLFILMENT_TOKEN,
-            amountUsdIn,
-            amountStUsdOut,
-            true
-        );
+        require(amountUsdIn > 0 || amountStUsdOut > 0, "RV: invalid amounts");
+
+        _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
     }
 
     /**
@@ -166,40 +219,29 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @notice deposits USD `tokenIn` into vault and mints given `amountStUsdOut amount
+     * @param requestId id of a deposit request
      * @param user user address
-     * @param tokenIn address of USD token in
-     * @param amountUsdIn amount of `tokenIn` that should be takken from user
+     * @param amountUsdIn amount of `tokenIn` that should be taken from user
      * @param amountStUsdOut amount of stUSD that should be minted to user
-     * @param isManuallyFilled is called from fulfillManualDeposit
-     * @return mintedStUsd amount of stUSD that minted to user
      */
-    function _deposit(
+    function _fullfillDepositRequest(
+        uint256 requestId,
         address user,
-        address tokenIn,
         uint256 amountUsdIn,
-        uint256 amountStUsdOut,
-        bool isManuallyFilled
-    ) internal returns (uint256) {
+        uint256 amountStUsdOut
+    ) internal {
         require(amountUsdIn > 0, "DV: invalid amount");
-
-        if (!isManuallyFilled) {
-            _validateAmountUsdIn(user, amountUsdIn);
-            totalDeposited[user] += amountUsdIn;
-        }
-
         require(amountStUsdOut > 0, "DV: invalid amount out");
+
+        delete requests[requestId];
 
         stUSD.mint(user, amountStUsdOut);
 
-        emit Deposit(
-            user,
-            tokenIn,
-            isManuallyFilled,
-            amountUsdIn,
+        emit FulfillRequest(
+            msg.sender,
+            requestId,
             amountStUsdOut
         );
-
-        return amountStUsdOut;
     }
 
     /**
@@ -235,5 +277,37 @@ contract DepositVault is ManageableVault, IDepositVault {
             amountUsdIn >= minAmountToDepositInUsd(),
             "DV: usd amount < min"
         );
+    }
+
+    function _manuallyDeposit(
+        address user,
+        address tokenIn,
+        uint256 amountUsdIn,
+        uint256 amountStUsdOut
+    ) internal {
+        require(user != address(0), "RV: invalid user");
+        _requireTokenExists(tokenIn);
+
+        _tokenTransferFrom(user, tokenIn, amountUsdIn);
+        stUSD.mint(user, amountStUsdOut);
+
+        emit PerformManualAction(
+            msg.sender,
+            user,
+            tokenIn,
+            amountStUsdOut,
+            amountUsdIn
+        );
+    }
+
+    /**
+     * @dev checks that request is exists and copies it to memory
+     * @return request request object
+     */
+    function _getRequest(
+        uint256 requestId
+    ) internal view returns (DepositRequest memory request) {
+        request = requests[requestId];
+        require(request.exists, "RV: r not exists");
     }
 }
