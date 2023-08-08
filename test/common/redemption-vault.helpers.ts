@@ -104,7 +104,7 @@ export const initiateRedemptionRequestTest = async (
   ).to.emit(
     redemptionVault,
     redemptionVault.interface.events[
-      'InitiateRedeemptionRequest(uint256,address,address,uint256)'
+      'InitiateRequest(uint256,address,address,uint256)'
     ].name,
   ).to.not.reverted;
 
@@ -228,7 +228,7 @@ export const fulfillRedemptionRequestTest = (
         await expect(
           redemptionVault
             .connect(sender)
-            ['fulfillRedemptionRequest(uint256,uint256)'](requestId, amountOut),
+            .fulfillRedemptionRequest(requestId, amountOut),
         ).revertedWith(opt?.revertMessage);
         return;
       }
@@ -237,6 +237,7 @@ export const fulfillRedemptionRequestTest = (
 
       let request = await redemptionVault.requests(requestId);
 
+      // eslint-disable-next-line camelcase
       const tokenContract = ERC20__factory.connect(request.tokenOut, owner);
       const isManualFillToken =
         request.tokenOut === ethers.constants.AddressZero;
@@ -256,11 +257,11 @@ export const fulfillRedemptionRequestTest = (
       await expect(
         redemptionVault
           .connect(sender)
-          ['fulfillRedemptionRequest(uint256,uint256)'](requestId, amountOut),
+          .fulfillRedemptionRequest(requestId, amountOut),
       ).to.emit(
         redemptionVault,
         redemptionVault.interface.events[
-          'FulfillRedeemptionRequest(address,uint256,uint256)'
+          'FulfillRequest(address,uint256,uint256)'
         ].name,
       ).to.not.reverted;
 
@@ -321,7 +322,7 @@ export const cancelRedemptionRequestTest = async (
     redemptionVault.connect(sender).cancelRedemptionRequest(requestId),
   ).to.emit(
     redemptionVault,
-    redemptionVault.interface.events['CancelRedemptionRequest(uint256)'].name,
+    redemptionVault.interface.events['CancelRequest(uint256)'].name,
   ).to.not.reverted;
 
   const request = await redemptionVault.requests(requestId);
@@ -357,6 +358,7 @@ export const manualRedeemTest = (
       tokenOut = getAccount(tokenOut);
       const amountIn = parseUnits(amountStUsdIn.toString());
 
+      // eslint-disable-next-line camelcase
       const token = ERC20__factory.connect(tokenOut, owner);
 
       if (opt?.revertMessage) {
@@ -383,11 +385,13 @@ export const manualRedeemTest = (
 
       const supplyBefore = await stUSD.totalSupply();
 
+      // eslint-disable-next-line camelcase
       const dataFeed = DataFeed__factory.connect(
         await redemptionVault.etfDataFeed(),
         owner,
       );
 
+      // eslint-disable-next-line camelcase
       const aggregator = AggregatorV3Mock__factory.connect(
         await dataFeed.aggregator(),
         owner,
@@ -407,7 +411,7 @@ export const manualRedeemTest = (
       ).to.emit(
         redemptionVault,
         redemptionVault.interface.events[
-          'ManuallyRedeem(address,address,address,uint256,uint256)'
+          'PerformManualAction(address,address,address,uint256,uint256)'
         ].name,
       ).to.not.reverted;
 
@@ -441,6 +445,7 @@ export const manualRedeemTest = (
       const amountIn = parseUnits(amountStUsdIn.toString());
       const amountOut = parseUnits(amountUsdOut.toString());
 
+      // eslint-disable-next-line camelcase
       const token = ERC20__factory.connect(tokenOut, owner);
 
       if (opt?.revertMessage) {
@@ -480,7 +485,7 @@ export const manualRedeemTest = (
       ).to.emit(
         redemptionVault,
         redemptionVault.interface.events[
-          'ManuallyRedeem(address,address,address,uint256,uint256)'
+          'PerformManualAction(address,address,address,uint256,uint256)'
         ].name,
       ).to.not.reverted;
 

@@ -101,6 +101,8 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         _requireTokenExists(tokenIn);
         _validateAmountUsdIn(user, amountUsdIn);
+        require(amountUsdIn > 0, "DV: invalid amount");
+
         _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
 
         totalDeposited[user] += amountUsdIn;
@@ -154,7 +156,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         address tokenIn,
         uint256 amountUsdIn
     ) external onlyVaultAdmin returns (uint256 amountStUsdOut) {
-        require(amountUsdIn > 0, "RV: 0 amount");
+        require(amountUsdIn > 0, "DV: 0 amount");
 
         amountStUsdOut = _getOutputAmountWithFee(amountUsdIn);
         _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
@@ -169,7 +171,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountUsdIn,
         uint256 amountStUsdOut
     ) external onlyVaultAdmin {
-        require(amountUsdIn > 0 || amountStUsdOut > 0, "RV: invalid amounts");
+        require(amountUsdIn > 0 || amountStUsdOut > 0, "DV: invalid amounts");
 
         _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
     }
@@ -229,9 +231,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountUsdIn,
         uint256 amountStUsdOut
     ) internal {
-        require(amountUsdIn > 0, "DV: invalid amount");
-        require(amountStUsdOut > 0, "DV: invalid amount out");
-
         delete requests[requestId];
 
         stUSD.mint(user, amountStUsdOut);
@@ -282,7 +281,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountUsdIn,
         uint256 amountStUsdOut
     ) internal {
-        require(user != address(0), "RV: invalid user");
+        require(user != address(0), "DV: invalid user");
         _requireTokenExists(tokenIn);
 
         _tokenTransferFrom(user, tokenIn, amountUsdIn);
@@ -307,6 +306,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         returns (DepositRequest memory request)
     {
         request = requests[requestId];
-        require(request.exists, "RV: r not exists");
+        require(request.exists, "DV: r not exists");
     }
 }

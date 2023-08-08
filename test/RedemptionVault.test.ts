@@ -4,21 +4,9 @@ import { assert, expect } from 'chai';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
-import {
-  acErrors,
-  blackList,
-  greenList,
-  unBlackList,
-  unGreenList,
-} from './common/ac.helpers';
-import { approveBase18, mintToken } from './common/common.helpers';
+import { acErrors, greenList } from './common/ac.helpers';
+import { mintToken } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
-import {
-  depositTest,
-  fulfillManualDepositTest,
-  getOutputAmountWithFeeTest,
-  setMinAmountToDepositTest,
-} from './common/deposit-vault.helpers';
 import { defaultDeploy } from './common/fixtures';
 import { addPaymentTokenTest } from './common/manageable-vault.helpers';
 import {
@@ -29,8 +17,6 @@ import {
   manualRedeemTest,
   setMinAmountToRedeemTest,
 } from './common/redemption-vault.helpers';
-
-import { DepositVault, ERC20Mock } from '../typechain-types';
 
 describe('RedemptionVault', function () {
   it('deployment', async () => {
