@@ -16,13 +16,13 @@ contract WithMidasAccessControlTester is WithMidasAccessControl {
         revokeRole(role, account);
     }
 
-    function withOnlyRole(
-        bytes32 role,
-        address account
-    ) external onlyRole(role, account) {}
+    function withOnlyRole(bytes32 role, address account)
+        external
+        onlyRole(role, account)
+    {}
 
-    function withOnlyNotRole(
-        bytes32 role,
-        address account
-    ) external onlyNotRole(role, account) {}
+    function withOnlyNotRole(bytes32 role, address account)
+        external
+        onlyNotRole(role, account)
+    {}
 }

@@ -41,9 +41,10 @@ abstract contract WithMidasAccessControl is
     /**
      * @dev upgradeable patter contract`s initializer
      */
-    function __WithMidasAccessControl_init(
-        address _accessControl
-    ) internal onlyInitializing {
+    function __WithMidasAccessControl_init(address _accessControl)
+        internal
+        onlyInitializing
+    {
         accessControl = MidasAccessControl(_accessControl);
     }
 

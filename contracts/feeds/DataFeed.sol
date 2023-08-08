@@ -38,9 +38,10 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     /**
      * @inheritdoc IDataFeed
      */
-    function changeAggregator(
-        address _aggregator
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    function changeAggregator(address _aggregator)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE, msg.sender)
+    {
         require(_aggregator != address(0), "DF: invalid address");
 
         aggregator = AggregatorV3Interface(_aggregator);

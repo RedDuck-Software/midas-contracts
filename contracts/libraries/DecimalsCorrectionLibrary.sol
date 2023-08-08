@@ -28,11 +28,11 @@ library DecimalsCorrectionLibrary {
         if (originalDecimals > decidedDecimals) {
             adjustedAmount =
                 originalAmount /
-                (10 ** (originalDecimals - decidedDecimals));
+                (10**(originalDecimals - decidedDecimals));
         } else if (originalDecimals < decidedDecimals) {
             adjustedAmount =
                 originalAmount *
-                (10 ** (decidedDecimals - originalDecimals));
+                (10**(decidedDecimals - originalDecimals));
         }
 
         return adjustedAmount;
@@ -45,10 +45,11 @@ library DecimalsCorrectionLibrary {
      * @param decidedDecimals decimals for the output amount
      * @return amount converted amount with `decidedDecimals`
      */
-    function convertFromBase18(
-        uint256 originalAmount,
-        uint256 decidedDecimals
-    ) internal pure returns (uint256) {
+    function convertFromBase18(uint256 originalAmount, uint256 decidedDecimals)
+        internal
+        pure
+        returns (uint256)
+    {
         return convert(originalAmount, 18, decidedDecimals);
     }
 
@@ -59,10 +60,11 @@ library DecimalsCorrectionLibrary {
      * @param originalDecimals decimals of the original amount
      * @return amount converted amount with 18 decimals
      */
-    function convertToBase18(
-        uint256 originalAmount,
-        uint256 originalDecimals
-    ) internal pure returns (uint256) {
+    function convertToBase18(uint256 originalAmount, uint256 originalDecimals)
+        internal
+        pure
+        returns (uint256)
+    {
         return convert(originalAmount, originalDecimals, 18);
     }
 }
