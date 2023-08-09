@@ -31,26 +31,6 @@ abstract contract Greenlistable is WithMidasAccessControl {
     }
 
     /**
-     * @notice adds given `account` to a greenlist
-     */
-    function addToGreenList(address account)
-        external
-        onlyRole(GREENLIST_OPERATOR_ROLE, msg.sender)
-    {
-        accessControl.grantRole(GREENLISTED_ROLE, account);
-    }
-
-    /**
-     * @notice removes given `account` from greenlist
-     */
-    function removeFromGreenList(address account)
-        external
-        onlyRole(GREENLIST_OPERATOR_ROLE, msg.sender)
-    {
-        accessControl.revokeRole(GREENLISTED_ROLE, account);
-    }
-
-    /**
      * @dev checks that a given `account` doesnt
      * have GREENLISTED_ROLE
      */

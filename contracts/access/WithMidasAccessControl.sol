@@ -49,24 +49,6 @@ abstract contract WithMidasAccessControl is
     }
 
     /**
-     * @dev grants `role` to `account` using MidasAccessControl
-     * @param role bytes32 role descriptor
-     * @param account address to grant role to
-     */
-    function grantRole(bytes32 role, address account) internal {
-        accessControl.grantRole(role, account);
-    }
-
-    /**
-     * @dev revokes `role` from `account` using MidasAccessControl
-     * @param role bytes32 role descriptor
-     * @param account address to revoke role from
-     */
-    function revokeRole(bytes32 role, address account) internal {
-        accessControl.revokeRole(role, account);
-    }
-
-    /**
      * @dev checks that given `address` have `role`
      */
     function _onlyRole(bytes32 role, address account) internal view {

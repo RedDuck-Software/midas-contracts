@@ -42,12 +42,18 @@ export const blackList = async (
 
   if (opt?.revertMessage) {
     await expect(
-      blacklistable.connect(opt?.from ?? owner).addToBlackList(account),
+      accessControl
+        .connect(opt?.from ?? owner)
+        .grantRole(await blacklistable.BLACKLISTED_ROLE(), account),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  await expect(blacklistable.connect(owner).addToBlackList(account)).to.emit(
+  await expect(
+    accessControl
+      .connect(opt?.from ?? owner)
+      .grantRole(await blacklistable.BLACKLISTED_ROLE(), account),
+  ).to.emit(
     accessControl,
     accessControl.interface.events['RoleGranted(bytes32,address,address)'].name,
   ).to.not.reverted;
@@ -69,13 +75,17 @@ export const unBlackList = async (
 
   if (opt?.revertMessage) {
     await expect(
-      blacklistable.connect(opt?.from ?? owner).removeFromBlackList(account),
+      accessControl
+        .connect(opt?.from ?? owner)
+        .revokeRole(await blacklistable.BLACKLISTED_ROLE(), account),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   await expect(
-    blacklistable.connect(owner).removeFromBlackList(account),
+    accessControl
+      .connect(opt?.from ?? owner)
+      .revokeRole(await blacklistable.BLACKLISTED_ROLE(), account),
   ).to.emit(
     accessControl,
     accessControl.interface.events['RoleRevoked(bytes32,address,address)'].name,
@@ -98,12 +108,18 @@ export const greenList = async (
 
   if (opt?.revertMessage) {
     await expect(
-      greenlistable.connect(opt?.from ?? owner).addToGreenList(account),
+      accessControl
+        .connect(opt?.from ?? owner)
+        .grantRole(await greenlistable.GREENLISTED_ROLE(), account),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  await expect(greenlistable.connect(owner).addToGreenList(account)).to.emit(
+  await expect(
+    accessControl
+      .connect(opt?.from ?? owner)
+      .grantRole(await greenlistable.GREENLISTED_ROLE(), account),
+  ).to.emit(
     accessControl,
     accessControl.interface.events['RoleGranted(bytes32,address,address)'].name,
   ).to.not.reverted;
@@ -125,13 +141,17 @@ export const unGreenList = async (
 
   if (opt?.revertMessage) {
     await expect(
-      greenlistable.connect(opt?.from ?? owner).removeFromGreenList(account),
+      accessControl
+        .connect(opt?.from ?? owner)
+        .revokeRole(await greenlistable.GREENLISTED_ROLE(), account),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   await expect(
-    greenlistable.connect(owner).removeFromGreenList(account),
+    accessControl
+      .connect(opt?.from ?? owner)
+      .revokeRole(await greenlistable.GREENLISTED_ROLE(), account),
   ).to.emit(
     accessControl,
     accessControl.interface.events['RoleRevoked(bytes32,address,address)'].name,

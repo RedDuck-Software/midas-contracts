@@ -1,7 +1,5 @@
-import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { assert, expect } from 'chai';
-import { ethers } from 'hardhat';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { expect } from 'chai';
 
 import { acErrors, blackList, unBlackList } from './common/ac.helpers';
 import { defaultDeploy } from './common/fixtures';
@@ -58,20 +56,15 @@ describe('Blacklistable', function () {
 
   describe('addToBlackList', () => {
     it('should fail: call from user without BLACKLIST_OPERATOR_ROLE role', async () => {
-      const {
-        accessControl,
-        blackListableTester,
-        roles,
-        owner,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { accessControl, blackListableTester, owner, regularAccounts } =
+        await loadFixture(defaultDeploy);
 
       await blackList(
         { blacklistable: blackListableTester, accessControl, owner },
         regularAccounts[0],
         {
           from: regularAccounts[0],
-          revertMessage: acErrors.WMAC_HASNT_ROLE,
+          revertMessage: `AccessControl: account ${regularAccounts[0].address.toLowerCase()} is missing role ${await accessControl.BLACKLIST_OPERATOR_ROLE()}`,
         },
       );
     });
@@ -106,7 +99,7 @@ describe('Blacklistable', function () {
         regularAccounts[0],
         {
           from: regularAccounts[0],
-          revertMessage: acErrors.WMAC_HASNT_ROLE,
+          revertMessage: `AccessControl: account ${regularAccounts[0].address.toLowerCase()} is missing role ${await accessControl.BLACKLIST_OPERATOR_ROLE()}`,
         },
       );
     });

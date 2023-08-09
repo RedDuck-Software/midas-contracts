@@ -31,26 +31,6 @@ abstract contract Blacklistable is WithMidasAccessControl {
     }
 
     /**
-     * @notice adds given `account` to blacklist
-     */
-    function addToBlackList(address account)
-        external
-        onlyRole(BLACKLIST_OPERATOR_ROLE, msg.sender)
-    {
-        accessControl.grantRole(BLACKLISTED_ROLE, account);
-    }
-
-    /**
-     * @notice removes given `account` from blacklist
-     */
-    function removeFromBlackList(address account)
-        external
-        onlyRole(BLACKLIST_OPERATOR_ROLE, msg.sender)
-    {
-        accessControl.revokeRole(BLACKLISTED_ROLE, account);
-    }
-
-    /**
      * @dev checks that a given `account` doesnt
      * have BLACKLISTED_ROLE
      */
