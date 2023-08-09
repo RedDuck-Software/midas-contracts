@@ -699,13 +699,81 @@ describe('DepositVault', function () {
     //   });
     // });
 
-    it('deposit 100 DAI, when price is 5$', async () => {
+    it('fail: is on pause', async () => {
+      const {
+        accessControl,
+        depositVault,
+        owner,
+        stUSD,
+        stableCoins,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+
+      await expect(depositVault.changePauseState(true)).to.emit(
+        depositVault,
+        depositVault.interface.events['ChangeState(bool)'].name,
+      ).to.not.reverted;
+
+      await mintToken(stableCoins.dai, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        depositVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+      );
+      await greenList(
+        { accessControl, greenlistable: depositVault, owner },
+        regularAccounts[0],
+      );
+
+      await initiateDepositRequest(
+        { depositVault, owner, stUSD },
+        stableCoins.dai,
+        100,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'P: is on pause',
+        },
+      );
+    });
+
+    it('is on pause, but admin can use everything', async () => {
+      const { accessControl, depositVault, owner, stUSD, stableCoins } =
+        await loadFixture(defaultDeploy);
+
+      await expect(depositVault.changePauseState(true)).to.emit(
+        depositVault,
+        depositVault.interface.events['ChangeState(bool)'].name,
+      ).to.not.reverted;
+
+      await mintToken(stableCoins.dai, owner, 100);
+      await approveBase18(owner, stableCoins.dai, depositVault, 100);
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+      );
+      await greenList(
+        { accessControl, greenlistable: depositVault, owner },
+        owner,
+      );
+
+      await initiateDepositRequest(
+        { depositVault, owner, stUSD },
+        stableCoins.dai,
+        100,
+      );
+    });
+
+    it('deposit 100 DAI, when price is 5$ with pause then unpause', async () => {
       const {
         owner,
         mockedAggregator,
         depositVault,
         accessControl,
-        regularAccounts,
         stableCoins,
         stUSD,
       } = await loadFixture(defaultDeploy);

@@ -93,6 +93,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function initiateDepositRequest(address tokenIn, uint256 amountUsdIn)
         external
         onlyGreenlisted(msg.sender)
+        pausable
         returns (uint256)
     {
         address user = msg.sender;
@@ -124,12 +125,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     {
         DepositRequest memory request = _getRequest(requestId);
 
-        _fullfillDepositRequest(
-            requestId,
-            request.user,
-            request.amountUsdIn,
-            amountStUsdOut
-        );
+        _fullfillDepositRequest(requestId, request.user, amountStUsdOut);
     }
 
     /**
@@ -222,13 +218,11 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @notice deposits USD `tokenIn` into vault and mints given `amountStUsdOut amount
      * @param requestId id of a deposit request
      * @param user user address
-     * @param amountUsdIn amount of `tokenIn` that should be taken from user
      * @param amountStUsdOut amount of stUSD that should be minted to user
      */
     function _fullfillDepositRequest(
         uint256 requestId,
         address user,
-        uint256 amountUsdIn,
         uint256 amountStUsdOut
     ) internal {
         delete requests[requestId];

@@ -81,6 +81,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn)
         external
         onlyGreenlisted(msg.sender)
+        pausable
         returns (uint256 requestId)
     {
         _requireTokenExists(tokenOut);

@@ -194,6 +194,69 @@ describe('RedemptionVault', function () {
       );
     });
 
+    it('fail: is on pause', async () => {
+      const {
+        owner,
+        redemptionVault,
+        accessControl,
+        regularAccounts,
+        manualFulfillmentToken,
+        stableCoins,
+        stUSD,
+      } = await loadFixture(defaultDeploy);
+      await expect(redemptionVault.changePauseState(true)).to.emit(
+        redemptionVault,
+        redemptionVault.interface.events['ChangeState(bool)'].name,
+      ).to.not.reverted;
+      await greenList(
+        { accessControl, greenlistable: redemptionVault, owner },
+        regularAccounts[0],
+      );
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+      );
+      await mintToken(stUSD, regularAccounts[0].address, 1);
+      await initiateRedemptionRequestTest(
+        { redemptionVault, owner, stUSD },
+        manualFulfillmentToken,
+        1,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'P: is on pause',
+        },
+      );
+    });
+
+    it('is on pause but admin can do everything', async () => {
+      const {
+        owner,
+        redemptionVault,
+        accessControl,
+        manualFulfillmentToken,
+        stableCoins,
+        stUSD,
+      } = await loadFixture(defaultDeploy);
+      await expect(redemptionVault.changePauseState(true)).to.emit(
+        redemptionVault,
+        redemptionVault.interface.events['ChangeState(bool)'].name,
+      ).to.not.reverted;
+      await greenList(
+        { accessControl, greenlistable: redemptionVault, owner },
+        owner,
+      );
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+      );
+      await mintToken(stUSD, owner, 1);
+      await initiateRedemptionRequestTest(
+        { redemptionVault, owner, stUSD },
+        manualFulfillmentToken,
+        1,
+      );
+    });
+
     it('when token out is MANUAL_FULLFILMENT_TOKEN', async () => {
       const {
         owner,
