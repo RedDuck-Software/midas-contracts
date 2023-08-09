@@ -1,31 +1,14 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumber, BigNumberish, Signer } from 'ethers';
-import {
-  defaultAbiCoder,
-  formatUnits,
-  parseUnits,
-  solidityKeccak256,
-} from 'ethers/lib/utils';
-import { ethers } from 'hardhat';
+import { BigNumberish } from 'ethers';
+
+import { Account, OptionalCommonParams, getAccount } from './common.helpers';
 
 import {
-  Account,
-  OptionalCommonParams,
-  balanceOfBase18,
-  getAccount,
-  tokenAmountToBase18,
-} from './common.helpers';
-import { getRoundData, setRoundData } from './data-feed.helpers';
-import { defaultDeploy } from './fixtures';
-
-import {
-  AggregatorV3Mock__factory,
-  DataFeed__factory,
   DepositVault,
   ERC20,
+  // eslint-disable-next-line camelcase
   ERC20__factory,
-  ManageableVault,
   RedemptionVault,
 } from '../../typechain-types';
 
@@ -93,6 +76,7 @@ export const withdrawTest = async (
   withdrawTo = getAccount(withdrawTo);
   token = getAccount(token);
 
+  // eslint-disable-next-line camelcase
   const tokenContract = ERC20__factory.connect(token, owner);
 
   if (opt?.revertMessage) {

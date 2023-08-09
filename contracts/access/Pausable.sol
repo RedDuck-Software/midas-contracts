@@ -19,6 +19,7 @@ abstract contract Pausable is WithMidasAccessControl, IPausable {
         _;
     }
 
+    // solhint-disable func-name-mixedcase
     function __Pausable_init(address _accessControl) internal onlyInitializing {
         __WithMidasAccessControl_init(_accessControl);
     }

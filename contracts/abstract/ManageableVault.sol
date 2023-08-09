@@ -70,6 +70,7 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
      * @param _stUSD address of stUSD token
      * @param _etfDataFeed address of CL`s data feed IB01/USD
      */
+    // solhint-disable func-name-mixedcase
     function __ManageableVault_init(
         address _ac,
         address _stUSD,

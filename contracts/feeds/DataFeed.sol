@@ -25,7 +25,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
      * @notice checks that a given `account`
      * have GREENLISTED_ROLE
      */
-    IDataFeed.RecordedDataFetch public _lastRecordedDataFetch;
+    IDataFeed.RecordedDataFetch private _lastRecordedDataFetch;
 
     /**
      * @inheritdoc IDataFeed

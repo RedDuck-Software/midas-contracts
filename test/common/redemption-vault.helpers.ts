@@ -1,12 +1,6 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumber, BigNumberish, Signer } from 'ethers';
-import {
-  defaultAbiCoder,
-  formatUnits,
-  parseUnits,
-  solidityKeccak256,
-} from 'ethers/lib/utils';
+import { BigNumberish, Signer } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 import {
@@ -14,19 +8,18 @@ import {
   OptionalCommonParams,
   balanceOfBase18,
   getAccount,
-  tokenAmountToBase18,
 } from './common.helpers';
 import { getRoundData, setRoundData } from './data-feed.helpers';
 import { defaultDeploy } from './fixtures';
 
 import {
+  // eslint-disable-next-line camelcase
   AggregatorV3Mock__factory,
+  // eslint-disable-next-line camelcase
   DataFeed__factory,
-  DepositVault,
   ERC20,
+  // eslint-disable-next-line camelcase
   ERC20__factory,
-  ManageableVault,
-  RedemptionVault,
 } from '../../typechain-types';
 
 type CommonParams = Pick<

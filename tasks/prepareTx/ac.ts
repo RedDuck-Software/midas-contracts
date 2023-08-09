@@ -9,8 +9,11 @@ import { MIDAS_AC_DEPLOY_TAG } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getAc = async (hre: HardhatRuntimeEnvironment) => {
-  const addresses = getCurrentAddresses(hre)
-  return await hre.ethers.getContractAt('MidasAccessControl', addresses?.accessControl ?? '');
+  const addresses = getCurrentAddresses(hre);
+  return await hre.ethers.getContractAt(
+    'MidasAccessControl',
+    addresses?.accessControl ?? '',
+  );
 };
 
 task('prepareTx:ac:grantRoleMult')

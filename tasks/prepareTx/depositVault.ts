@@ -8,8 +8,11 @@ import { DEPOSIT_VAULT_DEPLOY_TAG } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getDepositVault = async (hre: HardhatRuntimeEnvironment) => {
-  const addresses = getCurrentAddresses(hre)
-  return await hre.ethers.getContractAt('DepositVault', addresses?.depositVault ?? '');
+  const addresses = getCurrentAddresses(hre);
+  return await hre.ethers.getContractAt(
+    'DepositVault',
+    addresses?.depositVault ?? '',
+  );
 };
 
 task('prepareTx:depositVault:fulfillManualDeposit(address,uin256)')

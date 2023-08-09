@@ -10,6 +10,7 @@ import "./access/Blacklistable.sol";
  * @title stUSD
  * @author RedDuck Software
  */
+//solhint-disable contract-name-camelcase
 contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     /**
      * @notice default terms url metadata encoded key

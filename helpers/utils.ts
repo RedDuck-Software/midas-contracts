@@ -13,7 +13,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import fs from 'fs';
 
 export function delay(ms: number) {
-  return new Promise( resolve => setTimeout(resolve, ms) );
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export const getImplAddressFromProxy = async (

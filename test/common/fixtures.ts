@@ -23,6 +23,7 @@ import {
   GreenlistableTester__factory,
   // eslint-disable-next-line camelcase
   MidasAccessControl__factory,
+  // eslint-disable-next-line camelcase
   PausableTester__factory,
   // eslint-disable-next-line camelcase
   RedemptionVault__factory,

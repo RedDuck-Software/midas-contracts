@@ -6,11 +6,17 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import { postDeploymentTest } from '../../test/common/post-deploy.helpers';
 import {
+  // eslint-disable-next-line camelcase
   AggregatorV3Interface__factory,
+  // eslint-disable-next-line camelcase
   DataFeed__factory,
+  // eslint-disable-next-line camelcase
   DepositVault__factory,
+  // eslint-disable-next-line camelcase
   MidasAccessControl__factory,
+  // eslint-disable-next-line camelcase
   RedemptionVault__factory,
+  // eslint-disable-next-line camelcase
   StUSD__factory,
 } from '../../typechain-types';
 
@@ -24,32 +30,40 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   if (!addresses) return;
 
+  // eslint-disable-next-line camelcase
   const dataFeedContract = DataFeed__factory.connect(
     addresses.etfDataFeed,
     owner,
   );
+  // eslint-disable-next-line camelcase
   const dataFeedEurContract = DataFeed__factory.connect(
     addresses.eurToUsdFeed,
     owner,
   );
 
   await postDeploymentTest(hre, {
+    // eslint-disable-next-line camelcase
     accessControl: MidasAccessControl__factory.connect(
       addresses.accessControl,
       owner,
     ),
+    // eslint-disable-next-line camelcase
     depositVault: DepositVault__factory.connect(addresses.depositVault, owner),
+    // eslint-disable-next-line camelcase
     redemptionVault: RedemptionVault__factory.connect(
       addresses.redemptionVault,
       owner,
     ),
+    // eslint-disable-next-line camelcase
     stUsd: StUSD__factory.connect(addresses.stUSD, owner),
+    // eslint-disable-next-line camelcase
     aggregator: AggregatorV3Interface__factory.connect(
       await dataFeedContract.aggregator(),
       owner,
     ),
     dataFeed: dataFeedContract,
     dataFeedEur: dataFeedEurContract,
+    // eslint-disable-next-line camelcase
     aggregatorEur: AggregatorV3Interface__factory.connect(
       await dataFeedEurContract.aggregator(),
       owner,
