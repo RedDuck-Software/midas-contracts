@@ -4,21 +4,9 @@ import { assert, expect } from 'chai';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
-import {
-  acErrors,
-  blackList,
-  greenList,
-  unBlackList,
-  unGreenList,
-} from './common/ac.helpers';
-import { approveBase18, mintToken } from './common/common.helpers';
+import { acErrors, greenList } from './common/ac.helpers';
+import { mintToken } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
-import {
-  depositTest,
-  fulfillManualDepositTest,
-  getOutputAmountWithFeeTest,
-  setMinAmountToDepositTest,
-} from './common/deposit-vault.helpers';
 import { defaultDeploy } from './common/fixtures';
 import { addPaymentTokenTest } from './common/manageable-vault.helpers';
 import {
@@ -29,8 +17,6 @@ import {
   manualRedeemTest,
   setMinAmountToRedeemTest,
 } from './common/redemption-vault.helpers';
-
-import { DepositVault, ERC20Mock } from '../typechain-types';
 
 describe('RedemptionVault', function () {
   it('deployment', async () => {
@@ -208,6 +194,69 @@ describe('RedemptionVault', function () {
       );
     });
 
+    it('fail: is on pause', async () => {
+      const {
+        owner,
+        redemptionVault,
+        accessControl,
+        regularAccounts,
+        manualFulfillmentToken,
+        stableCoins,
+        stUSD,
+      } = await loadFixture(defaultDeploy);
+      await expect(redemptionVault.changePauseState(true)).to.emit(
+        redemptionVault,
+        redemptionVault.interface.events['ChangeState(bool)'].name,
+      ).to.not.reverted;
+      await greenList(
+        { accessControl, greenlistable: redemptionVault, owner },
+        regularAccounts[0],
+      );
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+      );
+      await mintToken(stUSD, regularAccounts[0].address, 1);
+      await initiateRedemptionRequestTest(
+        { redemptionVault, owner, stUSD },
+        manualFulfillmentToken,
+        1,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'P: is on pause',
+        },
+      );
+    });
+
+    it('is on pause but admin can do everything', async () => {
+      const {
+        owner,
+        redemptionVault,
+        accessControl,
+        manualFulfillmentToken,
+        stableCoins,
+        stUSD,
+      } = await loadFixture(defaultDeploy);
+      await expect(redemptionVault.changePauseState(true)).to.emit(
+        redemptionVault,
+        redemptionVault.interface.events['ChangeState(bool)'].name,
+      ).to.not.reverted;
+      await greenList(
+        { accessControl, greenlistable: redemptionVault, owner },
+        owner,
+      );
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+      );
+      await mintToken(stUSD, owner, 1);
+      await initiateRedemptionRequestTest(
+        { redemptionVault, owner, stUSD },
+        manualFulfillmentToken,
+        1,
+      );
+    });
+
     it('when token out is MANUAL_FULLFILMENT_TOKEN', async () => {
       const {
         owner,
@@ -379,7 +428,7 @@ describe('RedemptionVault', function () {
           revertMessage: acErrors.WMAC_HASNT_ROLE,
           from: regularAccounts[0],
         },
-      )['fulfillRedemptionRequest(uint256,uint256)'](0, 0);
+      )['fulfillRedemptionRequest(uint256,uint256)'](1, 0);
     });
 
     it('should fail: when request with provided id does`nt exists', async () => {
@@ -396,7 +445,7 @@ describe('RedemptionVault', function () {
         {
           revertMessage: 'RV: r not exists',
         },
-      )['fulfillRedemptionRequest(uint256,uint256)'](0, 0);
+      )['fulfillRedemptionRequest(uint256,uint256)'](1, 0);
     });
 
     it('should fail: when contract has insufficient balance', async () => {
@@ -431,7 +480,7 @@ describe('RedemptionVault', function () {
         {
           revertMessage: 'ERC20: transfer amount exceeds balance',
         },
-      )['fulfillRedemptionRequest(uint256,uint256)'](0, 1);
+      )['fulfillRedemptionRequest(uint256,uint256)'](1, 1);
     });
 
     it('when request is exists and contract has sufficient balance', async () => {
@@ -464,7 +513,7 @@ describe('RedemptionVault', function () {
 
       await fulfillRedemptionRequestTest({ redemptionVault, owner, stUSD })[
         'fulfillRedemptionRequest(uint256,uint256)'
-      ](0, 1);
+      ](1, 1);
     });
 
     it('when request is exists and tokenOut is MANUAL_FULLFILMENT_TOKEN', async () => {
@@ -497,7 +546,7 @@ describe('RedemptionVault', function () {
 
       await fulfillRedemptionRequestTest({ redemptionVault, owner, stUSD })[
         'fulfillRedemptionRequest(uint256,uint256)'
-      ](0, 1);
+      ](1, 1);
     });
   });
 
@@ -553,7 +602,7 @@ describe('RedemptionVault', function () {
         { from: users },
       );
 
-      await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 0);
+      await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 1);
     });
 
     it('when request id is valid and request tokenOut is MANUAL_FULLFILMENT_TOKEN', async () => {
@@ -584,7 +633,7 @@ describe('RedemptionVault', function () {
         { from: users },
       );
 
-      await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 0);
+      await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 1);
     });
   });
 

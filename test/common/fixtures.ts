@@ -9,15 +9,27 @@ import { getAllRoles } from './common.helpers';
 import { initGrantRoles, postDeploymentTest } from './post-deploy.helpers';
 
 import {
+  // eslint-disable-next-line camelcase
   AggregatorV3Mock__factory,
+  // eslint-disable-next-line camelcase
   BlacklistableTester__factory,
+  // eslint-disable-next-line camelcase
   DataFeed__factory,
+  // eslint-disable-next-line camelcase
   DepositVault__factory,
+  // eslint-disable-next-line camelcase
   ERC20Mock__factory,
+  // eslint-disable-next-line camelcase
   GreenlistableTester__factory,
+  // eslint-disable-next-line camelcase
   MidasAccessControl__factory,
+  // eslint-disable-next-line camelcase
+  PausableTester__factory,
+  // eslint-disable-next-line camelcase
   RedemptionVault__factory,
+  // eslint-disable-next-line camelcase
   StUSD__factory,
+  // eslint-disable-next-line camelcase
   WithMidasAccessControlTester__factory,
 } from '../../typechain-types';
 
@@ -98,6 +110,9 @@ export const defaultDeploy = async () => {
   ).deploy();
   await greenListableTester.initialize(accessControl.address);
 
+  const pausableTester = await new PausableTester__factory(owner).deploy();
+  await pausableTester.initialize(accessControl.address);
+
   const roles = await getAllRoles(accessControl);
 
   // role granting main
@@ -140,6 +155,7 @@ export const defaultDeploy = async () => {
     regularAccounts,
     blackListableTester,
     greenListableTester,
+    pausableTester,
     dataFeed,
     mockedAggregator,
     mockedAggregatorDecimals,

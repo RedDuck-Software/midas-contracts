@@ -25,7 +25,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
      * @notice checks that a given `account`
      * have GREENLISTED_ROLE
      */
-    IDataFeed.RecordedDataFetch public _lastRecordedDataFetch;
+    IDataFeed.RecordedDataFetch private _lastRecordedDataFetch;
 
     /**
      * @inheritdoc IDataFeed
@@ -38,9 +38,10 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     /**
      * @inheritdoc IDataFeed
      */
-    function changeAggregator(
-        address _aggregator
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    function changeAggregator(address _aggregator)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE, msg.sender)
+    {
         require(_aggregator != address(0), "DF: invalid address");
 
         aggregator = AggregatorV3Interface(_aggregator);

@@ -8,29 +8,6 @@ import "./IManageableVault.sol";
  * @author RedDuck Software
  */
 interface IRedemptionVault is IManageableVault {
-    event InitiateRedeemptionRequest(
-        uint256 indexed requestId,
-        address indexed user,
-        address indexed tokenOut,
-        uint256 amountStUsdIn
-    );
-
-    event FulfillRedeemptionRequest(
-        address indexed caller,
-        uint256 indexed requestId,
-        uint256 amountUsdOut
-    );
-
-    event CancelRedemptionRequest(uint256 indexed requestId);
-
-    event ManuallyRedeem(
-        address indexed caller,
-        address indexed user,
-        address indexed tokenOut,
-        uint256 amountStUsdIn,
-        uint256 amountUsdOut
-    );
-
     event SetMinAmountToRedeem(address indexed caller, uint256 newValue);
 
     /**
@@ -40,10 +17,9 @@ interface IRedemptionVault is IManageableVault {
      * @param amountStUsdIn amount of stUSD to redeem
      * @return requestId id of created request
      */
-    function initiateRedemptionRequest(
-        address tokenOut,
-        uint256 amountStUsdIn
-    ) external returns (uint256 requestId);
+    function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn)
+        external
+        returns (uint256 requestId);
 
     /**
      * @notice fulfills redemption request by a given `requestId`.
@@ -51,10 +27,8 @@ interface IRedemptionVault is IManageableVault {
      * @param requestId id of a redemption request
      * @param amountUsdOut amount of USD token to transfer to user
      */
-    function fulfillRedemptionRequest(
-        uint256 requestId,
-        uint256 amountUsdOut
-    ) external;
+    function fulfillRedemptionRequest(uint256 requestId, uint256 amountUsdOut)
+        external;
 
     /**
      * @notice cancels redemption request by a given `requestId`.

@@ -14,12 +14,13 @@ import "../interfaces/IDataFeed.sol";
 import "../access/Greenlistable.sol";
 
 import "../libraries/DecimalsCorrectionLibrary.sol";
+import "../access/Pausable.sol";
 
 /**
  * @title Contract with base Vault methods
  * @author RedDuck Software
  */
-abstract contract ManageableVault is Greenlistable, IManageableVault {
+abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
@@ -69,6 +70,7 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
      * @param _stUSD address of stUSD token
      * @param _etfDataFeed address of CL`s data feed IB01/USD
      */
+    // solhint-disable func-name-mixedcase
     function __ManageableVault_init(
         address _ac,
         address _stUSD,
@@ -77,6 +79,7 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
         stUSD = IStUSD(_stUSD);
         etfDataFeed = IDataFeed(_etfDataFeed);
         __Greenlistable_init(_ac);
+        __Pausable_init(_ac);
     }
 
     /**
@@ -136,6 +139,10 @@ abstract contract ManageableVault is Greenlistable, IManageableVault {
      * @return role bytes32 role
      */
     function vaultRole() public view virtual returns (bytes32);
+
+    function pauseAdminRole() public view override returns (bytes32) {
+        return vaultRole();
+    }
 
     /**
      * @dev do safe transfer from on a given token

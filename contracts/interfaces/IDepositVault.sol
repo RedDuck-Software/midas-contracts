@@ -8,51 +8,60 @@ import "./IManageableVault.sol";
  * @author RedDuck Software
  */
 interface IDepositVault is IManageableVault {
-    event Deposit(
-        address indexed user,
-        address indexed tokenIn,
-        bool indexed isManuallyFilled,
-        uint256 amountUsdIn,
-        uint256 amountStUsdOut
-    );
-
     event SetMinAmountToDeposit(address indexed caller, uint256 newValue);
 
     /**
      * @notice deposits USD token into vault and mints
      * stUSD using the DataFeed price
      * @param tokenIn address of USD token in
-     * @param amountIn amount of `tokenIn` that will be takken from user
+     * @param amountIn amount of `tokenIn` that will be taken from user
      * @return amountOut amount of stUSD that minted to user
      */
-    function deposit(
+    function initiateDepositRequest(address tokenIn, uint256 amountIn)
+        external
+        returns (uint256 amountOut);
+
+    /**
+     * @notice mints stUSD to a `user` and doesnt transfer USD
+     * from a `user`.
+     * can be called only from permissioned actor.
+     * @param requestId id of a deposit request
+     * @param amountStUsdOut amount of stUSD calculated by admin
+     */
+    function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut)
+        external;
+
+    /**
+     * @notice cancels deposit request by a given `requestId`.
+     * can be called only from permissioned actor
+     * @param requestId id of a deposit request
+     */
+    function cancelDepositRequest(uint256 requestId) external;
+
+    /**
+     * @notice mints stUSD to user.
+     * can be called only from permissioned actor
+     * @param user address of user
+     * @param tokenIn address of input USD token
+     * @param amountUsdIn amount of stUSD to send to user
+     */
+    function manuallyDeposit(
+        address user,
         address tokenIn,
-        uint256 amountIn
-    ) external returns (uint256 amountOut);
-
-    /**
-     * @notice mints stUSD to a `user` and doesnt transfer USD
-     * from a `user`.
-     * can be called only from permissioned actor.
-     * @param user address of user to mint stUSD to
-     * @param amountUsdIn amount of USD provided by user
-     * @return amountStUsdOut amount stUSD that minted to user
-     */
-    function fulfillManualDeposit(
-        address user,
         uint256 amountUsdIn
-    ) external returns (uint256 amountStUsdOut);
+    ) external returns (uint256 amountUsdOut);
 
     /**
-     * @notice mints stUSD to a `user` and doesnt transfer USD
-     * from a `user`.
-     * can be called only from permissioned actor.
-     * @param user address of user to mint stUSD to
-     * @param amountUsdIn address of user to mint stUSD to
-     * @param amountStUsdOut amount of stUSD that should be minted to user
+     * @notice mints stUSD to user.
+     * can be called only from permissioned actor
+     * @param user address of user
+     * @param tokenIn address of inout USD token
+     * @param amountUsdIn amount of USD to deposit
+     * @param amountStUsdOut amount of stUSD token to send to user
      */
-    function fulfillManualDeposit(
+    function manuallyDeposit(
         address user,
+        address tokenIn,
         uint256 amountUsdIn,
         uint256 amountStUsdOut
     ) external;

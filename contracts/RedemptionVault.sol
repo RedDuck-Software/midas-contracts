@@ -7,6 +7,8 @@ import {IERC20MetadataUpgradeable as IERC20Metadata} from "@openzeppelin/contrac
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+
 import "./interfaces/IRedemptionVault.sol";
 import "./interfaces/IStUSD.sol";
 import "./interfaces/IDataFeed.sol";
@@ -25,6 +27,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
+    using Counters for Counters.Counter;
 
     struct RedemptionRequest {
         address user;
@@ -43,7 +46,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @notice counter for request ids
      */
-    uint256 public lastRequestId;
+    Counters.Counter public lastRequestId;
 
     /**
      * @notice min. amount of USD that should be redeemed from stUSD
@@ -78,22 +81,25 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @dev burns 'amountStUsdIn' amount from user
      * and saves redemption request to the storage
      */
-    function initiateRedemptionRequest(
-        address tokenOut,
-        uint256 amountStUsdIn
-    ) external onlyGreenlisted(msg.sender) returns (uint256 requestId) {
+    function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn)
+        external
+        onlyGreenlisted(msg.sender)
+        pausable
+        returns (uint256 requestId)
+    {
         _requireTokenExists(tokenOut);
 
         require(amountStUsdIn > 0, "RV: 0 amount");
 
         address user = msg.sender;
 
-        // // estimate out amount and validate that it`s >= min allowed
+        // estimate out amount and validate that it`s >= min allowed
         _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn));
 
         stUSD.burn(user, amountStUsdIn);
 
-        requestId = lastRequestId++;
+        lastRequestId.increment();
+        requestId = lastRequestId._value;
         requests[requestId] = RedemptionRequest({
             user: user,
             tokenOut: tokenOut,
@@ -101,12 +107,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             exists: true
         });
 
-        emit InitiateRedeemptionRequest(
-            requestId,
-            user,
-            tokenOut,
-            amountStUsdIn
-        );
+        emit InitiateRequest(requestId, user, tokenOut, amountStUsdIn);
     }
 
     /**
@@ -115,10 +116,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * transfers `amountUsdOut` to user. USD token balance of the vault
      * should be sufficient to make the transfer
      */
-    function fulfillRedemptionRequest(
-        uint256 requestId,
-        uint256 amountUsdOut
-    ) external onlyVaultAdmin {
+    function fulfillRedemptionRequest(uint256 requestId, uint256 amountUsdOut)
+        external
+        onlyVaultAdmin
+    {
         RedemptionRequest memory request = _getRequest(requestId);
         _fulfillRedemptionRequest(request, requestId, amountUsdOut);
     }
@@ -128,13 +129,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @dev deletes request by a given `requestId` from storage
      * and fires the event
      */
-    function cancelRedemptionRequest(
-        uint256 requestId
-    ) external onlyVaultAdmin {
+    function cancelRedemptionRequest(uint256 requestId)
+        external
+        onlyVaultAdmin
+    {
         RedemptionRequest memory request = _getRequest(requestId);
         delete requests[requestId];
         stUSD.mint(request.user, request.amountStUsdIn);
-        emit CancelRedemptionRequest(requestId);
+        emit CancelRequest(requestId);
     }
 
     /**
@@ -177,9 +179,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @notice returns output USD amount from a given stUSD amount
      * @return amountOut output USD amount
      */
-    function getOutputAmountWithFee(
-        uint256 amountIn
-    ) external view returns (uint256 amountOut) {
+    function getOutputAmountWithFee(uint256 amountIn)
+        external
+        view
+        returns (uint256 amountOut)
+    {
         return _getOutputAmountWithFee(amountIn);
     }
 
@@ -204,9 +208,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @dev checks that request is exists and copies it to memory
      * @return request request object
      */
-    function _getRequest(
-        uint256 requestId
-    ) internal view returns (RedemptionRequest memory request) {
+    function _getRequest(uint256 requestId)
+        internal
+        view
+        returns (RedemptionRequest memory request)
+    {
         request = requests[requestId];
         require(request.exists, "RV: r not exists");
     }
@@ -227,7 +233,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         _transferToken(request.user, request.tokenOut, amountUsdOut);
 
-        emit FulfillRedeemptionRequest(msg.sender, requestId, amountUsdOut);
+        emit FulfillRequest(msg.sender, requestId, amountUsdOut);
     }
 
     /**
@@ -250,7 +256,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         stUSD.burn(user, amountStUsdIn);
         _transferToken(user, tokenOut, amountUsdOut);
 
-        emit ManuallyRedeem(
+        emit PerformManualAction(
             msg.sender,
             user,
             tokenOut,
@@ -285,15 +291,17 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @param amountStUsdIn amount of stUSD token
      * @return amountUsdOut amount with fee of output USD token
      */
-    function _getOutputAmountWithFee(
-        uint256 amountStUsdIn
-    ) internal view returns (uint256) {
+    function _getOutputAmountWithFee(uint256 amountStUsdIn)
+        internal
+        view
+        returns (uint256)
+    {
         if (amountStUsdIn == 0) return 0;
 
         uint256 price = etfDataFeed.getDataInBase18();
         uint256 amountOutWithoutFee = price == 0
             ? 0
-            : (amountStUsdIn * price) / (10 ** 18);
+            : (amountStUsdIn * price) / (10**18);
         return
             amountOutWithoutFee -
             ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));

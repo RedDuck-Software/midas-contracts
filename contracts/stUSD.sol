@@ -10,6 +10,7 @@ import "./access/Blacklistable.sol";
  * @title stUSD
  * @author RedDuck Software
  */
+//solhint-disable contract-name-camelcase
 contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     /**
      * @notice default terms url metadata encoded key
@@ -44,20 +45,20 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     /**
      * @inheritdoc IStUSD
      */
-    function mint(
-        address to,
-        uint256 amount
-    ) external onlyRole(ST_USD_MINT_OPERATOR_ROLE, msg.sender) {
+    function mint(address to, uint256 amount)
+        external
+        onlyRole(ST_USD_MINT_OPERATOR_ROLE, msg.sender)
+    {
         _mint(to, amount);
     }
 
     /**
      * @inheritdoc IStUSD
      */
-    function burn(
-        address from,
-        uint256 amount
-    ) external onlyRole(ST_USD_BURN_OPERATOR_ROLE, msg.sender) {
+    function burn(address from, uint256 amount)
+        external
+        onlyRole(ST_USD_BURN_OPERATOR_ROLE, msg.sender)
+    {
         _burn(from, amount);
     }
 
@@ -86,10 +87,10 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     /**
      * @inheritdoc IStUSD
      */
-    function setMetadata(
-        bytes32 key,
-        bytes memory data
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    function setMetadata(bytes32 key, bytes memory data)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE, msg.sender)
+    {
         metadata[key] = data;
     }
 

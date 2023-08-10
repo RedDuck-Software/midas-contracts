@@ -25,9 +25,7 @@ contract AggregatorV3Mock is AggregatorV3Interface {
         _latestRoundId++;
     }
 
-    function getRoundData(
-        uint80 _roundId
-    )
+    function getRoundData(uint80 _roundId)
         external
         view
         returns (

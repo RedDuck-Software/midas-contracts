@@ -8,7 +8,7 @@ import { ST_USD_DEPLOY_TAG } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getStUsd = async (hre: HardhatRuntimeEnvironment) => {
-  const addresses = getCurrentAddresses(hre)
+  const addresses = getCurrentAddresses(hre);
   return await hre.ethers.getContractAt('stUSD', addresses?.stUSD ?? '');
 };
 

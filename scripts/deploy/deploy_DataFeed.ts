@@ -22,6 +22,7 @@ import {
   tryEtherscanVerifyImplementation,
   verify,
 } from '../../helpers/utils';
+// eslint-disable-next-line camelcase
 import { AggregatorV3Mock__factory } from '../../typechain-types';
 
 const aggregatorsByNetwork: Record<number, string> = {
@@ -41,10 +42,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         'MOCK_AGGREGATOR_NETWORK_TAG is true, deploying mocked data aggregator',
       ),
     );
-    const aggregatorDeploy = await (await (
-      await hre.ethers.getContractFactory('AggregatorV3Mock', owner)
-    ).deploy()).deployed();
+    const aggregatorDeploy = await (
+      await (
+        await hre.ethers.getContractFactory('AggregatorV3Mock', owner)
+      ).deploy()
+    ).deployed();
 
+    // eslint-disable-next-line camelcase
     const aggregatorContract = AggregatorV3Mock__factory.connect(
       aggregatorDeploy.address,
       owner,

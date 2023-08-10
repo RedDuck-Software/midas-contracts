@@ -1,12 +1,6 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumber, BigNumberish, Signer } from 'ethers';
-import {
-  defaultAbiCoder,
-  formatUnits,
-  parseUnits,
-  solidityKeccak256,
-} from 'ethers/lib/utils';
+import { BigNumberish } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 import {
@@ -14,19 +8,18 @@ import {
   OptionalCommonParams,
   balanceOfBase18,
   getAccount,
-  tokenAmountToBase18,
 } from './common.helpers';
 import { getRoundData, setRoundData } from './data-feed.helpers';
 import { defaultDeploy } from './fixtures';
 
 import {
+  // eslint-disable-next-line camelcase
   AggregatorV3Mock__factory,
+  // eslint-disable-next-line camelcase
   DataFeed__factory,
-  DepositVault,
   ERC20,
+  // eslint-disable-next-line camelcase
   ERC20__factory,
-  ManageableVault,
-  RedemptionVault,
 } from '../../typechain-types';
 
 type CommonParams = Pick<
@@ -70,7 +63,7 @@ export const setMinAmountToDepositTest = async (
   expect(newMin).eq(value);
 };
 
-export const depositTest = async (
+export const initiateDepositRequest = async (
   { depositVault, owner, stUSD }: CommonParamsDeposit,
   tokenIn: ERC20 | string,
   amountUsdIn: number,
@@ -79,13 +72,14 @@ export const depositTest = async (
   tokenIn = getAccount(tokenIn);
 
   const sender = opt?.from ?? owner;
+  // eslint-disable-next-line camelcase
   const tokenContract = ERC20__factory.connect(tokenIn, owner);
 
   const amountIn = parseUnits(amountUsdIn.toString());
 
   if (opt?.revertMessage) {
     await expect(
-      depositVault.connect(sender).deposit(tokenIn, amountIn),
+      depositVault.connect(sender).initiateDepositRequest(tokenIn, amountIn),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -98,32 +92,17 @@ export const depositTest = async (
     tokenContract,
     sender.address,
   );
-  const balanceStUsdBeforeUser = await stUSD.balanceOf(sender.address);
 
   const totalDepositedBefore = await depositVault.totalDeposited(
     sender.address,
   );
 
-  const dataFeed = DataFeed__factory.connect(
-    await depositVault.etfDataFeed(),
-    owner,
-  );
-  const aggregator = AggregatorV3Mock__factory.connect(
-    await dataFeed.aggregator(),
-    owner,
-  );
-
-  const expectedOutAmount = await getOutputAmountWithFeeTest(
-    { depositVault, mockedAggregator: aggregator },
-    {
-      amountN: amountUsdIn,
-    },
-  );
-
-  await expect(depositVault.connect(sender).deposit(tokenIn, amountIn)).to.emit(
+  await expect(
+    depositVault.connect(sender).initiateDepositRequest(tokenIn, amountIn),
+  ).to.emit(
     depositVault,
     depositVault.interface.events[
-      'Deposit(address,address,bool,uint256,uint256)'
+      'InitiateRequest(uint256,address,address,uint256)'
     ].name,
   ).to.not.reverted;
 
@@ -134,26 +113,87 @@ export const depositTest = async (
     depositVault.address,
   );
   const balanceAfterUser = await balanceOfBase18(tokenContract, sender.address);
-  const balanceStUsdAfterUser = await stUSD.balanceOf(sender.address);
 
   expect(totalDepositedAfter).eq(totalDepositedBefore.add(amountIn));
   expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
-  expect(balanceStUsdAfterUser).eq(
-    balanceStUsdBeforeUser.add(expectedOutAmount),
-  );
+
+  const lastRequestId = await depositVault.lastRequestId();
+
+  const request = await depositVault.requests(lastRequestId);
+  expect(request.user).eq(sender.address);
+  expect(request.tokenIn).eq(tokenIn);
+  expect(request.amountUsdIn).eq(amountIn);
+  expect(request.exists).eq(true);
 };
 
-export const fulfillManualDepositTest = (
+export const fulfillDepositRequest = (
   { depositVault, owner, stUSD }: CommonParamsDeposit,
   opt?: OptionalCommonParams,
 ) => {
   return {
-    'fulfillManualDeposit(address,uint256)': async (
+    'fulfillDepositRequest(uint256, uint256)': async (
+      requestId: BigNumberish,
+      amountStUsdOut: number,
+    ) => {
+      const sender = opt?.from ?? owner;
+      const amountOut = parseUnits(amountStUsdOut.toString());
+
+      if (opt?.revertMessage) {
+        await expect(
+          depositVault
+            .connect(sender)
+            .fulfillDepositRequest(requestId, amountOut),
+        ).revertedWith(opt?.revertMessage);
+
+        return;
+      }
+
+      let request = await depositVault.requests(requestId);
+      expect(owner.address).eq(sender.address);
+      expect(request.tokenIn).not.eq(ethers.constants.AddressZero);
+      expect(request.amountUsdIn).gt(0);
+      expect(request.exists).eq(true);
+
+      const balanceStUsdBefore = await stUSD.balanceOf(request.user);
+
+      await expect(
+        depositVault.fulfillDepositRequest(requestId, amountOut),
+      ).to.emit(
+        depositVault,
+        depositVault.interface.events[
+          'InitiateRequest(uint256,address,address,uint256)'
+        ].name,
+      ).to.not.reverted;
+
+      const balanceStUsdAfter = await stUSD.balanceOf(request.user);
+
+      expect(balanceStUsdAfter).eq(balanceStUsdBefore.add(amountOut));
+
+      request = await depositVault.requests(requestId);
+
+      expect(request.user).eq(ethers.constants.AddressZero);
+      expect(request.tokenIn).eq(ethers.constants.AddressZero);
+      expect(request.amountUsdIn).eq(0);
+      expect(request.exists).eq(false);
+    },
+  };
+};
+
+export const manualDepositTest = (
+  { depositVault, owner, stUSD }: CommonParamsDeposit,
+  opt?: OptionalCommonParams,
+) => {
+  return {
+    'manuallyDeposit(address,address,uint256)': async (
       user: Account,
+      tokenIn: ERC20 | string,
       amountUsdIn: number,
     ) => {
       user = getAccount(user);
+      const tokenStr = getAccount(tokenIn);
+      // eslint-disable-next-line camelcase
+      const token = ERC20__factory.connect(tokenStr, owner);
 
       const sender = opt?.from ?? owner;
 
@@ -163,18 +203,29 @@ export const fulfillManualDepositTest = (
         await expect(
           depositVault
             .connect(sender)
-            ['fulfillManualDeposit(address,uint256)'](user, amountIn),
+            ['manuallyDeposit(address,address,uint256)'](
+              user,
+              tokenStr,
+              amountIn,
+            ),
         ).revertedWith(opt?.revertMessage);
+
         return;
       }
 
-      const balanceStUsdBeforeUser = await stUSD.balanceOf(user);
+      const balanceBeforeTokenUser = await balanceOfBase18(token, user);
+      const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
+
+      const balanceBeforeContract = await balanceOfBase18(token, depositVault);
+
       const supplyBefore = await stUSD.totalSupply();
 
+      // eslint-disable-next-line camelcase
       const dataFeed = DataFeed__factory.connect(
         await depositVault.etfDataFeed(),
         owner,
       );
+      // eslint-disable-next-line camelcase
       const aggregator = AggregatorV3Mock__factory.connect(
         await dataFeed.aggregator(),
         owner,
@@ -187,36 +238,46 @@ export const fulfillManualDepositTest = (
         },
       );
 
-      const totalDepositedBefore = await depositVault.totalDeposited(user);
-
       await expect(
         depositVault
           .connect(sender)
-          ['fulfillManualDeposit(address,uint256)'](user, amountIn),
+          ['manuallyDeposit(address,address,uint256)'](
+            user,
+            token.address,
+            amountIn,
+          ),
       ).to.emit(
         depositVault,
         depositVault.interface.events[
-          'Deposit(address,address,bool,uint256,uint256)'
+          'PerformManualAction(address,address,address,uint256,uint256)'
         ].name,
       ).to.not.reverted;
-      const totalDepositedAfter = await depositVault.totalDeposited(user);
 
-      const balanceStUsdAfterUser = await stUSD.balanceOf(user);
+      const balanceAfterTokenUser = await balanceOfBase18(token, user);
+      const balanceAfterStUsdUser = await stUSD.balanceOf(user);
+
+      const balanceAfterContract = await balanceOfBase18(token, depositVault);
+
       const supplyAfter = await stUSD.totalSupply();
 
-      expect(balanceStUsdAfterUser).eq(
-        balanceStUsdBeforeUser.add(expectedOutAmount),
-      );
-      expect(totalDepositedBefore).eq(totalDepositedAfter);
-
       expect(supplyAfter).eq(supplyBefore.add(expectedOutAmount));
+      expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
+      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser.sub(amountIn));
+      expect(balanceAfterStUsdUser).eq(
+        balanceBeforeStUsdUser.add(expectedOutAmount),
+      );
     },
-    'fulfillManualDeposit(address,uint256,uint256)': async (
+    'manuallyDeposit(address,address,uint256,uint256)': async (
       user: Account,
+      tokenIn: ERC20 | string,
       amountUsdIn: number,
       amountStUsdOut: number,
     ) => {
       user = getAccount(user);
+
+      const tokenStr = getAccount(tokenIn);
+      // eslint-disable-next-line camelcase
+      const token = ERC20__factory.connect(tokenStr, owner);
 
       const sender = opt?.from ?? owner;
 
@@ -227,43 +288,62 @@ export const fulfillManualDepositTest = (
         await expect(
           depositVault
             .connect(sender)
-            ['fulfillManualDeposit(address,uint256,uint256)'](
+            ['manuallyDeposit(address,address,uint256,uint256)'](
               user,
+              tokenStr,
               amountIn,
               amountOut,
             ),
         ).revertedWith(opt?.revertMessage);
+
         return;
       }
 
-      const balanceStUsdBeforeUser = await stUSD.balanceOf(user);
+      const balanceBeforeTokenUser = await balanceOfBase18(token, user);
+      const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
 
-      const expectedOutAmount = amountOut;
-      const totalDepositedBefore = await depositVault.totalDeposited(user);
+      const balanceBeforeContract = await balanceOfBase18(token, depositVault);
+
+      const supplyBefore = await stUSD.totalSupply();
+
+      // eslint-disable-next-line camelcase
+      const dataFeed = DataFeed__factory.connect(
+        await depositVault.etfDataFeed(),
+        owner,
+      );
+      // eslint-disable-next-line camelcase
+      const aggregator = AggregatorV3Mock__factory.connect(
+        await dataFeed.aggregator(),
+        owner,
+      );
 
       await expect(
         depositVault
           .connect(sender)
-          ['fulfillManualDeposit(address,uint256,uint256)'](
+          ['manuallyDeposit(address,address,uint256,uint256)'](
             user,
+            token.address,
             amountIn,
             amountOut,
           ),
       ).to.emit(
         depositVault,
         depositVault.interface.events[
-          'Deposit(address,address,bool,uint256,uint256)'
+          'PerformManualAction(address,address,address,uint256,uint256)'
         ].name,
       ).to.not.reverted;
-      const totalDepositedAfter = await depositVault.totalDeposited(user);
 
-      const balanceStUsdAfterUser = await stUSD.balanceOf(user);
+      const balanceAfterTokenUser = await balanceOfBase18(token, user);
+      const balanceAfterStUsdUser = await stUSD.balanceOf(user);
 
-      expect(totalDepositedBefore).eq(totalDepositedAfter);
+      const balanceAfterContract = await balanceOfBase18(token, depositVault);
 
-      expect(balanceStUsdAfterUser).eq(
-        balanceStUsdBeforeUser.add(expectedOutAmount),
-      );
+      const supplyAfter = await stUSD.totalSupply();
+
+      expect(supplyAfter).eq(supplyBefore.add(amountOut));
+      expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
+      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser.sub(amountIn));
+      expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser.add(amountOut));
     },
   };
 };
@@ -301,4 +381,44 @@ export const getOutputAmountWithFeeTest = async (
   expect(realValue).eq(expectedValue);
 
   return realValue;
+};
+
+export const cancelDepositRequest = async (
+  { depositVault, owner, stUSD }: CommonParamsDeposit,
+  requestId: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  const sender = opt?.from ?? owner;
+
+  if (opt?.revertMessage) {
+    await expect(
+      depositVault.connect(sender).cancelDepositRequest(requestId),
+    ).revertedWith(opt?.revertMessage);
+
+    return;
+  }
+
+  const requestBefore = await depositVault.requests(requestId);
+  // eslint-disable-next-line camelcase
+  const token = ERC20__factory.connect(requestBefore.tokenIn, owner);
+
+  const balanceBeforeUser = await token.balanceOf(requestBefore.user);
+
+  await expect(
+    depositVault.connect(sender).cancelDepositRequest(requestId),
+  ).to.emit(
+    depositVault,
+    depositVault.interface.events['CancelRequest(uint256)'].name,
+  ).to.not.reverted;
+
+  const request = await depositVault.requests(requestId);
+
+  const balanceAfterUser = await token.balanceOf(requestBefore.user);
+
+  expect(request.exists).eq(false);
+  expect(request.user).eq(ethers.constants.AddressZero);
+  expect(request.tokenIn).eq(ethers.constants.AddressZero);
+  expect(request.amountUsdIn).eq('0');
+
+  expect(balanceAfterUser).eq(requestBefore.amountUsdIn);
 };

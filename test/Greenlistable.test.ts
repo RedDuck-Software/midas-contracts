@@ -68,7 +68,7 @@ describe('Greenlistable', function () {
         regularAccounts[0],
         {
           from: regularAccounts[0],
-          revertMessage: acErrors.WMAC_HASNT_ROLE,
+          revertMessage: `AccessControl: account ${regularAccounts[0].address.toLowerCase()} is missing role ${await accessControl.GREENLIST_OPERATOR_ROLE()}`,
         },
       );
     });
@@ -103,7 +103,7 @@ describe('Greenlistable', function () {
         regularAccounts[0],
         {
           from: regularAccounts[0],
-          revertMessage: acErrors.WMAC_HASNT_ROLE,
+          revertMessage: `AccessControl: account ${regularAccounts[0].address.toLowerCase()} is missing role ${await accessControl.GREENLIST_OPERATOR_ROLE()}`,
         },
       );
     });

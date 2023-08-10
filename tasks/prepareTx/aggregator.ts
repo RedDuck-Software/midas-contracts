@@ -4,7 +4,10 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { logPopulatedTx } from '..';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 
-export const getAggregator = async (hre: HardhatRuntimeEnvironment, address: string) => {
+export const getAggregator = async (
+  hre: HardhatRuntimeEnvironment,
+  address: string,
+) => {
   return await hre.ethers.getContractAt('AggregatorV3Mock', address);
 };
 

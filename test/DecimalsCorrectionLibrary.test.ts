@@ -5,6 +5,7 @@ import { ethers } from 'hardhat';
 
 import {
   DecimalsCorrectionTester,
+  // eslint-disable-next-line camelcase
   DecimalsCorrectionTester__factory,
   DepositVault,
   ERC20Mock,

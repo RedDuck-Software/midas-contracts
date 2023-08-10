@@ -41,28 +41,12 @@ abstract contract WithMidasAccessControl is
     /**
      * @dev upgradeable patter contract`s initializer
      */
-    function __WithMidasAccessControl_init(
-        address _accessControl
-    ) internal onlyInitializing {
+    // solhint-disable func-name-mixedcase
+    function __WithMidasAccessControl_init(address _accessControl)
+        internal
+        onlyInitializing
+    {
         accessControl = MidasAccessControl(_accessControl);
-    }
-
-    /**
-     * @dev grants `role` to `account` using MidasAccessControl
-     * @param role bytes32 role descriptor
-     * @param account address to grant role to
-     */
-    function grantRole(bytes32 role, address account) internal {
-        accessControl.grantRole(role, account);
-    }
-
-    /**
-     * @dev revokes `role` from `account` using MidasAccessControl
-     * @param role bytes32 role descriptor
-     * @param account address to revoke role from
-     */
-    function revokeRole(bytes32 role, address account) internal {
-        accessControl.revokeRole(role, account);
     }
 
     /**

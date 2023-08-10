@@ -8,7 +8,8 @@ contract GreenlistableTester is Greenlistable {
         __Greenlistable_init(_accessControl);
     }
 
-    function onlyGreenlistedTester(
-        address account
-    ) external onlyGreenlisted(account) {}
+    function onlyGreenlistedTester(address account)
+        external
+        onlyGreenlisted(account)
+    {}
 }
