@@ -7,6 +7,8 @@ import {IERC20MetadataUpgradeable as IERC20Metadata} from "@openzeppelin/contrac
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+
 import "./interfaces/IDepositVault.sol";
 import "./interfaces/IStUSD.sol";
 import "./interfaces/IDataFeed.sol";
@@ -25,6 +27,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
+    using Counters for Counters.Counter;
 
     struct DepositRequest {
         address user;
@@ -58,7 +61,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @notice last deposit request id
      */
-    uint256 public lastRequestId;
+    Counters.Counter public lastRequestId;
 
     /**
      * @dev leaving a storage gap for futures updates
@@ -98,7 +101,8 @@ contract DepositVault is ManageableVault, IDepositVault {
     {
         address user = msg.sender;
 
-        uint256 requestId = lastRequestId++;
+        lastRequestId.increment();
+        uint256 requestId = lastRequestId._value;
 
         _requireTokenExists(tokenIn);
         _validateAmountUsdIn(user, amountUsdIn);
@@ -110,7 +114,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         requests[requestId] = DepositRequest(user, tokenIn, amountUsdIn, true);
 
-        emit InitiateRequest(lastRequestId, user, tokenIn, amountUsdIn);
+        emit InitiateRequest(requestId, user, tokenIn, amountUsdIn);
 
         return requestId;
     }

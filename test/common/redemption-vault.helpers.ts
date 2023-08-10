@@ -88,8 +88,6 @@ export const initiateRedemptionRequestTest = async (
 
   const supplyBefore = await stUSD.totalSupply();
 
-  const lastRequestId = await redemptionVault.lastRequestId();
-
   await expect(
     redemptionVault
       .connect(sender)
@@ -100,6 +98,8 @@ export const initiateRedemptionRequestTest = async (
       'InitiateRequest(uint256,address,address,uint256)'
     ].name,
   ).to.not.reverted;
+
+  const lastRequestId = await redemptionVault.lastRequestId();
 
   const request = await redemptionVault.requests(lastRequestId);
 

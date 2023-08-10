@@ -120,7 +120,7 @@ export const initiateDepositRequest = async (
 
   const lastRequestId = await depositVault.lastRequestId();
 
-  const request = await depositVault.requests(lastRequestId.sub(1));
+  const request = await depositVault.requests(lastRequestId);
   expect(request.user).eq(sender.address);
   expect(request.tokenIn).eq(tokenIn);
   expect(request.amountUsdIn).eq(amountIn);

@@ -7,6 +7,8 @@ import {IERC20MetadataUpgradeable as IERC20Metadata} from "@openzeppelin/contrac
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+
 import "./interfaces/IRedemptionVault.sol";
 import "./interfaces/IStUSD.sol";
 import "./interfaces/IDataFeed.sol";
@@ -25,6 +27,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
+    using Counters for Counters.Counter;
 
     struct RedemptionRequest {
         address user;
@@ -43,7 +46,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @notice counter for request ids
      */
-    uint256 public lastRequestId;
+    Counters.Counter public lastRequestId;
 
     /**
      * @notice min. amount of USD that should be redeemed from stUSD
@@ -95,7 +98,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         stUSD.burn(user, amountStUsdIn);
 
-        requestId = lastRequestId++;
+        lastRequestId.increment();
+        requestId = lastRequestId._value;
         requests[requestId] = RedemptionRequest({
             user: user,
             tokenOut: tokenOut,

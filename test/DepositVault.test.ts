@@ -617,7 +617,7 @@ describe('DepositVault', function () {
           from: regularAccounts[0],
           revertMessage: acErrors.WMAC_HASNT_ROLE,
         },
-      )['fulfillDepositRequest(uint256, uint256)'](0, 0);
+      )['fulfillDepositRequest(uint256, uint256)'](1, 0);
     });
 
     it('should fail: provided request doesn`t exist', async () => {
@@ -629,7 +629,7 @@ describe('DepositVault', function () {
           from: owner,
           revertMessage: 'DV: r not exists',
         },
-      )['fulfillDepositRequest(uint256, uint256)'](0, 0);
+      )['fulfillDepositRequest(uint256, uint256)'](1, 0);
     });
 
     it('successful fulfillment', async () => {
@@ -669,7 +669,7 @@ describe('DepositVault', function () {
         {
           from: owner,
         },
-      )['fulfillDepositRequest(uint256, uint256)'](0, 1);
+      )['fulfillDepositRequest(uint256, uint256)'](1, 1);
     });
   });
 
@@ -1254,7 +1254,7 @@ describe('DepositVault', function () {
         { from: users },
       );
 
-      await cancelDepositRequest({ depositVault, owner, stUSD }, 0);
+      await cancelDepositRequest({ depositVault, owner, stUSD }, 1);
     });
   });
 });

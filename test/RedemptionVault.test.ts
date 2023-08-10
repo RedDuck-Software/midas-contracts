@@ -428,7 +428,7 @@ describe('RedemptionVault', function () {
           revertMessage: acErrors.WMAC_HASNT_ROLE,
           from: regularAccounts[0],
         },
-      )['fulfillRedemptionRequest(uint256,uint256)'](0, 0);
+      )['fulfillRedemptionRequest(uint256,uint256)'](1, 0);
     });
 
     it('should fail: when request with provided id does`nt exists', async () => {
@@ -445,7 +445,7 @@ describe('RedemptionVault', function () {
         {
           revertMessage: 'RV: r not exists',
         },
-      )['fulfillRedemptionRequest(uint256,uint256)'](0, 0);
+      )['fulfillRedemptionRequest(uint256,uint256)'](1, 0);
     });
 
     it('should fail: when contract has insufficient balance', async () => {
@@ -480,7 +480,7 @@ describe('RedemptionVault', function () {
         {
           revertMessage: 'ERC20: transfer amount exceeds balance',
         },
-      )['fulfillRedemptionRequest(uint256,uint256)'](0, 1);
+      )['fulfillRedemptionRequest(uint256,uint256)'](1, 1);
     });
 
     it('when request is exists and contract has sufficient balance', async () => {
@@ -513,7 +513,7 @@ describe('RedemptionVault', function () {
 
       await fulfillRedemptionRequestTest({ redemptionVault, owner, stUSD })[
         'fulfillRedemptionRequest(uint256,uint256)'
-      ](0, 1);
+      ](1, 1);
     });
 
     it('when request is exists and tokenOut is MANUAL_FULLFILMENT_TOKEN', async () => {
@@ -546,7 +546,7 @@ describe('RedemptionVault', function () {
 
       await fulfillRedemptionRequestTest({ redemptionVault, owner, stUSD })[
         'fulfillRedemptionRequest(uint256,uint256)'
-      ](0, 1);
+      ](1, 1);
     });
   });
 
@@ -602,7 +602,7 @@ describe('RedemptionVault', function () {
         { from: users },
       );
 
-      await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 0);
+      await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 1);
     });
 
     it('when request id is valid and request tokenOut is MANUAL_FULLFILMENT_TOKEN', async () => {
@@ -633,7 +633,7 @@ describe('RedemptionVault', function () {
         { from: users },
       );
 
-      await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 0);
+      await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 1);
     });
   });
 
