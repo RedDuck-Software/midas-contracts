@@ -83,7 +83,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     [addresses?.accessControl, aggregator],
   );
 
-  await delay(5_000);
+  await delay(10_000);
   await logDeployProxy(hre, DATA_FEED_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };

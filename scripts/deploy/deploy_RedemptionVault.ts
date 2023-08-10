@@ -29,7 +29,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     [addresses?.accessControl, addresses?.stUSD, addresses?.etfDataFeed, '0'],
   );
 
-  await delay(5_000);
+  await delay(10_000);
   await logDeployProxy(hre, REDEMPTION_VAULT_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };
