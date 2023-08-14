@@ -84,12 +84,20 @@ Vaults can be used only by addresses, that have GreenListed Role on the [MidasAc
 There is 2 types of vaults presented in the project - Deposit and Redemption vaults
 
 #### ***Deposit Vault***
+Deposit is the process of minting stUSD tokens by transferring USD tokens from user. The exchange ratio can be calculated using the DataFeed answer, but currently it's all determined by the vault administrator individually for each deposit. USD tokens are stored in contract and can be withdrawn by vault admin at any time.
+The process consists of 2 steps:
+1. Deposit request initiation
+2. Deposit request fulfillment
 
-Deposit Vault can mint stUSD directly to the user by taking the USD token from them. The USD/stUSD exchange ratio is calculated based on [DataFeed](./contracts/feeds/DataFeed.sol) contract`s response. After USD is taken from the user, it stores on the DepositVault contract and later can be withdrawn by the vault administrator. 
+The initiation is done by the user, that want to transfer his USD tokens and receive stUSD token instead. After the initiation transaction, his USD tokens are immediately transfer from him, and now he needs to wait for deposit request fulfillment from the vault administrator.
 
-Deposit Vault have a `fulfillManualDeposit` function that can be used by the vault administrator to mint stUSD token to the user without taking a USD token from him. Its basically a wrapper of the stUSD's mint function, made for easier off-chain events listening
+The fulfillment is done by the vault administrator. Administrator should deposit the funds to the bank deposit, calculate the output stUSD amount and submit fulfillment transaction to the network.
 
-Deposit Vault can have a fee on stUSD minting, but currently it set to 0%
+Administrator may also decide to cancel the redemption request. In this case, transferred USD tokens will be transferred back to the user and request will be deleted from the contract's storage.
+
+The whole deposit process can be made by vault administrator for any user, that owns USD tokens. This action is basically a wrapper of the USD transfer function, made for easier off-chain events listening
+
+Deposit Vault can have a fee on stUSD minting. Because the output USD amount currently determined off-chain by the vault administrator, the value that stores in the contract currently is not used for the resulting USD output amount.
 
 
 #### ***Redemption Vault***
@@ -114,9 +122,9 @@ Redemption Vault can have a fee on stUSD burning. Because the output USD amount 
 
 |Contract Name|Sepolia|Mainnet| 
 |-|-|-|
-|**stUSD**|`0xe8eb39bE793b2ebf9116Cb43a2f34b43DF20D879`|-|
-|**MidasAccessControl**|`0xE3ec78422DC778AC081d410BCf96f01CAd18be4e`|-|
-|**DataFeed IB01/USD**|`0x3e0F40FC4750C3793C89E848E60cdAA6b4D7E545`|-|
+|**stUSD**|`0x08383da6716C12d1250E735ABe7FDcDD6e96e9e9`|-|
+|**MidasAccessControl**|`0xf93877fbc3fDcd95c09eb480dC451c4D356217bD`|-|
+|**DataFeed IB01/USD**|`0x7838E7B02d76e58Aa7032f73D27C11134192e99d`|-|
 |**DataFeed EUR/USD**|`0xE23c07Ecad6D822500CbE8306d72A90578CA9F11`|-|
-|**DepositVault**|`0x45A1392c1086B36e2c4c40bB5A4bbbb86415e8D7`|-|
-|**RedemptionVault**|`0x0d38dA23a47c36A41fa1BB32A048c43d368600F7`|-|
+|**DepositVault**|`0xb0f198b9e141179f401E53C104454688001dC511`|-|
+|**RedemptionVault**|`0x4C428dF013227696C27b223bcD18Dcda46CD0a3D`|-|

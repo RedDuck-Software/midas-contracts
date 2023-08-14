@@ -34,7 +34,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ],
   );
 
-  await delay(5_000);
+  await delay(10_000);
   await logDeployProxy(hre, DEPOSIT_VAULT_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };
