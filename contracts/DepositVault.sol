@@ -112,7 +112,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 requestId = lastRequestId._value;
 
         _requireTokenExists(tokenIn);
-        if(!isFreeFromMinDeposit[msg.sender]) {
+        if (!isFreeFromMinDeposit[msg.sender]) {
             _validateAmountUsdIn(user, amountUsdIn);
         }
         require(amountUsdIn > 0, "DV: invalid amount");
@@ -123,7 +123,13 @@ contract DepositVault is ManageableVault, IDepositVault {
         totalDeposited[user] += amountIncludingFee;
         _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
 
-        requests[requestId] = DepositRequest(user, tokenIn, amountIncludingFee, fee, true);
+        requests[requestId] = DepositRequest(
+            user,
+            tokenIn,
+            amountIncludingFee,
+            fee,
+            true
+        );
 
         emit InitiateRequest(requestId, user, tokenIn, amountIncludingFee);
         emit FeeCollected(requestId, msg.sender, fee);
@@ -192,7 +198,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function freeFromMinDeposit(address user) external onlyVaultAdmin {
         require(!isFreeFromMinDeposit[user], "DV: already free");
 
-        isFreeFromMinDeposit[user]= true;
+        isFreeFromMinDeposit[user] = true;
     }
 
     /**

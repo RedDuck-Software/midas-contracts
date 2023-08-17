@@ -21,7 +21,12 @@ import "../access/Pausable.sol";
  * @title Contract with base Vault methods
  * @author RedDuck Software
  */
-abstract contract ManageableVault is Greenlistable, Pausable, ReentrancyGuardUpgradeable, IManageableVault{
+abstract contract ManageableVault is
+    Greenlistable,
+    Pausable,
+    ReentrancyGuardUpgradeable,
+    IManageableVault
+{
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;

@@ -42,7 +42,11 @@ interface IManageableVault {
         uint256 amountUsd
     );
 
-    event FeeCollected(uint256 indexed requestId, address indexed user, uint256 feeAmount);
+    event FeeCollected(
+        uint256 indexed requestId,
+        address indexed user,
+        uint256 feeAmount
+    );
 
     /**
      * @notice withdraws `amoount` of a given `token` from the contract.
