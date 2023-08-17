@@ -65,6 +65,11 @@ contract DepositVault is ManageableVault, IDepositVault {
     Counters.Counter public lastRequestId;
 
     /**
+     * @notice users restricted from depositin minDepositAmountInEuro
+     */
+    mapping(address => bool) public isFreeFromMinDeposit;
+
+    /**
      * @dev leaving a storage gap for futures updates
      */
     uint256[50] private __gap;
@@ -107,7 +112,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 requestId = lastRequestId._value;
 
         _requireTokenExists(tokenIn);
-        _validateAmountUsdIn(user, amountUsdIn);
+        if(!isFreeFromMinDeposit[msg.sender]) {
+            _validateAmountUsdIn(user, amountUsdIn);
+        }
         require(amountUsdIn > 0, "DV: invalid amount");
 
         uint256 fee = (amountUsdIn * getFee(tokenIn)) / (100 * PERCENTAGE_BPS);
@@ -180,6 +187,12 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(amountUsdIn > 0 || amountStUsdOut > 0, "DV: invalid amounts");
 
         _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
+    }
+
+    function freeFromMinDeposit(address user) external onlyVaultAdmin {
+        require(!isFreeFromMinDeposit[user], "DV: already free");
+
+        isFreeFromMinDeposit[user]= true;
     }
 
     /**

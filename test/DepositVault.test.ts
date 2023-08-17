@@ -343,6 +343,44 @@ describe('DepositVault', function () {
   //   })
 
   // })
+  describe('freeFromMinDeposit(address)', async () => {
+    it('should fail: call from address without vault admin role', async () => {
+      const { depositVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+      await expect(
+        depositVault
+          .connect(regularAccounts[0])
+          .freeFromMinDeposit(regularAccounts[1].address),
+      ).to.be.revertedWith('WMAC: hasnt role');
+    });
+    it('should not fail', async () => {
+      const { depositVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+      await expect(depositVault.freeFromMinDeposit(regularAccounts[0].address))
+        .to.not.reverted;
+
+      expect(
+        await depositVault.isFreeFromMinDeposit(regularAccounts[0].address),
+      ).to.eq(true);
+    });
+    it('should fail: already in list', async () => {
+      const { depositVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+      await expect(depositVault.freeFromMinDeposit(regularAccounts[0].address))
+        .to.not.reverted;
+
+      expect(
+        await depositVault.isFreeFromMinDeposit(regularAccounts[0].address),
+      ).to.eq(true);
+
+      await expect(
+        depositVault.freeFromMinDeposit(regularAccounts[0].address),
+      ).to.revertedWith('DV: already free');
+    });
+  });
   describe('getOutputAmountWithFee()', () => {
     const test = ({
       priceN,
@@ -604,6 +642,35 @@ describe('DepositVault', function () {
         stableCoins.dai,
       );
       await setRoundData({ mockedAggregator }, 5);
+      await initiateDepositRequest(
+        { depositVault, owner, stUSD },
+        stableCoins.dai,
+        100,
+      );
+    });
+
+    it('deposit 100 DAI, when price is 5$ without checking of minDepositAmount', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        depositVault,
+        accessControl,
+        regularAccounts,
+        stableCoins,
+        stUSD,
+      } = await loadFixture(defaultDeploy);
+      await greenList(
+        { accessControl, greenlistable: depositVault, owner },
+        owner,
+      );
+      await mintToken(stableCoins.dai, owner, 100);
+      await approveBase18(owner, stableCoins.dai, depositVault, 100);
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+      );
+      await setRoundData({ mockedAggregator }, 5);
+      await depositVault.freeFromMinDeposit(owner.address);
       await initiateDepositRequest(
         { depositVault, owner, stUSD },
         stableCoins.dai,
