@@ -1028,8 +1028,8 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await mintToken(stableCoins.dai, regularAccounts[0], 100);
-      await approveBase18(regularAccounts[0], stableCoins.dai, depositVault, 5);
+      await mintToken(stableCoins.dai, owner, 5);
+      await approveBase18(owner, stableCoins.dai, depositVault, 5);
       await manualDepositTest(
         { depositVault, owner, stUSD },
         {
@@ -1086,8 +1086,8 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await mintToken(stableCoins.dai, regularAccounts[0], 100);
-      await approveBase18(regularAccounts[0], stableCoins.dai, depositVault, 5);
+      await mintToken(stableCoins.dai, owner, 5);
+      await approveBase18(owner, stableCoins.dai, depositVault, 5);
       await manualDepositTest(
         { depositVault, owner, stUSD },
         {
@@ -1192,8 +1192,8 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await mintToken(stableCoins.dai, regularAccounts[0], 100);
-      await approveBase18(regularAccounts[0], stableCoins.dai, depositVault, 5);
+      await mintToken(stableCoins.dai, owner, 1);
+      await approveBase18(owner, stableCoins.dai, depositVault, 1);
       await manualDepositTest(
         { depositVault, owner, stUSD },
         {

@@ -33,6 +33,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         address user;
         address tokenIn;
         uint256 amountUsdIn;
+        uint256 fee;
         bool exists;
     }
 
@@ -97,6 +98,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         external
         onlyGreenlisted(msg.sender)
         pausable
+        nonReentrant
         returns (uint256)
     {
         address user = msg.sender;
@@ -108,13 +110,16 @@ contract DepositVault is ManageableVault, IDepositVault {
         _validateAmountUsdIn(user, amountUsdIn);
         require(amountUsdIn > 0, "DV: invalid amount");
 
+        uint256 fee = (amountUsdIn * getFee()) / (100 * PERCENTAGE_BPS);
+        uint256 amountIncludingFee = amountUsdIn - fee;
+
+        totalDeposited[user] += amountIncludingFee;
         _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
 
-        totalDeposited[user] += amountUsdIn;
+        requests[requestId] = DepositRequest(user, tokenIn, amountIncludingFee, fee, true);
 
-        requests[requestId] = DepositRequest(user, tokenIn, amountUsdIn, true);
-
-        emit InitiateRequest(requestId, user, tokenIn, amountUsdIn);
+        emit InitiateRequest(requestId, user, tokenIn, amountIncludingFee);
+        emit FeeCollected(requestId, msg.sender, fee);
 
         return requestId;
     }
@@ -142,7 +147,8 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         delete requests[requestId];
 
-        IERC20(request.tokenIn).safeTransfer(request.user, request.amountUsdIn);
+        uint256 returnAmount = request.amountUsdIn + request.fee;
+        IERC20(request.tokenIn).safeTransfer(request.user, returnAmount);
 
         emit CancelRequest(requestId);
     }
@@ -181,6 +187,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      */
     function setMinAmountToDeposit(uint256 newValue) external onlyVaultAdmin {
         minAmountToDepositInEuro = newValue;
+
         emit SetMinAmountToDeposit(msg.sender, newValue);
     }
 
@@ -282,7 +289,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(user != address(0), "DV: invalid user");
         _requireTokenExists(tokenIn);
 
-        _tokenTransferFrom(user, tokenIn, amountUsdIn);
+        _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
         stUSD.mint(user, amountStUsdOut);
 
         emit PerformManualAction(

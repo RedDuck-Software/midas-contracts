@@ -77,6 +77,8 @@ export const defaultDeploy = async () => {
     0,
   );
 
+  await depositVault.setFee(15);
+
   const redemptionVault = await new RedemptionVault__factory(owner).deploy();
   await redemptionVault.initialize(
     accessControl.address,
@@ -84,6 +86,8 @@ export const defaultDeploy = async () => {
     dataFeed.address,
     0,
   );
+
+  await redemptionVault.setFee(15);
 
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),

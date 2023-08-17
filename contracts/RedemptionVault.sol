@@ -33,6 +33,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address user;
         address tokenOut;
         uint256 amountStUsdIn;
+        uint256 fee;
         bool exists;
     }
 
@@ -87,27 +88,32 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         pausable
         returns (uint256 requestId)
     {
+        lastRequestId.increment();
+        requestId = lastRequestId._value;
+        address user = msg.sender;
+
         _requireTokenExists(tokenOut);
 
         require(amountStUsdIn > 0, "RV: 0 amount");
-
-        address user = msg.sender;
 
         // estimate out amount and validate that it`s >= min allowed
         _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn));
 
         stUSD.burn(user, amountStUsdIn);
 
-        lastRequestId.increment();
-        requestId = lastRequestId._value;
+        uint256 fee = (amountStUsdIn * getFee()) / (100 * PERCENTAGE_BPS);
+        uint256 amountIncludingFee = amountStUsdIn - fee;
+
         requests[requestId] = RedemptionRequest({
             user: user,
             tokenOut: tokenOut,
-            amountStUsdIn: amountStUsdIn,
+            amountStUsdIn: amountIncludingFee,
+            fee: fee,
             exists: true
         });
 
-        emit InitiateRequest(requestId, user, tokenOut, amountStUsdIn);
+        emit InitiateRequest(requestId, user, tokenOut, amountIncludingFee);
+        emit FeeCollected(requestId, user, fee);
     }
 
     /**
@@ -134,8 +140,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         onlyVaultAdmin
     {
         RedemptionRequest memory request = _getRequest(requestId);
+
         delete requests[requestId];
-        stUSD.mint(request.user, request.amountStUsdIn);
+        uint256 returnAmount = request.amountStUsdIn + request.fee;
+        stUSD.mint(request.user, returnAmount);
         emit CancelRequest(requestId);
     }
 
