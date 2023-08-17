@@ -86,8 +86,11 @@ describe('DepositVault', function () {
       const { depositVault, regularAccounts, stableCoins } = await loadFixture(
         defaultDeploy,
       );
+      await depositVault.addPaymentToken(stableCoins.usdc.address);
       await expect(
-        depositVault.connect(regularAccounts[0]).setFee(stableCoins.usdc.address, 1),
+        depositVault
+          .connect(regularAccounts[0])
+          .setFee(stableCoins.usdc.address, 1),
       ).revertedWith(acErrors.WMAC_HASNT_ROLE);
     });
 
@@ -95,6 +98,7 @@ describe('DepositVault', function () {
       const { depositVault, regularAccounts, stableCoins } = await loadFixture(
         defaultDeploy,
       );
+      await depositVault.addPaymentToken(stableCoins.usdc.address);
       await expect(depositVault.setFee(stableCoins.usdc.address, 1)).to.emit(
         depositVault,
         depositVault.interface.events['SetFee(address,address,uint256)'].name,
@@ -360,6 +364,8 @@ describe('DepositVault', function () {
           stUSD,
           stableCoins,
         } = await loadFixture(defaultDeploy);
+
+        await depositVault.addPaymentToken(stableCoins.usdc.address);
 
         await getOutputAmountWithFeeTest(
           { depositVault, mockedAggregator },

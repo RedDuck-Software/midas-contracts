@@ -76,6 +76,8 @@ describe('RedemptionVault', function () {
         const { redemptionVault, mockedAggregator, stableCoins } =
           await loadFixture(defaultDeploy);
 
+        await redemptionVault.addPaymentToken(stableCoins.usdc.address);
+
         await getOutputAmountWithFeeRedeemTest(
           { redemptionVault, mockedAggregator },
           {

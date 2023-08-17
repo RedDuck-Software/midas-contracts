@@ -122,8 +122,11 @@ abstract contract ManageableVault is Greenlistable, Pausable, ReentrancyGuardUpg
 
     /**
      * @inheritdoc IManageableVault
+     * @dev reverts is token is not presented
      */
     function setFee(address token, uint256 newFee) external onlyVaultAdmin {
+        require(_paymentTokens.contains(token), "MV: doesn't exist");
+
         _feesForTokens[token] = newFee;
 
         emit SetFee(msg.sender, token, newFee);
