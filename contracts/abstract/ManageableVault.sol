@@ -53,9 +53,9 @@ abstract contract ManageableVault is Greenlistable, Pausable, ReentrancyGuardUpg
     EnumerableSet.AddressSet internal _paymentTokens;
 
     /**
-     * @dev value with `PERCENTAGE_BPS`
+     * @dev fees for different tokens
      */
-    uint256 internal _fee;
+    mapping(address => uint256) internal _feesForTokens;
 
     /**
      * @dev checks that msg.sender do have a vaultRole() role
@@ -123,9 +123,10 @@ abstract contract ManageableVault is Greenlistable, Pausable, ReentrancyGuardUpg
     /**
      * @inheritdoc IManageableVault
      */
-    function setFee(uint256 newFee) external onlyVaultAdmin {
-        _fee = newFee;
-        emit SetFee(msg.sender, newFee);
+    function setFee(address token, uint256 newFee) external onlyVaultAdmin {
+        _feesForTokens[token] = newFee;
+
+        emit SetFee(msg.sender, token, newFee);
     }
 
     /**

@@ -83,23 +83,23 @@ describe('DepositVault', function () {
 
   describe('setFee(),getFee()', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, regularAccounts } = await loadFixture(
+      const { depositVault, regularAccounts, stableCoins } = await loadFixture(
         defaultDeploy,
       );
       await expect(
-        depositVault.connect(regularAccounts[0]).setFee(1),
+        depositVault.connect(regularAccounts[0]).setFee(stableCoins.usdc.address, 1),
       ).revertedWith(acErrors.WMAC_HASNT_ROLE);
     });
 
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, regularAccounts } = await loadFixture(
+      const { depositVault, regularAccounts, stableCoins } = await loadFixture(
         defaultDeploy,
       );
-      await expect(depositVault.setFee(1)).to.emit(
+      await expect(depositVault.setFee(stableCoins.usdc.address, 1)).to.emit(
         depositVault,
-        depositVault.interface.events['SetFee(address,uint256)'].name,
+        depositVault.interface.events['SetFee(address,address,uint256)'].name,
       ).not.reverted;
-      expect(await depositVault.getFee()).eq(1);
+      expect(await depositVault.getFee(stableCoins.usdc.address)).eq(1);
     });
   });
 
@@ -367,6 +367,7 @@ describe('DepositVault', function () {
             priceN,
             amountN,
             feeN,
+            token: stableCoins.usdc.address,
           },
         );
       });

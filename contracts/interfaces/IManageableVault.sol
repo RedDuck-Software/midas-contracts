@@ -17,7 +17,7 @@ interface IManageableVault {
 
     event RemovePaymentToken(address indexed token, address indexed caller);
 
-    event SetFee(address indexed caller, uint256 newFee);
+    event SetFee(address indexed caller, address indexed token, uint256 newFee);
 
     event InitiateRequest(
         uint256 indexed requestId,
@@ -76,13 +76,13 @@ interface IManageableVault {
      * can be called only from permissioned actor.
      * @param newFee token address
      */
-    function setFee(uint256 newFee) external;
+    function setFee(address token, uint256 newFee) external;
 
     /**
      * @notice returns output amount from a given amount
      * @return amountOut output amount
      */
-    function getOutputAmountWithFee(uint256 amountIn)
+    function getOutputAmountWithFee(uint256 amountIn, address token)
         external
         view
         returns (uint256 amountOut);
@@ -91,5 +91,5 @@ interface IManageableVault {
      * @notice returns vault fee
      * @return fee fee
      */
-    function getFee() external view returns (uint256);
+    function getFee(address token) external view returns (uint256);
 }

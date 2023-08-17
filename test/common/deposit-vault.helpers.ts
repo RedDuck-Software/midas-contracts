@@ -97,7 +97,7 @@ export const initiateDepositRequest = async (
     sender.address,
   );
 
-  const fee = await depositVault.getFee();
+  const fee = await depositVault.getFee(tokenIn);
   const feeAmount = amountIn.sub(amountIn.sub(fee.mul(amountIn).div(10000)));
 
   await expect(
@@ -166,7 +166,7 @@ export const fulfillDepositRequest = (
       let request = await depositVault.requests(requestId);
       expect(owner.address).eq(sender.address);
       expect(request.tokenIn).not.eq(ethers.constants.AddressZero);
-      expect(request.fee).gt(0);
+      expect(request.fee).eq(0);
       expect(request.amountUsdIn).gt(0);
       expect(request.exists).eq(true);
 
@@ -251,6 +251,7 @@ export const manualDepositTest = (
         { depositVault, mockedAggregator: aggregator },
         {
           amountN: amountUsdIn,
+          token: token.address,
         },
       );
 
@@ -370,16 +371,18 @@ export const getOutputAmountWithFeeTest = async (
     priceN,
     amountN,
     feeN,
+    token,
   }: {
     amountN: number;
     priceN?: number;
     feeN?: number;
+    token: string;
   },
 ) => {
   const bps = await depositVault.PERCENTAGE_BPS();
 
   priceN ??= await getRoundData({ mockedAggregator });
-  feeN ??= (await depositVault.getFee()).toNumber() / bps.toNumber();
+  feeN ??= (await depositVault.getFee(token)).toNumber() / bps.toNumber();
 
   const price = await setRoundData({ mockedAggregator }, priceN);
   const amount = parseUnits(amountN.toString());
@@ -390,9 +393,9 @@ export const getOutputAmountWithFeeTest = async (
 
   const expectedValue = woFee.sub(woFee.mul(fee).div(bps.mul(100)));
 
-  await depositVault.setFee(fee);
+  await depositVault.setFee(token, fee);
 
-  const realValue = await depositVault.getOutputAmountWithFee(amount);
+  const realValue = await depositVault.getOutputAmountWithFee(amount, token);
 
   expect(realValue).eq(expectedValue);
 

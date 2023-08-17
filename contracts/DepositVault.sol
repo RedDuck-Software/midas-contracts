@@ -110,7 +110,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         _validateAmountUsdIn(user, amountUsdIn);
         require(amountUsdIn > 0, "DV: invalid amount");
 
-        uint256 fee = (amountUsdIn * getFee()) / (100 * PERCENTAGE_BPS);
+        uint256 fee = (amountUsdIn * getFee(tokenIn)) / (100 * PERCENTAGE_BPS);
         uint256 amountIncludingFee = amountUsdIn - fee;
 
         totalDeposited[user] += amountIncludingFee;
@@ -164,7 +164,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     ) external onlyVaultAdmin returns (uint256 amountStUsdOut) {
         require(amountUsdIn > 0, "DV: 0 amount");
 
-        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn);
+        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn, tokenIn);
         _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
     }
 
@@ -194,12 +194,12 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IManageableVault
      */
-    function getOutputAmountWithFee(uint256 amountUsdIn)
+    function getOutputAmountWithFee(uint256 amountUsdIn, address token)
         external
         view
         returns (uint256)
     {
-        return _getOutputAmountWithFee(amountUsdIn);
+        return _getOutputAmountWithFee(amountUsdIn, token);
     }
 
     /**
@@ -214,8 +214,8 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IManageableVault
      */
-    function getFee() public view returns (uint256) {
-        return _fee;
+    function getFee(address token) public view returns (uint256) {
+        return _feesForTokens[token];
     }
 
     /**
@@ -248,7 +248,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param amountUsdIn amount of USD
      * @return outputStUsd amount of stUSD that should be minted to user
      */
-    function _getOutputAmountWithFee(uint256 amountUsdIn)
+    function _getOutputAmountWithFee(uint256 amountUsdIn, address token)
         internal
         view
         returns (uint256)
@@ -261,7 +261,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             : (amountUsdIn * (10**18)) / (price);
         return
             amountOutWithoutFee -
-            ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));
+            ((amountOutWithoutFee * getFee(token)) / (100 * PERCENTAGE_BPS));
     }
 
     /**

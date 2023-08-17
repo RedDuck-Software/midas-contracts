@@ -88,7 +88,7 @@ export const initiateRedemptionRequestTest = async (
 
   const supplyBefore = await stUSD.totalSupply();
 
-  const fee = await redemptionVault.getFee();
+  const fee = await redemptionVault.getFee(tokenOut);
   const feeAmount = amountIn.sub(amountIn.sub(fee.mul(amountIn).div(10000)));
 
   await expect(
@@ -320,6 +320,7 @@ export const manualRedeemTest = (
         { redemptionVault, mockedAggregator: aggregator },
         {
           amountN: amountStUsdIn,
+          token: token.address,
         },
       );
 
@@ -434,16 +435,18 @@ export const getOutputAmountWithFeeRedeemTest = async (
     priceN,
     amountN,
     feeN,
+    token,
   }: {
     amountN: number;
     priceN?: number;
     feeN?: number;
+    token: string;
   },
 ) => {
   const bps = await redemptionVault.PERCENTAGE_BPS();
 
   priceN ??= await getRoundData({ mockedAggregator });
-  feeN ??= (await redemptionVault.getFee()).toNumber() / bps.toNumber();
+  feeN ??= (await redemptionVault.getFee(token)).toNumber() / bps.toNumber();
 
   const price = await setRoundData({ mockedAggregator }, priceN);
   const amount = parseUnits(amountN.toString());
@@ -454,9 +457,9 @@ export const getOutputAmountWithFeeRedeemTest = async (
 
   const expectedValue = woFee.sub(woFee.mul(fee).div(bps.mul(100)));
 
-  await redemptionVault.setFee(fee);
+  await redemptionVault.setFee(token, fee);
 
-  const realValue = await redemptionVault.getOutputAmountWithFee(amount);
+  const realValue = await redemptionVault.getOutputAmountWithFee(amount, token);
 
   expect(realValue).eq(expectedValue);
 

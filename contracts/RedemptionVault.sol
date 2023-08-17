@@ -97,11 +97,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         require(amountStUsdIn > 0, "RV: 0 amount");
 
         // estimate out amount and validate that it`s >= min allowed
-        _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn));
+        _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn, tokenOut));
 
         stUSD.burn(user, amountStUsdIn);
 
-        uint256 fee = (amountStUsdIn * getFee()) / (100 * PERCENTAGE_BPS);
+        uint256 fee = (amountStUsdIn * getFee(tokenOut)) / (100 * PERCENTAGE_BPS);
         uint256 amountIncludingFee = amountStUsdIn - fee;
 
         requests[requestId] = RedemptionRequest({
@@ -157,7 +157,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         uint256 amountStUsdIn
     ) external onlyVaultAdmin returns (uint256 amountUsdOut) {
         require(amountStUsdIn > 0, "RV: 0 amount");
-        amountUsdOut = _getOutputAmountWithFee(amountStUsdIn);
+        amountUsdOut = _getOutputAmountWithFee(amountStUsdIn, tokenOut);
         _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
     }
 
@@ -187,12 +187,12 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @notice returns output USD amount from a given stUSD amount
      * @return amountOut output USD amount
      */
-    function getOutputAmountWithFee(uint256 amountIn)
+    function getOutputAmountWithFee(uint256 amountIn, address token)
         external
         view
         returns (uint256 amountOut)
     {
-        return _getOutputAmountWithFee(amountIn);
+        return _getOutputAmountWithFee(amountIn, token);
     }
 
     /**
@@ -201,8 +201,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @dev fee applies to output USD amount
      * @return fee USD fee
      */
-    function getFee() public view returns (uint256) {
-        return _fee;
+    function getFee(address token) public view returns (uint256) {
+        return _feesForTokens[token];
     }
 
     /**
@@ -299,7 +299,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @param amountStUsdIn amount of stUSD token
      * @return amountUsdOut amount with fee of output USD token
      */
-    function _getOutputAmountWithFee(uint256 amountStUsdIn)
+    function _getOutputAmountWithFee(uint256 amountStUsdIn, address token)
         internal
         view
         returns (uint256)
@@ -312,7 +312,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             : (amountStUsdIn * price) / (10**18);
         return
             amountOutWithoutFee -
-            ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));
+            ((amountOutWithoutFee * getFee(token)) / (100 * PERCENTAGE_BPS));
     }
 
     /**
