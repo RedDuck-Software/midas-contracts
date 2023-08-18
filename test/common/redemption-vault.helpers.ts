@@ -297,7 +297,7 @@ export const manualRedeemTest = (
         return;
       }
 
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
+      const balanceBeforeStUsd = await stUSD.balanceOf(redemptionVault.address);
 
       const balanceBeforeUser = await balanceOfBase18(token, user);
 
@@ -339,7 +339,7 @@ export const manualRedeemTest = (
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterStUsdUser = await stUSD.balanceOf(user);
+      const balanceAfterStUsd = await stUSD.balanceOf(redemptionVault.address);
 
       const balanceAfterUser = await balanceOfBase18(token, user);
 
@@ -351,7 +351,7 @@ export const manualRedeemTest = (
       const supplyAfter = await stUSD.totalSupply();
 
       expect(supplyAfter).eq(supplyBefore.sub(amountIn));
-      expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser.sub(amountIn));
+      expect(balanceAfterStUsd).eq(balanceBeforeStUsd.sub(amountIn));
 
       expect(balanceAfterUser).eq(balanceBeforeUser.add(amountOut));
       expect(balanceAfterContract).eq(balanceBeforeContract.sub(amountOut));
@@ -386,7 +386,7 @@ export const manualRedeemTest = (
         return;
       }
 
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
+      const balanceBeforeStUsd = await stUSD.balanceOf(redemptionVault.address);
 
       const balanceBeforeUser = await balanceOfBase18(token, user);
 
@@ -413,7 +413,7 @@ export const manualRedeemTest = (
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterStUsdUser = await stUSD.balanceOf(user);
+      const balanceAfterStUsd = await stUSD.balanceOf(redemptionVault.address);
 
       const balanceAfterUser = await balanceOfBase18(token, user);
 
@@ -425,7 +425,7 @@ export const manualRedeemTest = (
       const supplyAfter = await stUSD.totalSupply();
 
       expect(supplyAfter).eq(supplyBefore.sub(amountIn));
-      expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser.sub(amountIn));
+      expect(balanceAfterStUsd).eq(balanceBeforeStUsd.sub(amountIn));
 
       expect(balanceAfterUser).eq(balanceBeforeUser.add(amountOut));
       expect(balanceAfterContract).eq(balanceBeforeContract.sub(amountOut));

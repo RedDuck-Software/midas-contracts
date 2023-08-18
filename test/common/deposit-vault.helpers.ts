@@ -282,8 +282,8 @@ export const manualDepositTest = (
       const supplyAfter = await stUSD.totalSupply();
 
       expect(supplyAfter).eq(supplyBefore.add(expectedOutAmount));
-      expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
-      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser.sub(amountIn));
+      expect(balanceAfterContract).eq(balanceBeforeContract);
+      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser);
       expect(balanceAfterStUsdUser).eq(
         balanceBeforeStUsdUser.add(expectedOutAmount),
       );
@@ -362,8 +362,8 @@ export const manualDepositTest = (
       const supplyAfter = await stUSD.totalSupply();
 
       expect(supplyAfter).eq(supplyBefore.add(amountOut));
-      expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
-      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser.sub(amountIn));
+      expect(balanceAfterContract).eq(balanceBeforeContract);
+      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser);
       expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser.add(amountOut));
     },
   };

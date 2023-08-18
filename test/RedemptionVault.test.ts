@@ -17,6 +17,7 @@ import {
   manualRedeemTest,
   setMinAmountToRedeemTest,
 } from './common/redemption-vault.helpers';
+import { mint } from './common/stUSD.helpers';
 
 describe('RedemptionVault', function () {
   it('deployment', async () => {
@@ -759,7 +760,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, regularAccounts[0], 1);
+      await mintToken(stUSD, redemptionVault.address, 1);
 
       await manualRedeemTest(
         { redemptionVault, owner, stUSD },
@@ -787,7 +788,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, regularAccounts[0], 1);
+      await mintToken(stUSD, redemptionVault.address, 1);
       await mintToken(stableCoins.dai, redemptionVault, 100);
 
       await manualRedeemTest({ redemptionVault, owner, stUSD })[
@@ -948,7 +949,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, regularAccounts[0], 1);
+      await mintToken(stUSD, redemptionVault.address, 1);
       await mintToken(stableCoins.dai, redemptionVault, 1);
 
       await manualRedeemTest({ redemptionVault, owner, stUSD })[
@@ -991,7 +992,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, regularAccounts[0], 1);
+      await mintToken(stUSD, redemptionVault.address, 1);
 
       await manualRedeemTest({ redemptionVault, owner, stUSD })[
         'manuallyRedeem(address,address,uint256,uint256)'
