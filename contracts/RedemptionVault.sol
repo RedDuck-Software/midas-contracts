@@ -103,17 +103,17 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         uint256 fee = (amountStUsdIn * getFee(tokenOut)) /
             (100 * PERCENTAGE_BPS);
-        uint256 amountIncludingFee = amountStUsdIn - fee;
+        uint256 amountIncludingSubtractionOfFee = amountStUsdIn - fee;
 
         requests[requestId] = RedemptionRequest({
             user: user,
             tokenOut: tokenOut,
-            amountStUsdIn: amountIncludingFee,
+            amountStUsdIn: amountIncludingSubtractionOfFee,
             fee: fee,
             exists: true
         });
 
-        emit InitiateRequest(requestId, user, tokenOut, amountIncludingFee);
+        emit InitiateRequest(requestId, user, tokenOut, amountIncludingSubtractionOfFee);
         emit FeeCollected(requestId, user, fee);
     }
 

@@ -118,20 +118,20 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(amountUsdIn > 0, "DV: invalid amount");
 
         uint256 fee = (amountUsdIn * getFee(tokenIn)) / (100 * PERCENTAGE_BPS);
-        uint256 amountIncludingFee = amountUsdIn - fee;
+        uint256 amountIncludingSubtractionOfFee = amountUsdIn - fee;
 
-        totalDeposited[user] += amountIncludingFee;
+        totalDeposited[user] += amountIncludingSubtractionOfFee;
         _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
 
         requests[requestId] = DepositRequest(
             user,
             tokenIn,
-            amountIncludingFee,
+            amountIncludingSubtractionOfFee,
             fee,
             true
         );
 
-        emit InitiateRequest(requestId, user, tokenIn, amountIncludingFee);
+        emit InitiateRequest(requestId, user, tokenIn, amountIncludingSubtractionOfFee);
         emit FeeCollected(requestId, msg.sender, fee);
 
         return requestId;
