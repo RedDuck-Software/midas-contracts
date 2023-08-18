@@ -42,7 +42,14 @@ export const initGrantRoles = async ({
   const checkAndExecute = async (role: string, address: string) => {
     if (!(await accessControl.hasRole(role, address))) {
       if (execute) await execute(role, address);
-      else await accessControl.connect(owner).grantRole(role, address);
+      else {
+        console.log(`Granting role: ${role} to address: ${address}`);
+        await accessControl
+          .connect(owner)
+          .grantRole(role, address)
+          .then((tx) => tx.wait());
+        console.log('Role granted.');
+      }
     }
   };
 

@@ -23,6 +23,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getCurrentAddresses(hre);
 
+  console.log('Deploying DepositVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(DEPOSIT_VAULT_CONTRACT_NAME, owner),
     [
@@ -33,8 +34,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       '0',
     ],
   );
+  console.log('Deployed DepositVault:', deployment.address);
 
-  await delay(10_000);
+  if (deployment.deployTransaction) {
+    console.log('Waiting 5 blocks...');
+    await deployment.deployTransaction.wait(5);
+    console.log('Waited.');
+  }
   await logDeployProxy(hre, DEPOSIT_VAULT_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };

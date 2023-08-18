@@ -16,17 +16,17 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
 > = {
   main: undefined,
   sepolia: {
-    depositVault: '0xb0f198b9e141179f401E53C104454688001dC511',
-    redemptionVault: '0x4C428dF013227696C27b223bcD18Dcda46CD0a3D',
-    stUSD: '0x08383da6716C12d1250E735ABe7FDcDD6e96e9e9',
-    etfDataFeed: '0x7838E7B02d76e58Aa7032f73D27C11134192e99d',
+    depositVault: '0x9fbE2b4c7132F97aA9B85b8197ddc55068dF6FF4',
+    redemptionVault: '0x5c05D18E86dE36cB34Ac97946FC900b67c296288',
+    stUSD: '0xDF7d31CC8FD536F442Db48400567388cC019841b',
+    etfDataFeed: '0xd7541dd188FD2499EDC9EeF33e62BCbae78D3426',
     eurToUsdFeed: '0xE23c07Ecad6D822500CbE8306d72A90578CA9F11',
-    accessControl: '0xf93877fbc3fDcd95c09eb480dC451c4D356217bD',
+    accessControl: '0x31b380DD71Ba166ADb2285adAa5bE10532c4e627',
   },
   hardhat: {
     depositVault: '',
     redemptionVault: '',
-    stUSD: '',
+    stUSD: '0xDF7d31CC8FD536F442Db48400567388cC019841b',
     etfDataFeed: '',
     eurToUsdFeed: '',
     accessControl: '0x53D493424694874Edb368144b60b5F36C6c70c37',

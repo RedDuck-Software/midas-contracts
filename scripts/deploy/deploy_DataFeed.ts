@@ -42,11 +42,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         'MOCK_AGGREGATOR_NETWORK_TAG is true, deploying mocked data aggregator',
       ),
     );
+    console.log('Deploying AggregatorV3Mock...');
     const aggregatorDeploy = await (
       await (
         await hre.ethers.getContractFactory('AggregatorV3Mock', owner)
       ).deploy()
     ).deployed();
+    console.log('Deployed AggregatorV3Mock:', aggregatorDeploy.address);
 
     // eslint-disable-next-line camelcase
     const aggregatorContract = AggregatorV3Mock__factory.connect(
@@ -78,12 +80,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getCurrentAddresses(hre);
 
+  console.log('Deploying DataFeed...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(DATA_FEED_CONTRACT_NAME, owner),
     [addresses?.accessControl, aggregator],
   );
+  console.log('Deployed DataFeed:', deployment.address);
 
-  await delay(10_000);
+  if (deployment.deployTransaction) {
+    console.log('Waiting 5 blocks...');
+    await deployment.deployTransaction.wait(5);
+    console.log('Waited.');
+  }
   await logDeployProxy(hre, DATA_FEED_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };
