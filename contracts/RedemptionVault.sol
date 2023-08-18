@@ -268,7 +268,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         _requireTokenExists(tokenOut);
         stUSD.burn(address(this), amountStUsdIn);
-        _transferToken(user, tokenOut, amountUsdOut);
 
         emit PerformManualAction(
             msg.sender,

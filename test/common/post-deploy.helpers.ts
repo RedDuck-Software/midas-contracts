@@ -44,11 +44,11 @@ export const initGrantRoles = async ({
       if (execute) await execute(role, address);
       else {
         console.log(`Granting role: ${role} to address: ${address}`);
-        await accessControl
-          .connect(owner)
-          .grantRole(role, address)
-          .then((tx) => tx.wait());
-        console.log('Role granted.');
+        // await accessControl
+        //   .connect(owner)
+        //   .grantRole(role, address)
+        //   .then((tx) => tx.wait());
+        // console.log('Role granted.');
       }
     }
   };
