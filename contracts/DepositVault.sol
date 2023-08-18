@@ -131,7 +131,12 @@ contract DepositVault is ManageableVault, IDepositVault {
             true
         );
 
-        emit InitiateRequest(requestId, user, tokenIn, amountIncludingSubtractionOfFee);
+        emit InitiateRequest(
+            requestId,
+            user,
+            tokenIn,
+            amountIncludingSubtractionOfFee
+        );
         emit FeeCollected(requestId, msg.sender, fee);
 
         return requestId;

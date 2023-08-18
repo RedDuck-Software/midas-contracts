@@ -113,7 +113,12 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             exists: true
         });
 
-        emit InitiateRequest(requestId, user, tokenOut, amountIncludingSubtractionOfFee);
+        emit InitiateRequest(
+            requestId,
+            user,
+            tokenOut,
+            amountIncludingSubtractionOfFee
+        );
         emit FeeCollected(requestId, user, fee);
     }
 
