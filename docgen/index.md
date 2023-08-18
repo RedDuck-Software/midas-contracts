@@ -4,6 +4,18 @@
 
 Smart contract that handles stUSD minting
 
+### DepositRequest
+
+```solidity
+struct DepositRequest {
+  address user;
+  address tokenIn;
+  uint256 amountUsdIn;
+  uint256 fee;
+  bool exists;
+}
+```
+
 ### minAmountToDepositInEuro
 
 ```solidity
@@ -28,6 +40,33 @@ mapping(address => uint256) totalDeposited
 
 depositor address => amount deposited
 
+### requests
+
+```solidity
+mapping(uint256 => struct DepositVault.DepositRequest) requests
+```
+
+stores requests id for deposit requests created by user
+deleted when request is fulfilled or cancelled by permissioned actor
+
+_requestId => DepositRequest_
+
+### lastRequestId
+
+```solidity
+struct Counters.Counter lastRequestId
+```
+
+last deposit request id
+
+### isFreeFromMinDeposit
+
+```solidity
+mapping(address => bool) isFreeFromMinDeposit
+```
+
+users restricted from depositin minDepositAmountInEuro
+
 ### initialize
 
 ```solidity
@@ -46,10 +85,10 @@ upgradeable patter contract`s initializer
 | _eurUsdDataFeed | address | address of CL`s data feed EUR/USD |
 | _minAmountToDepositInEuro | uint256 | init. value for minUsdAmountToRedeem |
 
-### deposit
+### initiateDepositRequest
 
 ```solidity
-function deposit(address tokenIn, uint256 amountUsdIn) external returns (uint256)
+function initiateDepositRequest(address tokenIn, uint256 amountUsdIn) external returns (uint256)
 ```
 
 deposits USD token into vault and mints
@@ -71,10 +110,10 @@ stUSD according to ETF data feed price_
 | ---- | ---- | ----------- |
 | [0] | uint256 |  |
 
-### fulfillManualDeposit
+### fulfillDepositRequest
 
 ```solidity
-function fulfillManualDeposit(address user, uint256 amountUsdIn) external returns (uint256)
+function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut) external
 ```
 
 mints stUSD to a `user` and doesnt transfer USD
@@ -87,34 +126,69 @@ _mints stUSD according to ETF data feed price_
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| user | address | address of user to mint stUSD to |
-| amountUsdIn | uint256 | amount of USD provided by user |
+| requestId | uint256 | id of a deposit request |
+| amountStUsdOut | uint256 | amount of stUSD calculated by admin |
 
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 |  |
-
-### fulfillManualDeposit
+### cancelDepositRequest
 
 ```solidity
-function fulfillManualDeposit(address user, uint256 amountUsdIn, uint256 amountStUsdOut) external
+function cancelDepositRequest(uint256 requestId) external
 ```
 
-mints stUSD to a `user` and doesnt transfer USD
-from a `user`.
-can be called only from permissioned actor.
+cancels deposit request by a given `requestId`.
+can be called only from permissioned actor
 
-_mints `amountStUsdOut` of stUSD_
+_deletes request by a given `requestId` from storage
+and fires the event_
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| user | address | address of user to mint stUSD to |
-| amountUsdIn | uint256 | address of user to mint stUSD to |
-| amountStUsdOut | uint256 | amount of stUSD that should be minted to user |
+| requestId | uint256 | id of a deposit request |
+
+### manuallyDeposit
+
+```solidity
+function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn) external returns (uint256 amountStUsdOut)
+```
+
+mints stUSD to user.
+can be called only from permissioned actor
+
+_`tokenIn` amount is calculated using ETF data feed answer_
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| user | address | address of user |
+| tokenIn | address | address of input USD token |
+| amountUsdIn | uint256 | amount of stUSD to send to user |
+
+### manuallyDeposit
+
+```solidity
+function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut) external
+```
+
+mints stUSD to user.
+can be called only from permissioned actor
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| user | address | address of user |
+| tokenIn | address | address of inout USD token |
+| amountUsdIn | uint256 | amount of USD to deposit |
+| amountStUsdOut | uint256 | amount of stUSD token to send to user |
+
+### freeFromMinDeposit
+
+```solidity
+function freeFromMinDeposit(address user) external
+```
 
 ### setMinAmountToDeposit
 
@@ -134,7 +208,7 @@ can be called only from permissioned actor.
 ### getOutputAmountWithFee
 
 ```solidity
-function getOutputAmountWithFee(uint256 amountUsdIn) external view returns (uint256)
+function getOutputAmountWithFee(uint256 amountUsdIn, address token) external view returns (uint256)
 ```
 
 returns output amount from a given amount
@@ -156,7 +230,7 @@ minAmountToDepositInEuro in USD in base18
 ### getFee
 
 ```solidity
-function getFee() public view returns (uint256)
+function getFee(address token) public view returns (uint256)
 ```
 
 returns vault fee
@@ -181,10 +255,10 @@ AC role of vault administrator
 | ---- | ---- | ----------- |
 | [0] | bytes32 | role bytes32 role |
 
-### _deposit
+### _fullfillDepositRequest
 
 ```solidity
-function _deposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut, bool isManuallyFilled) internal returns (uint256)
+function _fullfillDepositRequest(uint256 requestId, address user, uint256 amountStUsdOut) internal
 ```
 
 deposits USD `tokenIn` into vault and mints given `amountStUsdOut amount
@@ -193,22 +267,14 @@ deposits USD `tokenIn` into vault and mints given `amountStUsdOut amount
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| requestId | uint256 | id of a deposit request |
 | user | address | user address |
-| tokenIn | address | address of USD token in |
-| amountUsdIn | uint256 | amount of `tokenIn` that should be takken from user |
 | amountStUsdOut | uint256 | amount of stUSD that should be minted to user |
-| isManuallyFilled | bool | is called from fulfillManualDeposit |
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | mintedStUsd amount of stUSD that minted to user |
 
 ### _getOutputAmountWithFee
 
 ```solidity
-function _getOutputAmountWithFee(uint256 amountUsdIn) internal view returns (uint256)
+function _getOutputAmountWithFee(uint256 amountUsdIn, address token) internal view returns (uint256)
 ```
 
 _returns how much stUSD user should receive from USD inputted_
@@ -218,6 +284,7 @@ _returns how much stUSD user should receive from USD inputted_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | amountUsdIn | uint256 | amount of USD |
+| token | address |  |
 
 #### Return Values
 
@@ -240,6 +307,26 @@ _validates that inputted USD amount >= minAmountToDepositInUsd()_
 | user | address | user address |
 | amountUsdIn | uint256 | amount of USD |
 
+### _manuallyDeposit
+
+```solidity
+function _manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut) internal
+```
+
+### _getRequest
+
+```solidity
+function _getRequest(uint256 requestId) internal view returns (struct DepositVault.DepositRequest request)
+```
+
+_checks that request is exists and copies it to memory_
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| request | struct DepositVault.DepositRequest | request object |
+
 ## RedemptionVault
 
 Smart contract that handles stUSD redemptions
@@ -251,6 +338,7 @@ struct RedemptionRequest {
   address user;
   address tokenOut;
   uint256 amountStUsdIn;
+  uint256 fee;
   bool exists;
 }
 ```
@@ -269,7 +357,7 @@ _requestId => RedemptionRequest_
 ### lastRequestId
 
 ```solidity
-uint256 lastRequestId
+struct Counters.Counter lastRequestId
 ```
 
 counter for request ids
@@ -419,7 +507,7 @@ can be called only from permissioned actor
 ### getOutputAmountWithFee
 
 ```solidity
-function getOutputAmountWithFee(uint256 amountIn) external view returns (uint256 amountOut)
+function getOutputAmountWithFee(uint256 amountIn, address token) external view returns (uint256 amountOut)
 ```
 
 returns output USD amount from a given stUSD amount
@@ -433,7 +521,7 @@ returns output USD amount from a given stUSD amount
 ### getFee
 
 ```solidity
-function getFee() public view returns (uint256)
+function getFee(address token) public view returns (uint256)
 ```
 
 returns redemption fee
@@ -529,7 +617,7 @@ token is `MANUAL_FULLFILMENT_TOKEN` as it should be transfered off-chain_
 ### _getOutputAmountWithFee
 
 ```solidity
-function _getOutputAmountWithFee(uint256 amountStUsdIn) internal view returns (uint256)
+function _getOutputAmountWithFee(uint256 amountStUsdIn, address token) internal view returns (uint256)
 ```
 
 _calculates output USD amount based on ETF data feed answer_
@@ -539,6 +627,7 @@ _calculates output USD amount based on ETF data feed answer_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | amountStUsdIn | uint256 | amount of stUSD token |
+| token | address |  |
 
 #### Return Values
 
@@ -618,13 +707,13 @@ struct EnumerableSetUpgradeable.AddressSet _paymentTokens
 
 _tokens that can be used as USD representation_
 
-### _fee
+### _feesForTokens
 
 ```solidity
-uint256 _fee
+mapping(address => uint256) _feesForTokens
 ```
 
-_value with `PERCENTAGE_BPS`_
+_fees for different tokens_
 
 ### onlyVaultAdmin
 
@@ -704,16 +793,19 @@ _reverts if token is not presented_
 ### setFee
 
 ```solidity
-function setFee(uint256 newFee) external
+function setFee(address token, uint256 newFee) external
 ```
 
 sets new `_fee` value
 can be called only from permissioned actor.
 
+_reverts is token is not presented_
+
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| token | address |  |
 | newFee | uint256 | token address |
 
 ### getPaymentTokens
@@ -744,6 +836,14 @@ AC role of vault administrator
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | [0] | bytes32 | role bytes32 role |
+
+### pauseAdminRole
+
+```solidity
+function pauseAdminRole() public view returns (bytes32)
+```
+
+_virtual function to determine pauseAdmin role_
 
 ### _tokenTransferFrom
 
@@ -798,7 +898,7 @@ _checks that `token` is presented in `_paymentTokens`_
 
 ## Blacklistable
 
-Base contract that implements basic functions and modifiers 
+Base contract that implements basic functions and modifiers
 to work with blacklistable
 
 ### onlyNotBlacklisted
@@ -824,25 +924,9 @@ _upgradeable patter contract`s initializer_
 | ---- | ---- | ----------- |
 | _accessControl | address | MidasAccessControl contract address |
 
-### addToBlackList
-
-```solidity
-function addToBlackList(address account) external
-```
-
-adds given `account` to blacklist
-
-### removeFromBlackList
-
-```solidity
-function removeFromBlackList(address account) external
-```
-
-removes given `account` from blacklist
-
 ## Greenlistable
 
-Base contract that implements basic functions and modifiers 
+Base contract that implements basic functions and modifiers
 to work with greenlistable
 
 ### onlyGreenlisted
@@ -867,22 +951,6 @@ _upgradeable patter contract`s initializer_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | _accessControl | address | MidasAccessControl contract address |
-
-### addToGreenList
-
-```solidity
-function addToGreenList(address account) external
-```
-
-adds given `account` to a greenlist
-
-### removeFromGreenList
-
-```solidity
-function removeFromGreenList(address account) external
-```
-
-removes given `account` from greenlist
 
 ## MidasAccessControl
 
@@ -1008,6 +1076,81 @@ bytes32 BLACKLISTED_ROLE
 
 actor that is blacklisted
 
+## Pausable
+
+Base contract that implements basic functions and modifiers
+with pause functionality
+
+### pausable
+
+```solidity
+modifier pausable()
+```
+
+_checks if contract is on pause_
+
+### onlyPauseAdmin
+
+```solidity
+modifier onlyPauseAdmin()
+```
+
+_checks that a given `account`
+has a determinedPauseAdminRole_
+
+### __Pausable_init
+
+```solidity
+function __Pausable_init(address _accessControl) internal
+```
+
+_upgradeable patter contract`s initializer_
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| _accessControl | address | MidasAccessControl contract address |
+
+### changePauseState
+
+```solidity
+function changePauseState(bool newState) public
+```
+
+_upgradeable patter contract`s initializer_
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| newState | bool | is new pause state |
+
+### getIsOnPause
+
+```solidity
+function getIsOnPause() external view returns (bool)
+```
+
+_returns isOnPause property_
+
+### pauseAdminRole
+
+```solidity
+function pauseAdminRole() public view virtual returns (bytes32)
+```
+
+_virtual function to determine pauseAdmin role_
+
+### _pausable
+
+```solidity
+function _pausable() internal view
+```
+
+_checks if user has pauseAdmin role and if not,
+requires to be unpaused_
+
 ## WithMidasAccessControl
 
 Base contract that consumes MidasAccessControl
@@ -1052,36 +1195,6 @@ function __WithMidasAccessControl_init(address _accessControl) internal
 
 _upgradeable patter contract`s initializer_
 
-### grantRole
-
-```solidity
-function grantRole(bytes32 role, address account) internal
-```
-
-_grants `role` to `account` using MidasAccessControl_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| role | bytes32 | bytes32 role descriptor |
-| account | address | address to grant role to |
-
-### revokeRole
-
-```solidity
-function revokeRole(bytes32 role, address account) internal
-```
-
-_revokes `role` from `account` using MidasAccessControl_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| role | bytes32 | bytes32 role descriptor |
-| account | address | address to revoke role from |
-
 ### _onlyRole
 
 ```solidity
@@ -1109,15 +1222,6 @@ contract AggregatorV3Interface aggregator
 ```
 
 AggregatorV3Interface contract address
-
-### _lastRecordedDataFetch
-
-```solidity
-struct IDataFeed.RecordedDataFetch _lastRecordedDataFetch
-```
-
-checks that a given `account`
-have GREENLISTED_ROLE
 
 ### initialize
 
@@ -1277,22 +1381,16 @@ returns last data saved via fetchDataInBase18()
 
 ## IDepositVault
 
-### Deposit
-
-```solidity
-event Deposit(address user, address tokenIn, bool isManuallyFilled, uint256 amountUsdIn, uint256 amountStUsdOut)
-```
-
 ### SetMinAmountToDeposit
 
 ```solidity
 event SetMinAmountToDeposit(address caller, uint256 newValue)
 ```
 
-### deposit
+### initiateDepositRequest
 
 ```solidity
-function deposit(address tokenIn, uint256 amountIn) external returns (uint256 amountOut)
+function initiateDepositRequest(address tokenIn, uint256 amountIn) external returns (uint256 amountOut)
 ```
 
 deposits USD token into vault and mints
@@ -1303,7 +1401,7 @@ stUSD using the DataFeed price
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | tokenIn | address | address of USD token in |
-| amountIn | uint256 | amount of `tokenIn` that will be takken from user |
+| amountIn | uint256 | amount of `tokenIn` that will be taken from user |
 
 #### Return Values
 
@@ -1311,10 +1409,10 @@ stUSD using the DataFeed price
 | ---- | ---- | ----------- |
 | amountOut | uint256 | amount of stUSD that minted to user |
 
-### fulfillManualDeposit
+### fulfillDepositRequest
 
 ```solidity
-function fulfillManualDeposit(address user, uint256 amountUsdIn) external returns (uint256 amountStUsdOut)
+function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut) external
 ```
 
 mints stUSD to a `user` and doesnt transfer USD
@@ -1325,32 +1423,58 @@ can be called only from permissioned actor.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| user | address | address of user to mint stUSD to |
-| amountUsdIn | uint256 | amount of USD provided by user |
+| requestId | uint256 | id of a deposit request |
+| amountStUsdOut | uint256 | amount of stUSD calculated by admin |
 
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| amountStUsdOut | uint256 | amount stUSD that minted to user |
-
-### fulfillManualDeposit
+### cancelDepositRequest
 
 ```solidity
-function fulfillManualDeposit(address user, uint256 amountUsdIn, uint256 amountStUsdOut) external
+function cancelDepositRequest(uint256 requestId) external
 ```
 
-mints stUSD to a `user` and doesnt transfer USD
-from a `user`.
-can be called only from permissioned actor.
+cancels deposit request by a given `requestId`.
+can be called only from permissioned actor
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| user | address | address of user to mint stUSD to |
-| amountUsdIn | uint256 | address of user to mint stUSD to |
-| amountStUsdOut | uint256 | amount of stUSD that should be minted to user |
+| requestId | uint256 | id of a deposit request |
+
+### manuallyDeposit
+
+```solidity
+function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn) external returns (uint256 amountUsdOut)
+```
+
+mints stUSD to user.
+can be called only from permissioned actor
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| user | address | address of user |
+| tokenIn | address | address of input USD token |
+| amountUsdIn | uint256 | amount of stUSD to send to user |
+
+### manuallyDeposit
+
+```solidity
+function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut) external
+```
+
+mints stUSD to user.
+can be called only from permissioned actor
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| user | address | address of user |
+| tokenIn | address | address of inout USD token |
+| amountUsdIn | uint256 | amount of USD to deposit |
+| amountStUsdOut | uint256 | amount of stUSD token to send to user |
 
 ### setMinAmountToDeposit
 
@@ -1390,7 +1514,37 @@ event RemovePaymentToken(address token, address caller)
 ### SetFee
 
 ```solidity
-event SetFee(address caller, uint256 newFee)
+event SetFee(address caller, address token, uint256 newFee)
+```
+
+### InitiateRequest
+
+```solidity
+event InitiateRequest(uint256 requestId, address user, address token, uint256 amount)
+```
+
+### FulfillRequest
+
+```solidity
+event FulfillRequest(address caller, uint256 requestId, uint256 amountOut)
+```
+
+### CancelRequest
+
+```solidity
+event CancelRequest(uint256 requestId)
+```
+
+### PerformManualAction
+
+```solidity
+event PerformManualAction(address caller, address user, address token, uint256 amountStUsd, uint256 amountUsd)
+```
+
+### FeeCollected
+
+```solidity
+event FeeCollected(uint256 requestId, address user, uint256 feeAmount)
 ```
 
 ### withdrawToken
@@ -1443,7 +1597,7 @@ can be called only from permissioned actor.
 ### setFee
 
 ```solidity
-function setFee(uint256 newFee) external
+function setFee(address token, uint256 newFee) external
 ```
 
 sets new `_fee` value
@@ -1453,12 +1607,13 @@ can be called only from permissioned actor.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| token | address |  |
 | newFee | uint256 | token address |
 
 ### getOutputAmountWithFee
 
 ```solidity
-function getOutputAmountWithFee(uint256 amountIn) external view returns (uint256 amountOut)
+function getOutputAmountWithFee(uint256 amountIn, address token) external view returns (uint256 amountOut)
 ```
 
 returns output amount from a given amount
@@ -1472,7 +1627,7 @@ returns output amount from a given amount
 ### getFee
 
 ```solidity
-function getFee() external view returns (uint256)
+function getFee(address token) external view returns (uint256)
 ```
 
 returns vault fee
@@ -1483,31 +1638,15 @@ returns vault fee
 | ---- | ---- | ----------- |
 | [0] | uint256 | fee fee |
 
+## IPausable
+
+### ChangeState
+
+```solidity
+event ChangeState(bool newState)
+```
+
 ## IRedemptionVault
-
-### InitiateRedeemptionRequest
-
-```solidity
-event InitiateRedeemptionRequest(uint256 requestId, address user, address tokenOut, uint256 amountStUsdIn)
-```
-
-### FulfillRedeemptionRequest
-
-```solidity
-event FulfillRedeemptionRequest(address caller, uint256 requestId, uint256 amountUsdOut)
-```
-
-### CancelRedemptionRequest
-
-```solidity
-event CancelRedemptionRequest(uint256 requestId)
-```
-
-### ManuallyRedeem
-
-```solidity
-event ManuallyRedeem(address caller, address user, address tokenOut, uint256 amountStUsdIn, uint256 amountUsdOut)
-```
 
 ### SetMinAmountToRedeem
 
@@ -2025,6 +2164,22 @@ function initialize(address _accessControl) external
 ```solidity
 function onlyGreenlistedTester(address account) external
 ```
+
+## PausableTester
+
+### initialize
+
+```solidity
+function initialize(address _accessControl) external
+```
+
+### pauseAdminRole
+
+```solidity
+function pauseAdminRole() public view returns (bytes32)
+```
+
+_virtual function to determine pauseAdmin role_
 
 ## WithMidasAccessControlTester
 

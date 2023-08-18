@@ -84,11 +84,14 @@ export const initiateRedemptionRequestTest = async (
     return;
   }
 
+  const feePercentageInBPS = 0;
+
   const balanceBeforeUser = await stUSD.balanceOf(sender.address);
 
   const supplyBefore = await stUSD.totalSupply();
 
   const fee = await redemptionVault.getFee(tokenOut);
+  expect(fee).eq(feePercentageInBPS);
   const feeAmount = amountIn.sub(amountIn.sub(fee.mul(amountIn).div(10000)));
 
   await expect(
@@ -198,6 +201,7 @@ export const fulfillRedemptionRequestTest = (
       expect(request.exists).eq(false);
       expect(request.user).eq(ethers.constants.AddressZero);
       expect(request.tokenOut).eq(ethers.constants.AddressZero);
+      expect(request.fee).eq(0);
       expect(request.amountStUsdIn).eq('0');
 
       expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser);

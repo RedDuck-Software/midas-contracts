@@ -74,6 +74,7 @@ export const initiateDepositRequest = async (
   const sender = opt?.from ?? owner;
   // eslint-disable-next-line camelcase
   const tokenContract = ERC20__factory.connect(tokenIn, owner);
+  const feePercentageInBPS = 15;
 
   const amountIn = parseUnits(amountUsdIn.toString());
 
@@ -83,6 +84,8 @@ export const initiateDepositRequest = async (
     ).revertedWith(opt?.revertMessage);
     return;
   }
+
+  await depositVault.setFee(tokenIn, feePercentageInBPS);
 
   const balanceBeforeContract = await balanceOfBase18(
     tokenContract,
@@ -98,6 +101,7 @@ export const initiateDepositRequest = async (
   );
 
   const fee = await depositVault.getFee(tokenIn);
+  await expect(fee).eq(feePercentageInBPS);
   const feeAmount = amountIn.sub(amountIn.sub(fee.mul(amountIn).div(10000)));
 
   await expect(
@@ -166,7 +170,7 @@ export const fulfillDepositRequest = (
       let request = await depositVault.requests(requestId);
       expect(owner.address).eq(sender.address);
       expect(request.tokenIn).not.eq(ethers.constants.AddressZero);
-      expect(request.fee).eq(0);
+      expect(request.fee).gt(0);
       expect(request.amountUsdIn).gt(0);
       expect(request.exists).eq(true);
 

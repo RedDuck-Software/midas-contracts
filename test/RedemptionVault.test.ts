@@ -254,7 +254,7 @@ describe('RedemptionVault', function () {
       await mintToken(stUSD, owner, 1);
       await initiateRedemptionRequestTest(
         { redemptionVault, owner, stUSD },
-        manualFulfillmentToken,
+        stableCoins.dai,
         1,
       );
     });
