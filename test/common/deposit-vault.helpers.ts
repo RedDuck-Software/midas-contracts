@@ -74,6 +74,7 @@ export const initiateDepositRequest = async (
   const sender = opt?.from ?? owner;
   // eslint-disable-next-line camelcase
   const tokenContract = ERC20__factory.connect(tokenIn, owner);
+  const feePercentageInBPS = 15;
 
   const amountIn = parseUnits(amountUsdIn.toString());
 
@@ -83,6 +84,8 @@ export const initiateDepositRequest = async (
     ).revertedWith(opt?.revertMessage);
     return;
   }
+
+  await depositVault.setFee(tokenIn, feePercentageInBPS);
 
   const balanceBeforeContract = await balanceOfBase18(
     tokenContract,
@@ -97,14 +100,26 @@ export const initiateDepositRequest = async (
     sender.address,
   );
 
+  const fee = await depositVault.getFee(tokenIn);
+  await expect(fee).eq(feePercentageInBPS);
+  const feeAmount = amountIn.sub(amountIn.sub(fee.mul(amountIn).div(10000)));
+
   await expect(
     depositVault.connect(sender).initiateDepositRequest(tokenIn, amountIn),
-  ).to.emit(
-    depositVault,
-    depositVault.interface.events[
-      'InitiateRequest(uint256,address,address,uint256)'
-    ].name,
-  ).to.not.reverted;
+  )
+    .to.emit(
+      depositVault,
+      depositVault.interface.events[
+        'InitiateRequest(uint256,address,address,uint256)'
+      ].name,
+    )
+    .to.emit(
+      depositVault,
+      depositVault.interface.events['FeeCollected(uint256,address,uint256)']
+        .name,
+    )
+    .withArgs(await depositVault.lastRequestId(), sender.address, feeAmount).to
+    .not.reverted;
 
   const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
 
@@ -114,7 +129,9 @@ export const initiateDepositRequest = async (
   );
   const balanceAfterUser = await balanceOfBase18(tokenContract, sender.address);
 
-  expect(totalDepositedAfter).eq(totalDepositedBefore.add(amountIn));
+  expect(totalDepositedAfter).eq(
+    totalDepositedBefore.add(amountIn.sub(feeAmount)),
+  );
   expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
 
@@ -123,7 +140,8 @@ export const initiateDepositRequest = async (
   const request = await depositVault.requests(lastRequestId);
   expect(request.user).eq(sender.address);
   expect(request.tokenIn).eq(tokenIn);
-  expect(request.amountUsdIn).eq(amountIn);
+  expect(request.amountUsdIn).eq(amountIn.sub(feeAmount));
+  expect(request.fee).eq(feeAmount);
   expect(request.exists).eq(true);
 };
 
@@ -152,6 +170,7 @@ export const fulfillDepositRequest = (
       let request = await depositVault.requests(requestId);
       expect(owner.address).eq(sender.address);
       expect(request.tokenIn).not.eq(ethers.constants.AddressZero);
+      expect(request.fee).gt(0);
       expect(request.amountUsdIn).gt(0);
       expect(request.exists).eq(true);
 
@@ -175,6 +194,7 @@ export const fulfillDepositRequest = (
       expect(request.user).eq(ethers.constants.AddressZero);
       expect(request.tokenIn).eq(ethers.constants.AddressZero);
       expect(request.amountUsdIn).eq(0);
+      expect(request.fee).eq(0);
       expect(request.exists).eq(false);
     },
   };
@@ -213,7 +233,7 @@ export const manualDepositTest = (
         return;
       }
 
-      const balanceBeforeTokenUser = await balanceOfBase18(token, user);
+      const balanceBeforeTokenUser = await balanceOfBase18(token, owner);
       const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
 
       const balanceBeforeContract = await balanceOfBase18(token, depositVault);
@@ -235,6 +255,7 @@ export const manualDepositTest = (
         { depositVault, mockedAggregator: aggregator },
         {
           amountN: amountUsdIn,
+          token: token.address,
         },
       );
 
@@ -253,7 +274,7 @@ export const manualDepositTest = (
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterTokenUser = await balanceOfBase18(token, user);
+      const balanceAfterTokenUser = await balanceOfBase18(token, owner);
       const balanceAfterStUsdUser = await stUSD.balanceOf(user);
 
       const balanceAfterContract = await balanceOfBase18(token, depositVault);
@@ -299,7 +320,7 @@ export const manualDepositTest = (
         return;
       }
 
-      const balanceBeforeTokenUser = await balanceOfBase18(token, user);
+      const balanceBeforeTokenUser = await balanceOfBase18(token, owner);
       const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
 
       const balanceBeforeContract = await balanceOfBase18(token, depositVault);
@@ -333,7 +354,7 @@ export const manualDepositTest = (
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterTokenUser = await balanceOfBase18(token, user);
+      const balanceAfterTokenUser = await balanceOfBase18(token, owner);
       const balanceAfterStUsdUser = await stUSD.balanceOf(user);
 
       const balanceAfterContract = await balanceOfBase18(token, depositVault);
@@ -354,16 +375,18 @@ export const getOutputAmountWithFeeTest = async (
     priceN,
     amountN,
     feeN,
+    token,
   }: {
     amountN: number;
     priceN?: number;
     feeN?: number;
+    token: string;
   },
 ) => {
   const bps = await depositVault.PERCENTAGE_BPS();
 
   priceN ??= await getRoundData({ mockedAggregator });
-  feeN ??= (await depositVault.getFee()).toNumber() / bps.toNumber();
+  feeN ??= (await depositVault.getFee(token)).toNumber() / bps.toNumber();
 
   const price = await setRoundData({ mockedAggregator }, priceN);
   const amount = parseUnits(amountN.toString());
@@ -374,9 +397,9 @@ export const getOutputAmountWithFeeTest = async (
 
   const expectedValue = woFee.sub(woFee.mul(fee).div(bps.mul(100)));
 
-  await depositVault.setFee(fee);
+  await depositVault.setFee(token, fee);
 
-  const realValue = await depositVault.getOutputAmountWithFee(amount);
+  const realValue = await depositVault.getOutputAmountWithFee(amount, token);
 
   expect(realValue).eq(expectedValue);
 
@@ -420,5 +443,5 @@ export const cancelDepositRequest = async (
   expect(request.tokenIn).eq(ethers.constants.AddressZero);
   expect(request.amountUsdIn).eq('0');
 
-  expect(balanceAfterUser).eq(requestBefore.amountUsdIn);
+  expect(balanceAfterUser).eq(requestBefore.amountUsdIn.add(requestBefore.fee));
 };

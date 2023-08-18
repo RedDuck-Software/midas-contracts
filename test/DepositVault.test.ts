@@ -83,23 +83,27 @@ describe('DepositVault', function () {
 
   describe('setFee(),getFee()', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, regularAccounts } = await loadFixture(
+      const { depositVault, regularAccounts, stableCoins } = await loadFixture(
         defaultDeploy,
       );
+      await depositVault.addPaymentToken(stableCoins.usdc.address);
       await expect(
-        depositVault.connect(regularAccounts[0]).setFee(1),
+        depositVault
+          .connect(regularAccounts[0])
+          .setFee(stableCoins.usdc.address, 1),
       ).revertedWith(acErrors.WMAC_HASNT_ROLE);
     });
 
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, regularAccounts } = await loadFixture(
+      const { depositVault, regularAccounts, stableCoins } = await loadFixture(
         defaultDeploy,
       );
-      await expect(depositVault.setFee(1)).to.emit(
+      await depositVault.addPaymentToken(stableCoins.usdc.address);
+      await expect(depositVault.setFee(stableCoins.usdc.address, 1)).to.emit(
         depositVault,
-        depositVault.interface.events['SetFee(address,uint256)'].name,
+        depositVault.interface.events['SetFee(address,address,uint256)'].name,
       ).not.reverted;
-      expect(await depositVault.getFee()).eq(1);
+      expect(await depositVault.getFee(stableCoins.usdc.address)).eq(1);
     });
   });
 
@@ -339,6 +343,44 @@ describe('DepositVault', function () {
   //   })
 
   // })
+  describe('freeFromMinDeposit(address)', async () => {
+    it('should fail: call from address without vault admin role', async () => {
+      const { depositVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+      await expect(
+        depositVault
+          .connect(regularAccounts[0])
+          .freeFromMinDeposit(regularAccounts[1].address),
+      ).to.be.revertedWith('WMAC: hasnt role');
+    });
+    it('should not fail', async () => {
+      const { depositVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+      await expect(depositVault.freeFromMinDeposit(regularAccounts[0].address))
+        .to.not.reverted;
+
+      expect(
+        await depositVault.isFreeFromMinDeposit(regularAccounts[0].address),
+      ).to.eq(true);
+    });
+    it('should fail: already in list', async () => {
+      const { depositVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+      await expect(depositVault.freeFromMinDeposit(regularAccounts[0].address))
+        .to.not.reverted;
+
+      expect(
+        await depositVault.isFreeFromMinDeposit(regularAccounts[0].address),
+      ).to.eq(true);
+
+      await expect(
+        depositVault.freeFromMinDeposit(regularAccounts[0].address),
+      ).to.revertedWith('DV: already free');
+    });
+  });
   describe('getOutputAmountWithFee()', () => {
     const test = ({
       priceN,
@@ -361,12 +403,15 @@ describe('DepositVault', function () {
           stableCoins,
         } = await loadFixture(defaultDeploy);
 
+        await depositVault.addPaymentToken(stableCoins.usdc.address);
+
         await getOutputAmountWithFeeTest(
           { depositVault, mockedAggregator },
           {
             priceN,
             amountN,
             feeN,
+            token: stableCoins.usdc.address,
           },
         );
       });
@@ -597,6 +642,35 @@ describe('DepositVault', function () {
         stableCoins.dai,
       );
       await setRoundData({ mockedAggregator }, 5);
+      await initiateDepositRequest(
+        { depositVault, owner, stUSD },
+        stableCoins.dai,
+        100,
+      );
+    });
+
+    it('deposit 100 DAI, when price is 5$ without checking of minDepositAmount', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        depositVault,
+        accessControl,
+        regularAccounts,
+        stableCoins,
+        stUSD,
+      } = await loadFixture(defaultDeploy);
+      await greenList(
+        { accessControl, greenlistable: depositVault, owner },
+        owner,
+      );
+      await mintToken(stableCoins.dai, owner, 100);
+      await approveBase18(owner, stableCoins.dai, depositVault, 100);
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+      );
+      await setRoundData({ mockedAggregator }, 5);
+      await depositVault.freeFromMinDeposit(owner.address);
       await initiateDepositRequest(
         { depositVault, owner, stUSD },
         stableCoins.dai,
@@ -1028,8 +1102,8 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await mintToken(stableCoins.dai, regularAccounts[0], 100);
-      await approveBase18(regularAccounts[0], stableCoins.dai, depositVault, 5);
+      await mintToken(stableCoins.dai, owner, 5);
+      await approveBase18(owner, stableCoins.dai, depositVault, 5);
       await manualDepositTest(
         { depositVault, owner, stUSD },
         {
@@ -1086,8 +1160,8 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await mintToken(stableCoins.dai, regularAccounts[0], 100);
-      await approveBase18(regularAccounts[0], stableCoins.dai, depositVault, 5);
+      await mintToken(stableCoins.dai, owner, 5);
+      await approveBase18(owner, stableCoins.dai, depositVault, 5);
       await manualDepositTest(
         { depositVault, owner, stUSD },
         {
@@ -1192,8 +1266,8 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await mintToken(stableCoins.dai, regularAccounts[0], 100);
-      await approveBase18(regularAccounts[0], stableCoins.dai, depositVault, 5);
+      await mintToken(stableCoins.dai, owner, 1);
+      await approveBase18(owner, stableCoins.dai, depositVault, 1);
       await manualDepositTest(
         { depositVault, owner, stUSD },
         {

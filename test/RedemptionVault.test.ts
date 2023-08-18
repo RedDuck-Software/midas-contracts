@@ -73,9 +73,10 @@ describe('RedemptionVault', function () {
       expectedValue: number;
     }) => {
       it(`price is ${priceN}$, fee is ${feeN}%, amount is ${amountN}$ return value should be ${expectedValue} stUSD`, async () => {
-        const { redemptionVault, mockedAggregator } = await loadFixture(
-          defaultDeploy,
-        );
+        const { redemptionVault, mockedAggregator, stableCoins } =
+          await loadFixture(defaultDeploy);
+
+        await redemptionVault.addPaymentToken(stableCoins.usdc.address);
 
         await getOutputAmountWithFeeRedeemTest(
           { redemptionVault, mockedAggregator },
@@ -83,6 +84,7 @@ describe('RedemptionVault', function () {
             priceN,
             amountN,
             feeN,
+            token: stableCoins.usdc.address,
           },
         );
       });
@@ -252,7 +254,7 @@ describe('RedemptionVault', function () {
       await mintToken(stUSD, owner, 1);
       await initiateRedemptionRequestTest(
         { redemptionVault, owner, stUSD },
-        manualFulfillmentToken,
+        stableCoins.dai,
         1,
       );
     });

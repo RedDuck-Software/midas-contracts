@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import {IERC20Upgradeable as IERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IERC20MetadataUpgradeable as IERC20Metadata} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
@@ -20,7 +21,12 @@ import "../access/Pausable.sol";
  * @title Contract with base Vault methods
  * @author RedDuck Software
  */
-abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
+abstract contract ManageableVault is
+    Greenlistable,
+    Pausable,
+    ReentrancyGuardUpgradeable,
+    IManageableVault
+{
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
@@ -52,9 +58,9 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     EnumerableSet.AddressSet internal _paymentTokens;
 
     /**
-     * @dev value with `PERCENTAGE_BPS`
+     * @dev fees for different tokens
      */
-    uint256 internal _fee;
+    mapping(address => uint256) internal _feesForTokens;
 
     /**
      * @dev checks that msg.sender do have a vaultRole() role
@@ -80,6 +86,7 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
         etfDataFeed = IDataFeed(_etfDataFeed);
         __Greenlistable_init(_ac);
         __Pausable_init(_ac);
+        __ReentrancyGuard_init();
     }
 
     /**
@@ -95,6 +102,7 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
         address withdrawTo
     ) external onlyVaultAdmin {
         IERC20(token).transfer(withdrawTo, amount);
+
         emit WithdrawToken(msg.sender, token, withdrawTo, amount);
     }
 
@@ -119,10 +127,14 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
 
     /**
      * @inheritdoc IManageableVault
+     * @dev reverts is token is not presented
      */
-    function setFee(uint256 newFee) external onlyVaultAdmin {
-        _fee = newFee;
-        emit SetFee(msg.sender, newFee);
+    function setFee(address token, uint256 newFee) external onlyVaultAdmin {
+        require(_paymentTokens.contains(token), "MV: doesn't exist");
+
+        _feesForTokens[token] = newFee;
+
+        emit SetFee(msg.sender, token, newFee);
     }
 
     /**

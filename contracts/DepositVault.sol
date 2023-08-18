@@ -33,6 +33,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         address user;
         address tokenIn;
         uint256 amountUsdIn;
+        uint256 fee;
         bool exists;
     }
 
@@ -62,6 +63,11 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @notice last deposit request id
      */
     Counters.Counter public lastRequestId;
+
+    /**
+     * @notice users restricted from depositin minDepositAmountInEuro
+     */
+    mapping(address => bool) public isFreeFromMinDeposit;
 
     /**
      * @dev leaving a storage gap for futures updates
@@ -97,6 +103,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         external
         onlyGreenlisted(msg.sender)
         pausable
+        nonReentrant
         returns (uint256)
     {
         address user = msg.sender;
@@ -105,16 +112,32 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 requestId = lastRequestId._value;
 
         _requireTokenExists(tokenIn);
-        _validateAmountUsdIn(user, amountUsdIn);
+        if (!isFreeFromMinDeposit[msg.sender]) {
+            _validateAmountUsdIn(user, amountUsdIn);
+        }
         require(amountUsdIn > 0, "DV: invalid amount");
 
+        uint256 fee = (amountUsdIn * getFee(tokenIn)) / (100 * PERCENTAGE_BPS);
+        uint256 amountIncludingSubtractionOfFee = amountUsdIn - fee;
+
+        totalDeposited[user] += amountIncludingSubtractionOfFee;
         _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
 
-        totalDeposited[user] += amountUsdIn;
+        requests[requestId] = DepositRequest(
+            user,
+            tokenIn,
+            amountIncludingSubtractionOfFee,
+            fee,
+            true
+        );
 
-        requests[requestId] = DepositRequest(user, tokenIn, amountUsdIn, true);
-
-        emit InitiateRequest(requestId, user, tokenIn, amountUsdIn);
+        emit InitiateRequest(
+            requestId,
+            user,
+            tokenIn,
+            amountIncludingSubtractionOfFee
+        );
+        emit FeeCollected(requestId, msg.sender, fee);
 
         return requestId;
     }
@@ -142,7 +165,8 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         delete requests[requestId];
 
-        IERC20(request.tokenIn).safeTransfer(request.user, request.amountUsdIn);
+        uint256 returnAmount = request.amountUsdIn + request.fee;
+        IERC20(request.tokenIn).safeTransfer(request.user, returnAmount);
 
         emit CancelRequest(requestId);
     }
@@ -158,7 +182,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     ) external onlyVaultAdmin returns (uint256 amountStUsdOut) {
         require(amountUsdIn > 0, "DV: 0 amount");
 
-        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn);
+        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn, tokenIn);
         _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
     }
 
@@ -176,23 +200,30 @@ contract DepositVault is ManageableVault, IDepositVault {
         _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
     }
 
+    function freeFromMinDeposit(address user) external onlyVaultAdmin {
+        require(!isFreeFromMinDeposit[user], "DV: already free");
+
+        isFreeFromMinDeposit[user] = true;
+    }
+
     /**
      * @inheritdoc IDepositVault
      */
     function setMinAmountToDeposit(uint256 newValue) external onlyVaultAdmin {
         minAmountToDepositInEuro = newValue;
+
         emit SetMinAmountToDeposit(msg.sender, newValue);
     }
 
     /**
      * @inheritdoc IManageableVault
      */
-    function getOutputAmountWithFee(uint256 amountUsdIn)
+    function getOutputAmountWithFee(uint256 amountUsdIn, address token)
         external
         view
         returns (uint256)
     {
-        return _getOutputAmountWithFee(amountUsdIn);
+        return _getOutputAmountWithFee(amountUsdIn, token);
     }
 
     /**
@@ -207,8 +238,8 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IManageableVault
      */
-    function getFee() public view returns (uint256) {
-        return _fee;
+    function getFee(address token) public view returns (uint256) {
+        return _feesForTokens[token];
     }
 
     /**
@@ -241,7 +272,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param amountUsdIn amount of USD
      * @return outputStUsd amount of stUSD that should be minted to user
      */
-    function _getOutputAmountWithFee(uint256 amountUsdIn)
+    function _getOutputAmountWithFee(uint256 amountUsdIn, address token)
         internal
         view
         returns (uint256)
@@ -254,7 +285,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             : (amountUsdIn * (10**18)) / (price);
         return
             amountOutWithoutFee -
-            ((amountOutWithoutFee * getFee()) / (100 * PERCENTAGE_BPS));
+            ((amountOutWithoutFee * getFee(token)) / (100 * PERCENTAGE_BPS));
     }
 
     /**
@@ -282,7 +313,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(user != address(0), "DV: invalid user");
         _requireTokenExists(tokenIn);
 
-        _tokenTransferFrom(user, tokenIn, amountUsdIn);
+        _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
         stUSD.mint(user, amountStUsdOut);
 
         emit PerformManualAction(
