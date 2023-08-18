@@ -24,12 +24,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
 
+  console.log('Deploying RedemptionVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(REDEMPTION_VAULT_CONTRACT_NAME, owner),
     [addresses?.accessControl, addresses?.stUSD, addresses?.etfDataFeed, '0'],
   );
+  console.log('Deployed RedemptionVault:', deployment.address);
 
-  await delay(10_000);
+  if (deployment.deployTransaction) {
+    console.log('Waiting 5 blocks...');
+    await deployment.deployTransaction.wait(5);
+    console.log('Waited.');
+  }
   await logDeployProxy(hre, REDEMPTION_VAULT_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };

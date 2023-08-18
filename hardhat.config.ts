@@ -32,7 +32,7 @@ const config: HardhatUserConfig = {
     ],
   },
   namedAccounts: {
-    deployer: '0xacd40F6e41A44816649f3Fe003D54B781b0f17ED',
+    deployer: '0xf10AE7626b420CcDd80C31588E2D3cCD7B2621A2',
   },
   verify: {
     etherscan: {
