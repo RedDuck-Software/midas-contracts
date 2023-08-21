@@ -22,12 +22,6 @@ type CommonParamsGreenList = {
   owner: SignerWithAddress;
 };
 
-export const acRevertMessage = (address: string, role: string) => {
-  return `AccessControl: account ${getAddress(
-    address,
-  )} is missing role ${role}`;
-};
-
 export const acErrors = {
   WMAC_HASNT_ROLE: 'WMAC: hasnt role',
   WMAC_HAS_ROLE: 'WMAC: has role',

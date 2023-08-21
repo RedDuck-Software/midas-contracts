@@ -7,8 +7,6 @@ import {
   DecimalsCorrectionTester,
   // eslint-disable-next-line camelcase
   DecimalsCorrectionTester__factory,
-  DepositVault,
-  ERC20Mock,
 } from '../typechain-types';
 
 describe('DecimalsCorrectionLibrary', function () {

@@ -1,15 +1,12 @@
-import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { assert, expect } from 'chai';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
 import { defaultDeploy } from './common/fixtures';
 
 describe('MidasAccessControl', function () {
   it('deployment', async () => {
-    const { accessControl, roles, owner, stUSD } = await loadFixture(
-      defaultDeploy,
-    );
+    const { accessControl, roles, owner } = await loadFixture(defaultDeploy);
 
     const { blacklisted: _, greenlisted: __, ...rolesToCheck } = roles;
 
@@ -23,9 +20,7 @@ describe('MidasAccessControl', function () {
   });
 
   it('initialize', async () => {
-    const { accessControl, mockedAggregator } = await loadFixture(
-      defaultDeploy,
-    );
+    const { accessControl } = await loadFixture(defaultDeploy);
 
     await expect(accessControl.initialize()).revertedWith(
       'Initializable: contract is already initialized',
@@ -44,9 +39,7 @@ describe('MidasAccessControl', function () {
     });
 
     it('should fail: arrays length mismatch', async () => {
-      const { accessControl, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { accessControl } = await loadFixture(defaultDeploy);
 
       await expect(
         accessControl.grantRoleMult([], [ethers.constants.AddressZero]),
@@ -96,9 +89,7 @@ describe('MidasAccessControl', function () {
     });
 
     it('should fail: arrays length mismatch', async () => {
-      const { accessControl, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { accessControl } = await loadFixture(defaultDeploy);
 
       await expect(
         accessControl.revokeRoleMult([], [ethers.constants.AddressZero]),
@@ -191,7 +182,7 @@ describe('WithMidasAccessControl', function () {
     });
 
     it('call from non DEFAULT_ADMIN_ROLE address', async () => {
-      const { wAccessControlTester, owner, regularAccounts, roles } =
+      const { wAccessControlTester, regularAccounts, roles } =
         await loadFixture(defaultDeploy);
       await expect(
         wAccessControlTester.withOnlyNotRole(
@@ -204,13 +195,8 @@ describe('WithMidasAccessControl', function () {
 
   describe('grantRole()', () => {
     it('should fail when call from non role admin', async () => {
-      const {
-        wAccessControlTester,
-        accessControl,
-        owner,
-        regularAccounts,
-        roles,
-      } = await loadFixture(defaultDeploy);
+      const { wAccessControlTester, accessControl, regularAccounts, roles } =
+        await loadFixture(defaultDeploy);
       expect(
         await accessControl.hasRole(
           roles.blacklistedOperator,
@@ -226,14 +212,8 @@ describe('WithMidasAccessControl', function () {
     });
 
     it('call from role admin', async () => {
-      const {
-        accessControl,
-        wAccessControlTester,
-        owner,
-        regularAccounts,
-        stUSD,
-        roles,
-      } = await loadFixture(defaultDeploy);
+      const { accessControl, wAccessControlTester, regularAccounts, roles } =
+        await loadFixture(defaultDeploy);
       await accessControl.grantRole(
         roles.blacklistedOperator,
         wAccessControlTester.address,
@@ -249,13 +229,8 @@ describe('WithMidasAccessControl', function () {
 
   describe('revokeRole()', () => {
     it('should fail when call from non role admin', async () => {
-      const {
-        wAccessControlTester,
-        accessControl,
-        owner,
-        regularAccounts,
-        roles,
-      } = await loadFixture(defaultDeploy);
+      const { wAccessControlTester, accessControl, regularAccounts, roles } =
+        await loadFixture(defaultDeploy);
       expect(
         await accessControl.hasRole(
           roles.blacklistedOperator,
@@ -271,14 +246,8 @@ describe('WithMidasAccessControl', function () {
     });
 
     it('call from role admin', async () => {
-      const {
-        accessControl,
-        wAccessControlTester,
-        owner,
-        regularAccounts,
-        stUSD,
-        roles,
-      } = await loadFixture(defaultDeploy);
+      const { accessControl, wAccessControlTester, regularAccounts, roles } =
+        await loadFixture(defaultDeploy);
       await accessControl.grantRole(
         roles.blacklistedOperator,
         wAccessControlTester.address,

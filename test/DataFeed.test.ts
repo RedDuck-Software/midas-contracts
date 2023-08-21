@@ -1,10 +1,9 @@
-import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { assert, expect } from 'chai';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { expect } from 'chai';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
-import { acErrors, blackList, unBlackList } from './common/ac.helpers';
+import { acErrors } from './common/ac.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import { defaultDeploy } from './common/fixtures';
 
@@ -16,7 +15,7 @@ describe('DataFeed', function () {
   });
 
   it('initialize', async () => {
-    const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
+    const { dataFeed } = await loadFixture(defaultDeploy);
 
     await expect(
       dataFeed.initialize(
@@ -28,9 +27,7 @@ describe('DataFeed', function () {
 
   describe('changeAggregator()', () => {
     it('should fail: call from address without DEFAULT_ADMIN_ROLE', async () => {
-      const { dataFeed, mockedAggregator, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { dataFeed, regularAccounts } = await loadFixture(defaultDeploy);
 
       await expect(
         dataFeed
@@ -40,9 +37,7 @@ describe('DataFeed', function () {
     });
 
     it('should fail: pass zero address', async () => {
-      const { dataFeed, mockedAggregator, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { dataFeed } = await loadFixture(defaultDeploy);
 
       await expect(
         dataFeed.changeAggregator(ethers.constants.AddressZero),
@@ -50,9 +45,7 @@ describe('DataFeed', function () {
     });
 
     it('pass new aggregator address', async () => {
-      const { dataFeed, mockedAggregator, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
 
       await expect(dataFeed.changeAggregator(mockedAggregator.address)).not
         .reverted;
@@ -61,24 +54,14 @@ describe('DataFeed', function () {
 
   describe('getDataInBase18()', () => {
     it('data in base18 conversion for 4$ price', async () => {
-      const {
-        dataFeed,
-        mockedAggregatorDecimals,
-        mockedAggregator,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
       const price = '4';
       await setRoundData({ mockedAggregator }, +price);
       expect(await dataFeed.getDataInBase18()).eq(parseUnits(price));
     });
 
     it('data in base18 conversion for 0.001$ price', async () => {
-      const {
-        dataFeed,
-        mockedAggregatorDecimals,
-        mockedAggregator,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
       const price = '0.001';
       await setRoundData({ mockedAggregator }, +price);
       expect(await dataFeed.getDataInBase18()).eq(parseUnits(price));
@@ -87,12 +70,7 @@ describe('DataFeed', function () {
 
   describe('fetchDataInBase18(), lastRecordedDataFetch()', () => {
     it('data in base18 conversion for 4$ price', async () => {
-      const {
-        dataFeed,
-        mockedAggregatorDecimals,
-        mockedAggregator,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
       const price = '4';
       await setRoundData({ mockedAggregator }, +price);
       await expect(dataFeed.fetchDataInBase18()).not.reverted;
@@ -101,12 +79,7 @@ describe('DataFeed', function () {
     });
 
     it('data in base18 conversion for 0.001$ price', async () => {
-      const {
-        dataFeed,
-        mockedAggregatorDecimals,
-        mockedAggregator,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
       const price = '0.001';
       await setRoundData({ mockedAggregator }, +price);
       await expect(dataFeed.fetchDataInBase18()).not.reverted;

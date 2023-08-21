@@ -1,11 +1,8 @@
 import { expect } from 'chai';
-import chalk from 'chalk';
-import { PopulatedTransaction } from 'ethers';
 import { task, types } from 'hardhat/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { logPopulatedTx } from '..';
-import { MIDAS_AC_DEPLOY_TAG } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getAc = async (hre: HardhatRuntimeEnvironment) => {
