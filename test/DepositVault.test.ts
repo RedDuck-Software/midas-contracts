@@ -94,6 +94,13 @@ describe('DepositVault', function () {
       ).revertedWith(acErrors.WMAC_HASNT_ROLE);
     });
 
+    it('should fail: set fee of non-existent token', async () => {
+      const { depositVault, stableCoins } = await loadFixture(defaultDeploy);
+      await expect(
+        depositVault.setFee(stableCoins.usdc.address, 1),
+      ).revertedWith(`MV: doesn't exist`);
+    });
+
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { depositVault, regularAccounts, stableCoins } = await loadFixture(
         defaultDeploy,

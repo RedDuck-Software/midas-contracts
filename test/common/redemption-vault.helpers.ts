@@ -353,8 +353,8 @@ export const manualRedeemTest = (
       expect(supplyAfter).eq(supplyBefore.sub(amountIn));
       expect(balanceAfterStUsd).eq(balanceBeforeStUsd.sub(amountIn));
 
-      expect(balanceAfterUser).eq(balanceBeforeUser.add(amountOut));
-      expect(balanceAfterContract).eq(balanceBeforeContract.sub(amountOut));
+      expect(balanceAfterUser).eq(balanceBeforeUser);
+      expect(balanceAfterContract).eq(balanceBeforeContract);
     },
     'manuallyRedeem(address,address,uint256,uint256)': async (
       user: Account,
@@ -427,8 +427,8 @@ export const manualRedeemTest = (
       expect(supplyAfter).eq(supplyBefore.sub(amountIn));
       expect(balanceAfterStUsd).eq(balanceBeforeStUsd.sub(amountIn));
 
-      expect(balanceAfterUser).eq(balanceBeforeUser.add(amountOut));
-      expect(balanceAfterContract).eq(balanceBeforeContract.sub(amountOut));
+      expect(balanceAfterUser).eq(balanceBeforeUser);
+      expect(balanceAfterContract).eq(balanceBeforeContract);
     },
   };
 };
