@@ -17,6 +17,7 @@ import {
   manualRedeemTest,
   setMinAmountToRedeemTest,
 } from './common/redemption-vault.helpers';
+import { mint } from './common/stUSD.helpers';
 
 describe('RedemptionVault', function () {
   it('deployment', async () => {
@@ -745,34 +746,6 @@ describe('RedemptionVault', function () {
       );
     });
 
-    it('should fail: when contract`s token balance is insufficient', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: redemptionVault, owner },
-        stableCoins.dai,
-      );
-
-      await mintToken(stUSD, regularAccounts[0], 1);
-
-      await manualRedeemTest(
-        { redemptionVault, owner, stUSD },
-        {
-          revertMessage: 'ERC20: transfer amount exceeds balance',
-        },
-      )['manuallyRedeem(address,address,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        1,
-      );
-    });
-
     it('when contracts has sufficient balance', async () => {
       const {
         owner,
@@ -787,7 +760,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, regularAccounts[0], 1);
+      await mintToken(stUSD, redemptionVault.address, 1);
       await mintToken(stableCoins.dai, redemptionVault, 100);
 
       await manualRedeemTest({ redemptionVault, owner, stUSD })[
@@ -907,33 +880,6 @@ describe('RedemptionVault', function () {
       );
     });
 
-    it('should fail: when contract`s token balance is insufficient', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: redemptionVault, owner },
-        stableCoins.dai,
-      );
-
-      await manualRedeemTest(
-        { redemptionVault, owner, stUSD },
-        {
-          revertMessage: 'ERC20: transfer amount exceeds balance',
-        },
-      )['manuallyRedeem(address,address,uint256,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        0,
-        1,
-      );
-    });
-
     it('when contracts has sufficient balance', async () => {
       const {
         owner,
@@ -948,7 +894,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, regularAccounts[0], 1);
+      await mintToken(stUSD, redemptionVault.address, 1);
       await mintToken(stableCoins.dai, redemptionVault, 1);
 
       await manualRedeemTest({ redemptionVault, owner, stUSD })[
@@ -991,7 +937,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, regularAccounts[0], 1);
+      await mintToken(stUSD, redemptionVault.address, 1);
 
       await manualRedeemTest({ redemptionVault, owner, stUSD })[
         'manuallyRedeem(address,address,uint256,uint256)'

@@ -1,9 +1,12 @@
-import { ethers, upgrades } from 'hardhat';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { MIDAS_AC_CONTRACT_NAME } from '../../config';
+import {
+  DEPOSIT_VAULT_CONTRACT_NAME,
+  REDEMPTION_VAULT_CONTRACT_NAME,
+} from '../../config';
+import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
   delay,
   logDeployProxy,
@@ -11,20 +14,22 @@ import {
 } from '../../helpers/utils';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+  const addresses = getCurrentAddresses(hre);
+
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
 
-  console.log('Deploying MidasAccessControl...');
-  const deployment = await hre.upgrades.deployProxy(
-    await hre.ethers.getContractFactory(MIDAS_AC_CONTRACT_NAME, owner),
-    [],
+  console.log('Upgrading DepositVault at address:', addresses?.depositVault);
+  const deployment = await hre.upgrades.upgradeProxy(
+    addresses?.depositVault ?? '',
+    await hre.ethers.getContractFactory(DEPOSIT_VAULT_CONTRACT_NAME, owner),
   );
-  await logDeployProxy(hre, MIDAS_AC_CONTRACT_NAME, deployment.address);
+  console.log('Upgraded DepositVault:', deployment.address);
 
+  await logDeployProxy(hre, DEPOSIT_VAULT_CONTRACT_NAME, deployment.address);
+  console.log('Waiting 5 blocks to verify...');
   if (deployment.deployTransaction) {
-    console.log('Waiting 5 blocks...');
     await deployment.deployTransaction.wait(5);
-    console.log('Waited.');
   }
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };

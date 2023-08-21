@@ -313,7 +313,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(user != address(0), "DV: invalid user");
         _requireTokenExists(tokenIn);
 
-        _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
         stUSD.mint(user, amountStUsdOut);
 
         emit PerformManualAction(

@@ -94,6 +94,13 @@ describe('DepositVault', function () {
       ).revertedWith(acErrors.WMAC_HASNT_ROLE);
     });
 
+    it('should fail: set fee of non-existent token', async () => {
+      const { depositVault, stableCoins } = await loadFixture(defaultDeploy);
+      await expect(
+        depositVault.setFee(stableCoins.usdc.address, 1),
+      ).revertedWith(`MV: doesn't exist`);
+    });
+
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { depositVault, regularAccounts, stableCoins } = await loadFixture(
         defaultDeploy,
@@ -1075,26 +1082,6 @@ describe('DepositVault', function () {
       );
     });
 
-    it('should fail: user`s token balance is insufficient', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
-        await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: depositVault, owner },
-        stableCoins.dai,
-      );
-      await manualDepositTest(
-        { depositVault, owner, stUSD },
-        {
-          from: owner,
-          revertMessage: 'ERC20: insufficient allowance',
-        },
-      )['manuallyDeposit(address,address,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        5,
-      );
-    });
-
     it('when everything`s good', async () => {
       const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
         await loadFixture(defaultDeploy);
@@ -1235,27 +1222,6 @@ describe('DepositVault', function () {
         stableCoins.dai,
         1,
         0,
-      );
-    });
-
-    it('should fail: user`s token balance is insufficient', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
-        await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: depositVault, owner },
-        stableCoins.dai,
-      );
-      await manualDepositTest(
-        { depositVault, owner, stUSD },
-        {
-          from: owner,
-          revertMessage: 'ERC20: insufficient allowance',
-        },
-      )['manuallyDeposit(address,address,uint256,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        5,
-        5,
       );
     });
 
