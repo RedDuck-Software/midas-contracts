@@ -2,13 +2,9 @@ import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import {
-  DEPOSIT_VAULT_CONTRACT_NAME,
-  REDEMPTION_VAULT_CONTRACT_NAME,
-} from '../../config';
+import { DEPOSIT_VAULT_CONTRACT_NAME } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
-  delay,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
 } from '../../helpers/utils';

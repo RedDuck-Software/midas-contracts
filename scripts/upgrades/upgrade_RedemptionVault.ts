@@ -5,7 +5,6 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { REDEMPTION_VAULT_CONTRACT_NAME } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
-  delay,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
 } from '../../helpers/utils';

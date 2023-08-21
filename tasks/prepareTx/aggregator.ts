@@ -2,7 +2,6 @@ import { task, types } from 'hardhat/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { logPopulatedTx } from '..';
-import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getAggregator = async (
   hre: HardhatRuntimeEnvironment,

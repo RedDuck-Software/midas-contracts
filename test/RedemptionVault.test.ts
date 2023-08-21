@@ -1,7 +1,5 @@
-import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { assert, expect } from 'chai';
-import { parseUnits } from 'ethers/lib/utils';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
 import { acErrors, greenList } from './common/ac.helpers';
@@ -17,7 +15,6 @@ import {
   manualRedeemTest,
   setMinAmountToRedeemTest,
 } from './common/redemption-vault.helpers';
-import { mint } from './common/stUSD.helpers';
 
 describe('RedemptionVault', function () {
   it('deployment', async () => {
@@ -115,14 +112,8 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when there is no token in vault', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, accessControl, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: redemptionVault, owner },
         owner,
@@ -138,14 +129,8 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when 0 amount passed', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, accessControl, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: redemptionVault, owner },
         owner,
@@ -232,14 +217,8 @@ describe('RedemptionVault', function () {
     });
 
     it('is on pause but admin can do everything', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        manualFulfillmentToken,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, accessControl, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await expect(redemptionVault.changePauseState(true)).to.emit(
         redemptionVault,
         redemptionVault.interface.events['ChangeState(bool)'].name,
@@ -265,7 +244,6 @@ describe('RedemptionVault', function () {
         owner,
         redemptionVault,
         accessControl,
-        regularAccounts,
         manualFulfillmentToken,
         stableCoins,
         stUSD,
@@ -287,142 +265,9 @@ describe('RedemptionVault', function () {
     });
   });
 
-  // describe('fulfillRedemptionRequest(uint256)', () => {
-  //   it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
-  //     const { redemptionVault, regularAccounts, owner, stUSD, stableCoins } =
-  //       await loadFixture(defaultDeploy);
-
-  //     await fulfillRedemptionRequestTest(
-  //       { redemptionVault, owner, stUSD },
-  //       {
-  //         revertMessage: acErrors.WMAC_HASNT_ROLE,
-  //         from: regularAccounts[0],
-  //       },
-  //     )['fulfillRedemptionRequest(uint256)'](0);
-  //   });
-
-  //   it('should fail: when request with provided id does`nt exists', async () => {
-  //     const {
-  //       owner,
-  //       redemptionVault,
-  //       accessControl,
-  //       regularAccounts,
-  //       stableCoins,
-  //       stUSD,
-  //     } = await loadFixture(defaultDeploy);
-  //     await fulfillRedemptionRequestTest(
-  //       { redemptionVault, owner, stUSD },
-  //       {
-  //         revertMessage: 'RV: r not exists',
-  //       },
-  //     )['fulfillRedemptionRequest(uint256)'](0);
-  //   });
-
-  //   it('should fail: when contract has insufficient balance', async () => {
-  //     const {
-  //       owner,
-  //       redemptionVault,
-  //       accessControl,
-  //       regularAccounts,
-  //       stableCoins,
-  //       stUSD,
-  //     } = await loadFixture(defaultDeploy);
-  //     const users = regularAccounts[0];
-  //     await greenList(
-  //       { accessControl, greenlistable: redemptionVault, owner },
-  //       users,
-  //     );
-  //     await addPaymentTokenTest(
-  //       { vault: redemptionVault, owner },
-  //       stableCoins.dai,
-  //     );
-  //     await mintToken(stUSD, users.address, 1);
-
-  //     await initiateRedemptionRequestTest(
-  //       { redemptionVault, owner, stUSD },
-  //       stableCoins.dai,
-  //       1,
-  //       { from: users },
-  //     );
-
-  //     await fulfillRedemptionRequestTest(
-  //       { redemptionVault, owner, stUSD },
-  //       {
-  //         revertMessage: 'ERC20: transfer amount exceeds balance',
-  //       },
-  //     )['fulfillRedemptionRequest(uint256)'](0);
-  //   });
-
-  //   it('when request is exists and contract has sufficient balance', async () => {
-  //     const {
-  //       owner,
-  //       redemptionVault,
-  //       accessControl,
-  //       regularAccounts,
-  //       stableCoins,
-  //       stUSD,
-  //     } = await loadFixture(defaultDeploy);
-  //     const users = regularAccounts[0];
-  //     await greenList(
-  //       { accessControl, greenlistable: redemptionVault, owner },
-  //       users,
-  //     );
-  //     await addPaymentTokenTest(
-  //       { vault: redemptionVault, owner },
-  //       stableCoins.dai,
-  //     );
-  //     await mintToken(stUSD, users.address, 1);
-  //     await mintToken(stableCoins.dai, redemptionVault.address, 100);
-
-  //     await initiateRedemptionRequestTest(
-  //       { redemptionVault, owner, stUSD },
-  //       stableCoins.dai,
-  //       1,
-  //       { from: users },
-  //     );
-
-  //     await fulfillRedemptionRequestTest({ redemptionVault, owner, stUSD })[
-  //       'fulfillRedemptionRequest(uint256)'
-  //     ](0);
-  //   });
-
-  //   it('when request is exists and tokenOut is MANUAL_FULLFILMENT_TOKEN', async () => {
-  //     const {
-  //       owner,
-  //       redemptionVault,
-  //       accessControl,
-  //       regularAccounts,
-  //       stableCoins,
-  //       stUSD,
-  //       manualFulfillmentToken,
-  //     } = await loadFixture(defaultDeploy);
-  //     const users = regularAccounts[0];
-  //     await greenList(
-  //       { accessControl, greenlistable: redemptionVault, owner },
-  //       users,
-  //     );
-  //     await addPaymentTokenTest(
-  //       { vault: redemptionVault, owner },
-  //       stableCoins.dai,
-  //     );
-  //     await mintToken(stUSD, users.address, 1);
-
-  //     await initiateRedemptionRequestTest(
-  //       { redemptionVault, owner, stUSD },
-  //       manualFulfillmentToken,
-  //       1,
-  //       { from: users },
-  //     );
-
-  //     await fulfillRedemptionRequestTest({ redemptionVault, owner, stUSD })[
-  //       'fulfillRedemptionRequest(uint256)'
-  //     ](0);
-  //   });
-  // });
-
   describe('fulfillRedemptionRequest(uint256,uint256)', () => {
     it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
-      const { redemptionVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { redemptionVault, regularAccounts, owner, stUSD } =
         await loadFixture(defaultDeploy);
 
       await fulfillRedemptionRequestTest(
@@ -435,14 +280,9 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when request with provided id does`nt exists', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, stUSD } = await loadFixture(
+        defaultDeploy,
+      );
       await fulfillRedemptionRequestTest(
         { redemptionVault, owner, stUSD },
         {
@@ -555,7 +395,7 @@ describe('RedemptionVault', function () {
 
   describe('cancelRedemptionRequest()', () => {
     it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
-      const { redemptionVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { redemptionVault, regularAccounts, owner, stUSD } =
         await loadFixture(defaultDeploy);
 
       await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 0, {
@@ -565,14 +405,9 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when request with provided id does`nt exists', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, stUSD } = await loadFixture(
+        defaultDeploy,
+      );
       await cancelRedemptionRequestTest({ redemptionVault, owner, stUSD }, 0, {
         revertMessage: 'RV: r not exists',
       });
@@ -642,7 +477,7 @@ describe('RedemptionVault', function () {
 
   describe('manuallyRedeem(address,address,uint256)', () => {
     it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
-      const { redemptionVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { redemptionVault, regularAccounts, owner, stUSD } =
         await loadFixture(defaultDeploy);
 
       await manualRedeemTest(
@@ -659,14 +494,8 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when token out is not exists', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await manualRedeemTest(
         { redemptionVault, owner, stUSD },
         {
@@ -680,14 +509,9 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when amount is 0', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, stableCoins, stUSD } = await loadFixture(
+        defaultDeploy,
+      );
       await manualRedeemTest(
         { redemptionVault, owner, stUSD },
         {
@@ -701,14 +525,9 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when user is address(0)', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, stableCoins, stUSD } = await loadFixture(
+        defaultDeploy,
+      );
       await manualRedeemTest(
         { redemptionVault, owner, stUSD },
         {
@@ -722,14 +541,8 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when user`s stUSD balance is insufficient', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.dai,
@@ -747,14 +560,8 @@ describe('RedemptionVault', function () {
     });
 
     it('when contracts has sufficient balance', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.dai,
@@ -771,7 +578,7 @@ describe('RedemptionVault', function () {
 
   describe('manuallyRedeem(address,address,uint256,uint256)', () => {
     it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
-      const { redemptionVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { redemptionVault, regularAccounts, owner, stUSD } =
         await loadFixture(defaultDeploy);
 
       await manualRedeemTest(
@@ -789,14 +596,8 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when token out is not exists', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await manualRedeemTest(
         { redemptionVault, owner, stUSD },
         {
@@ -811,14 +612,9 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when both amounts are 0', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, stableCoins, stUSD } = await loadFixture(
+        defaultDeploy,
+      );
       await manualRedeemTest(
         { redemptionVault, owner, stUSD },
         {
@@ -833,14 +629,9 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when user is address(0)', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, stableCoins, stUSD } = await loadFixture(
+        defaultDeploy,
+      );
       await manualRedeemTest(
         { redemptionVault, owner, stUSD },
         {
@@ -855,14 +646,8 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: when user`s stUSD balance is insufficient', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.dai,
@@ -881,14 +666,8 @@ describe('RedemptionVault', function () {
     });
 
     it('when contracts has sufficient balance', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.dai,
@@ -903,14 +682,8 @@ describe('RedemptionVault', function () {
     });
 
     it('when amountStUsdIn is 0 and amountUsdOut is not 0', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.dai,
@@ -924,14 +697,8 @@ describe('RedemptionVault', function () {
     });
 
     it('when amountStUsdIn is not 0 and amountUsdOut is 0', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        regularAccounts,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
+      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
+        await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.dai,

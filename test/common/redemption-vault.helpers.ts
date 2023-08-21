@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumberish, Signer } from 'ethers';
+import { BigNumberish } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
@@ -13,10 +13,6 @@ import { getRoundData, setRoundData } from './data-feed.helpers';
 import { defaultDeploy } from './fixtures';
 
 import {
-  // eslint-disable-next-line camelcase
-  AggregatorV3Mock__factory,
-  // eslint-disable-next-line camelcase
-  DataFeed__factory,
   ERC20,
   // eslint-disable-next-line camelcase
   ERC20__factory,
@@ -307,26 +303,6 @@ export const manualRedeemTest = (
       );
 
       const supplyBefore = await stUSD.totalSupply();
-
-      // eslint-disable-next-line camelcase
-      const dataFeed = DataFeed__factory.connect(
-        await redemptionVault.etfDataFeed(),
-        owner,
-      );
-
-      // eslint-disable-next-line camelcase
-      const aggregator = AggregatorV3Mock__factory.connect(
-        await dataFeed.aggregator(),
-        owner,
-      );
-
-      const amountOut = await getOutputAmountWithFeeRedeemTest(
-        { redemptionVault, mockedAggregator: aggregator },
-        {
-          amountN: amountStUsdIn,
-          token: token.address,
-        },
-      );
 
       await expect(
         redemptionVault

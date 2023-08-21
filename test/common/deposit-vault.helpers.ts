@@ -327,17 +327,6 @@ export const manualDepositTest = (
 
       const supplyBefore = await stUSD.totalSupply();
 
-      // eslint-disable-next-line camelcase
-      const dataFeed = DataFeed__factory.connect(
-        await depositVault.etfDataFeed(),
-        owner,
-      );
-      // eslint-disable-next-line camelcase
-      const aggregator = AggregatorV3Mock__factory.connect(
-        await dataFeed.aggregator(),
-        owner,
-      );
-
       await expect(
         depositVault
           .connect(sender)
@@ -424,8 +413,6 @@ export const cancelDepositRequest = async (
   const requestBefore = await depositVault.requests(requestId);
   // eslint-disable-next-line camelcase
   const token = ERC20__factory.connect(requestBefore.tokenIn, owner);
-
-  const balanceBeforeUser = await token.balanceOf(requestBefore.user);
 
   await expect(
     depositVault.connect(sender).cancelDepositRequest(requestId),

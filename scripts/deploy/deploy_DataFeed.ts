@@ -1,26 +1,19 @@
 import { expect } from 'chai';
 import chalk from 'chalk';
 import { parseUnits } from 'ethers/lib/utils';
-import { upgrades } from 'hardhat';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import {
   DATA_FEED_CONTRACT_NAME,
-  DEPOSIT_VAULT_CONTRACT_NAME,
-  MIDAS_AC_CONTRACT_NAME,
-  MIDAS_AC_DEPLOY_TAG,
   MOCK_AGGREGATOR_NETWORK_TAG,
-  ST_USD_CONTRACT_NAME,
 } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
-  delay,
   logDeploy,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
-  verify,
 } from '../../helpers/utils';
 // eslint-disable-next-line camelcase
 import { AggregatorV3Mock__factory } from '../../typechain-types';

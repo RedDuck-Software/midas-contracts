@@ -6,8 +6,9 @@ import { defaultDeploy } from './common/fixtures';
 
 describe('Blacklistable', function () {
   it('deployment', async () => {
-    const { accessControl, blackListableTester, roles, owner } =
-      await loadFixture(defaultDeploy);
+    const { accessControl, blackListableTester, roles } = await loadFixture(
+      defaultDeploy,
+    );
 
     expect(
       await accessControl.hasRole(
@@ -19,13 +20,8 @@ describe('Blacklistable', function () {
 
   describe('modifier onlyNotBlacklisted', () => {
     it('should fail: call from blacklisted user', async () => {
-      const {
-        accessControl,
-        blackListableTester,
-        roles,
-        owner,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { accessControl, blackListableTester, owner, regularAccounts } =
+        await loadFixture(defaultDeploy);
 
       await blackList(
         { blacklistable: blackListableTester, accessControl, owner },
@@ -39,13 +35,9 @@ describe('Blacklistable', function () {
     });
 
     it('call from not blacklisted user', async () => {
-      const {
-        accessControl,
-        blackListableTester,
-        roles,
-        owner,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { blackListableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
       await expect(
         blackListableTester.onlyNotBlacklistedTester(
           regularAccounts[0].address,
@@ -70,13 +62,8 @@ describe('Blacklistable', function () {
     });
 
     it('call from user with BLACKLIST_OPERATOR_ROLE role', async () => {
-      const {
-        accessControl,
-        blackListableTester,
-        roles,
-        owner,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { accessControl, blackListableTester, owner, regularAccounts } =
+        await loadFixture(defaultDeploy);
       await blackList(
         { blacklistable: blackListableTester, accessControl, owner },
         regularAccounts[0],
@@ -86,13 +73,8 @@ describe('Blacklistable', function () {
 
   describe('removeFromBlackList', () => {
     it('should fail: call from user without BLACKLIST_OPERATOR_ROLE role', async () => {
-      const {
-        accessControl,
-        blackListableTester,
-        roles,
-        owner,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { accessControl, blackListableTester, owner, regularAccounts } =
+        await loadFixture(defaultDeploy);
 
       await unBlackList(
         { blacklistable: blackListableTester, accessControl, owner },
@@ -105,13 +87,8 @@ describe('Blacklistable', function () {
     });
 
     it('call from user with BLACKLIST_OPERATOR_ROLE role', async () => {
-      const {
-        accessControl,
-        blackListableTester,
-        roles,
-        owner,
-        regularAccounts,
-      } = await loadFixture(defaultDeploy);
+      const { accessControl, blackListableTester, owner, regularAccounts } =
+        await loadFixture(defaultDeploy);
       await unBlackList(
         { blacklistable: blackListableTester, accessControl, owner },
         regularAccounts[0],

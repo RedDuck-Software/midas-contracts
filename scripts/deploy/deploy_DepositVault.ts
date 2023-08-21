@@ -1,20 +1,12 @@
-import { upgrades } from 'hardhat';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import {
-  DEPOSIT_VAULT_CONTRACT_NAME,
-  MIDAS_AC_CONTRACT_NAME,
-  MIDAS_AC_DEPLOY_TAG,
-  ST_USD_CONTRACT_NAME,
-} from '../../config';
+import { DEPOSIT_VAULT_CONTRACT_NAME } from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
-  delay,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
-  verify,
 } from '../../helpers/utils';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {

@@ -1,13 +1,6 @@
-import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { time, loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { assert, expect } from 'chai';
-import {
-  defaultAbiCoder,
-  getAddress,
-  parseUnits,
-  solidityKeccak256,
-} from 'ethers/lib/utils';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { expect } from 'chai';
+import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 import { blackList, acErrors, unBlackList } from './common/ac.helpers';
@@ -16,9 +9,7 @@ import { burn, mint, setMetadataTest } from './common/stUSD.helpers';
 
 describe('stUSD', function () {
   it('deployment', async () => {
-    const { accessControl, roles, owner, stUSD } = await loadFixture(
-      defaultDeploy,
-    );
+    const { accessControl, roles, stUSD } = await loadFixture(defaultDeploy);
 
     expect(await stUSD.name()).eq('stUSD');
     expect(await stUSD.symbol()).eq('stUSD');
@@ -31,7 +22,7 @@ describe('stUSD', function () {
   });
 
   it('initialize', async () => {
-    const { stUSD, mockedAggregator } = await loadFixture(defaultDeploy);
+    const { stUSD } = await loadFixture(defaultDeploy);
 
     await expect(stUSD.initialize(ethers.constants.AddressZero)).revertedWith(
       'Initializable: contract is already initialized',
