@@ -81,7 +81,7 @@ Its a set of smart contracts, that are supposed to make stUSD minting and burnin
 
 Vaults can be used only by addresses, that have GreenListed Role on the [MidasAccessControl](./contracts/access/MidasAccessControl.sol) contract
 
-There is 2 types of vaults presented in the project - Deposit and Redemption vaults
+There are 2 types of vaults presented in the project - Deposit and Redemption vaults
 
 #### ***Deposit Vault***
 Deposit is the process of minting stUSD tokens by transferring USD tokens from user. The exchange ratio can be calculated using the DataFeed answer, but currently it's all determined by the vault administrator individually for each deposit. USD tokens are stored in contract and can be withdrawn by vault admin at any time.
@@ -89,15 +89,15 @@ The process consists of 2 steps:
 1. Deposit request initiation
 2. Deposit request fulfillment
 
-The initiation is done by the user, that want to transfer his USD tokens and receive stUSD token instead. After the initiation transaction, his USD tokens are immediately transfer from him, and now he needs to wait for deposit request fulfillment from the vault administrator.
+The initiation is done by the user that wants to transfer his USD tokens and receive stUSD token instead. After the initiation of transaction, his USD tokens are immediately transferred from him, and now he needs to wait for deposit request fulfillment from the vault administrator.
 
 The fulfillment is done by the vault administrator. Administrator should deposit the funds to the bank deposit, calculate the output stUSD amount and submit fulfillment transaction to the network.
 
-Administrator may also decide to cancel the redemption request. In this case, transferred USD tokens will be transferred back to the user and request will be deleted from the contract's storage.
+Administrator may also decide to cancel the deposit request. In this case, transferred USD tokens will be transferred back to the user and request will be deleted from the contract's storage.
 
-The whole deposit process can be made by vault administrator for any user, that owns USD tokens. This action is basically a wrapper of the USD transfer function, made for easier off-chain events listening
+The whole deposit process can be made by vault administrator for any user. This action is basically a wrapper of the stUSD mint function, made for easier off-chain events listening.
 
-Deposit Vault can have a fee on stUSD minting. Because the output USD amount currently determined off-chain by the vault administrator, the value that stores in the contract currently is not used for the resulting USD output amount.
+Deposit Vault can have a fee on stUSD minting. Because the output stUSD amount currently determined off-chain by the vault administrator, the value that stores in the contract currently is not used for the resulting stUSD output amount.
 
 
 #### ***Redemption Vault***
@@ -113,7 +113,7 @@ The fulfillment is done by the vault administrator. Administrator should withdra
 
 Administrator may also decide to cancel the redemption request. In this case, burned stUSD tokens will be minted back to the user and request will be deleted from the contracts storage.
 
-The whole redemption process can be made by vault administrator for any user, that owns stUSD tokens. This action is basically a wrapper of the stUSD's burn function, made for easier off-chain events listening
+The whole redemption process can be made by vault administrator for any user. This action is basically a wrapper of the stUSD's burn function, made for easier off-chain events listening
 
 Redemption Vault can have a fee on stUSD burning. Because the output USD amount currently determined off-chain by the vault administrator, the value that stores in the contract currently is not used for the resulting USD output amount.
 
