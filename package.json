@@ -8,7 +8,7 @@
     "prepare": "husky install",
     "hardhat": "hardhat",
     "clean": "hardhat clean",
-    "docgen": "hardhat run docgen",
+    "docgen": "hardhat docgen",
     "compile": "hardhat compile",
     "build": "run-s clean compile",
     "test": "hardhat test",
