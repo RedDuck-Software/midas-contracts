@@ -122,9 +122,9 @@ Redemption Vault can have a fee on stUSD burning. Because the output USD amount 
 
 |Contract Name|Sepolia|Mainnet| 
 |-|-|-|
-|**stUSD**|`0x08383da6716C12d1250E735ABe7FDcDD6e96e9e9`|-|
-|**MidasAccessControl**|`0xf93877fbc3fDcd95c09eb480dC451c4D356217bD`|-|
-|**DataFeed IB01/USD**|`0x7838E7B02d76e58Aa7032f73D27C11134192e99d`|-|
+|**stUSD**|`0xDd82C21F721746Bd77D84E8B05EdDED0f8e50980`|-|
+|**MidasAccessControl**|`0x44af5F38a9b4bf70696fa1bE922e70c2Af679FD7`|-|
+|**DataFeed IB01/USD**|`0x4E677F7FE252DE44682a913f609EA3eb6F29DC3E`|-|
 |**DataFeed EUR/USD**|`0xE23c07Ecad6D822500CbE8306d72A90578CA9F11`|-|
-|**DepositVault**|`0xb0f198b9e141179f401E53C104454688001dC511`|-|
-|**RedemptionVault**|`0x4C428dF013227696C27b223bcD18Dcda46CD0a3D`|-|
+|**DepositVault**|`0xc2c78dcb340935509634B343840fAa5052367f29`|-|
+|**RedemptionVault**|`0xbCe90740A9C6B59FC1D45fdc0e1F3b6C795c85dC`|-|
