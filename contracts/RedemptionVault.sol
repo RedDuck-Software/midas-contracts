@@ -254,7 +254,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         require(user != address(0), "RV: invalid user");
 
         _requireTokenExists(tokenOut);
-        stUSD.burn(address(this), amountStUsdIn);
+        stUSD.burn(user, amountStUsdIn);
+        _transferToken(user, tokenOut, amountUsdOut);
 
         emit PerformManualAction(
             msg.sender,
