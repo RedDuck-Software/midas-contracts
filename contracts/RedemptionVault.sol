@@ -87,7 +87,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         stUSD.burn(user, amountStUsdIn);
 
         uint256 fee = (amountStUsdIn * getFee(tokenOut)) /
-            (100 * PERCENTAGE_BPS);
+            (ONE_HUNDRED_PERCENT);
         uint256 amountIncludingSubtractionOfFee = amountStUsdIn - fee;
 
         requests[requestId] = RedemptionRequest({

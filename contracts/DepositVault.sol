@@ -114,7 +114,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         }
         require(amountUsdIn > 0, "DV: invalid amount");
 
-        uint256 fee = (amountUsdIn * getFee(tokenIn)) / (100 * PERCENTAGE_BPS);
+        uint256 fee = (amountUsdIn * getFee(tokenIn)) / (ONE_HUNDRED_PERCENT);
         uint256 amountIncludingSubtractionOfFee = amountUsdIn - fee;
 
         totalDeposited[user] += amountIncludingSubtractionOfFee;

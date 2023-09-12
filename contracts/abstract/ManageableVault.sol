@@ -37,11 +37,10 @@ abstract contract ManageableVault is
     address public constant MANUAL_FULLFILMENT_TOKEN = address(0x0);
 
     /**
-     * @notice base points for percentage calculation
-     * @dev for example, 100% will be (100 * PERCENTAGE_BPS)%
+     * @notice 100 percent with base 100
+     * @dev for example, 10% will be (10 * 100)%
      */
-    uint256 public constant PERCENTAGE_BPS = 100;
-
+    uint256 public constant ONE_HUNDRED_PERCENT = 100 * 100; 
     /**
      * @notice stUSD token
      */
@@ -123,6 +122,8 @@ abstract contract ManageableVault is
      */
     function setFee(address token, uint256 newFee) external onlyVaultAdmin {
         require(_paymentTokens.contains(token), "MV: doesn't exist");
+        
+        require(newFee <= ONE_HUNDRED_PERCENT, "MV: fee exceeds limit");
 
         _feesForTokens[token] = newFee;
 
@@ -166,7 +167,7 @@ abstract contract ManageableVault is
             amount.convertFromBase18(_tokenDecimals(token))
         );
     }
-    
+
     /**
      * @dev do safe transfer on a given token. Doesnt perform transfer if
      * token is `MANUAL_FULLFILMENT_TOKEN` as it should be transfered off-chain
