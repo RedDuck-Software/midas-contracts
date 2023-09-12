@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 import "./MidasAccessControlRoles.sol";
+import "../abstract/MidasInitializable.sol";
 
 /**
  * @title MidasAccessControl
@@ -11,7 +12,9 @@ import "./MidasAccessControlRoles.sol";
  * @author RedDuck Software
  */
 contract MidasAccessControl is
+
     AccessControlUpgradeable,
+    MidasInitializable,
     MidasAccessControlRoles
 {
     /**
