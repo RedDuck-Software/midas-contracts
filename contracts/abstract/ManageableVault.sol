@@ -43,11 +43,6 @@ abstract contract ManageableVault is
     uint256 public constant PERCENTAGE_BPS = 100;
 
     /**
-     * @notice IBO1/USD ChainLink data feed
-     */
-    IDataFeed public etfDataFeed;
-
-    /**
      * @notice stUSD token
      */
     IStUSD public stUSD;
@@ -74,16 +69,13 @@ abstract contract ManageableVault is
      * @dev upgradeable patter contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
-     * @param _etfDataFeed address of CL`s data feed IB01/USD
      */
     // solhint-disable func-name-mixedcase
     function __ManageableVault_init(
         address _ac,
-        address _stUSD,
-        address _etfDataFeed
+        address _stUSD
     ) internal onlyInitializing {
         stUSD = IStUSD(_stUSD);
-        etfDataFeed = IDataFeed(_etfDataFeed);
         __Greenlistable_init(_ac);
         __Pausable_init(_ac);
         __ReentrancyGuard_init();

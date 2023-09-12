@@ -64,16 +64,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @notice upgradeable patter contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
-     * @param _etfDataFeed address of CL`s data feed IB01/USD
      * @param _minUsdAmountToRedeem init. value for minUsdAmountToRedeem
      */
     function initialize(
         address _ac,
         address _stUSD,
-        address _etfDataFeed,
         uint256 _minUsdAmountToRedeem
     ) external initializer {
-        __ManageableVault_init(_ac, _stUSD, _etfDataFeed);
+        __ManageableVault_init(_ac, _stUSD);
         minUsdAmountToRedeem = _minUsdAmountToRedeem;
     }
 
@@ -95,10 +93,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         _requireTokenExists(tokenOut);
 
         require(amountStUsdIn > 0, "RV: 0 amount");
-
-        // estimate out amount and validate that it`s >= min allowed
-        // TODO: remove this line
-        _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn, tokenOut));
 
         stUSD.burn(user, amountStUsdIn);
 
@@ -297,15 +291,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         view
         returns (uint256)
     {
-        if (amountStUsdIn == 0) return 0;
-
-        uint256 price = etfDataFeed.getDataInBase18();
-        uint256 amountOutWithoutFee = price == 0
-            ? 0
-            : (amountStUsdIn * price) / (10**18);
-        return
-            amountOutWithoutFee -
-            ((amountOutWithoutFee * getFee(token)) / (100 * PERCENTAGE_BPS));
     }
 
     /**

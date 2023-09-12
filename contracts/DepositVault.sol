@@ -78,18 +78,16 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @notice upgradeable patter contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
-     * @param _etfDataFeed address of CL`s data feed IB01/USD
      * @param _eurUsdDataFeed address of CL`s data feed EUR/USD
      * @param _minAmountToDepositInEuro init. value for minUsdAmountToRedeem
      */
     function initialize(
         address _ac,
         address _stUSD,
-        address _etfDataFeed,
         address _eurUsdDataFeed,
         uint256 _minAmountToDepositInEuro
     ) external initializer {
-        __ManageableVault_init(_ac, _stUSD, _etfDataFeed);
+        __ManageableVault_init(_ac, _stUSD);
         minAmountToDepositInEuro = _minAmountToDepositInEuro;
         eurUsdDataFeed = IDataFeed(_eurUsdDataFeed);
     }
@@ -278,15 +276,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         view
         returns (uint256)
     {
-        if (amountUsdIn == 0) return 0;
-
-        uint256 price = etfDataFeed.getDataInBase18();
-        uint256 amountOutWithoutFee = price == 0
-            ? 0
-            : (amountUsdIn * (10**18)) / (price);
-        return
-            amountOutWithoutFee -
-            ((amountOutWithoutFee * getFee(token)) / (100 * PERCENTAGE_BPS));
     }
 
     /**
