@@ -172,21 +172,6 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @inheritdoc IDepositVault
-     * @dev `tokenIn` amount is calculated using ETF data feed answer
-     */
-    function manuallyDeposit(
-        address user,
-        address tokenIn,
-        uint256 amountUsdIn
-    ) external onlyVaultAdmin returns (uint256 amountStUsdOut) {
-        require(amountUsdIn > 0, "DV: 0 amount");
-
-        amountStUsdOut = _getOutputAmountWithFee(amountUsdIn, tokenIn);
-        _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
-    }
-
-    /**
-     * @inheritdoc IDepositVault
      */
     function manuallyDeposit(
         address user,

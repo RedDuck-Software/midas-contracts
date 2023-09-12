@@ -42,19 +42,6 @@ interface IDepositVault is IManageableVault {
      * @notice mints stUSD to user.
      * can be called only from permissioned actor
      * @param user address of user
-     * @param tokenIn address of input USD token
-     * @param amountUsdIn amount of stUSD to send to user
-     */
-    function manuallyDeposit(
-        address user,
-        address tokenIn,
-        uint256 amountUsdIn
-    ) external returns (uint256 amountUsdOut);
-
-    /**
-     * @notice mints stUSD to user.
-     * can be called only from permissioned actor
-     * @param user address of user
      * @param tokenIn address of inout USD token
      * @param amountUsdIn amount of USD to deposit
      * @param amountStUsdOut amount of stUSD token to send to user
