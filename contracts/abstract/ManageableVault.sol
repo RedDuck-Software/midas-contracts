@@ -166,6 +166,27 @@ abstract contract ManageableVault is
             amount.convertFromBase18(_tokenDecimals(token))
         );
     }
+    
+    /**
+     * @dev do safe transfer on a given token. Doesnt perform transfer if
+     * token is `MANUAL_FULLFILMENT_TOKEN` as it should be transfered off-chain
+     * @param user user address
+     * @param token address of token
+     * @param amount amount of `token` to transfer to `user`
+     */
+    function _transferToken(
+        address user,
+        address token,
+        uint256 amount
+    ) internal {
+        // MANUAL_FULLFILMENT_TOKEN should be transfered off-chain to user`s bank account
+        if (token == MANUAL_FULLFILMENT_TOKEN) return;
+
+        IERC20(token).safeTransfer(
+            user,
+            amount.convertFromBase18(_tokenDecimals(token))
+        );
+    }
 
     /**
      * @dev retreives decimals of a given `token`
