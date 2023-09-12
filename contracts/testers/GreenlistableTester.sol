@@ -12,4 +12,6 @@ contract GreenlistableTester is Greenlistable {
         external
         onlyGreenlisted(account)
     {}
+
+    function _disableInitializers() internal override {}
 }

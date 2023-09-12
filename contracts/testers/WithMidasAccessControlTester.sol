@@ -25,4 +25,6 @@ contract WithMidasAccessControlTester is WithMidasAccessControl {
         external
         onlyNotRole(role, account)
     {}
+
+    function _disableInitializers() internal override {}
 }

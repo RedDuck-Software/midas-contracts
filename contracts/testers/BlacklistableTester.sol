@@ -12,4 +12,6 @@ contract BlacklistableTester is Blacklistable {
         external
         onlyNotBlacklisted(account)
     {}
+
+    function _disableInitializers() internal override {}
 }

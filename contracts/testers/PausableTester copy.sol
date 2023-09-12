@@ -11,6 +11,4 @@ contract PausableTester is Pausable {
     function pauseAdminRole() public view override returns (bytes32) {
         return accessControl.DEFAULT_ADMIN_ROLE();
     }
-
-    function _disableInitializers() internal override {}
 }
