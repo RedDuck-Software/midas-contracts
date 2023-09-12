@@ -34,7 +34,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address tokenOut;
         uint256 amountStUsdIn;
         uint256 fee;
-        bool exists;
     }
 
     /**
@@ -95,8 +94,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             user: user,
             tokenOut: tokenOut,
             amountStUsdIn: amountIncludingSubtractionOfFee,
-            fee: fee,
-            exists: true
+            fee: fee
         });
 
         emit InitiateRequest(
@@ -179,7 +177,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         returns (RedemptionRequest memory request)
     {
         request = requests[requestId];
-        require(request.exists, "RV: r not exists");
+        require(request.user != address(0), "RV: r not exists");
     }
 
     /**

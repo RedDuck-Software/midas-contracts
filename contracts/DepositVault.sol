@@ -34,7 +34,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         address tokenIn;
         uint256 amountUsdIn;
         uint256 fee;
-        bool exists;
     }
 
     /**
@@ -125,8 +124,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             user,
             tokenIn,
             amountIncludingSubtractionOfFee,
-            fee,
-            true
+            fee
         );
 
         emit InitiateRequest(
@@ -290,6 +288,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         returns (DepositRequest memory request)
     {
         request = requests[requestId];
-        require(request.exists, "DV: r not exists");
+        require(request.user != address(0), "DV: r not exists");
     }
 }
