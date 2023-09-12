@@ -50,12 +50,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     Counters.Counter public lastRequestId;
 
     /**
-     * @notice min. amount of USD that should be redeemed from stUSD
-     * @dev min. amount should be validated only in request initiation
-     */
-    uint256 public minUsdAmountToRedeem;
-
-    /**
      * @dev leaving a storage gap for futures updates
      */
     uint256[51] private __gap;
@@ -64,15 +58,12 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @notice upgradeable patter contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
-     * @param _minUsdAmountToRedeem init. value for minUsdAmountToRedeem
      */
     function initialize(
         address _ac,
-        address _stUSD,
-        uint256 _minUsdAmountToRedeem
+        address _stUSD
     ) external initializer {
         __ManageableVault_init(_ac, _stUSD);
-        minUsdAmountToRedeem = _minUsdAmountToRedeem;
     }
 
     /**
@@ -159,27 +150,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     ) external onlyVaultAdmin {
         require(amountStUsdIn > 0 || amountUsdOut > 0, "RV: invalid amounts");
         _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
-    }
-
-    /**
-     * @inheritdoc IRedemptionVault
-     */
-    function setMinAmountToRedeem(uint256 newValue) external {
-        minUsdAmountToRedeem = newValue;
-        emit SetMinAmountToRedeem(msg.sender, newValue);
-    }
-
-    /**
-     * @inheritdoc IManageableVault
-     * @notice returns output USD amount from a given stUSD amount
-     * @return amountOut output USD amount
-     */
-    function getOutputAmountWithFee(uint256 amountIn, address token)
-        external
-        view
-        returns (uint256 amountOut)
-    {
-        return _getOutputAmountWithFee(amountIn, token);
     }
 
     /**
@@ -279,26 +249,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             user,
             amount.convertFromBase18(_tokenDecimals(token))
         );
-    }
-
-    /**
-     * @dev calculates output USD amount based on ETF data feed answer
-     * @param amountStUsdIn amount of stUSD token
-     * @return amountUsdOut amount with fee of output USD token
-     */
-    function _getOutputAmountWithFee(uint256 amountStUsdIn, address token)
-        internal
-        view
-        returns (uint256)
-    {
-    }
-
-    /**
-     * @dev validates that provided `amount` is >= `minUsdAmountToRedeem`
-     * @param amount amount of USD token
-     */
-    function _validateAmountUsdOut(uint256 amount) internal view {
-        require(amount >= minUsdAmountToRedeem, "RV: amount < min");
     }
 
     /**

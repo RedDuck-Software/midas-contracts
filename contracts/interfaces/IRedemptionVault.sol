@@ -51,11 +51,4 @@ interface IRedemptionVault is IManageableVault {
         uint256 amountStUsdIn,
         uint256 amountUsdOut
     ) external;
-
-    /**
-     * @notice updates `minUsdAmountToRedeem` storage value.
-     * can be called only from permissioned actor
-     * @param newValue new value of `minUsdAmountToRedeem`
-     */
-    function setMinAmountToRedeem(uint256 newValue) external;
 }
