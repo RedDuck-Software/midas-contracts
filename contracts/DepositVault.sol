@@ -204,17 +204,6 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     /**
-     * @inheritdoc IManageableVault
-     */
-    function getOutputAmountWithFee(uint256 amountUsdIn, address token)
-        external
-        view
-        returns (uint256)
-    {
-        return _getOutputAmountWithFee(amountUsdIn, token);
-    }
-
-    /**
      * @notice minAmountToDepositInEuro in USD in base18
      */
     function minAmountToDepositInUsd() public view returns (uint256) {
@@ -253,18 +242,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         stUSD.mint(user, amountStUsdOut);
 
         emit FulfillRequest(msg.sender, requestId, amountStUsdOut);
-    }
-
-    /**
-     * @dev returns how much stUSD user should receive from USD inputted
-     * @param amountUsdIn amount of USD
-     * @return outputStUsd amount of stUSD that should be minted to user
-     */
-    function _getOutputAmountWithFee(uint256 amountUsdIn, address token)
-        internal
-        view
-        returns (uint256)
-    {
     }
 
     /**

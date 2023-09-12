@@ -83,15 +83,6 @@ interface IManageableVault {
     function setFee(address token, uint256 newFee) external;
 
     /**
-     * @notice returns output amount from a given amount
-     * @return amountOut output amount
-     */
-    function getOutputAmountWithFee(uint256 amountIn, address token)
-        external
-        view
-        returns (uint256 amountOut);
-
-    /**
      * @notice returns vault fee
      * @return fee fee
      */
