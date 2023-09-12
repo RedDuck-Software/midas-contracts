@@ -78,7 +78,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         returns (uint256 requestId)
     {
         lastRequestId.increment();
-        requestId = lastRequestId._value;
+        requestId = lastRequestId.current();
         address user = msg.sender;
 
         _requireTokenExists(tokenOut);

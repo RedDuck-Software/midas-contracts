@@ -107,7 +107,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         address user = msg.sender;
 
         lastRequestId.increment();
-        uint256 requestId = lastRequestId._value;
+        uint256 requestId = lastRequestId.current();
 
         _requireTokenExists(tokenIn);
         if (!isFreeFromMinDeposit[msg.sender]) {
