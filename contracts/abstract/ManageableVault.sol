@@ -92,7 +92,7 @@ abstract contract ManageableVault is
         uint256 amount,
         address withdrawTo
     ) external onlyVaultAdmin {
-        IERC20(token).transfer(withdrawTo, amount);
+        IERC20(token).safeTransfer(withdrawTo, amount);
 
         emit WithdrawToken(msg.sender, token, withdrawTo, amount);
     }
