@@ -97,6 +97,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         require(amountStUsdIn > 0, "RV: 0 amount");
 
         // estimate out amount and validate that it`s >= min allowed
+        // TODO: remove this line
         _validateAmountUsdOut(_getOutputAmountWithFee(amountStUsdIn, tokenOut));
 
         stUSD.burn(user, amountStUsdIn);
@@ -157,6 +158,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @inheritdoc IRedemptionVault
      * @dev `tokenOut` amount is calculated using ETF data feed answer
      */
+    // TODO: remove this version
     function manuallyRedeem(
         address user,
         address tokenOut,

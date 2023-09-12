@@ -166,6 +166,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         delete requests[requestId];
 
         uint256 returnAmount = request.amountUsdIn + request.fee;
+        // FIXME: token amount convertion here
         IERC20(request.tokenIn).safeTransfer(request.user, returnAmount);
 
         emit CancelRequest(requestId);
