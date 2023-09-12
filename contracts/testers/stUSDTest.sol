@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../RedemptionVault.sol";
+import "../stUSD.sol";
 
-contract RedemptionVaultTest is RedemptionVault {
+contract stUSDTest is stUSD {
     function _disableInitializers() internal override {}
 }

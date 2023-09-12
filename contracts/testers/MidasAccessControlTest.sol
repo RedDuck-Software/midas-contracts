@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../RedemptionVault.sol";
+import "../access/MidasAccessControl.sol";
 
-contract RedemptionVaultTest is RedemptionVault {
+contract MidasAccessControlTest is MidasAccessControl {
     function _disableInitializers() internal override {}
 }

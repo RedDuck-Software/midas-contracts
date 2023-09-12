@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../RedemptionVault.sol";
+import "../feeds/DataFeed.sol";
 
-contract RedemptionVaultTest is RedemptionVault {
+contract DataFeedTest is DataFeed {
     function _disableInitializers() internal override {}
 }

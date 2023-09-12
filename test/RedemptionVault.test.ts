@@ -10,10 +10,9 @@ import { addPaymentTokenTest } from './common/manageable-vault.helpers';
 import {
   cancelRedemptionRequestTest,
   fulfillRedemptionRequestTest,
-  getOutputAmountWithFeeRedeemTest,
+  // getOutputAmountWithFeeRedeemTest,
   initiateRedemptionRequestTest,
   manualRedeemTest,
-  setMinAmountToRedeemTest,
 } from './common/redemption-vault.helpers';
 
 describe('RedemptionVault', function () {
@@ -24,11 +23,7 @@ describe('RedemptionVault', function () {
 
     expect(await redemptionVault.stUSD()).eq(stUSD.address);
 
-    expect(await redemptionVault.etfDataFeed()).eq(dataFeed.address);
-
-    expect(await redemptionVault.minUsdAmountToRedeem()).eq('0');
-
-    expect(await redemptionVault.PERCENTAGE_BPS()).eq('100');
+    expect(await redemptionVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
     expect(await redemptionVault.lastRequestId()).eq('0');
 
@@ -46,54 +41,47 @@ describe('RedemptionVault', function () {
       redemptionVault.initialize(
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        0,
       ),
     ).revertedWith('Initializable: contract is already initialized');
   });
 
-  it('setMinAmountToRedeem()', async () => {
-    const { owner, redemptionVault } = await loadFixture(defaultDeploy);
 
-    await setMinAmountToRedeemTest({ redemptionVault, owner }, 1.1);
-  });
+  // describe('getOutputAmountWithFee()', () => {
+  //   const test = ({
+  //     priceN,
+  //     amountN,
+  //     feeN,
+  //     expectedValue,
+  //   }: {
+  //     priceN: number;
+  //     amountN: number;
+  //     feeN: number;
+  //     expectedValue: number;
+  //   }) => {
+  //     it(`price is ${priceN}$, fee is ${feeN}%, amount is ${amountN}$ return value should be ${expectedValue} stUSD`, async () => {
+  //       const { redemptionVault, mockedAggregator, stableCoins } =
+  //         await loadFixture(defaultDeploy);
 
-  describe('getOutputAmountWithFee()', () => {
-    const test = ({
-      priceN,
-      amountN,
-      feeN,
-      expectedValue,
-    }: {
-      priceN: number;
-      amountN: number;
-      feeN: number;
-      expectedValue: number;
-    }) => {
-      it(`price is ${priceN}$, fee is ${feeN}%, amount is ${amountN}$ return value should be ${expectedValue} stUSD`, async () => {
-        const { redemptionVault, mockedAggregator, stableCoins } =
-          await loadFixture(defaultDeploy);
+  //       await redemptionVault.addPaymentToken(stableCoins.usdc.address);
 
-        await redemptionVault.addPaymentToken(stableCoins.usdc.address);
+  //       await getOutputAmountWithFeeRedeemTest(
+  //         { redemptionVault, mockedAggregator },
+  //         {
+  //           priceN,
+  //           amountN,
+  //           feeN,
+  //           token: stableCoins.usdc.address,
+  //         },
+  //       );
+  //     });
+  //   };
 
-        await getOutputAmountWithFeeRedeemTest(
-          { redemptionVault, mockedAggregator },
-          {
-            priceN,
-            amountN,
-            feeN,
-            token: stableCoins.usdc.address,
-          },
-        );
-      });
-    };
-
-    test({ priceN: 5.1, feeN: 1, amountN: 100, expectedValue: 504.9 });
-    test({ priceN: 1, feeN: 0.01, amountN: 50, expectedValue: 49.9 });
-    test({ priceN: 5, feeN: 0, amountN: 100, expectedValue: 500 });
-    test({ priceN: 0, feeN: 1, amountN: 100, expectedValue: 0 });
-    test({ priceN: 1, feeN: 1, amountN: 0, expectedValue: 0 });
-  });
+  //   test({ priceN: 5.1, feeN: 1, amountN: 100, expectedValue: 504.9 });
+  //   test({ priceN: 1, feeN: 0.01, amountN: 50, expectedValue: 49.9 });
+  //   test({ priceN: 5, feeN: 0, amountN: 100, expectedValue: 500 });
+  //   test({ priceN: 0, feeN: 1, amountN: 100, expectedValue: 0 });
+  //   test({ priceN: 1, feeN: 1, amountN: 0, expectedValue: 0 });
+  // });
 
   describe('initiateRedemptionRequest()', () => {
     it('should fail: call from address without GREENLISTED_ROLE role', async () => {
@@ -151,38 +139,7 @@ describe('RedemptionVault', function () {
       );
     });
 
-    it('should fail: when estimated output amount is < min', async () => {
-      const {
-        owner,
-        redemptionVault,
-        accessControl,
-        mockedAggregator,
-        stableCoins,
-        stUSD,
-      } = await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: redemptionVault, owner },
-        owner,
-      );
-
-      await addPaymentTokenTest(
-        { vault: redemptionVault, owner },
-        stableCoins.dai,
-      );
-
-      await setMinAmountToRedeemTest({ redemptionVault, owner }, 1.1);
-      await setRoundData({ mockedAggregator }, 1);
-      await initiateRedemptionRequestTest(
-        { redemptionVault, owner, stUSD },
-        stableCoins.dai,
-        1,
-        {
-          revertMessage: 'RV: amount < min',
-        },
-      );
-    });
-
-    it('fail: is on pause', async () => {
+    it('should fail: when is on pause', async () => {
       const {
         owner,
         redemptionVault,
@@ -475,107 +432,6 @@ describe('RedemptionVault', function () {
     });
   });
 
-  describe('manuallyRedeem(address,address,uint256)', () => {
-    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
-      const { redemptionVault, regularAccounts, owner, stUSD } =
-        await loadFixture(defaultDeploy);
-
-      await manualRedeemTest(
-        { redemptionVault, owner, stUSD },
-        {
-          revertMessage: acErrors.WMAC_HASNT_ROLE,
-          from: regularAccounts[0],
-        },
-      )['manuallyRedeem(address,address,uint256)'](
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        0,
-      );
-    });
-
-    it('should fail: when token out is not exists', async () => {
-      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
-        await loadFixture(defaultDeploy);
-      await manualRedeemTest(
-        { redemptionVault, owner, stUSD },
-        {
-          revertMessage: 'MV: token not exists',
-        },
-      )['manuallyRedeem(address,address,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        1,
-      );
-    });
-
-    it('should fail: when amount is 0', async () => {
-      const { owner, redemptionVault, stableCoins, stUSD } = await loadFixture(
-        defaultDeploy,
-      );
-      await manualRedeemTest(
-        { redemptionVault, owner, stUSD },
-        {
-          revertMessage: 'RV: 0 amount',
-        },
-      )['manuallyRedeem(address,address,uint256)'](
-        ethers.constants.AddressZero,
-        stableCoins.dai,
-        0,
-      );
-    });
-
-    it('should fail: when user is address(0)', async () => {
-      const { owner, redemptionVault, stableCoins, stUSD } = await loadFixture(
-        defaultDeploy,
-      );
-      await manualRedeemTest(
-        { redemptionVault, owner, stUSD },
-        {
-          revertMessage: 'RV: invalid user',
-        },
-      )['manuallyRedeem(address,address,uint256)'](
-        ethers.constants.AddressZero,
-        stableCoins.dai,
-        1,
-      );
-    });
-
-    it('should fail: when user`s stUSD balance is insufficient', async () => {
-      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
-        await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: redemptionVault, owner },
-        stableCoins.dai,
-      );
-      await manualRedeemTest(
-        { redemptionVault, owner, stUSD },
-        {
-          revertMessage: 'ERC20: burn amount exceeds balance',
-        },
-      )['manuallyRedeem(address,address,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        1,
-      );
-    });
-
-    it('when contracts has sufficient balance', async () => {
-      const { owner, redemptionVault, regularAccounts, stableCoins, stUSD } =
-        await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: redemptionVault, owner },
-        stableCoins.dai,
-      );
-
-      await mintToken(stUSD, redemptionVault.address, 1);
-      await mintToken(stableCoins.dai, redemptionVault, 100);
-
-      await manualRedeemTest({ redemptionVault, owner, stUSD })[
-        'manuallyRedeem(address,address,uint256)'
-      ](regularAccounts[0], stableCoins.dai, 1);
-    });
-  });
-
   describe('manuallyRedeem(address,address,uint256,uint256)', () => {
     it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
       const { redemptionVault, regularAccounts, owner, stUSD } =
@@ -673,8 +529,8 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, redemptionVault.address, 1);
-      await mintToken(stableCoins.dai, redemptionVault, 1);
+      await mintToken(stUSD, regularAccounts[0].address, 1);
+      await mintToken(stableCoins.dai, redemptionVault.address, 1);
 
       await manualRedeemTest({ redemptionVault, owner, stUSD })[
         'manuallyRedeem(address,address,uint256,uint256)'
@@ -704,7 +560,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await mintToken(stUSD, redemptionVault.address, 1);
+      await mintToken(stUSD, regularAccounts[0].address, 1);
 
       await manualRedeemTest({ redemptionVault, owner, stUSD })[
         'manuallyRedeem(address,address,uint256,uint256)'

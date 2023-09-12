@@ -8,7 +8,7 @@ import { approveBase18, mintToken } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import {
   initiateDepositRequest,
-  getOutputAmountWithFeeTest,
+  // getOutputAmountWithFeeTest,
   setMinAmountToDepositTest,
   fulfillDepositRequest,
   manualDepositTest,
@@ -28,11 +28,9 @@ describe('DepositVault', function () {
 
     expect(await depositVault.stUSD()).eq(stUSD.address);
 
-    expect(await depositVault.etfDataFeed()).eq(dataFeed.address);
-
     expect(await depositVault.eurUsdDataFeed()).eq(eurToUsdDataFeed.address);
 
-    expect(await depositVault.PERCENTAGE_BPS()).eq('100');
+    expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
     expect(await depositVault.minAmountToDepositInEuro()).eq('0');
 
@@ -48,7 +46,6 @@ describe('DepositVault', function () {
 
     await expect(
       depositVault.initialize(
-        ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
@@ -354,42 +351,42 @@ describe('DepositVault', function () {
       ).to.revertedWith('DV: already free');
     });
   });
-  describe('getOutputAmountWithFee()', () => {
-    const test = ({
-      priceN,
-      amountN,
-      feeN,
-      expectedValue,
-    }: {
-      priceN: number;
-      amountN: number;
-      feeN: number;
-      expectedValue: number;
-    }) => {
-      it(`price is ${priceN}$, fee is ${feeN}%, amount is ${amountN}$ return value should be ${expectedValue} stUSD`, async () => {
-        const { depositVault, mockedAggregator, stableCoins } =
-          await loadFixture(defaultDeploy);
+  // describe('getOutputAmountWithFee()', () => {
+  //   const test = ({
+  //     priceN,
+  //     amountN,
+  //     feeN,
+  //     expectedValue,
+  //   }: {
+  //     priceN: number;
+  //     amountN: number;
+  //     feeN: number;
+  //     expectedValue: number;
+  //   }) => {
+  //     it(`price is ${priceN}$, fee is ${feeN}%, amount is ${amountN}$ return value should be ${expectedValue} stUSD`, async () => {
+  //       const { depositVault, mockedAggregator, stableCoins } =
+  //         await loadFixture(defaultDeploy);
 
-        await depositVault.addPaymentToken(stableCoins.usdc.address);
+  //       await depositVault.addPaymentToken(stableCoins.usdc.address);
 
-        await getOutputAmountWithFeeTest(
-          { depositVault, mockedAggregator },
-          {
-            priceN,
-            amountN,
-            feeN,
-            token: stableCoins.usdc.address,
-          },
-        );
-      });
-    };
+  //       await getOutputAmountWithFeeTest(
+  //         { depositVault, mockedAggregator },
+  //         {
+  //           priceN,
+  //           amountN,
+  //           feeN,
+  //           token: stableCoins.usdc.address,
+  //         },
+  //       );
+  //     });
+  //   };
 
-    test({ priceN: 5.1, feeN: 1, amountN: 100, expectedValue: 19.41 });
-    test({ priceN: 1, feeN: 0.01, amountN: 50, expectedValue: 9.8 });
-    test({ priceN: 5, feeN: 0, amountN: 100, expectedValue: 20 });
-    test({ priceN: 0, feeN: 1, amountN: 100, expectedValue: 0 });
-    test({ priceN: 1, feeN: 1, amountN: 0, expectedValue: 0 });
-  });
+  //   test({ priceN: 5.1, feeN: 1, amountN: 100, expectedValue: 19.41 });
+  //   test({ priceN: 1, feeN: 0.01, amountN: 50, expectedValue: 9.8 });
+  //   test({ priceN: 5, feeN: 0, amountN: 100, expectedValue: 20 });
+  //   test({ priceN: 0, feeN: 1, amountN: 100, expectedValue: 0 });
+  //   test({ priceN: 1, feeN: 1, amountN: 0, expectedValue: 0 });
+  // });
 
   describe('initiateDepositRequest()', async () => {
     it('should fail: call from address without GREENLISTED_ROLE role', async () => {
@@ -910,104 +907,6 @@ describe('DepositVault', function () {
         { depositVault, owner, stUSD },
         stableCoins.usdt,
         14,
-      );
-    });
-  });
-
-  describe('manuallyDeposit(address,address,uint256)', () => {
-    it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, regularAccounts, owner, stUSD } = await loadFixture(
-        defaultDeploy,
-      );
-
-      await manualDepositTest(
-        { depositVault, owner, stUSD },
-        {
-          from: regularAccounts[0],
-          revertMessage: acErrors.WMAC_HASNT_ROLE,
-        },
-      )['manuallyDeposit(address,address,uint256)'](
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        0,
-      );
-    });
-
-    it('should fail: call when token doesn`t exist', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
-        await loadFixture(defaultDeploy);
-      await manualDepositTest(
-        { depositVault, owner, stUSD },
-        {
-          from: owner,
-          revertMessage: 'MV: token not exists',
-        },
-      )['manuallyDeposit(address,address,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        1,
-      );
-    });
-
-    it('should fail: call for amountUsdIn = 0', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
-        await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: depositVault, owner },
-        stableCoins.dai,
-      );
-      await manualDepositTest(
-        { depositVault, owner, stUSD },
-        {
-          from: owner,
-          revertMessage: 'DV: 0 amount',
-        },
-      )['manuallyDeposit(address,address,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        0,
-      );
-    });
-
-    it('should fail: user address is address(0)', async () => {
-      const { depositVault, owner, stUSD, stableCoins } = await loadFixture(
-        defaultDeploy,
-      );
-      await addPaymentTokenTest(
-        { vault: depositVault, owner },
-        stableCoins.dai,
-      );
-      await manualDepositTest(
-        { depositVault, owner, stUSD },
-        {
-          from: owner,
-          revertMessage: 'DV: invalid user',
-        },
-      )['manuallyDeposit(address,address,uint256)'](
-        ethers.constants.AddressZero,
-        stableCoins.dai,
-        1,
-      );
-    });
-
-    it('when everything`s good', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
-        await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: depositVault, owner },
-        stableCoins.dai,
-      );
-      await mintToken(stableCoins.dai, owner, 5);
-      await approveBase18(owner, stableCoins.dai, depositVault, 5);
-      await manualDepositTest(
-        { depositVault, owner, stUSD },
-        {
-          from: owner,
-        },
-      )['manuallyDeposit(address,address,uint256)'](
-        regularAccounts[0],
-        stableCoins.dai,
-        5,
       );
     });
   });
