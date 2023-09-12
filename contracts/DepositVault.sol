@@ -37,7 +37,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     /**
-     * @notice minimal USD deposit amount in EUR
+     * @notice minimal USD amount in EUR for first user`s deposit
      */
     uint256 public minAmountToDepositInEuro;
 
@@ -78,7 +78,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
      * @param _eurUsdDataFeed address of CL`s data feed EUR/USD
-     * @param _minAmountToDepositInEuro init. value for minUsdAmountToRedeem
+     * @param _minAmountToDepositInEuro initial value for minAmountToDepositInEuro
      */
     function initialize(
         address _ac,
