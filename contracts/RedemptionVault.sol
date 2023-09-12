@@ -156,21 +156,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     /**
      * @inheritdoc IRedemptionVault
-     * @dev `tokenOut` amount is calculated using ETF data feed answer
-     */
-    // TODO: remove this version
-    function manuallyRedeem(
-        address user,
-        address tokenOut,
-        uint256 amountStUsdIn
-    ) external onlyVaultAdmin returns (uint256 amountUsdOut) {
-        require(amountStUsdIn > 0, "RV: 0 amount");
-        amountUsdOut = _getOutputAmountWithFee(amountStUsdIn, tokenOut);
-        _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
-    }
-
-    /**
-     * @inheritdoc IRedemptionVault
      */
     function manuallyRedeem(
         address user,

@@ -38,19 +38,6 @@ interface IRedemptionVault is IManageableVault {
     function cancelRedemptionRequest(uint256 requestId) external;
 
     /**
-     * @notice burns stUSD and transfers `tokenOut` to the user.
-     * can be called only from permissioned actor
-     * @param user address of user
-     * @param tokenOut address of output USD token
-     * @param amountStUsdIn amount of stUSD to redeem
-     */
-    function manuallyRedeem(
-        address user,
-        address tokenOut,
-        uint256 amountStUsdIn
-    ) external returns (uint256 amountUsdOut);
-
-    /**
      * @notice burns stUSD and transfers `amountUsdOut` of `tokenOut` to the user.
      * can be called only from permissioned actor
      * @param user address of user
