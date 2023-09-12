@@ -2,14 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "./MidasAccessControl.sol";
-
+import "../abstract/MidasInitializable.sol";
 /**
  * @title WithMidasAccessControl
  * @notice Base contract that consumes MidasAccessControl
  * @author RedDuck Software
  */
 abstract contract WithMidasAccessControl is
-    Initializable,
+    MidasInitializable,
     MidasAccessControlRoles
 {
     /**

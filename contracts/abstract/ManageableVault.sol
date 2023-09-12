@@ -18,8 +18,9 @@ import "../libraries/DecimalsCorrectionLibrary.sol";
 import "../access/Pausable.sol";
 
 /**
- * @title Contract with base Vault methods
+ * @title ManageableVault
  * @author RedDuck Software
+ * @notice Contract with base Vault methods
  */
 abstract contract ManageableVault is
     Greenlistable,
