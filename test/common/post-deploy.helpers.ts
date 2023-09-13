@@ -51,12 +51,6 @@ export const initGrantRoles = async ({
     }
   };
 
-  await checkAndExecute(roles.blacklistedOperator, stUsd.address);
-
-  await checkAndExecute(roles.greenlistedOperator, depositVault.address);
-
-  await checkAndExecute(roles.greenlistedOperator, redemptionVault.address);
-
   await checkAndExecute(roles.minter, depositVault.address);
 
   await checkAndExecute(roles.minter, redemptionVault.address);

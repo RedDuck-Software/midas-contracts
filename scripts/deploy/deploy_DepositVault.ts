@@ -21,7 +21,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     [
       addresses?.accessControl,
       addresses?.stUSD,
-      addresses?.etfDataFeed,
       addresses?.eurToUsdFeed,
       '0',
     ],

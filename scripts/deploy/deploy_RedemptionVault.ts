@@ -18,7 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   console.log('Deploying RedemptionVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(REDEMPTION_VAULT_CONTRACT_NAME, owner),
-    [addresses?.accessControl, addresses?.stUSD, addresses?.etfDataFeed, '0'],
+    [addresses?.accessControl, addresses?.stUSD],
   );
   console.log('Deployed RedemptionVault:', deployment.address);
 
