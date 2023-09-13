@@ -54,7 +54,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     uint256[51] private __gap;
 
     /**
-     * @notice upgradeable patter contract`s initializer
+     * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
      */
@@ -182,7 +182,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     /**
      * @dev deletes request from storage, transfers USD token to user
-     * and fires the event
+     * and emits the event
      * @param request request object
      * @param requestId id of the request object
      * @param amountUsdOut amount of USD token to transfer to user

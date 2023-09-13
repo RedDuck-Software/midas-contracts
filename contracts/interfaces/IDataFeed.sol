@@ -19,7 +19,7 @@ interface IDataFeed {
     }
 
     /**
-     * @notice upgradeable patter contract`s initializer
+     * @notice upgradeable pattern contract`s initializer
      * @param _ac MidasAccessControl contract address
      * @param _aggregator Agg   regatorV3Interface contract address
      */

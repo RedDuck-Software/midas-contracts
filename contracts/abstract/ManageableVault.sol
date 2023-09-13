@@ -64,7 +64,7 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @dev upgradeable patter contract`s initializer
+     * @dev upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
      */
@@ -119,7 +119,7 @@ abstract contract ManageableVault is
      * @dev reverts is token is not presented
      */
     function setFee(address token, uint256 newFee) external onlyVaultAdmin {
-        require(_paymentTokens.contains(token), "MV: doesn't exist");
+        _requireTokenExists(token);
         
         require(newFee <= ONE_HUNDRED_PERCENT, "MV: fee exceeds limit");
 
@@ -178,7 +178,7 @@ abstract contract ManageableVault is
         address token,
         uint256 amount
     ) internal {
-        // MANUAL_FULLFILMENT_TOKEN should be transfered off-chain to user`s bank account
+        // MANUAL_FULLFILMENT_TOKEN should be transfered off-chain
         if (token == MANUAL_FULLFILMENT_TOKEN) return;
 
         IERC20(token).safeTransfer(

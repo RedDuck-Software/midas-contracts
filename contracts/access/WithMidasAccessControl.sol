@@ -39,7 +39,7 @@ abstract contract WithMidasAccessControl is
     }
 
     /**
-     * @dev upgradeable patter contract`s initializer
+     * @dev upgradeable pattern contract`s initializer
      */
     // solhint-disable func-name-mixedcase
     function __WithMidasAccessControl_init(address _accessControl)

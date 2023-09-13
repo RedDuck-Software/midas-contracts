@@ -20,7 +20,7 @@ abstract contract Blacklistable is WithMidasAccessControl {
     }
 
     /**
-     * @dev upgradeable patter contract`s initializer
+     * @dev upgradeable pattern contract`s initializer
      * @param _accessControl MidasAccessControl contract address
      */
     // solhint-disable func-name-mixedcase

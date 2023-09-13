@@ -18,7 +18,7 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     bytes32 public constant TERMS_URL_METADATA_KEY = keccak256("urls.terms");
 
     /**
-     * @notice default description url metadata encoded key
+     * @notice default encoded key for description url metadata 
      */
     bytes32 public constant DESCRIPTION_URL_METADATA_KEY =
         keccak256("urls.description");
@@ -34,7 +34,7 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     uint256[50] private __gap;
 
     /**
-     * @notice upgradeable patter contract`s initializer
+     * @notice upgradeable pattern contract`s initializer
      * @param _accessControl address of MidasAccessControll contract
      */
     function initialize(address _accessControl) external initializer {

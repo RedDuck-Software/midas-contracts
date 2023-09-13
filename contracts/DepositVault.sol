@@ -47,7 +47,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     IDataFeed public eurUsdDataFeed;
 
     /**
-     * @notice depositor address => amount deposited
+     * @dev depositor address => amount deposited
      */
     mapping(address => uint256) public totalDeposited;
 
@@ -74,7 +74,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     uint256[50] private __gap;
 
     /**
-     * @notice upgradeable patter contract`s initializer
+     * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
      * @param _eurUsdDataFeed address of CL`s data feed EUR/USD
@@ -94,7 +94,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      * @dev transfers `tokenIn` from msg.sender and mints
-     * stUSD according to ETF data feed price
+     * and saves deposit request to the storage
      */
     function initiateDepositRequest(address tokenIn, uint256 amountUsdIn)
         external
@@ -264,7 +264,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountStUsdOut
     ) internal {
         require(user != address(0), "DV: invalid user");
-        _requireTokenExists(tokenIn);
 
         stUSD.mint(user, amountStUsdOut);
 

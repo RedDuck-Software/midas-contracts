@@ -18,7 +18,7 @@ contract MidasAccessControl is
     MidasAccessControlRoles
 {
     /**
-     * @notice upgradeable patter contract`s initializer
+     * @notice upgradeable pattern contract`s initializer
      */
     function initialize() external initializer {
         __AccessControl_init();

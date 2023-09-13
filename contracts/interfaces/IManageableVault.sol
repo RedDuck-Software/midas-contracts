@@ -49,7 +49,7 @@ interface IManageableVault {
     );
 
     /**
-     * @notice withdraws `amoount` of a given `token` from the contract.
+     * @notice withdraws `amount` of a given `token` from the contract.
      * can be called only from permissioned actor.
      * @param token token address
      * @param amount token amount
