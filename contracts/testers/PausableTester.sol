@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSEDI
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 import "../access/Pausable.sol";
 
