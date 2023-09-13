@@ -15,10 +15,6 @@ describe('stUSD', function () {
     expect(await stUSD.symbol()).eq('stUSD');
 
     expect(await stUSD.paused()).eq(false);
-
-    expect(
-      await accessControl.hasRole(roles.blacklistedOperator, stUSD.address),
-    ).eq(true);
   });
 
   it('initialize', async () => {

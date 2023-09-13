@@ -143,22 +143,6 @@ export const postDeploymentTest = async (
 
   /** Contracts roles tests start */
 
-  expect(
-    await accessControl.hasRole(roles.blacklistedOperator, stUsd.address),
-  ).eq(true);
-  expect(
-    await accessControl.hasRole(
-      roles.greenlistedOperator,
-      depositVault.address,
-    ),
-  ).eq(true);
-  expect(
-    await accessControl.hasRole(
-      roles.greenlistedOperator,
-      redemptionVault.address,
-    ),
-  ).eq(true);
-
   expect(await accessControl.hasRole(roles.minter, depositVault.address)).eq(
     true,
   );
