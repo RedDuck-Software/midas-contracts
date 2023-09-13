@@ -93,7 +93,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @inheritdoc IDepositVault
-     * @dev transfers `tokenIn` from msg.sender
+     * @dev transfers `tokenIn` from `msg.sender`
      * and saves deposit request to the storage
      */
     function initiateDepositRequest(address tokenIn, uint256 amountUsdIn)
@@ -228,10 +228,10 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @dev removes deposit request from the storage
-     * mints `amountStUsdOut` of stUSD to user
+     * mints `amountStUsdOut` of stUSD to `user`
      * @param requestId id of a deposit request
      * @param user user address
-     * @param amountStUsdOut amount of stUSD that should be minted to user
+     * @param amountStUsdOut amount of stUSD that should be minted to `user`
      */
     function _fullfillDepositRequest(
         uint256 requestId,

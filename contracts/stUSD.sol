@@ -95,7 +95,7 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     }
 
     /**
-     * @dev overrrides _beforeTokenTransfer function to ban
+     * @dev overrides _beforeTokenTransfer function to ban
      * blaclisted users from using the token functions
      */
     function _beforeTokenTransfer(

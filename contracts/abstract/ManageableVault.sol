@@ -79,7 +79,7 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @notice withdraws `amoount` of a given `token` from the contract.
+     * @notice withdraws `amount` of a given `token` from the contract.
      * can be called only from permissioned actor.
      * @param token token address
      * @param amount token amount
@@ -115,7 +115,7 @@ abstract contract ManageableVault is
 
     /**
      * @inheritdoc IManageableVault
-     * @dev reverts is token is not presented
+     * @dev reverts if token is not presented
      */
     function setFee(address token, uint256 newFee) external onlyVaultAdmin {
         _requireTokenExists(token);
@@ -151,8 +151,9 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @dev do safe transfer from on a given token
-     * and converts amount from base18 to amount for a given token
+     * @dev do safeTransferFrom on a given token
+     * and converts `amount` from base18
+     * to amount with a correct precision
      * @param user user address
      * @param token address of token
      * @param amount amount of `token` to transfer to `user`
@@ -173,7 +174,7 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @dev do safe transfer on a given token. Doesnt perform transfer if
+     * @dev do safeTransfer on a given token. Doesnt perform transfer if
      * token is `MANUAL_FULLFILMENT_TOKEN` as it should be transferred off-chain
      * @param user user address
      * @param token address of token
