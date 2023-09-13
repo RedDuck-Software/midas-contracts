@@ -21,9 +21,10 @@ describe('DecimalsCorrectionLibrary', function () {
 
   const convertFromBase18Test = async (
     amountIn: string,
-    decimals: BigNumberish,
-    expectedAmountOut: BigNumberish,
+    decimals: BigNumberish
   ) => {
+    const expectedAmountOut = parseUnits(amountIn.toString(), decimals);
+
     const res = await decimalsCorrection.convertAmountFromBase18Public(
       parseUnits(amountIn.toString()),
       decimals,
@@ -34,9 +35,10 @@ describe('DecimalsCorrectionLibrary', function () {
 
   const convertToBase18Test = async (
     amountIn: string,
-    decimals: BigNumberish,
-    expectedAmountOut: BigNumberish,
+    decimals: BigNumberish
   ) => {
+    const expectedAmountOut = parseUnits(amountIn.toString());
+
     const res = await decimalsCorrection.convertAmountToBase18Public(
       parseUnits(amountIn.toString(), decimals),
       decimals,
@@ -47,45 +49,54 @@ describe('DecimalsCorrectionLibrary', function () {
 
   describe('convertFromBase18()', () => {
     it('decimal < 18: Amount - 0, decimals - 0, expected out - (0,0)', async () => {
-      await convertFromBase18Test('0', '0', '0');
+      await convertFromBase18Test('0', '0');
     });
 
     it('decimal < 18: Amount - 0, decimals - 9, expected out - (0,0)', async () => {
-      await convertFromBase18Test('0', '0', '0');
+      await convertFromBase18Test('0', '0');
     });
 
     it('decimal < 18: Amount - 1, decimals - 9, expected out - (1,9)', async () => {
-      await convertFromBase18Test('1', '9', parseUnits('1', 9));
+      await convertFromBase18Test('1', '9');
     });
 
     it('decimal > 18: Amount - 1, decimals - 27, expected out - (1,27)', async () => {
-      await convertFromBase18Test('1', '27', parseUnits('1', 27));
+      await convertFromBase18Test('1', '27');
     });
 
+    it('decimal == 18: Amount - 1, decimals - 18, expected out - (1,18)', async () => {
+      await convertFromBase18Test('1', '18');
+    });
+
+
     it('decimal > 18: Amount - 0, decimals - 27, expected out - (0,0)', async () => {
-      await convertFromBase18Test('0', '27', parseUnits('0', 27));
+      await convertFromBase18Test('0', '27');
     });
   });
 
   describe('convertToBase18()', () => {
     it('decimal < 18: Amount - 0, decimals - 0, expected out - (0,0)', async () => {
-      await convertToBase18Test('0', '0', '0');
+      await convertToBase18Test('0', '0');
     });
 
     it('decimal < 18: Amount - 0, decimals - 9, expected out - (0,0)', async () => {
-      await convertToBase18Test('0', '0', '0');
+      await convertToBase18Test('0', '0');
+    });
+
+    it('decimal == 18: Amount - 1, decimals - 18, expected out - (1,18)', async () => {
+      await convertToBase18Test('1', '18');
     });
 
     it('decimal < 18: Amount - 1, decimals - 9, expected out - (1,18)', async () => {
-      await convertToBase18Test('1', '9', parseUnits('1'));
+      await convertToBase18Test('1', '9');
     });
 
     it('decimal > 18: Amount - 1, decimals - 27, expected out - (1,18)', async () => {
-      await convertToBase18Test('1', '27', parseUnits('1'));
+      await convertToBase18Test('1', '27');
     });
 
     it('decimal > 18: Amount - 0, decimals - 27, expected out - (0,0)', async () => {
-      await convertToBase18Test('0', '27', parseUnits('0'));
+      await convertToBase18Test('0', '27');
     });
   });
 });

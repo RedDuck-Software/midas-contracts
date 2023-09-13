@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import {IERC20Upgradeable as IERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IERC20MetadataUpgradeable as IERC20Metadata} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
@@ -25,7 +24,6 @@ import "../access/Pausable.sol";
 abstract contract ManageableVault is
     Greenlistable,
     Pausable,
-    ReentrancyGuardUpgradeable,
     IManageableVault
 {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -78,7 +76,6 @@ abstract contract ManageableVault is
         stUSD = IStUSD(_stUSD);
         __Greenlistable_init(_ac);
         __Pausable_init(_ac);
-        __ReentrancyGuard_init();
     }
 
     /**

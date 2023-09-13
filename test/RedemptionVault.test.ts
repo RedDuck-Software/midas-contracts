@@ -45,44 +45,6 @@ describe('RedemptionVault', function () {
     ).revertedWith('Initializable: contract is already initialized');
   });
 
-
-  // describe('getOutputAmountWithFee()', () => {
-  //   const test = ({
-  //     priceN,
-  //     amountN,
-  //     feeN,
-  //     expectedValue,
-  //   }: {
-  //     priceN: number;
-  //     amountN: number;
-  //     feeN: number;
-  //     expectedValue: number;
-  //   }) => {
-  //     it(`price is ${priceN}$, fee is ${feeN}%, amount is ${amountN}$ return value should be ${expectedValue} stUSD`, async () => {
-  //       const { redemptionVault, mockedAggregator, stableCoins } =
-  //         await loadFixture(defaultDeploy);
-
-  //       await redemptionVault.addPaymentToken(stableCoins.usdc.address);
-
-  //       await getOutputAmountWithFeeRedeemTest(
-  //         { redemptionVault, mockedAggregator },
-  //         {
-  //           priceN,
-  //           amountN,
-  //           feeN,
-  //           token: stableCoins.usdc.address,
-  //         },
-  //       );
-  //     });
-  //   };
-
-  //   test({ priceN: 5.1, feeN: 1, amountN: 100, expectedValue: 504.9 });
-  //   test({ priceN: 1, feeN: 0.01, amountN: 50, expectedValue: 49.9 });
-  //   test({ priceN: 5, feeN: 0, amountN: 100, expectedValue: 500 });
-  //   test({ priceN: 0, feeN: 1, amountN: 100, expectedValue: 0 });
-  //   test({ priceN: 1, feeN: 1, amountN: 0, expectedValue: 0 });
-  // });
-
   describe('initiateRedemptionRequest()', () => {
     it('should fail: call from address without GREENLISTED_ROLE role', async () => {
       const { redemptionVault, regularAccounts, owner, stUSD, stableCoins } =

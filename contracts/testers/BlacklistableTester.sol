@@ -8,6 +8,10 @@ contract BlacklistableTester is Blacklistable {
         __Blacklistable_init(_accessControl);
     }
 
+    function initializeWithoutInitializer(address _accessControl) external { 
+        __Blacklistable_init(_accessControl);
+    } 
+
     function onlyNotBlacklistedTester(address account)
         external
         onlyNotBlacklisted(account)

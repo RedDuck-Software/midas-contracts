@@ -20,6 +20,7 @@ import {
   removePaymentTokenTest,
   withdrawTest,
 } from './common/manageable-vault.helpers';
+import { ManageableVaultTester__factory } from '../typechain-types';
 
 describe('DepositVault', function () {
   it('deployment', async () => {
@@ -52,6 +53,23 @@ describe('DepositVault', function () {
         0,
       ),
     ).revertedWith('Initializable: contract is already initialized');
+  });
+
+  it('onlyInitializing', async () => {
+    const { owner, accessControl, stUSD } = await loadFixture(
+      defaultDeploy,
+    );
+  
+    const vault = await new ManageableVaultTester__factory(
+      owner,
+    ).deploy();
+
+    await expect(
+      vault.initializeWithoutInitializer(
+        accessControl.address,
+        stUSD.address
+      ),
+    ).revertedWith('Initializable: contract is not initializing');
   });
 
   describe('setMinAmountToDeposit()', () => {
@@ -90,6 +108,16 @@ describe('DepositVault', function () {
       await expect(
         depositVault.setFee(stableCoins.usdc.address, 1),
       ).revertedWith(`MV: doesn't exist`);
+    });
+
+    it('should fail: set fee that is > 100%', async () => {
+      const { depositVault, stableCoins } = await loadFixture(defaultDeploy);
+
+      await depositVault.addPaymentToken(stableCoins.usdc.address);
+
+      await expect(
+        depositVault.setFee(stableCoins.usdc.address, 101_00),
+      ).revertedWith(`MV: fee exceeds limit`);
     });
 
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {

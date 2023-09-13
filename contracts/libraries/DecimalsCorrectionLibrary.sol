@@ -29,7 +29,7 @@ library DecimalsCorrectionLibrary {
             adjustedAmount =
                 originalAmount /
                 (10**(originalDecimals - decidedDecimals));
-        } else if (originalDecimals < decidedDecimals) {
+        } else {
             adjustedAmount =
                 originalAmount *
                 (10**(decidedDecimals - originalDecimals));

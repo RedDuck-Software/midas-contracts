@@ -8,6 +8,10 @@ contract WithMidasAccessControlTester is WithMidasAccessControl {
         __WithMidasAccessControl_init(_accessControl);
     }
 
+   function initializeWithoutInitializer(address _accessControl) external {
+        __WithMidasAccessControl_init(_accessControl);
+    }
+
     function grantRoleTester(bytes32 role, address account) external {
         accessControl.grantRole(role, account);
     }

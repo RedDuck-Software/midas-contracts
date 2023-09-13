@@ -8,6 +8,10 @@ contract PausableTester is Pausable {
         __Pausable_init(_accessControl);
     }
 
+    function initializeWithoutInitializer(address _accessControl) external {
+        __Pausable_init(_accessControl);
+    }
+
     function pauseAdminRole() public view override returns (bytes32) {
         return accessControl.DEFAULT_ADMIN_ROLE();
     }

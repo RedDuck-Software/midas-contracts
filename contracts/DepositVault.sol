@@ -100,7 +100,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         external
         onlyGreenlisted(msg.sender)
         pausable
-        nonReentrant
         returns (uint256)
     {
         address user = msg.sender;

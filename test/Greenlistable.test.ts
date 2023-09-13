@@ -3,6 +3,7 @@ import { expect } from 'chai';
 
 import { acErrors, greenList, unGreenList } from './common/ac.helpers';
 import { defaultDeploy } from './common/fixtures';
+import { GreenlistableTester__factory } from '../typechain-types';
 
 describe('Greenlistable', function () {
   it('deployment', async () => {
@@ -16,6 +17,22 @@ describe('Greenlistable', function () {
         greenListableTester.address,
       ),
     ).eq(true);
+  });
+
+  it('onlyInitializing', async () => {
+    const { owner, accessControl } = await loadFixture(
+      defaultDeploy,
+    );
+  
+    const greenListable = await new GreenlistableTester__factory(
+      owner,
+    ).deploy();
+
+    await expect(
+      greenListable.initializeWithoutInitializer(
+        accessControl.address
+      ),
+    ).revertedWith('Initializable: contract is not initializing');
   });
 
   describe('modifier onlyGreenlisted', () => {
