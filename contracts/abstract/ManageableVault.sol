@@ -159,6 +159,9 @@ abstract contract ManageableVault is
         address token,
         uint256 amount
     ) internal {
+        // MANUAL_FULLFILMENT_TOKEN should be transfered off-chain
+        if (token == MANUAL_FULLFILMENT_TOKEN) return;
+        
         IERC20(token).safeTransferFrom(
             user,
             address(this),

@@ -161,6 +161,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         delete requests[requestId];
 
         uint256 returnAmount = request.amountUsdIn + request.fee;
+        totalDeposited[request.user] -= request.amountUsdIn;
 
         _transferToken(
             request.user, 
