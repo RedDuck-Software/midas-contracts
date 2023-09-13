@@ -100,7 +100,6 @@ abstract contract ManageableVault is
      * @dev reverts if token is already added
      */
     function addPaymentToken(address token) external onlyVaultAdmin {
-        require(token != address(0), "MV: invalid token");
         require(_paymentTokens.add(token), "MV: already added");
         emit AddPaymentToken(token, msg.sender);
     }
@@ -129,7 +128,7 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @notice returns array of `_paymentTokens`
+     * @notice returns array of stablecoins supported by the vault
      * can be called only from permissioned actor.
      * @return paymentTokens array of payment tokens
      */
@@ -143,6 +142,10 @@ abstract contract ManageableVault is
      */
     function vaultRole() public view virtual returns (bytes32);
 
+    /**
+     * @notice AC role of vault`s pauser
+     * @return role bytes32 role
+     */
     function pauseAdminRole() public view override returns (bytes32) {
         return vaultRole();
     }
@@ -159,9 +162,9 @@ abstract contract ManageableVault is
         address token,
         uint256 amount
     ) internal {
-        // MANUAL_FULLFILMENT_TOKEN should be transfered off-chain
+        // MANUAL_FULLFILMENT_TOKEN should be transferred off-chain
         if (token == MANUAL_FULLFILMENT_TOKEN) return;
-        
+
         IERC20(token).safeTransferFrom(
             user,
             address(this),
@@ -171,7 +174,7 @@ abstract contract ManageableVault is
 
     /**
      * @dev do safe transfer on a given token. Doesnt perform transfer if
-     * token is `MANUAL_FULLFILMENT_TOKEN` as it should be transfered off-chain
+     * token is `MANUAL_FULLFILMENT_TOKEN` as it should be transferred off-chain
      * @param user user address
      * @param token address of token
      * @param amount amount of `token` to transfer to `user`
@@ -181,7 +184,7 @@ abstract contract ManageableVault is
         address token,
         uint256 amount
     ) internal {
-        // MANUAL_FULLFILMENT_TOKEN should be transfered off-chain
+        // MANUAL_FULLFILMENT_TOKEN should be transferred off-chain
         if (token == MANUAL_FULLFILMENT_TOKEN) return;
 
         IERC20(token).safeTransfer(

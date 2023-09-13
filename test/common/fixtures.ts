@@ -35,6 +35,7 @@ import {
   WithMidasAccessControlTester__factory,
 } from '../../typechain-types';
 import { DataFeedTest__factory } from '../../typechain-types/factories/contracts/testers/DataFeedTest__factory';
+import { constants } from 'ethers';
 
 export const defaultDeploy = async () => {
   const [owner, ...regularAccounts] = await ethers.getSigners();
@@ -116,6 +117,8 @@ export const defaultDeploy = async () => {
 
   const roles = await getAllRoles(accessControl);
 
+  const offChainUsdToken = constants.AddressZero;
+
   // role granting main
   await initGrantRoles({
     accessControl,
@@ -166,6 +169,7 @@ export const defaultDeploy = async () => {
     manualFulfillmentToken,
     eurToUsdDataFeed,
     mockedAggregatorEur,
+    offChainUsdToken,
     mockedAggregatorEurDecimals,
   };
 };

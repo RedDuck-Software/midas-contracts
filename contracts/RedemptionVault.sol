@@ -153,8 +153,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @inheritdoc IManageableVault
      * @notice returns redemption fee
-     * @dev fee applies to output USD amount
-     * @return fee USD fee
+     * @dev fee applies to inputted stUSD amount
+     * @return fee fee percentage multiplied by 100
      */
     function getFee(address token) public view returns (uint256) {
         return _feesForTokens[token];

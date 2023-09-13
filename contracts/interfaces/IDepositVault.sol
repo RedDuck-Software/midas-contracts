@@ -62,7 +62,15 @@ interface IDepositVault is IManageableVault {
     ) external;
 
     /**
-     * @notice sets new minimal amount to deposit.
+     * @notice frees given `user` from the minimal deposit
+     * amount validation in `initiateDepositRequest`
+     * @param user address of user
+     */
+    function freeFromMinDeposit(address user) external;
+
+
+    /**
+     * @notice sets new minimal amount to deposit in EUR.
      * can be called only from vault`s admin
      * @param newValue new min. deposit value
      */

@@ -107,7 +107,7 @@ describe('DepositVault', function () {
       const { depositVault, stableCoins } = await loadFixture(defaultDeploy);
       await expect(
         depositVault.setFee(stableCoins.usdc.address, 1),
-      ).revertedWith(`MV: doesn't exist`);
+      ).revertedWith(`MV: token not exists`);
     });
 
     it('should fail: set fee that is > 100%', async () => {
@@ -143,14 +143,6 @@ describe('DepositVault', function () {
       );
     });
 
-    it('should fail: when token eq to address(0)', async () => {
-      const { depositVault, owner } = await loadFixture(defaultDeploy);
-      await addPaymentTokenTest(
-        { vault: depositVault, owner },
-        ethers.constants.AddressZero,
-        { revertMessage: 'MV: invalid token' },
-      );
-    });
 
     it('should fail: when token is already added', async () => {
       const { depositVault, stableCoins, owner } = await loadFixture(
@@ -379,42 +371,6 @@ describe('DepositVault', function () {
       ).to.revertedWith('DV: already free');
     });
   });
-  // describe('getOutputAmountWithFee()', () => {
-  //   const test = ({
-  //     priceN,
-  //     amountN,
-  //     feeN,
-  //     expectedValue,
-  //   }: {
-  //     priceN: number;
-  //     amountN: number;
-  //     feeN: number;
-  //     expectedValue: number;
-  //   }) => {
-  //     it(`price is ${priceN}$, fee is ${feeN}%, amount is ${amountN}$ return value should be ${expectedValue} stUSD`, async () => {
-  //       const { depositVault, mockedAggregator, stableCoins } =
-  //         await loadFixture(defaultDeploy);
-
-  //       await depositVault.addPaymentToken(stableCoins.usdc.address);
-
-  //       await getOutputAmountWithFeeTest(
-  //         { depositVault, mockedAggregator },
-  //         {
-  //           priceN,
-  //           amountN,
-  //           feeN,
-  //           token: stableCoins.usdc.address,
-  //         },
-  //       );
-  //     });
-  //   };
-
-  //   test({ priceN: 5.1, feeN: 1, amountN: 100, expectedValue: 19.41 });
-  //   test({ priceN: 1, feeN: 0.01, amountN: 50, expectedValue: 9.8 });
-  //   test({ priceN: 5, feeN: 0, amountN: 100, expectedValue: 20 });
-  //   test({ priceN: 0, feeN: 1, amountN: 100, expectedValue: 0 });
-  //   test({ priceN: 1, feeN: 1, amountN: 0, expectedValue: 0 });
-  // });
 
   describe('initiateDepositRequest()', async () => {
     it('should fail: call from address without GREENLISTED_ROLE role', async () => {
@@ -615,6 +571,32 @@ describe('DepositVault', function () {
         100,
       );
     });
+
+    it('deposit $USD', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        depositVault,
+        accessControl,
+        offChainUsdToken,
+        stUSD,
+      } = await loadFixture(defaultDeploy);
+      await greenList(
+        { accessControl, greenlistable: depositVault, owner },
+        owner,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        offChainUsdToken,
+      );
+      await setRoundData({ mockedAggregator }, 5);
+      await initiateDepositRequest(
+        { depositVault, owner, stUSD },
+        offChainUsdToken,
+        100,
+      );
+    });
+
 
     it('deposit 100 DAI, when price is 5$ without checking of minDepositAmount', async () => {
       const {
@@ -973,6 +955,22 @@ describe('DepositVault', function () {
         stableCoins.dai,
         1,
         1,
+      );
+    });
+
+    it('call with token address == address(0)', async () => {
+      const { depositVault, regularAccounts, offChainUsdToken, owner, stUSD } =
+        await loadFixture(defaultDeploy);
+      await manualDepositTest(
+        { depositVault, owner, stUSD },
+        {
+          from: owner,
+        },
+      )['manuallyDeposit(address,address,uint256,uint256)'](
+        regularAccounts[0],
+        offChainUsdToken,
+        1,
+        0,
       );
     });
 

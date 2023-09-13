@@ -62,14 +62,14 @@ interface IManageableVault {
     ) external;
 
     /**
-     * @notice adds a token to `_paymentTokens`.
+     * @notice adds a token to the stablecoins list.
      * can be called only from permissioned actor.
      * @param token token address
      */
     function addPaymentToken(address token) external;
 
     /**
-     * @notice removes a token from `_paymentTokens`.
+     * @notice removes a token from stablecoins list.
      * can be called only from permissioned actor.
      * @param token token address
      */

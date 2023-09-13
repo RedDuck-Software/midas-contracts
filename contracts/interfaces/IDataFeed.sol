@@ -21,7 +21,7 @@ interface IDataFeed {
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac MidasAccessControl contract address
-     * @param _aggregator Agg   regatorV3Interface contract address
+     * @param _aggregator AggregatorV3Interface contract address
      */
     function initialize(address _ac, address _aggregator) external;
 

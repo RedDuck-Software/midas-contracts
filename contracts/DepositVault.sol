@@ -93,7 +93,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @inheritdoc IDepositVault
-     * @dev transfers `tokenIn` from msg.sender and mints
+     * @dev transfers `tokenIn` from msg.sender
      * and saves deposit request to the storage
      */
     function initiateDepositRequest(address tokenIn, uint256 amountUsdIn)
@@ -139,7 +139,6 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @inheritdoc IDepositVault
-     * @dev mints stUSD according to ETF data feed price
      */
     function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut)
         external
@@ -152,8 +151,8 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @inheritdoc IDepositVault
-     * @dev deletes request by a given `requestId` from storage
-     * and fires the event
+     * @dev reverts existing deposit request by a given `requestId`,
+     * deletes it from the storage and fires the event
      */
     function cancelDepositRequest(uint256 requestId) external onlyVaultAdmin {
         DepositRequest memory request = _getRequest(requestId);
@@ -186,6 +185,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
     }
 
+    /**
+     * @inheritdoc IDepositVault
+     */
     function freeFromMinDeposit(address user) external onlyVaultAdmin {
         require(!isFreeFromMinDeposit[user], "DV: already free");
 
@@ -202,7 +204,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     /**
-     * @notice minAmountToDepositInEuro in USD in base18
+     * @notice minAmountToDepositInEuro converted to USD in base18
      */
     function minAmountToDepositInUsd() public view returns (uint256) {
         return
@@ -225,7 +227,8 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     /**
-     * @notice deposits USD `tokenIn` into vault and mints given `amountStUsdOut amount
+     * @dev removes deposit request from the storage
+     * mints `amountStUsdOut` of stUSD to user
      * @param requestId id of a deposit request
      * @param user user address
      * @param amountStUsdOut amount of stUSD that should be minted to user
@@ -258,6 +261,15 @@ contract DepositVault is ManageableVault, IDepositVault {
         );
     }
 
+    /**
+     * @dev internal implementation of manuallyDeposit()
+     * mints `amountStUsdOut` amount of stUSd to the `user`
+     * and fires the event
+     * @param user user address
+     * @param tokenIn address of input USD token
+     * @param amountUsdIn amount of USD token taken from user
+     * @param amountStUsdOut amount of stUSD token to mint to `user`
+     */
     function _manuallyDeposit(
         address user,
         address tokenIn,
@@ -265,6 +277,10 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountStUsdOut
     ) internal {
         require(user != address(0), "DV: invalid user");
+
+        if (tokenIn != MANUAL_FULLFILMENT_TOKEN) {
+            _requireTokenExists(tokenIn);
+        }
 
         stUSD.mint(user, amountStUsdOut);
 
@@ -278,7 +294,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     /**
-     * @dev checks that request is exists and copies it to memory
+     * @dev checks that request is exists and copies it to the memory
      * @return request request object
      */
     function _getRequest(uint256 requestId)

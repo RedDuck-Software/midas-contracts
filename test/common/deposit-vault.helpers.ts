@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumberish } from 'ethers';
+import { BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
@@ -132,8 +132,11 @@ export const initiateDepositRequest = async (
   expect(totalDepositedAfter).eq(
     totalDepositedBefore.add(amountIn.sub(feeAmount)),
   );
-  expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
-  expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+
+  if(tokenIn !== constants.AddressZero) {
+    expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
+    expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+  }
 
   const lastRequestId = await depositVault.lastRequestId();
 
@@ -264,9 +267,12 @@ export const manualDepositTest = (
 
       const supplyAfter = await stUSD.totalSupply();
 
+      if(tokenStr !== constants.AddressZero) { 
+        expect(balanceAfterContract).eq(balanceBeforeContract);
+        expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser);
+      }
+
       expect(supplyAfter).eq(supplyBefore.add(amountOut));
-      expect(balanceAfterContract).eq(balanceBeforeContract);
-      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser);
       expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser.add(amountOut));
     },
   };
