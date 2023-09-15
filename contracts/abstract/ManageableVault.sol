@@ -21,11 +21,7 @@ import "../access/Pausable.sol";
  * @author RedDuck Software
  * @notice Contract with base Vault methods
  */
-abstract contract ManageableVault is
-    Greenlistable,
-    Pausable,
-    IManageableVault
-{
+abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
@@ -39,7 +35,7 @@ abstract contract ManageableVault is
      * @notice 100 percent with base 100
      * @dev for example, 10% will be (10 * 100)%
      */
-    uint256 public constant ONE_HUNDRED_PERCENT = 100 * 100; 
+    uint256 public constant ONE_HUNDRED_PERCENT = 100 * 100;
     /**
      * @notice stUSD token
      */
@@ -69,10 +65,10 @@ abstract contract ManageableVault is
      * @param _stUSD address of stUSD token
      */
     // solhint-disable func-name-mixedcase
-    function __ManageableVault_init(
-        address _ac,
-        address _stUSD
-    ) internal onlyInitializing {
+    function __ManageableVault_init(address _ac, address _stUSD)
+        internal
+        onlyInitializing
+    {
         stUSD = IStUSD(_stUSD);
         __Greenlistable_init(_ac);
         __Pausable_init(_ac);
@@ -119,7 +115,7 @@ abstract contract ManageableVault is
      */
     function setFee(address token, uint256 newFee) external onlyVaultAdmin {
         _requireTokenExists(token);
-        
+
         require(newFee <= ONE_HUNDRED_PERCENT, "MV: fee exceeds limit");
 
         _feesForTokens[token] = newFee;

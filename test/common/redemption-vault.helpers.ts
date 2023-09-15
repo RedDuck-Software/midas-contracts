@@ -257,12 +257,7 @@ export const manualRedeemTest = (
         await expect(
           redemptionVault
             .connect(sender)
-            .manuallyRedeem(
-              user,
-              tokenOut,
-              amountIn,
-              amountOut,
-            ),
+            .manuallyRedeem(user, tokenOut, amountIn, amountOut),
         ).revertedWith(opt?.revertMessage);
         return;
       }
@@ -281,12 +276,7 @@ export const manualRedeemTest = (
       await expect(
         redemptionVault
           .connect(sender)
-          .manuallyRedeem(
-            user,
-            tokenOut,
-            amountIn,
-            amountOut,
-          ),
+          .manuallyRedeem(user, tokenOut, amountIn, amountOut),
       ).to.emit(
         redemptionVault,
         redemptionVault.interface.events[

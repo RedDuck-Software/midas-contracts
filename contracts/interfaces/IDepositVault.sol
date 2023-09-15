@@ -46,7 +46,7 @@ interface IDepositVault is IManageableVault {
 
     /**
      * @notice wrapper over the stUSD.mint() function.
-     * Mints `amountStUsdOut` to the `user` and emits the 
+     * Mints `amountStUsdOut` to the `user` and emits the
      * event to be able to track this deposit off-chain.
      * can be called only from vault`s admin
      * @param user address of user
@@ -67,7 +67,6 @@ interface IDepositVault is IManageableVault {
      * @param user address of user
      */
     function freeFromMinDeposit(address user) external;
-
 
     /**
      * @notice sets new minimal amount to deposit in EUR.

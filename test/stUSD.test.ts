@@ -9,7 +9,7 @@ import { burn, mint, setMetadataTest } from './common/stUSD.helpers';
 
 describe('stUSD', function () {
   it('deployment', async () => {
-    const { accessControl, roles, stUSD } = await loadFixture(defaultDeploy);
+    const { stUSD } = await loadFixture(defaultDeploy);
 
     expect(await stUSD.name()).eq('stUSD');
     expect(await stUSD.symbol()).eq('stUSD');

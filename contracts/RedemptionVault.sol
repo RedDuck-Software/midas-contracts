@@ -58,10 +58,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @param _ac address of MidasAccessControll contract
      * @param _stUSD address of stUSD token
      */
-    function initialize(
-        address _ac,
-        address _stUSD
-    ) external initializer {
+    function initialize(address _ac, address _stUSD) external initializer {
         __ManageableVault_init(_ac, _stUSD);
     }
 

@@ -21,7 +21,7 @@ describe('DecimalsCorrectionLibrary', function () {
 
   const convertFromBase18Test = async (
     amountIn: string,
-    decimals: BigNumberish
+    decimals: BigNumberish,
   ) => {
     const expectedAmountOut = parseUnits(amountIn.toString(), decimals);
 
@@ -35,7 +35,7 @@ describe('DecimalsCorrectionLibrary', function () {
 
   const convertToBase18Test = async (
     amountIn: string,
-    decimals: BigNumberish
+    decimals: BigNumberish,
   ) => {
     const expectedAmountOut = parseUnits(amountIn.toString());
 
@@ -67,7 +67,6 @@ describe('DecimalsCorrectionLibrary', function () {
     it('decimal == 18: Amount - 1, decimals - 18, expected out - (1,18)', async () => {
       await convertFromBase18Test('1', '18');
     });
-
 
     it('decimal > 18: Amount - 0, decimals - 27, expected out - (0,0)', async () => {
       await convertFromBase18Test('0', '27');

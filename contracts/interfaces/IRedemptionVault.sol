@@ -37,7 +37,7 @@ interface IRedemptionVault is IManageableVault {
 
     /**
      * @notice cancels redemption request by a given `requestId`
-     * and mints stUSD back to the user. 
+     * and mints stUSD back to the user.
      * can be called only from permissioned actor
      * @param requestId id of a redemption request
      */
@@ -45,7 +45,7 @@ interface IRedemptionVault is IManageableVault {
 
     /**
      * @notice wrapper over the stUSD.burn() function.
-     * Burns `amountStUsdIn` from the `user` and emits the 
+     * Burns `amountStUsdIn` from the `user` and emits the
      * event to be able to track this redemption off-chain.
      * can be called only from vault`s admin
      * @param user address of user

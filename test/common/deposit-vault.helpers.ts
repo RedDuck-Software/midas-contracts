@@ -133,7 +133,7 @@ export const initiateDepositRequest = async (
     totalDepositedBefore.add(amountIn.sub(feeAmount)),
   );
 
-  if(tokenIn !== constants.AddressZero) {
+  if (tokenIn !== constants.AddressZero) {
     expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
     expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
   }
@@ -226,12 +226,7 @@ export const manualDepositTest = (
         await expect(
           depositVault
             .connect(sender)
-            .manuallyDeposit(
-              user,
-              tokenStr,
-              amountIn,
-              amountOut,
-            ),
+            .manuallyDeposit(user, tokenStr, amountIn, amountOut),
         ).revertedWith(opt?.revertMessage);
 
         return;
@@ -247,12 +242,7 @@ export const manualDepositTest = (
       await expect(
         depositVault
           .connect(sender)
-          .manuallyDeposit(
-            user,
-            token.address,
-            amountIn,
-            amountOut,
-          ),
+          .manuallyDeposit(user, token.address, amountIn, amountOut),
       ).to.emit(
         depositVault,
         depositVault.interface.events[
@@ -267,7 +257,7 @@ export const manualDepositTest = (
 
       const supplyAfter = await stUSD.totalSupply();
 
-      if(tokenStr !== constants.AddressZero) { 
+      if (tokenStr !== constants.AddressZero) {
         expect(balanceAfterContract).eq(balanceBeforeContract);
         expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser);
       }

@@ -18,12 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   console.log('Deploying DepositVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(DEPOSIT_VAULT_CONTRACT_NAME, owner),
-    [
-      addresses?.accessControl,
-      addresses?.stUSD,
-      addresses?.eurToUsdFeed,
-      '0',
-    ],
+    [addresses?.accessControl, addresses?.stUSD, addresses?.eurToUsdFeed, '0'],
   );
   console.log('Deployed DepositVault:', deployment.address);
 

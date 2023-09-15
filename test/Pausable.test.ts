@@ -2,7 +2,11 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 
 import { defaultDeploy } from './common/fixtures';
-import { PausableTester__factory } from '../typechain-types';
+
+import {
+  // eslint-disable-next-line camelcase
+  PausableTester__factory,
+} from '../typechain-types';
 
 describe('Pausable', () => {
   it('deployment', async () => {
@@ -11,21 +15,15 @@ describe('Pausable', () => {
     expect(await pausableTester.pauseAdminRole()).eq(roles.defaultAdmin);
   });
 
-
   it('onlyInitializing', async () => {
-    const { accessControl, owner } = await loadFixture(
-      defaultDeploy,
-    );
+    const { accessControl, owner } = await loadFixture(defaultDeploy);
 
     const pausable = await new PausableTester__factory(owner).deploy();
-    
+
     await expect(
-      pausable.initializeWithoutInitializer(
-        accessControl.address
-      ),
+      pausable.initializeWithoutInitializer(accessControl.address),
     ).revertedWith('Initializable: contract is not initializing');
   });
-
 
   describe('onlyPauseAdmin modifier', async () => {
     it('fail: can`t change state if doesn`t have role', async () => {
