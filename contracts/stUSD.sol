@@ -18,7 +18,7 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
     bytes32 public constant TERMS_URL_METADATA_KEY = keccak256("urls.terms");
 
     /**
-     * @notice default encoded key for description url metadata 
+     * @notice default encoded key for description url metadata
      */
     bytes32 public constant DESCRIPTION_URL_METADATA_KEY =
         keccak256("urls.description");

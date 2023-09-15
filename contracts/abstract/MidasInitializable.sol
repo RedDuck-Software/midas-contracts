@@ -4,11 +4,11 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /**
- * @title MidasInitializable 
+ * @title MidasInitializable
  * @author RedDuck Software
  * @notice Base Initializable contract that implements constructor
- * that calls _disableInitializers() to prevent 
- * initialization of implementation contract 
+ * that calls _disableInitializers() to prevent
+ * initialization of implementation contract
  */
 abstract contract MidasInitializable is Initializable {
     constructor() {

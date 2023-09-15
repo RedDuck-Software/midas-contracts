@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 import "./MidasAccessControl.sol";
 import "../abstract/MidasInitializable.sol";
+
 /**
  * @title WithMidasAccessControl
  * @notice Base contract that consumes MidasAccessControl

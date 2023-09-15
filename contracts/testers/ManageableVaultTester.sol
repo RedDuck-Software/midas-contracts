@@ -4,10 +4,10 @@ pragma solidity 0.8.9;
 import "../abstract/ManageableVault.sol";
 
 contract ManageableVaultTester is ManageableVault {
-    function initialize(
-        address _accessControl,
-        address _stUsd
-    ) external initializer {
+    function initialize(address _accessControl, address _stUsd)
+        external
+        initializer
+    {
         __ManageableVault_init(_accessControl, _stUsd);
     }
 

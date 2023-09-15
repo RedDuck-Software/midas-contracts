@@ -1,3 +1,4 @@
+import { constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 import * as hre from 'hardhat';
@@ -11,10 +12,7 @@ import {
   // eslint-disable-next-line camelcase
   BlacklistableTester__factory,
   // eslint-disable-next-line camelcase
-  DataFeed__factory,
   DepositVaultTest__factory,
-  // eslint-disable-next-line camelcase
-  DepositVault__factory,
   // eslint-disable-next-line camelcase
   ERC20Mock__factory,
   // eslint-disable-next-line camelcase
@@ -22,26 +20,24 @@ import {
   // eslint-disable-next-line camelcase
   MidasAccessControlTest__factory,
   // eslint-disable-next-line camelcase
-  MidasAccessControl__factory,
-  // eslint-disable-next-line camelcase
   PausableTester__factory,
+  // eslint-disable-next-line camelcase
   RedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
-  RedemptionVault__factory,
   StUSDTest__factory,
   // eslint-disable-next-line camelcase
-  StUSD__factory,
-  // eslint-disable-next-line camelcase
   WithMidasAccessControlTester__factory,
+  // eslint-disable-next-line camelcase
+  DataFeedTest__factory,
 } from '../../typechain-types';
-import { DataFeedTest__factory } from '../../typechain-types/factories/contracts/testers/DataFeedTest__factory';
-import { constants } from 'ethers';
 
 export const defaultDeploy = async () => {
   const [owner, ...regularAccounts] = await ethers.getSigners();
 
   // main contracts
-  const accessControl = await new MidasAccessControlTest__factory(owner).deploy();
+  const accessControl = await new MidasAccessControlTest__factory(
+    owner,
+  ).deploy();
   await accessControl.initialize();
 
   const stUSD = await new StUSDTest__factory(owner).deploy();
@@ -80,12 +76,10 @@ export const defaultDeploy = async () => {
     0,
   );
 
-  const redemptionVault = await new RedemptionVaultTest__factory(owner).deploy();
-  await redemptionVault.initialize(
-    accessControl.address,
-    stUSD.address,
-  );
-
+  const redemptionVault = await new RedemptionVaultTest__factory(
+    owner,
+  ).deploy();
+  await redemptionVault.initialize(accessControl.address, stUSD.address);
 
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),

@@ -8,7 +8,6 @@ import { approveBase18, mintToken } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import {
   initiateDepositRequest,
-  // getOutputAmountWithFeeTest,
   setMinAmountToDepositTest,
   fulfillDepositRequest,
   manualDepositTest,
@@ -20,7 +19,11 @@ import {
   removePaymentTokenTest,
   withdrawTest,
 } from './common/manageable-vault.helpers';
-import { ManageableVaultTester__factory } from '../typechain-types';
+
+import {
+  // eslint-disable-next-line camelcase
+  ManageableVaultTester__factory,
+} from '../typechain-types';
 
 describe('DepositVault', function () {
   it('deployment', async () => {
@@ -56,19 +59,12 @@ describe('DepositVault', function () {
   });
 
   it('onlyInitializing', async () => {
-    const { owner, accessControl, stUSD } = await loadFixture(
-      defaultDeploy,
-    );
-  
-    const vault = await new ManageableVaultTester__factory(
-      owner,
-    ).deploy();
+    const { owner, accessControl, stUSD } = await loadFixture(defaultDeploy);
+
+    const vault = await new ManageableVaultTester__factory(owner).deploy();
 
     await expect(
-      vault.initializeWithoutInitializer(
-        accessControl.address,
-        stUSD.address
-      ),
+      vault.initializeWithoutInitializer(accessControl.address, stUSD.address),
     ).revertedWith('Initializable: contract is not initializing');
   });
 
@@ -142,7 +138,6 @@ describe('DepositVault', function () {
         { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
       );
     });
-
 
     it('should fail: when token is already added', async () => {
       const { depositVault, stableCoins, owner } = await loadFixture(
@@ -596,7 +591,6 @@ describe('DepositVault', function () {
         100,
       );
     });
-
 
     it('deposit 100 DAI, when price is 5$ without checking of minDepositAmount', async () => {
       const {

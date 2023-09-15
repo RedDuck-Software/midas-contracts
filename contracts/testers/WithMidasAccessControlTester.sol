@@ -8,7 +8,7 @@ contract WithMidasAccessControlTester is WithMidasAccessControl {
         __WithMidasAccessControl_init(_accessControl);
     }
 
-   function initializeWithoutInitializer(address _accessControl) external {
+    function initializeWithoutInitializer(address _accessControl) external {
         __WithMidasAccessControl_init(_accessControl);
     }
 

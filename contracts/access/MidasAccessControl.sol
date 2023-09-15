@@ -12,7 +12,6 @@ import "../abstract/MidasInitializable.sol";
  * @author RedDuck Software
  */
 contract MidasAccessControl is
-
     AccessControlUpgradeable,
     MidasInitializable,
     MidasAccessControlRoles

@@ -162,11 +162,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 returnAmount = request.amountUsdIn + request.fee;
         totalDeposited[request.user] -= request.amountUsdIn;
 
-        _transferToken(
-            request.user, 
-            request.tokenIn,
-            returnAmount
-        );
+        _transferToken(request.user, request.tokenIn, returnAmount);
 
         emit CancelRequest(requestId);
     }
