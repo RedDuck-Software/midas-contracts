@@ -33,32 +33,6 @@ type CommonParamsGetOutputAmount = Pick<
   'redemptionVault' | 'mockedAggregator'
 >;
 
-export const setMinAmountToRedeemTest = async (
-  { redemptionVault, owner }: CommonParams,
-  valueN: number,
-  opt?: OptionalCommonParams,
-) => {
-  const value = parseUnits(valueN.toString());
-
-  if (opt?.revertMessage) {
-    await expect(
-      redemptionVault.connect(opt?.from ?? owner).setMinAmountToRedeem(value),
-    ).revertedWith(opt?.revertMessage);
-    return;
-  }
-
-  await expect(
-    redemptionVault.connect(opt?.from ?? owner).setMinAmountToRedeem(value),
-  ).to.emit(
-    redemptionVault,
-    redemptionVault.interface.events['SetMinAmountToRedeem(address,uint256)']
-      .name,
-  ).to.not.reverted;
-
-  const newMin = await redemptionVault.minUsdAmountToRedeem();
-  expect(newMin).eq(value);
-};
-
 export const initiateRedemptionRequestTest = async (
   { redemptionVault, owner, stUSD }: CommonParamsDeposit,
   tokenOut: ERC20 | string,
@@ -117,7 +91,6 @@ export const initiateRedemptionRequestTest = async (
 
   const supplyAfter = await stUSD.totalSupply();
 
-  expect(request.exists).eq(true);
   expect(request.user).eq(sender.address);
   expect(request.fee).eq(feeAmount);
   expect(request.tokenOut).eq(tokenOut);
@@ -194,7 +167,6 @@ export const fulfillRedemptionRequestTest = (
 
       request = await redemptionVault.requests(requestId);
 
-      expect(request.exists).eq(false);
       expect(request.user).eq(ethers.constants.AddressZero);
       expect(request.tokenOut).eq(ethers.constants.AddressZero);
       expect(request.fee).eq(0);
@@ -247,7 +219,6 @@ export const cancelRedemptionRequestTest = async (
 
   const supplyAfter = await stUSD.totalSupply();
 
-  expect(request.exists).eq(false);
   expect(request.user).eq(ethers.constants.AddressZero);
   expect(request.tokenOut).eq(ethers.constants.AddressZero);
   expect(request.fee).eq('0');
@@ -266,72 +237,6 @@ export const manualRedeemTest = (
   opt?: OptionalCommonParams,
 ) => {
   return {
-    'manuallyRedeem(address,address,uint256)': async (
-      user: Account,
-      tokenOut: ERC20 | string,
-      amountStUsdIn: number,
-    ) => {
-      const sender = opt?.from ?? owner;
-
-      user = getAccount(user);
-      tokenOut = getAccount(tokenOut);
-      const amountIn = parseUnits(amountStUsdIn.toString());
-
-      // eslint-disable-next-line camelcase
-      const token = ERC20__factory.connect(tokenOut, owner);
-
-      if (opt?.revertMessage) {
-        await expect(
-          redemptionVault
-            .connect(sender)
-            ['manuallyRedeem(address,address,uint256)'](
-              user,
-              tokenOut,
-              amountIn,
-            ),
-        ).revertedWith(opt?.revertMessage);
-        return;
-      }
-
-      const balanceBeforeStUsd = await stUSD.balanceOf(redemptionVault.address);
-
-      const balanceBeforeUser = await balanceOfBase18(token, user);
-
-      const balanceBeforeContract = await balanceOfBase18(
-        token,
-        redemptionVault,
-      );
-
-      const supplyBefore = await stUSD.totalSupply();
-
-      await expect(
-        redemptionVault
-          .connect(sender)
-          ['manuallyRedeem(address,address,uint256)'](user, tokenOut, amountIn),
-      ).to.emit(
-        redemptionVault,
-        redemptionVault.interface.events[
-          'PerformManualAction(address,address,address,uint256,uint256)'
-        ].name,
-      ).to.not.reverted;
-
-      const balanceAfterStUsd = await stUSD.balanceOf(redemptionVault.address);
-
-      const balanceAfterUser = await balanceOfBase18(token, user);
-
-      const balanceAfterContract = await balanceOfBase18(
-        token,
-        redemptionVault,
-      );
-
-      const supplyAfter = await stUSD.totalSupply();
-
-      expect(supplyAfter).eq(supplyBefore.sub(amountIn));
-      expect(balanceAfterStUsd).eq(balanceBeforeStUsd.sub(amountIn));
-
-      expect(balanceAfterUser).eq(balanceBeforeUser);
-      expect(balanceAfterContract).eq(balanceBeforeContract);
-    },
     'manuallyRedeem(address,address,uint256,uint256)': async (
       user: Account,
       tokenOut: ERC20 | string,
@@ -352,7 +257,7 @@ export const manualRedeemTest = (
         await expect(
           redemptionVault
             .connect(sender)
-            ['manuallyRedeem(address,address,uint256,uint256)'](
+            .manuallyRedeem(
               user,
               tokenOut,
               amountIn,
@@ -362,7 +267,7 @@ export const manualRedeemTest = (
         return;
       }
 
-      const balanceBeforeStUsd = await stUSD.balanceOf(redemptionVault.address);
+      const balanceBeforeStUsd = await stUSD.balanceOf(user);
 
       const balanceBeforeUser = await balanceOfBase18(token, user);
 
@@ -376,7 +281,7 @@ export const manualRedeemTest = (
       await expect(
         redemptionVault
           .connect(sender)
-          ['manuallyRedeem(address,address,uint256,uint256)'](
+          .manuallyRedeem(
             user,
             tokenOut,
             amountIn,
@@ -389,7 +294,7 @@ export const manualRedeemTest = (
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterStUsd = await stUSD.balanceOf(redemptionVault.address);
+      const balanceAfterStUsd = await stUSD.balanceOf(user);
 
       const balanceAfterUser = await balanceOfBase18(token, user);
 
@@ -403,45 +308,45 @@ export const manualRedeemTest = (
       expect(supplyAfter).eq(supplyBefore.sub(amountIn));
       expect(balanceAfterStUsd).eq(balanceBeforeStUsd.sub(amountIn));
 
-      expect(balanceAfterUser).eq(balanceBeforeUser);
-      expect(balanceAfterContract).eq(balanceBeforeContract);
+      expect(balanceAfterUser).eq(balanceBeforeUser.add(amountOut));
+      expect(balanceAfterContract).eq(balanceBeforeContract.sub(amountOut));
     },
   };
 };
 
-export const getOutputAmountWithFeeRedeemTest = async (
-  { redemptionVault, mockedAggregator }: CommonParamsGetOutputAmount,
-  {
-    priceN,
-    amountN,
-    feeN,
-    token,
-  }: {
-    amountN: number;
-    priceN?: number;
-    feeN?: number;
-    token: string;
-  },
-) => {
-  const bps = await redemptionVault.PERCENTAGE_BPS();
+// export const getOutputAmountWithFeeRedeemTest = async (
+//   { redemptionVault, mockedAggregator }: CommonParamsGetOutputAmount,
+//   {
+//     priceN,
+//     amountN,
+//     feeN,
+//     token,
+//   }: {
+//     amountN: number;
+//     priceN?: number;
+//     feeN?: number;
+//     token: string;
+//   },
+// ) => {
+//   const bps = await redemptionVault.();
 
-  priceN ??= await getRoundData({ mockedAggregator });
-  feeN ??= (await redemptionVault.getFee(token)).toNumber() / bps.toNumber();
+//   priceN ??= await getRoundData({ mockedAggregator });
+//   feeN ??= (await redemptionVault.getFee(token)).toNumber() / bps.toNumber();
 
-  const price = await setRoundData({ mockedAggregator }, priceN);
-  const amount = parseUnits(amountN.toString());
-  const fee = feeN * bps.toNumber();
-  const woFee = price.eq(ethers.constants.Zero)
-    ? ethers.constants.Zero
-    : amount.mul(price).div(parseUnits('1'));
+//   const price = await setRoundData({ mockedAggregator }, priceN);
+//   const amount = parseUnits(amountN.toString());
+//   const fee = feeN * bps.toNumber();
+//   const woFee = price.eq(ethers.constants.Zero)
+//     ? ethers.constants.Zero
+//     : amount.mul(price).div(parseUnits('1'));
 
-  const expectedValue = woFee.sub(woFee.mul(fee).div(bps.mul(100)));
+//   const expectedValue = woFee.sub(woFee.mul(fee).div(bps.mul(100)));
 
-  await redemptionVault.setFee(token, fee);
+//   await redemptionVault.setFee(token, fee);
 
-  const realValue = await redemptionVault.getOutputAmountWithFee(amount, token);
+//   const realValue = await redemptionVault.getOutputAmountWithFee(amount, token);
 
-  expect(realValue).eq(expectedValue);
+//   expect(realValue).eq(expectedValue);
 
-  return realValue;
-};
+//   return realValue;
+// };

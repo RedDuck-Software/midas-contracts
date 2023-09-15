@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 import "./MidasAccessControlRoles.sol";
+import "../abstract/MidasInitializable.sol";
 
 /**
  * @title MidasAccessControl
@@ -11,11 +12,13 @@ import "./MidasAccessControlRoles.sol";
  * @author RedDuck Software
  */
 contract MidasAccessControl is
+
     AccessControlUpgradeable,
+    MidasInitializable,
     MidasAccessControlRoles
 {
     /**
-     * @notice upgradeable patter contract`s initializer
+     * @notice upgradeable pattern contract`s initializer
      */
     function initialize() external initializer {
         __AccessControl_init();

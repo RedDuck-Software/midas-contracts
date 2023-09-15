@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 import "../access/WithMidasAccessControl.sol";
 import "../interfaces/IPausable.sol";
@@ -35,7 +35,7 @@ abstract contract Pausable is WithMidasAccessControl, IPausable {
     }
 
     /**
-     * @dev upgradeable patter contract`s initializer
+     * @dev upgradeable pattern contract`s initializer
      * @param _accessControl MidasAccessControl contract address
      */
     // solhint-disable func-name-mixedcase
@@ -44,7 +44,7 @@ abstract contract Pausable is WithMidasAccessControl, IPausable {
     }
 
     /**
-     * @dev upgradeable patter contract`s initializer
+     * @dev upgradeable pattern contract`s initializer
      * @param newState is new pause state
      */
     function changePauseState(bool newState) public onlyPauseAdmin {

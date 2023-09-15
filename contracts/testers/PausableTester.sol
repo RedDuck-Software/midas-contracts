@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSEDI
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 import "../access/Pausable.sol";
 
@@ -8,7 +8,13 @@ contract PausableTester is Pausable {
         __Pausable_init(_accessControl);
     }
 
+    function initializeWithoutInitializer(address _accessControl) external {
+        __Pausable_init(_accessControl);
+    }
+
     function pauseAdminRole() public view override returns (bytes32) {
         return accessControl.DEFAULT_ADMIN_ROLE();
     }
+
+    function _disableInitializers() internal override {}
 }

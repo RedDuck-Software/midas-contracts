@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumberish } from 'ethers';
+import { BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
@@ -132,8 +132,11 @@ export const initiateDepositRequest = async (
   expect(totalDepositedAfter).eq(
     totalDepositedBefore.add(amountIn.sub(feeAmount)),
   );
-  expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
-  expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+
+  if(tokenIn !== constants.AddressZero) {
+    expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
+    expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+  }
 
   const lastRequestId = await depositVault.lastRequestId();
 
@@ -142,7 +145,6 @@ export const initiateDepositRequest = async (
   expect(request.tokenIn).eq(tokenIn);
   expect(request.amountUsdIn).eq(amountIn.sub(feeAmount));
   expect(request.fee).eq(feeAmount);
-  expect(request.exists).eq(true);
 };
 
 export const fulfillDepositRequest = (
@@ -172,7 +174,6 @@ export const fulfillDepositRequest = (
       expect(request.tokenIn).not.eq(ethers.constants.AddressZero);
       expect(request.fee).gt(0);
       expect(request.amountUsdIn).gt(0);
-      expect(request.exists).eq(true);
 
       const balanceStUsdBefore = await stUSD.balanceOf(request.user);
 
@@ -195,7 +196,6 @@ export const fulfillDepositRequest = (
       expect(request.tokenIn).eq(ethers.constants.AddressZero);
       expect(request.amountUsdIn).eq(0);
       expect(request.fee).eq(0);
-      expect(request.exists).eq(false);
     },
   };
 };
@@ -205,89 +205,6 @@ export const manualDepositTest = (
   opt?: OptionalCommonParams,
 ) => {
   return {
-    'manuallyDeposit(address,address,uint256)': async (
-      user: Account,
-      tokenIn: ERC20 | string,
-      amountUsdIn: number,
-    ) => {
-      user = getAccount(user);
-      const tokenStr = getAccount(tokenIn);
-      // eslint-disable-next-line camelcase
-      const token = ERC20__factory.connect(tokenStr, owner);
-
-      const sender = opt?.from ?? owner;
-
-      const amountIn = parseUnits(amountUsdIn.toString());
-
-      if (opt?.revertMessage) {
-        await expect(
-          depositVault
-            .connect(sender)
-            ['manuallyDeposit(address,address,uint256)'](
-              user,
-              tokenStr,
-              amountIn,
-            ),
-        ).revertedWith(opt?.revertMessage);
-
-        return;
-      }
-
-      const balanceBeforeTokenUser = await balanceOfBase18(token, owner);
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
-
-      const balanceBeforeContract = await balanceOfBase18(token, depositVault);
-
-      const supplyBefore = await stUSD.totalSupply();
-
-      // eslint-disable-next-line camelcase
-      const dataFeed = DataFeed__factory.connect(
-        await depositVault.etfDataFeed(),
-        owner,
-      );
-      // eslint-disable-next-line camelcase
-      const aggregator = AggregatorV3Mock__factory.connect(
-        await dataFeed.aggregator(),
-        owner,
-      );
-
-      const expectedOutAmount = await getOutputAmountWithFeeTest(
-        { depositVault, mockedAggregator: aggregator },
-        {
-          amountN: amountUsdIn,
-          token: token.address,
-        },
-      );
-
-      await expect(
-        depositVault
-          .connect(sender)
-          ['manuallyDeposit(address,address,uint256)'](
-            user,
-            token.address,
-            amountIn,
-          ),
-      ).to.emit(
-        depositVault,
-        depositVault.interface.events[
-          'PerformManualAction(address,address,address,uint256,uint256)'
-        ].name,
-      ).to.not.reverted;
-
-      const balanceAfterTokenUser = await balanceOfBase18(token, owner);
-      const balanceAfterStUsdUser = await stUSD.balanceOf(user);
-
-      const balanceAfterContract = await balanceOfBase18(token, depositVault);
-
-      const supplyAfter = await stUSD.totalSupply();
-
-      expect(supplyAfter).eq(supplyBefore.add(expectedOutAmount));
-      expect(balanceAfterContract).eq(balanceBeforeContract);
-      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser);
-      expect(balanceAfterStUsdUser).eq(
-        balanceBeforeStUsdUser.add(expectedOutAmount),
-      );
-    },
     'manuallyDeposit(address,address,uint256,uint256)': async (
       user: Account,
       tokenIn: ERC20 | string,
@@ -309,7 +226,7 @@ export const manualDepositTest = (
         await expect(
           depositVault
             .connect(sender)
-            ['manuallyDeposit(address,address,uint256,uint256)'](
+            .manuallyDeposit(
               user,
               tokenStr,
               amountIn,
@@ -330,7 +247,7 @@ export const manualDepositTest = (
       await expect(
         depositVault
           .connect(sender)
-          ['manuallyDeposit(address,address,uint256,uint256)'](
+          .manuallyDeposit(
             user,
             token.address,
             amountIn,
@@ -350,50 +267,52 @@ export const manualDepositTest = (
 
       const supplyAfter = await stUSD.totalSupply();
 
+      if(tokenStr !== constants.AddressZero) { 
+        expect(balanceAfterContract).eq(balanceBeforeContract);
+        expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser);
+      }
+
       expect(supplyAfter).eq(supplyBefore.add(amountOut));
-      expect(balanceAfterContract).eq(balanceBeforeContract);
-      expect(balanceAfterTokenUser).eq(balanceBeforeTokenUser);
       expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser.add(amountOut));
     },
   };
 };
 
-export const getOutputAmountWithFeeTest = async (
-  { depositVault, mockedAggregator }: CommonParamsGetOutputAmount,
-  {
-    priceN,
-    amountN,
-    feeN,
-    token,
-  }: {
-    amountN: number;
-    priceN?: number;
-    feeN?: number;
-    token: string;
-  },
-) => {
-  const bps = await depositVault.PERCENTAGE_BPS();
+// export const feeCalculationTest = async (
+//   { depositVault, mockedAggregator }: CommonParamsGetOutputAmount,
+//   {
+//     priceN,
+//     amountN,
+//     feeN,
+//     token,
+//   }: {
+//     amountN: number;
+//     priceN?: number;
+//     feeN?: number;
+//     token: string;
+//   },
+// ) => {
+//   const percents_100 = await depositVault.ONE_HUNDRED_PERCENT();
 
-  priceN ??= await getRoundData({ mockedAggregator });
-  feeN ??= (await depositVault.getFee(token)).toNumber() / bps.toNumber();
+//   priceN ??= await getRoundData({ mockedAggregator });
 
-  const price = await setRoundData({ mockedAggregator }, priceN);
-  const amount = parseUnits(amountN.toString());
-  const fee = feeN * bps.toNumber();
-  const woFee = price.eq(ethers.constants.Zero)
-    ? ethers.constants.Zero
-    : amount.mul(parseUnits('1')).div(price);
+//   const price = await setRoundData({ mockedAggregator }, priceN);
+//   const amount = parseUnits(amountN.toString());
+//   const fee = (await depositVault.getFee(token)).toNumber();
+//   const woFee = price.eq(ethers.constants.Zero)
+//     ? ethers.constants.Zero
+//     : amount.mul(parseUnits('1')).div(price);
 
-  const expectedValue = woFee.sub(woFee.mul(fee).div(bps.mul(100)));
+//   const expectedValue = woFee.sub(woFee.mul(fee).div(percents_100));
 
-  await depositVault.setFee(token, fee);
+//   await depositVault.setFee(token, fee);
 
-  const realValue = await depositVault.getOutputAmountWithFee(amount, token);
+//   const realValue = await depositVault.getOutputAmountWithFee(amount, token);
 
-  expect(realValue).eq(expectedValue);
+//   expect(realValue).eq(expectedValue);
 
-  return realValue;
-};
+//   return realValue;
+// };
 
 export const cancelDepositRequest = async (
   { depositVault, owner, stUSD }: CommonParamsDeposit,
@@ -425,7 +344,6 @@ export const cancelDepositRequest = async (
 
   const balanceAfterUser = await token.balanceOf(requestBefore.user);
 
-  expect(request.exists).eq(false);
   expect(request.user).eq(ethers.constants.AddressZero);
   expect(request.tokenIn).eq(ethers.constants.AddressZero);
   expect(request.amountUsdIn).eq('0');

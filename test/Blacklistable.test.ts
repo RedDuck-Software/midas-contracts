@@ -3,6 +3,7 @@ import { expect } from 'chai';
 
 import { acErrors, blackList, unBlackList } from './common/ac.helpers';
 import { defaultDeploy } from './common/fixtures';
+import { BlacklistableTester__factory } from '../typechain-types';
 
 describe('Blacklistable', function () {
   it('deployment', async () => {
@@ -16,6 +17,21 @@ describe('Blacklistable', function () {
         blackListableTester.address,
       ),
     ).eq(true);
+  });
+
+
+  it('onlyInitializing', async () => {
+    const { accessControl, owner } = await loadFixture(
+      defaultDeploy,
+    );
+
+    const blackListable = await new BlacklistableTester__factory(owner).deploy();
+    
+    await expect(
+      blackListable.initializeWithoutInitializer(
+        accessControl.address
+      ),
+    ).revertedWith('Initializable: contract is not initializing');
   });
 
   describe('modifier onlyNotBlacklisted', () => {

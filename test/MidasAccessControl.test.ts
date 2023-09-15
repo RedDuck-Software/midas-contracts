@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
 import { defaultDeploy } from './common/fixtures';
+import { WithMidasAccessControlTester__factory } from '../typechain-types';
 
 describe('MidasAccessControl', function () {
   it('deployment', async () => {
@@ -142,6 +143,20 @@ describe('WithMidasAccessControl', function () {
     expect(await wAccessControlTester.accessControl()).eq(
       accessControl.address,
     );
+  });
+
+  it('onlyInitializing', async () => {
+    const { accessControl, owner } = await loadFixture(
+      defaultDeploy,
+    );
+
+    const wac = await new WithMidasAccessControlTester__factory(owner).deploy();
+    
+    await expect(
+      wac.initializeWithoutInitializer(
+        accessControl.address
+      ),
+    ).revertedWith('Initializable: contract is not initializing');
   });
 
   describe('modifier onlyRole', () => {

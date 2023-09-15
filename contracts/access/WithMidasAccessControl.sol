@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 import "./MidasAccessControl.sol";
-
+import "../abstract/MidasInitializable.sol";
 /**
  * @title WithMidasAccessControl
  * @notice Base contract that consumes MidasAccessControl
  * @author RedDuck Software
  */
 abstract contract WithMidasAccessControl is
-    Initializable,
+    MidasInitializable,
     MidasAccessControlRoles
 {
     /**
@@ -39,7 +39,7 @@ abstract contract WithMidasAccessControl is
     }
 
     /**
-     * @dev upgradeable patter contract`s initializer
+     * @dev upgradeable pattern contract`s initializer
      */
     // solhint-disable func-name-mixedcase
     function __WithMidasAccessControl_init(address _accessControl)

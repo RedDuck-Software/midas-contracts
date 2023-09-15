@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 /**
  * @title IManageableVault
@@ -49,7 +49,7 @@ interface IManageableVault {
     );
 
     /**
-     * @notice withdraws `amoount` of a given `token` from the contract.
+     * @notice withdraws `amount` of a given `token` from the contract.
      * can be called only from permissioned actor.
      * @param token token address
      * @param amount token amount
@@ -62,14 +62,14 @@ interface IManageableVault {
     ) external;
 
     /**
-     * @notice adds a token to `_paymentTokens`.
+     * @notice adds a token to the stablecoins list.
      * can be called only from permissioned actor.
      * @param token token address
      */
     function addPaymentToken(address token) external;
 
     /**
-     * @notice removes a token from `_paymentTokens`.
+     * @notice removes a token from stablecoins list.
      * can be called only from permissioned actor.
      * @param token token address
      */
@@ -81,15 +81,6 @@ interface IManageableVault {
      * @param newFee token address
      */
     function setFee(address token, uint256 newFee) external;
-
-    /**
-     * @notice returns output amount from a given amount
-     * @return amountOut output amount
-     */
-    function getOutputAmountWithFee(uint256 amountIn, address token)
-        external
-        view
-        returns (uint256 amountOut);
 
     /**
      * @notice returns vault fee

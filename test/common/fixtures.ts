@@ -12,6 +12,7 @@ import {
   BlacklistableTester__factory,
   // eslint-disable-next-line camelcase
   DataFeed__factory,
+  DepositVaultTest__factory,
   // eslint-disable-next-line camelcase
   DepositVault__factory,
   // eslint-disable-next-line camelcase
@@ -19,25 +20,31 @@ import {
   // eslint-disable-next-line camelcase
   GreenlistableTester__factory,
   // eslint-disable-next-line camelcase
+  MidasAccessControlTest__factory,
+  // eslint-disable-next-line camelcase
   MidasAccessControl__factory,
   // eslint-disable-next-line camelcase
   PausableTester__factory,
+  RedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
   RedemptionVault__factory,
+  StUSDTest__factory,
   // eslint-disable-next-line camelcase
   StUSD__factory,
   // eslint-disable-next-line camelcase
   WithMidasAccessControlTester__factory,
 } from '../../typechain-types';
+import { DataFeedTest__factory } from '../../typechain-types/factories/contracts/testers/DataFeedTest__factory';
+import { constants } from 'ethers';
 
 export const defaultDeploy = async () => {
   const [owner, ...regularAccounts] = await ethers.getSigners();
 
   // main contracts
-  const accessControl = await new MidasAccessControl__factory(owner).deploy();
+  const accessControl = await new MidasAccessControlTest__factory(owner).deploy();
   await accessControl.initialize();
 
-  const stUSD = await new StUSD__factory(owner).deploy();
+  const stUSD = await new StUSDTest__factory(owner).deploy();
   await stUSD.initialize(accessControl.address);
 
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
@@ -56,31 +63,29 @@ export const defaultDeploy = async () => {
     parseUnits('1.07778', mockedAggregatorEurDecimals),
   );
 
-  const dataFeed = await new DataFeed__factory(owner).deploy();
+  const dataFeed = await new DataFeedTest__factory(owner).deploy();
   await dataFeed.initialize(accessControl.address, mockedAggregator.address);
 
-  const eurToUsdDataFeed = await new DataFeed__factory(owner).deploy();
+  const eurToUsdDataFeed = await new DataFeedTest__factory(owner).deploy();
   await eurToUsdDataFeed.initialize(
     accessControl.address,
     mockedAggregatorEur.address,
   );
 
-  const depositVault = await new DepositVault__factory(owner).deploy();
+  const depositVault = await new DepositVaultTest__factory(owner).deploy();
   await depositVault.initialize(
     accessControl.address,
     stUSD.address,
-    dataFeed.address,
     eurToUsdDataFeed.address,
     0,
   );
 
-  const redemptionVault = await new RedemptionVault__factory(owner).deploy();
+  const redemptionVault = await new RedemptionVaultTest__factory(owner).deploy();
   await redemptionVault.initialize(
     accessControl.address,
     stUSD.address,
-    dataFeed.address,
-    0,
   );
+
 
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),
@@ -111,6 +116,8 @@ export const defaultDeploy = async () => {
   await pausableTester.initialize(accessControl.address);
 
   const roles = await getAllRoles(accessControl);
+
+  const offChainUsdToken = constants.AddressZero;
 
   // role granting main
   await initGrantRoles({
@@ -162,6 +169,7 @@ export const defaultDeploy = async () => {
     manualFulfillmentToken,
     eurToUsdDataFeed,
     mockedAggregatorEur,
+    offChainUsdToken,
     mockedAggregatorEurDecimals,
   };
 };

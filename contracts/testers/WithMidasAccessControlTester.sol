@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 import "../access/WithMidasAccessControl.sol";
 
 contract WithMidasAccessControlTester is WithMidasAccessControl {
     function initialize(address _accessControl) external initializer {
+        __WithMidasAccessControl_init(_accessControl);
+    }
+
+   function initializeWithoutInitializer(address _accessControl) external {
         __WithMidasAccessControl_init(_accessControl);
     }
 
@@ -25,4 +29,6 @@ contract WithMidasAccessControlTester is WithMidasAccessControl {
         external
         onlyNotRole(role, account)
     {}
+
+    function _disableInitializers() internal override {}
 }

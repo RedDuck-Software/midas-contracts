@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 import "./WithMidasAccessControl.sol";
 
@@ -20,7 +20,7 @@ abstract contract Blacklistable is WithMidasAccessControl {
     }
 
     /**
-     * @dev upgradeable patter contract`s initializer
+     * @dev upgradeable pattern contract`s initializer
      * @param _accessControl MidasAccessControl contract address
      */
     // solhint-disable func-name-mixedcase

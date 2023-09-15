@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 /**
  * @title DecimalsCorrectionLibrary
@@ -29,7 +29,7 @@ library DecimalsCorrectionLibrary {
             adjustedAmount =
                 originalAmount /
                 (10**(originalDecimals - decidedDecimals));
-        } else if (originalDecimals < decidedDecimals) {
+        } else {
             adjustedAmount =
                 originalAmount *
                 (10**(decidedDecimals - originalDecimals));

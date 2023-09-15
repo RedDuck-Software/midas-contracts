@@ -43,21 +43,13 @@ export const initGrantRoles = async ({
     if (!(await accessControl.hasRole(role, address))) {
       if (execute) await execute(role, address);
       else {
-        // console.log(`Granting role: ${role} to address: ${address}`);
         await accessControl
           .connect(owner)
           .grantRole(role, address)
           .then((tx) => tx.wait());
-        console.log('Role granted.');
       }
     }
   };
-
-  await checkAndExecute(roles.blacklistedOperator, stUsd.address);
-
-  await checkAndExecute(roles.greenlistedOperator, depositVault.address);
-
-  await checkAndExecute(roles.greenlistedOperator, redemptionVault.address);
 
   await checkAndExecute(roles.minter, depositVault.address);
 
@@ -101,11 +93,9 @@ export const postDeploymentTest = async (
 
   expect(await depositVault.stUSD()).eq(stUsd.address);
 
-  expect(await depositVault.etfDataFeed()).eq(dataFeed.address);
-
   expect(await depositVault.eurUsdDataFeed()).eq(dataFeedEur.address);
 
-  expect(await depositVault.PERCENTAGE_BPS()).eq('100');
+  expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
   expect(await depositVault.minAmountToDepositInEuro()).eq('0');
 
@@ -123,11 +113,7 @@ export const postDeploymentTest = async (
 
   expect(await redemptionVault.stUSD()).eq(stUsd.address);
 
-  expect(await redemptionVault.etfDataFeed()).eq(dataFeed.address);
-
-  expect(await redemptionVault.minUsdAmountToRedeem()).eq('0');
-
-  expect(await redemptionVault.PERCENTAGE_BPS()).eq('100');
+  expect(await redemptionVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
   expect(await redemptionVault.lastRequestId()).eq('0');
 
@@ -156,22 +142,6 @@ export const postDeploymentTest = async (
   /** Owners roles tests end */
 
   /** Contracts roles tests start */
-
-  expect(
-    await accessControl.hasRole(roles.blacklistedOperator, stUsd.address),
-  ).eq(true);
-  expect(
-    await accessControl.hasRole(
-      roles.greenlistedOperator,
-      depositVault.address,
-    ),
-  ).eq(true);
-  expect(
-    await accessControl.hasRole(
-      roles.greenlistedOperator,
-      redemptionVault.address,
-    ),
-  ).eq(true);
 
   expect(await accessControl.hasRole(roles.minter, depositVault.address)).eq(
     true,

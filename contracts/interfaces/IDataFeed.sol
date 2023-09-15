@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
@@ -19,9 +19,9 @@ interface IDataFeed {
     }
 
     /**
-     * @notice upgradeable patter contract`s initializer
+     * @notice upgradeable pattern contract`s initializer
      * @param _ac MidasAccessControl contract address
-     * @param _aggregator Agg   regatorV3Interface contract address
+     * @param _aggregator AggregatorV3Interface contract address
      */
     function initialize(address _ac, address _aggregator) external;
 
