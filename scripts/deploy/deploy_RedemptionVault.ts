@@ -13,12 +13,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);
 
   const { deployer } = await hre.getNamedAccounts();
+  
+  console.log({ deployer });
+
   const owner = await hre.ethers.getSigner(deployer);
 
   console.log('Deploying RedemptionVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(REDEMPTION_VAULT_CONTRACT_NAME, owner),
     [addresses?.accessControl, addresses?.stUSD],
+    {
+      unsafeAllow: ['constructor'],
+    },
   );
   console.log('Deployed RedemptionVault:', deployment.address);
 

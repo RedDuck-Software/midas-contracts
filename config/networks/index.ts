@@ -87,9 +87,11 @@ export const getBaseNetworkConfig = (
 export const getNetworkConfig = (
   network: Network,
   tags: Array<string> = [MOCK_AGGREGATOR_NETWORK_TAG],
+  forkingNetwork?: Network,
 ): NetworkUserConfig => ({
-  ...getBaseNetworkConfig(network, tags),
+  ...getBaseNetworkConfig(forkingNetwork ?? network, tags),
   url: rpcUrls[network],
+  chainId: 1,
   saveDeployments: true,
 });
 
@@ -102,7 +104,11 @@ export const getForkNetworkConfig = (
     mnemonic: mnemonics[network],
   },
   live: false,
-  saveDeployments: true,
+  saveDeployments: true,  
+  mining: { 
+    auto: false,
+    interval: 1000
+  },
   forking: {
     url: rpcUrls[network],
   },

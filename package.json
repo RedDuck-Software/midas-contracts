@@ -29,7 +29,15 @@
     "format:yml": "prettier \"**/*.{yml,yaml}\" --check",
     "format:yml:fix": "prettier \"**/*.{yml,yaml}\" --write",
     "codestyle": "run-s lint:* format:*",
-    "codestyle:fix": "run-s lint:*:* format:*:*"
+    "codestyle:fix": "run-s lint:*:* format:*:*",
+    "hh:run:main": "hardhat run --network main",
+    "deploy:main:ac": "yarn hh:run:main scripts/deploy/deploy_MidasAccessControl.ts",
+    "deploy:main:stUSD": "yarn hh:run:main scripts/deploy/deploy_stUSD.ts",
+    "deploy:main:feed": "yarn hh:run:main scripts/deploy/deploy_DataFeed.ts",
+    "deploy:main:dv": "yarn hh:run:main scripts/deploy/deploy_DepositVault.ts",
+    "deploy:main:rv": "yarn hh:run:main scripts/deploy/deploy_RedemptionVault.ts",
+    "deploy:main:roles": "yarn hh:run:main scripts/deploy/grantRoles.ts",
+    "deploy:main:validate": "yarn hh:run:main scripts/deploy/postDeploy.ts"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.6.1",

@@ -17,6 +17,7 @@ import {
 
 const { OPTIMIZER, REPORT_GAS, FORKING_NETWORK, ETHERSCAN_API_KEY } = ENV;
 
+console.log({FORKING_NETWORK})
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -32,7 +33,12 @@ const config: HardhatUserConfig = {
     ],
   },
   namedAccounts: {
-    deployer: '0xf10AE7626b420CcDd80C31588E2D3cCD7B2621A2',
+    deployer: {
+      1: 0,
+      hardhat: 0,
+      localhost: 0,
+      sepolia: '0xf10AE7626b420CcDd80C31588E2D3cCD7B2621A2',
+    },
   },
   verify: {
     etherscan: {
@@ -45,7 +51,7 @@ const config: HardhatUserConfig = {
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),
-    localhost: getNetworkConfig('localhost'),
+    localhost: getNetworkConfig('localhost', FORKING_NETWORK as any),
   },
   gasReporter: {
     enabled: REPORT_GAS,
@@ -63,9 +69,6 @@ const config: HardhatUserConfig = {
   docgen: {
     outputDir: './docgen',
     pages: 'single',
-    // path: './docgen',
-    // clear: true,
-    // runOnCompile: false,
   },
   external: FORKING_NETWORK
     ? {

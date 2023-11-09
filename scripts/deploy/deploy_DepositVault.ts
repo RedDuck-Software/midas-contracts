@@ -18,7 +18,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   console.log('Deploying DepositVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(DEPOSIT_VAULT_CONTRACT_NAME, owner),
-    [addresses?.accessControl, addresses?.stUSD, addresses?.eurToUsdFeed, '0'],
+    [addresses?.accessControl, addresses?.stUSD, addresses?.eurToUsdFeed, hre.ethers.utils.parseUnits('100000')],
+    {
+      unsafeAllow: ['constructor'],
+    },
   );
   console.log('Deployed DepositVault:', deployment.address);
 
@@ -27,6 +30,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     await deployment.deployTransaction.wait(5);
     console.log('Waited.');
   }
+  
   await logDeployProxy(hre, DEPOSIT_VAULT_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };

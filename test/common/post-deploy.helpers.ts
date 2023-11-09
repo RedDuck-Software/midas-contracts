@@ -97,7 +97,7 @@ export const postDeploymentTest = async (
 
   expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
-  expect(await depositVault.minAmountToDepositInEuro()).eq('0');
+  // expect(await depositVault.minAmountToDepositInEuro()).eq('0');
 
   expect(await depositVault.vaultRole()).eq(
     await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),

@@ -14,10 +14,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
 
-  console.log('Deploying stUSD...');
+  console.log('Deploying stUSD...', { addresses });
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(ST_USD_CONTRACT_NAME, owner),
     [addresses?.accessControl],
+    {
+      unsafeAllow: ['constructor'],
+    },
   );
   console.log('Deployed stUSD:', deployment.address);
 

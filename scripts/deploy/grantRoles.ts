@@ -22,7 +22,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getCurrentAddresses(hre);
 
-  if (!addresses) return;
+  if (!addresses) {
+    console.log('addresses', {addresses})
+    return;
+  }
 
   await initGrantRoles({
     // eslint-disable-next-line camelcase
