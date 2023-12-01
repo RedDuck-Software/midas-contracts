@@ -3,15 +3,15 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 
-import "./interfaces/IStUSD.sol";
+import "./interfaces/IMTbill.sol";
 import "./access/Blacklistable.sol";
 
 /**
- * @title stUSD
+ * @title mTBILL
  * @author RedDuck Software
  */
 //solhint-disable contract-name-camelcase
-contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
+contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
     /**
      * @notice default terms url metadata encoded key
      */
@@ -39,53 +39,53 @@ contract stUSD is ERC20PausableUpgradeable, Blacklistable, IStUSD {
      */
     function initialize(address _accessControl) external initializer {
         __Blacklistable_init(_accessControl);
-        __ERC20_init("stUSD", "stUSD");
+        __ERC20_init("mTBILL", "mTBILL");
     }
 
     /**
-     * @inheritdoc IStUSD
+     * @inheritdoc IMTbill
      */
     function mint(address to, uint256 amount)
         external
-        onlyRole(ST_USD_MINT_OPERATOR_ROLE, msg.sender)
+        onlyRole(M_TBILL_MINT_OPERATOR_ROLE, msg.sender)
     {
         _mint(to, amount);
     }
 
     /**
-     * @inheritdoc IStUSD
+     * @inheritdoc IMTbill
      */
     function burn(address from, uint256 amount)
         external
-        onlyRole(ST_USD_BURN_OPERATOR_ROLE, msg.sender)
+        onlyRole(M_TBILL_BURN_OPERATOR_ROLE, msg.sender)
     {
         _burn(from, amount);
     }
 
     /**
-     * @inheritdoc IStUSD
+     * @inheritdoc IMTbill
      */
     function pause()
         external
         override
-        onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender)
+        onlyRole(M_TBILL_PAUSE_OPERATOR_ROLE, msg.sender)
     {
         _pause();
     }
 
     /**
-     * @inheritdoc IStUSD
+     * @inheritdoc IMTbill
      */
     function unpause()
         external
         override
-        onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender)
+        onlyRole(M_TBILL_PAUSE_OPERATOR_ROLE, msg.sender)
     {
         _unpause();
     }
 
     /**
-     * @inheritdoc IStUSD
+     * @inheritdoc IMTbill
      */
     function setMetadata(bytes32 key, bytes memory data)
         external

@@ -10,12 +10,12 @@ import {
   DepositVault,
   MidasAccessControl,
   RedemptionVault,
-  StUSD,
+  mTBILL,
 } from '../../typechain-types';
 
 type Params = {
   accessControl: MidasAccessControl;
-  stUsd: StUSD;
+  mTBILL: mTBILL;
   dataFeed: DataFeed;
   dataFeedEur: DataFeed;
   aggregator: AggregatorV3Interface;
@@ -30,7 +30,7 @@ export const initGrantRoles = async ({
   accessControl,
   depositVault,
   redemptionVault,
-  stUsd,
+  mTBILL,
   owner,
   execute,
 }: Omit<
@@ -66,7 +66,7 @@ export const postDeploymentTest = async (
     dataFeed,
     depositVault,
     redemptionVault,
-    stUsd,
+    mTBILL,
     dataFeedEur,
     aggregatorEur,
     owner,
@@ -74,12 +74,12 @@ export const postDeploymentTest = async (
 ) => {
   const roles = await getAllRoles(accessControl);
 
-  /** stUSD tests start */
-  expect(await stUsd.name()).eq('stUSD');
-  expect(await stUsd.symbol()).eq('stUSD');
-  expect(await stUsd.paused()).eq(false);
+  /** mTBILL tests start */
+  expect(await mTBILL.name()).eq('mTBILL');
+  expect(await mTBILL.symbol()).eq('mTBILL');
+  expect(await mTBILL.paused()).eq(false);
 
-  /** stUSD tests end */
+  /** mTBILL tests end */
 
   /** DataFeed tests start */
 
@@ -91,7 +91,7 @@ export const postDeploymentTest = async (
 
   /** DepositVault tests start */
 
-  expect(await depositVault.stUSD()).eq(stUsd.address);
+  expect(await depositVault.mTBILL()).eq(mTBILL.address);
 
   expect(await depositVault.eurUsdDataFeed()).eq(dataFeedEur.address);
 
@@ -111,7 +111,7 @@ export const postDeploymentTest = async (
 
   /** RedemptionVault tests start */
 
-  expect(await redemptionVault.stUSD()).eq(stUsd.address);
+  expect(await redemptionVault.mTBILL()).eq(mTBILL.address);
 
   expect(await redemptionVault.ONE_HUNDRED_PERCENT()).eq('10000');
 

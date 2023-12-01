@@ -10,7 +10,7 @@ import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./interfaces/IDepositVault.sol";
-import "./interfaces/IStUSD.sol";
+import "./interfaces/IMTbill.sol";
 import "./interfaces/IDataFeed.sol";
 
 import "./access/Greenlistable.sol";
@@ -20,7 +20,7 @@ import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
  * @title DepositVault
- * @notice Smart contract that handles stUSD minting
+ * @notice Smart contract that handles mTBILL minting
  * @author RedDuck Software
  */
 contract DepositVault is ManageableVault, IDepositVault {
@@ -76,17 +76,17 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _stUSD address of stUSD token
+     * @param _mTBILL address of mTBILL token
      * @param _eurUsdDataFeed address of CL`s data feed EUR/USD
      * @param _minAmountToDepositInEuro initial value for minAmountToDepositInEuro
      */
     function initialize(
         address _ac,
-        address _stUSD,
+        address _mTBILL,
         address _eurUsdDataFeed,
         uint256 _minAmountToDepositInEuro
     ) external initializer {
-        __ManageableVault_init(_ac, _stUSD);
+        __ManageableVault_init(_ac, _mTBILL);
         minAmountToDepositInEuro = _minAmountToDepositInEuro;
         eurUsdDataFeed = IDataFeed(_eurUsdDataFeed);
     }
@@ -224,10 +224,10 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @dev removes deposit request from the storage
-     * mints `amountStUsdOut` of stUSD to `user`
+     * mints `amountStUsdOut` of mTBILL to `user`
      * @param requestId id of a deposit request
      * @param user user address
-     * @param amountStUsdOut amount of stUSD that should be minted to `user`
+     * @param amountStUsdOut amount of mTBILL that should be minted to `user`
      */
     function _fullfillDepositRequest(
         uint256 requestId,
@@ -236,7 +236,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     ) internal {
         delete requests[requestId];
 
-        stUSD.mint(user, amountStUsdOut);
+        mTBILL.mint(user, amountStUsdOut);
 
         emit FulfillRequest(msg.sender, requestId, amountStUsdOut);
     }
@@ -259,12 +259,12 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @dev internal implementation of manuallyDeposit()
-     * mints `amountStUsdOut` amount of stUSd to the `user`
+     * mints `amountStUsdOut` amount of mTBILL to the `user`
      * and fires the event
      * @param user user address
      * @param tokenIn address of input USD token
      * @param amountUsdIn amount of USD token taken from user
-     * @param amountStUsdOut amount of stUSD token to mint to `user`
+     * @param amountStUsdOut amount of mTBILL token to mint to `user`
      */
     function _manuallyDeposit(
         address user,
@@ -278,7 +278,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             _requireTokenExists(tokenIn);
         }
 
-        stUSD.mint(user, amountStUsdOut);
+        mTBILL.mint(user, amountStUsdOut);
 
         emit PerformManualAction(
             msg.sender,

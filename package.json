@@ -33,7 +33,7 @@
     "hh:run:main": "hardhat run --network main",
     "verify:main": "hardhat verify --network main",
     "deploy:main:ac": "yarn hh:run:main scripts/deploy/deploy_MidasAccessControl.ts",
-    "deploy:main:stUSD": "yarn hh:run:main scripts/deploy/deploy_stUSD.ts",
+    "deploy:main:mTBILL": "yarn hh:run:main scripts/deploy/deploy_mTBILL.ts",
     "deploy:main:feed": "yarn hh:run:main scripts/deploy/deploy_DataFeed.ts",
     "deploy:main:dv": "yarn hh:run:main scripts/deploy/deploy_DepositVault.ts",
     "deploy:main:rv": "yarn hh:run:main scripts/deploy/deploy_RedemptionVault.ts",

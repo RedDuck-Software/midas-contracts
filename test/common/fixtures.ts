@@ -40,8 +40,8 @@ export const defaultDeploy = async () => {
   ).deploy();
   await accessControl.initialize();
 
-  const stUSD = await new StUSDTest__factory(owner).deploy();
-  await stUSD.initialize(accessControl.address);
+  const mTBILL = await new StUSDTest__factory(owner).deploy();
+  await mTBILL.initialize(accessControl.address);
 
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
   const mockedAggregatorDecimals = await mockedAggregator.decimals();
@@ -71,7 +71,7 @@ export const defaultDeploy = async () => {
   const depositVault = await new DepositVaultTest__factory(owner).deploy();
   await depositVault.initialize(
     accessControl.address,
-    stUSD.address,
+    mTBILL.address,
     eurToUsdDataFeed.address,
     0,
   );
@@ -79,7 +79,7 @@ export const defaultDeploy = async () => {
   const redemptionVault = await new RedemptionVaultTest__factory(
     owner,
   ).deploy();
-  await redemptionVault.initialize(accessControl.address, stUSD.address);
+  await redemptionVault.initialize(accessControl.address, mTBILL.address);
 
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),
@@ -119,7 +119,7 @@ export const defaultDeploy = async () => {
     depositVault,
     owner,
     redemptionVault,
-    stUsd: stUSD,
+    mTBILL: mTBILL,
   });
 
   // role granting testers
@@ -141,11 +141,11 @@ export const defaultDeploy = async () => {
     redemptionVault,
     aggregatorEur: mockedAggregatorEur,
     dataFeedEur: eurToUsdDataFeed,
-    stUsd: stUSD,
+    mTBILL: mTBILL,
   });
 
   return {
-    stUSD,
+    mTBILL,
     accessControl,
     wAccessControlTester,
     roles,

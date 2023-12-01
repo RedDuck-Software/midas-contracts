@@ -469,7 +469,7 @@
     },
     {
       "inputs": [],
-      "name": "ST_USD_BURN_OPERATOR_ROLE",
+      "name": "M_TBILL_BURN_OPERATOR_ROLE",
       "outputs": [
         {
           "internalType": "bytes32",
@@ -482,7 +482,7 @@
     },
     {
       "inputs": [],
-      "name": "ST_USD_MINT_OPERATOR_ROLE",
+      "name": "M_TBILL_MINT_OPERATOR_ROLE",
       "outputs": [
         {
           "internalType": "bytes32",
@@ -495,7 +495,7 @@
     },
     {
       "inputs": [],
-      "name": "ST_USD_PAUSE_OPERATOR_ROLE",
+      "name": "M_TBILL_PAUSE_OPERATOR_ROLE",
       "outputs": [
         {
           "internalType": "bytes32",
@@ -662,7 +662,7 @@
         },
         {
           "internalType": "address",
-          "name": "_stUSD",
+          "name": "_mTBILL",
           "type": "address"
         },
         {
@@ -876,10 +876,10 @@
     },
     {
       "inputs": [],
-      "name": "stUSD",
+      "name": "mTBILL",
       "outputs": [
         {
-          "internalType": "contract IStUSD",
+          "internalType": "contract IMTbill",
           "name": "",
           "type": "address"
         }

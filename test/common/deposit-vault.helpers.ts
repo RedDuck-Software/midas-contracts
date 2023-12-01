@@ -29,7 +29,7 @@ type CommonParams = Pick<
 
 type CommonParamsDeposit = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'depositVault' | 'owner' | 'stUSD'
+  'depositVault' | 'owner' | 'mTBILL'
 >;
 
 type CommonParamsGetOutputAmount = Pick<
@@ -64,7 +64,7 @@ export const setMinAmountToDepositTest = async (
 };
 
 export const initiateDepositRequest = async (
-  { depositVault, owner, stUSD }: CommonParamsDeposit,
+  { depositVault, owner, mTBILL }: CommonParamsDeposit,
   tokenIn: ERC20 | string,
   amountUsdIn: number,
   opt?: OptionalCommonParams,
@@ -148,7 +148,7 @@ export const initiateDepositRequest = async (
 };
 
 export const fulfillDepositRequest = (
-  { depositVault, owner, stUSD }: CommonParamsDeposit,
+  { depositVault, owner, mTBILL }: CommonParamsDeposit,
   opt?: OptionalCommonParams,
 ) => {
   return {
@@ -175,7 +175,7 @@ export const fulfillDepositRequest = (
       expect(request.fee).gt(0);
       expect(request.amountUsdIn).gt(0);
 
-      const balanceStUsdBefore = await stUSD.balanceOf(request.user);
+      const balanceStUsdBefore = await mTBILL.balanceOf(request.user);
 
       await expect(
         depositVault.fulfillDepositRequest(requestId, amountOut),
@@ -186,7 +186,7 @@ export const fulfillDepositRequest = (
         ].name,
       ).to.not.reverted;
 
-      const balanceStUsdAfter = await stUSD.balanceOf(request.user);
+      const balanceStUsdAfter = await mTBILL.balanceOf(request.user);
 
       expect(balanceStUsdAfter).eq(balanceStUsdBefore.add(amountOut));
 
@@ -201,7 +201,7 @@ export const fulfillDepositRequest = (
 };
 
 export const manualDepositTest = (
-  { depositVault, owner, stUSD }: CommonParamsDeposit,
+  { depositVault, owner, mTBILL }: CommonParamsDeposit,
   opt?: OptionalCommonParams,
 ) => {
   return {
@@ -233,11 +233,11 @@ export const manualDepositTest = (
       }
 
       const balanceBeforeTokenUser = await balanceOfBase18(token, owner);
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(user);
+      const balanceBeforeStUsdUser = await mTBILL.balanceOf(user);
 
       const balanceBeforeContract = await balanceOfBase18(token, depositVault);
 
-      const supplyBefore = await stUSD.totalSupply();
+      const supplyBefore = await mTBILL.totalSupply();
 
       await expect(
         depositVault
@@ -251,11 +251,11 @@ export const manualDepositTest = (
       ).to.not.reverted;
 
       const balanceAfterTokenUser = await balanceOfBase18(token, owner);
-      const balanceAfterStUsdUser = await stUSD.balanceOf(user);
+      const balanceAfterStUsdUser = await mTBILL.balanceOf(user);
 
       const balanceAfterContract = await balanceOfBase18(token, depositVault);
 
-      const supplyAfter = await stUSD.totalSupply();
+      const supplyAfter = await mTBILL.totalSupply();
 
       if (tokenStr !== constants.AddressZero) {
         expect(balanceAfterContract).eq(balanceBeforeContract);
@@ -305,7 +305,7 @@ export const manualDepositTest = (
 // };
 
 export const cancelDepositRequest = async (
-  { depositVault, owner, stUSD }: CommonParamsDeposit,
+  { depositVault, owner, mTBILL }: CommonParamsDeposit,
   requestId: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {

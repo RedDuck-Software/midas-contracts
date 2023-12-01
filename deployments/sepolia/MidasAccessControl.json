@@ -305,7 +305,7 @@
     },
     {
       "inputs": [],
-      "name": "ST_USD_BURN_OPERATOR_ROLE",
+      "name": "M_TBILL_BURN_OPERATOR_ROLE",
       "outputs": [
         {
           "internalType": "bytes32",
@@ -318,7 +318,7 @@
     },
     {
       "inputs": [],
-      "name": "ST_USD_MINT_OPERATOR_ROLE",
+      "name": "M_TBILL_MINT_OPERATOR_ROLE",
       "outputs": [
         {
           "internalType": "bytes32",
@@ -331,7 +331,7 @@
     },
     {
       "inputs": [],
-      "name": "ST_USD_PAUSE_OPERATOR_ROLE",
+      "name": "M_TBILL_PAUSE_OPERATOR_ROLE",
       "outputs": [
         {
           "internalType": "bytes32",

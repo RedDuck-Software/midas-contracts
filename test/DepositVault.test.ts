@@ -27,10 +27,10 @@ import {
 
 describe('DepositVault', function () {
   it('deployment', async () => {
-    const { depositVault, stUSD, dataFeed, eurToUsdDataFeed, roles } =
+    const { depositVault, mTBILL, dataFeed, eurToUsdDataFeed, roles } =
       await loadFixture(defaultDeploy);
 
-    expect(await depositVault.stUSD()).eq(stUSD.address);
+    expect(await depositVault.mTBILL()).eq(mTBILL.address);
 
     expect(await depositVault.eurUsdDataFeed()).eq(eurToUsdDataFeed.address);
 
@@ -59,12 +59,12 @@ describe('DepositVault', function () {
   });
 
   it('onlyInitializing', async () => {
-    const { owner, accessControl, stUSD } = await loadFixture(defaultDeploy);
+    const { owner, accessControl, mTBILL } = await loadFixture(defaultDeploy);
 
     const vault = await new ManageableVaultTester__factory(owner).deploy();
 
     await expect(
-      vault.initializeWithoutInitializer(accessControl.address, stUSD.address),
+      vault.initializeWithoutInitializer(accessControl.address, mTBILL.address),
     ).revertedWith('Initializable: contract is not initializing');
   });
 
@@ -369,10 +369,10 @@ describe('DepositVault', function () {
 
   describe('initiateDepositRequest()', async () => {
     it('should fail: call from address without GREENLISTED_ROLE role', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { depositVault, regularAccounts, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         0,
         {
@@ -383,14 +383,14 @@ describe('DepositVault', function () {
     });
 
     it('should fail: when there is no token in vault', async () => {
-      const { owner, depositVault, accessControl, stableCoins, stUSD } =
+      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
         await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
         owner,
       );
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         0,
         {
@@ -400,7 +400,7 @@ describe('DepositVault', function () {
     });
 
     it('should fail: when trying to deposit 0 amount', async () => {
-      const { owner, depositVault, accessControl, stableCoins, stUSD } =
+      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
         await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -411,7 +411,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
       );
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         0,
         {
@@ -421,7 +421,7 @@ describe('DepositVault', function () {
     });
 
     it('should fail: call with insufficient allowance', async () => {
-      const { owner, depositVault, accessControl, stableCoins, stUSD } =
+      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
         await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -433,7 +433,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
       );
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         1,
         {
@@ -443,7 +443,7 @@ describe('DepositVault', function () {
     });
 
     it('should fail: call with insufficient balance', async () => {
-      const { owner, depositVault, accessControl, stableCoins, stUSD } =
+      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
         await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -455,7 +455,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
       );
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         1,
         {
@@ -471,7 +471,7 @@ describe('DepositVault', function () {
         depositVault,
         accessControl,
         stableCoins,
-        stUSD,
+        mTBILL,
       } = await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -485,7 +485,7 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 5);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100,
       );
@@ -495,7 +495,7 @@ describe('DepositVault', function () {
         owner,
       );
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100,
         {
@@ -511,7 +511,7 @@ describe('DepositVault', function () {
         mockedAggregator,
         mockedAggregatorEur,
         owner,
-        stUSD,
+        mTBILL,
         stableCoins,
       } = await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
@@ -531,7 +531,7 @@ describe('DepositVault', function () {
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
 
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         99_999,
         {
@@ -547,7 +547,7 @@ describe('DepositVault', function () {
         depositVault,
         accessControl,
         stableCoins,
-        stUSD,
+        mTBILL,
       } = await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -561,7 +561,7 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 5);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100,
       );
@@ -574,7 +574,7 @@ describe('DepositVault', function () {
         depositVault,
         accessControl,
         offChainUsdToken,
-        stUSD,
+        mTBILL,
       } = await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -586,7 +586,7 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 5);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         offChainUsdToken,
         100,
       );
@@ -599,7 +599,7 @@ describe('DepositVault', function () {
         depositVault,
         accessControl,
         stableCoins,
-        stUSD,
+        mTBILL,
       } = await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -614,7 +614,7 @@ describe('DepositVault', function () {
       await setRoundData({ mockedAggregator }, 5);
       await depositVault.freeFromMinDeposit(owner.address);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100,
       );
@@ -623,12 +623,12 @@ describe('DepositVault', function () {
 
   describe('fulfillDepositRequest()', async () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, regularAccounts, owner, stUSD } = await loadFixture(
+      const { depositVault, regularAccounts, owner, mTBILL } = await loadFixture(
         defaultDeploy,
       );
 
       await fulfillDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: regularAccounts[0],
           revertMessage: acErrors.WMAC_HASNT_ROLE,
@@ -637,10 +637,10 @@ describe('DepositVault', function () {
     });
 
     it('should fail: provided request doesn`t exist', async () => {
-      const { depositVault, owner, stUSD } = await loadFixture(defaultDeploy);
+      const { depositVault, owner, mTBILL } = await loadFixture(defaultDeploy);
 
       await fulfillDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
           revertMessage: 'DV: r not exists',
@@ -653,7 +653,7 @@ describe('DepositVault', function () {
         stableCoins,
         depositVault,
         owner,
-        stUSD,
+        mTBILL,
         regularAccounts,
         accessControl,
       } = await loadFixture(defaultDeploy);
@@ -672,7 +672,7 @@ describe('DepositVault', function () {
       await approveBase18(users, stableCoins.dai, depositVault, 1);
 
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         1,
         {
@@ -681,7 +681,7 @@ describe('DepositVault', function () {
       );
 
       await fulfillDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
         },
@@ -695,7 +695,7 @@ describe('DepositVault', function () {
         accessControl,
         depositVault,
         owner,
-        stUSD,
+        mTBILL,
         stableCoins,
         regularAccounts,
       } = await loadFixture(defaultDeploy);
@@ -722,7 +722,7 @@ describe('DepositVault', function () {
       );
 
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100,
         {
@@ -733,7 +733,7 @@ describe('DepositVault', function () {
     });
 
     it('is on pause, but admin can use everything', async () => {
-      const { accessControl, depositVault, owner, stUSD, stableCoins } =
+      const { accessControl, depositVault, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
 
       await expect(depositVault.changePauseState(true)).to.emit(
@@ -753,7 +753,7 @@ describe('DepositVault', function () {
       );
 
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100,
       );
@@ -766,7 +766,7 @@ describe('DepositVault', function () {
         depositVault,
         accessControl,
         stableCoins,
-        stUSD,
+        mTBILL,
       } = await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -780,7 +780,7 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 5);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100,
       );
@@ -793,7 +793,7 @@ describe('DepositVault', function () {
         mockedAggregator,
         mockedAggregatorEur,
         owner,
-        stUSD,
+        mTBILL,
         stableCoins,
       } = await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
@@ -813,7 +813,7 @@ describe('DepositVault', function () {
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
 
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100_000,
       );
@@ -826,7 +826,7 @@ describe('DepositVault', function () {
         mockedAggregator,
         mockedAggregatorEur,
         owner,
-        stUSD,
+        mTBILL,
         stableCoins,
       } = await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
@@ -846,12 +846,12 @@ describe('DepositVault', function () {
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
 
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100_001,
       );
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         1,
       );
@@ -864,7 +864,7 @@ describe('DepositVault', function () {
         depositVault,
         accessControl,
         stableCoins,
-        stUSD,
+        mTBILL,
       } = await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: depositVault, owner },
@@ -894,21 +894,21 @@ describe('DepositVault', function () {
 
       await setRoundData({ mockedAggregator }, 5);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.dai,
         100,
       );
 
       await setRoundData({ mockedAggregator }, 5.1);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.usdc,
         25,
       );
 
       await setRoundData({ mockedAggregator }, 5.4);
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.usdt,
         14,
       );
@@ -917,12 +917,12 @@ describe('DepositVault', function () {
 
   describe('manuallyDeposit(address,uint256,uint256,uint256)', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, regularAccounts, owner, stUSD } = await loadFixture(
+      const { depositVault, regularAccounts, owner, mTBILL } = await loadFixture(
         defaultDeploy,
       );
 
       await manualDepositTest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: regularAccounts[0],
           revertMessage: acErrors.WMAC_HASNT_ROLE,
@@ -936,10 +936,10 @@ describe('DepositVault', function () {
     });
 
     it('should fail: call when token doesn`t exist', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { depositVault, regularAccounts, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
       await manualDepositTest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
           revertMessage: 'MV: token not exists',
@@ -953,10 +953,10 @@ describe('DepositVault', function () {
     });
 
     it('call with token address == address(0)', async () => {
-      const { depositVault, regularAccounts, offChainUsdToken, owner, stUSD } =
+      const { depositVault, regularAccounts, offChainUsdToken, owner, mTBILL } =
         await loadFixture(defaultDeploy);
       await manualDepositTest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
         },
@@ -969,7 +969,7 @@ describe('DepositVault', function () {
     });
 
     it('call for amountStUsdOut = 0', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { depositVault, regularAccounts, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
@@ -978,7 +978,7 @@ describe('DepositVault', function () {
       await mintToken(stableCoins.dai, owner, 5);
       await approveBase18(owner, stableCoins.dai, depositVault, 5);
       await manualDepositTest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
         },
@@ -991,14 +991,14 @@ describe('DepositVault', function () {
     });
 
     it('call for amountUsdIn = 0', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { depositVault, regularAccounts, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.dai,
       );
       await manualDepositTest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
         },
@@ -1011,14 +1011,14 @@ describe('DepositVault', function () {
     });
 
     it('should fail: call for both amounts = 0', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { depositVault, regularAccounts, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.dai,
       );
       await manualDepositTest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
           revertMessage: 'DV: invalid amounts',
@@ -1032,7 +1032,7 @@ describe('DepositVault', function () {
     });
 
     it('should fail: user address is address(0)', async () => {
-      const { depositVault, owner, stUSD, stableCoins } = await loadFixture(
+      const { depositVault, owner, mTBILL, stableCoins } = await loadFixture(
         defaultDeploy,
       );
       await addPaymentTokenTest(
@@ -1040,7 +1040,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
       );
       await manualDepositTest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
           revertMessage: 'DV: invalid user',
@@ -1054,7 +1054,7 @@ describe('DepositVault', function () {
     });
 
     it('when everything`s good', async () => {
-      const { depositVault, regularAccounts, owner, stUSD, stableCoins } =
+      const { depositVault, regularAccounts, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
@@ -1063,7 +1063,7 @@ describe('DepositVault', function () {
       await mintToken(stableCoins.dai, owner, 1);
       await approveBase18(owner, stableCoins.dai, depositVault, 1);
       await manualDepositTest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         {
           from: owner,
         },
@@ -1078,19 +1078,19 @@ describe('DepositVault', function () {
 
   describe('cancelDepositRequest()', async () => {
     it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, regularAccounts, owner, stUSD } = await loadFixture(
+      const { depositVault, regularAccounts, owner, mTBILL } = await loadFixture(
         defaultDeploy,
       );
 
-      await cancelDepositRequest({ depositVault, owner, stUSD }, 0, {
+      await cancelDepositRequest({ depositVault, owner, mTBILL }, 0, {
         revertMessage: acErrors.WMAC_HASNT_ROLE,
         from: regularAccounts[0],
       });
     });
 
     it('should fail: when request with provided id does`nt exists', async () => {
-      const { owner, depositVault, stUSD } = await loadFixture(defaultDeploy);
-      await cancelDepositRequest({ depositVault, owner, stUSD }, 0, {
+      const { owner, depositVault, mTBILL } = await loadFixture(defaultDeploy);
+      await cancelDepositRequest({ depositVault, owner, mTBILL }, 0, {
         revertMessage: 'DV: r not exists',
       });
     });
@@ -1102,7 +1102,7 @@ describe('DepositVault', function () {
         accessControl,
         regularAccounts,
         stableCoins,
-        stUSD,
+        mTBILL,
       } = await loadFixture(defaultDeploy);
       const users = regularAccounts[0];
       await greenList(
@@ -1117,13 +1117,13 @@ describe('DepositVault', function () {
       await approveBase18(users, stableCoins.usdt, depositVault, 1);
 
       await initiateDepositRequest(
-        { depositVault, owner, stUSD },
+        { depositVault, owner, mTBILL },
         stableCoins.usdt,
         1,
         { from: users },
       );
 
-      await cancelDepositRequest({ depositVault, owner, stUSD }, 1);
+      await cancelDepositRequest({ depositVault, owner, mTBILL }, 1);
     });
   });
 });

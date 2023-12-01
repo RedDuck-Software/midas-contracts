@@ -17,7 +17,7 @@ import {
   // eslint-disable-next-line camelcase
   RedemptionVault__factory,
   // eslint-disable-next-line camelcase
-  StUSD__factory,
+  MTBILL__factory,
 } from '../../typechain-types';
 
 export const POST_DEPLOY_TAG = 'POST_DEPLOY';
@@ -55,7 +55,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       owner,
     ),
     // eslint-disable-next-line camelcase
-    stUsd: StUSD__factory.connect(addresses.stUSD, owner),
+    mTBILL: MTBILL__factory.connect(addresses.mTBILL, owner),
     // eslint-disable-next-line camelcase
     aggregator: AggregatorV3Interface__factory.connect(
       await dataFeedContract.aggregator(),

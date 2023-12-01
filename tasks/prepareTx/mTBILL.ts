@@ -6,10 +6,10 @@ import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getStUsd = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);
-  return await hre.ethers.getContractAt('stUSD', addresses?.stUSD ?? '');
+  return await hre.ethers.getContractAt('mTBILL', addresses?.mTBILL ?? '');
 };
 
-task('prepareTx:stUsd:mint')
+task('prepareTx:mTBILL:mint')
   .addPositionalParam('to', undefined, undefined, types.string)
   .addPositionalParam('amount', undefined, undefined, types.float)
   .setAction(async ({ to, amount }, hre) => {
@@ -25,7 +25,7 @@ task('prepareTx:stUsd:mint')
     logPopulatedTx(populatedTx);
   });
 
-task('prepareTx:stUsd:burn')
+task('prepareTx:mTBILL:burn')
   .addPositionalParam('from', undefined, undefined, types.string)
   .addPositionalParam('amount', undefined, undefined, types.float)
   .setAction(async ({ from, amount }, hre) => {
@@ -40,7 +40,7 @@ task('prepareTx:stUsd:burn')
     logPopulatedTx(populatedTx);
   });
 
-task('prepareTx:stUsd:pause').setAction(async (_, hre) => {
+task('prepareTx:mTBILL:pause').setAction(async (_, hre) => {
   const stUsdContract = await getStUsd(hre);
 
   const populatedTx = await stUsdContract.populateTransaction.pause();
@@ -48,7 +48,7 @@ task('prepareTx:stUsd:pause').setAction(async (_, hre) => {
   logPopulatedTx(populatedTx);
 });
 
-task('prepareTx:stUsd:unpause').setAction(async (_, hre) => {
+task('prepareTx:mTBILL:unpause').setAction(async (_, hre) => {
   const stUsdContract = await getStUsd(hre);
 
   const populatedTx = await stUsdContract.populateTransaction.unpause();
@@ -56,7 +56,7 @@ task('prepareTx:stUsd:unpause').setAction(async (_, hre) => {
   logPopulatedTx(populatedTx);
 });
 
-task('prepareTx:stUsd:setMetadata')
+task('prepareTx:mTBILL:setMetadata')
   .addPositionalParam('key', undefined, undefined, types.string)
   .addPositionalParam('value', undefined, undefined, types.string)
   .setAction(async ({ key, value }, hre) => {
@@ -76,7 +76,7 @@ task('prepareTx:stUsd:setMetadata')
     logPopulatedTx(populatedTx);
   });
 
-task('prepareTx:stUsd:addToBlackList')
+task('prepareTx:mTBILL:addToBlackList')
   .addPositionalParam('account', undefined, undefined, types.string)
   .setAction(async ({ account }, hre) => {
     const stUsdContract = await getStUsd(hre);
@@ -88,7 +88,7 @@ task('prepareTx:stUsd:addToBlackList')
     logPopulatedTx(populatedTx);
   });
 
-task('prepareTx:stUsd:removeFromBlackList')
+task('prepareTx:mTBILL:removeFromBlackList')
   .addPositionalParam('account', undefined, undefined, types.string)
   .setAction(async ({ account }, hre) => {
     const stUsdContract = await getStUsd(hre);

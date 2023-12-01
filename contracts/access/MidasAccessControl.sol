@@ -77,8 +77,8 @@ contract MidasAccessControl is
         _setupRole(GREENLIST_OPERATOR_ROLE, admin);
         _setupRole(BLACKLIST_OPERATOR_ROLE, admin);
 
-        _setupRole(ST_USD_MINT_OPERATOR_ROLE, admin);
-        _setupRole(ST_USD_BURN_OPERATOR_ROLE, admin);
-        _setupRole(ST_USD_PAUSE_OPERATOR_ROLE, admin);
+        _setupRole(M_TBILL_MINT_OPERATOR_ROLE, admin);
+        _setupRole(M_TBILL_BURN_OPERATOR_ROLE, admin);
+        _setupRole(M_TBILL_PAUSE_OPERATOR_ROLE, admin);
     }
 }

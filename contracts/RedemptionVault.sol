@@ -10,7 +10,7 @@ import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./interfaces/IRedemptionVault.sol";
-import "./interfaces/IStUSD.sol";
+import "./interfaces/IMTbill.sol";
 import "./interfaces/IDataFeed.sol";
 
 import "./abstract/ManageableVault.sol";
@@ -20,7 +20,7 @@ import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
  * @title RedemptionVault
- * @notice Smart contract that handles stUSD redemptions
+ * @notice Smart contract that handles mTBILL redemptions
  * @author RedDuck Software
  */
 contract RedemptionVault is ManageableVault, IRedemptionVault {
@@ -56,10 +56,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _stUSD address of stUSD token
+     * @param _mTBILL address of mTBILL token
      */
-    function initialize(address _ac, address _stUSD) external initializer {
-        __ManageableVault_init(_ac, _stUSD);
+    function initialize(address _ac, address _mTBILL) external initializer {
+        __ManageableVault_init(_ac, _mTBILL);
     }
 
     /**
@@ -81,7 +81,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         require(amountStUsdIn > 0, "RV: 0 amount");
 
-        stUSD.burn(user, amountStUsdIn);
+        mTBILL.burn(user, amountStUsdIn);
 
         uint256 fee = (amountStUsdIn * getFee(tokenOut)) /
             (ONE_HUNDRED_PERCENT);
@@ -130,7 +130,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         delete requests[requestId];
         uint256 returnAmount = request.amountStUsdIn + request.fee;
-        stUSD.mint(request.user, returnAmount);
+        mTBILL.mint(request.user, returnAmount);
         emit CancelRequest(requestId);
     }
 
@@ -150,7 +150,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @inheritdoc IManageableVault
      * @notice returns redemption fee
-     * @dev fee applies to inputted stUSD amount
+     * @dev fee applies to inputted mTBILL amount
      * @return fee fee percentage multiplied by 100
      */
     function getFee(address token) public view returns (uint256) {
@@ -197,12 +197,12 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @dev burn `amountStUsdIn` amount of stUSd from `user`
+     * @dev burn `amountStUsdIn` amount of mTBILL from `user`
      * and transfers `amountUsdOut` amount of `tokenOut` to `user`
      * @param user user address
      * @param tokenOut address of output USD token
      * @param amountUsdOut amount of USD token to transfer to `user`
-     * @param amountStUsdIn amount of stUSD token to burn from `user`
+     * @param amountStUsdIn amount of mTBILL token to burn from `user`
      */
     function _manuallyRedeem(
         address user,
@@ -213,7 +213,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         require(user != address(0), "RV: invalid user");
 
         _requireTokenExists(tokenOut);
-        stUSD.burn(user, amountStUsdIn);
+        mTBILL.burn(user, amountStUsdIn);
         _transferToken(user, tokenOut, amountUsdOut);
 
         emit PerformManualAction(

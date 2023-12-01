@@ -2,7 +2,7 @@
 
 ## DepositVault
 
-Smart contract that handles stUSD minting
+Smart contract that handles mTBILL minting
 
 ### DepositRequest
 
@@ -69,7 +69,7 @@ users restricted from depositin minDepositAmountInEuro
 ### initialize
 
 ```solidity
-function initialize(address _ac, address _stUSD, address _eurUsdDataFeed, uint256 _minAmountToDepositInEuro) external
+function initialize(address _ac, address _mTBILL, address _eurUsdDataFeed, uint256 _minAmountToDepositInEuro) external
 ```
 
 upgradeable pattern contract`s initializer
@@ -79,7 +79,7 @@ upgradeable pattern contract`s initializer
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | _ac | address | address of MidasAccessControll contract |
-| _stUSD | address | address of stUSD token |
+| _mTBILL | address | address of mTBILL token |
 | _eurUsdDataFeed | address | address of CL`s data feed EUR/USD |
 | _minAmountToDepositInEuro | uint256 | initial value for minAmountToDepositInEuro |
 
@@ -119,7 +119,7 @@ function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut) extern
 
 second step of the depositing proccess.
 After deposit request was validated off-chain,
-admin calculates how much of stUSD`s should be minted to the user.
+admin calculates how much of mTBILL`s should be minted to the user.
 can be called only from permissioned actor.
 
 #### Parameters
@@ -127,7 +127,7 @@ can be called only from permissioned actor.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | requestId | uint256 | id of a deposit request |
-| amountStUsdOut | uint256 | amount of stUSD to mint |
+| amountStUsdOut | uint256 | amount of mTBILL to mint |
 
 ### cancelDepositRequest
 
@@ -155,7 +155,7 @@ deletes it from the storage and fires the event_
 function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut) external
 ```
 
-wrapper over the stUSD.mint() function.
+wrapper over the mTBILL.mint() function.
 Mints `amountStUsdOut` to the `user` and emits the 
 event to be able to track this deposit off-chain.
 can be called only from vault`s admin
@@ -167,7 +167,7 @@ can be called only from vault`s admin
 | user | address | address of user |
 | tokenIn | address | address of inout USD token |
 | amountUsdIn | uint256 | amount of USD to deposit |
-| amountStUsdOut | uint256 | amount of stUSD token to send to user |
+| amountStUsdOut | uint256 | amount of mTBILL token to send to user |
 
 ### freeFromMinDeposit
 
@@ -242,7 +242,7 @@ function _fullfillDepositRequest(uint256 requestId, address user, uint256 amount
 ```
 
 _removes deposit request from the storage
-mints `amountStUsdOut` of stUSD to user_
+mints `amountStUsdOut` of mTBILL to user_
 
 #### Parameters
 
@@ -250,7 +250,7 @@ mints `amountStUsdOut` of stUSD to user_
 | ---- | ---- | ----------- |
 | requestId | uint256 | id of a deposit request |
 | user | address | user address |
-| amountStUsdOut | uint256 | amount of stUSD that should be minted to user |
+| amountStUsdOut | uint256 | amount of mTBILL that should be minted to user |
 
 ### _validateAmountUsdIn
 
@@ -274,7 +274,7 @@ function _manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, ui
 ```
 
 _internal implementation of manuallyDeposit()
-mints `amountStUsdOut` amount of stUSd to the `user`
+mints `amountStUsdOut` amount of mTBILL to the `user`
 and fires the event_
 
 #### Parameters
@@ -284,7 +284,7 @@ and fires the event_
 | user | address | user address |
 | tokenIn | address | address of input USD token |
 | amountUsdIn | uint256 | amount of USD token taken from user |
-| amountStUsdOut | uint256 | amount of stUSD token to mint to `user` |
+| amountStUsdOut | uint256 | amount of mTBILL token to mint to `user` |
 
 ### _getRequest
 
@@ -302,7 +302,7 @@ _checks that request is exists and copies it to the memory_
 
 ## RedemptionVault
 
-Smart contract that handles stUSD redemptions
+Smart contract that handles mTBILL redemptions
 
 ### RedemptionRequest
 
@@ -337,7 +337,7 @@ counter for request ids
 ### initialize
 
 ```solidity
-function initialize(address _ac, address _stUSD) external
+function initialize(address _ac, address _mTBILL) external
 ```
 
 upgradeable pattern contract`s initializer
@@ -347,7 +347,7 @@ upgradeable pattern contract`s initializer
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | _ac | address | address of MidasAccessControll contract |
-| _stUSD | address | address of stUSD token |
+| _mTBILL | address | address of mTBILL token |
 
 ### initiateRedemptionRequest
 
@@ -355,8 +355,8 @@ upgradeable pattern contract`s initializer
 function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn) external returns (uint256 requestId)
 ```
 
-first step of stUSD redemption process
-Burns stUSD from the user, and saves a redemption request
+first step of mTBILL redemption process
+Burns mTBILL from the user, and saves a redemption request
 into the storage. Then request should be validated off-chain
 and fulfilled by the vault`s admin by calling the
 `fulfillRedemptionRequest`
@@ -369,7 +369,7 @@ and saves redemption request to the storage_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | tokenOut | address | stable coin token address to redeem to |
-| amountStUsdIn | uint256 | amount of stUSD to redeem |
+| amountStUsdIn | uint256 | amount of mTBILL to redeem |
 
 #### Return Values
 
@@ -406,7 +406,7 @@ function cancelRedemptionRequest(uint256 requestId) external
 ```
 
 cancels redemption request by a given `requestId`
-and mints stUSD back to the user. 
+and mints mTBILL back to the user. 
 can be called only from permissioned actor
 
 _deletes request by a given `requestId` from storage
@@ -424,7 +424,7 @@ and fires the event_
 function manuallyRedeem(address user, address tokenOut, uint256 amountStUsdIn, uint256 amountUsdOut) external
 ```
 
-wrapper over the stUSD.burn() function.
+wrapper over the mTBILL.burn() function.
 Burns `amountStUsdIn` from the `user` and emits the 
 event to be able to track this redemption off-chain.
 can be called only from vault`s admin
@@ -435,7 +435,7 @@ can be called only from vault`s admin
 | ---- | ---- | ----------- |
 | user | address | address of user |
 | tokenOut | address | address of output USD token |
-| amountStUsdIn | uint256 | amount of stUSD to redeem |
+| amountStUsdIn | uint256 | amount of mTBILL to redeem |
 | amountUsdOut | uint256 | amount of USD token to send to user |
 
 ### getFee
@@ -446,7 +446,7 @@ function getFee(address token) public view returns (uint256)
 
 returns redemption fee
 
-_fee applies to inputted stUSD amount_
+_fee applies to inputted mTBILL amount_
 
 #### Return Values
 
@@ -505,7 +505,7 @@ and emits the event_
 function _manuallyRedeem(address user, address tokenOut, uint256 amountStUsdIn, uint256 amountUsdOut) internal
 ```
 
-_burn `amountStUsdIn` amount of stUSd from `user`
+_burn `amountStUsdIn` amount of mTBILL from `user`
 and transfers `amountUsdOut` amount of `tokenOut` to `user`_
 
 #### Parameters
@@ -514,7 +514,7 @@ and transfers `amountUsdOut` amount of `tokenOut` to `user`_
 | ---- | ---- | ----------- |
 | user | address | user address |
 | tokenOut | address | address of output USD token |
-| amountStUsdIn | uint256 | amount of stUSD token to burn from `user` |
+| amountStUsdIn | uint256 | amount of mTBILL token to burn from `user` |
 | amountUsdOut | uint256 | amount of USD token to transfer to `user` |
 
 ### _requireTokenExists
@@ -553,13 +553,13 @@ uint256 ONE_HUNDRED_PERCENT
 
 _for example, 10% will be (10 * 100)%_
 
-### stUSD
+### mTBILL
 
 ```solidity
-contract IStUSD stUSD
+contract IMTbill mTBILL
 ```
 
-stUSD token
+mTBILL token
 
 ### _paymentTokens
 
@@ -588,7 +588,7 @@ _checks that msg.sender do have a vaultRole() role_
 ### __ManageableVault_init
 
 ```solidity
-function __ManageableVault_init(address _ac, address _stUSD) internal
+function __ManageableVault_init(address _ac, address _mTBILL) internal
 ```
 
 _upgradeable pattern contract`s initializer_
@@ -598,7 +598,7 @@ _upgradeable pattern contract`s initializer_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | _ac | address | address of MidasAccessControll contract |
-| _stUSD | address | address of stUSD token |
+| _mTBILL | address | address of mTBILL token |
 
 ### withdrawToken
 
@@ -916,29 +916,29 @@ bytes32 BLACKLIST_OPERATOR_ROLE
 
 actor that can change black list statuses of addresses
 
-### ST_USD_MINT_OPERATOR_ROLE
+### M_TBILL_MINT_OPERATOR_ROLE
 
 ```solidity
-bytes32 ST_USD_MINT_OPERATOR_ROLE
+bytes32 M_TBILL_MINT_OPERATOR_ROLE
 ```
 
-actor that can mint stUSD
+actor that can mint mTBILL
 
-### ST_USD_BURN_OPERATOR_ROLE
+### M_TBILL_BURN_OPERATOR_ROLE
 
 ```solidity
-bytes32 ST_USD_BURN_OPERATOR_ROLE
+bytes32 M_TBILL_BURN_OPERATOR_ROLE
 ```
 
-actor that can burn stUSD
+actor that can burn mTBILL
 
-### ST_USD_PAUSE_OPERATOR_ROLE
+### M_TBILL_PAUSE_OPERATOR_ROLE
 
 ```solidity
-bytes32 ST_USD_PAUSE_OPERATOR_ROLE
+bytes32 M_TBILL_PAUSE_OPERATOR_ROLE
 ```
 
-actor that can pause stUSD
+actor that can pause mTBILL
 
 ### DEPOSIT_VAULT_ADMIN_ROLE
 
@@ -1306,7 +1306,7 @@ and fulfilled by the vault`s admin by calling the
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| amountOut | uint256 | amount of stUSD that minted to user |
+| amountOut | uint256 | amount of mTBILL that minted to user |
 
 ### fulfillDepositRequest
 
@@ -1316,7 +1316,7 @@ function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut) extern
 
 second step of the depositing proccess.
 After deposit request was validated off-chain,
-admin calculates how much of stUSD`s should be minted to the user.
+admin calculates how much of mTBILL`s should be minted to the user.
 can be called only from permissioned actor.
 
 #### Parameters
@@ -1324,7 +1324,7 @@ can be called only from permissioned actor.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | requestId | uint256 | id of a deposit request |
-| amountStUsdOut | uint256 | amount of stUSD to mint |
+| amountStUsdOut | uint256 | amount of mTBILL to mint |
 
 ### cancelDepositRequest
 
@@ -1349,7 +1349,7 @@ can be called only from vault`s admin
 function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut) external
 ```
 
-wrapper over the stUSD.mint() function.
+wrapper over the mTBILL.mint() function.
 Mints `amountStUsdOut` to the `user` and emits the 
 event to be able to track this deposit off-chain.
 can be called only from vault`s admin
@@ -1361,7 +1361,7 @@ can be called only from vault`s admin
 | user | address | address of user |
 | tokenIn | address | address of inout USD token |
 | amountUsdIn | uint256 | amount of USD to deposit |
-| amountStUsdOut | uint256 | amount of stUSD token to send to user |
+| amountStUsdOut | uint256 | amount of mTBILL token to send to user |
 
 ### freeFromMinDeposit
 
@@ -1548,8 +1548,8 @@ event SetMinAmountToRedeem(address caller, uint256 newValue)
 function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn) external returns (uint256 requestId)
 ```
 
-first step of stUSD redemption process
-Burns stUSD from the user, and saves a redemption request
+first step of mTBILL redemption process
+Burns mTBILL from the user, and saves a redemption request
 into the storage. Then request should be validated off-chain
 and fulfilled by the vault`s admin by calling the
 `fulfillRedemptionRequest`
@@ -1559,7 +1559,7 @@ and fulfilled by the vault`s admin by calling the
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | tokenOut | address | stable coin token address to redeem to |
-| amountStUsdIn | uint256 | amount of stUSD to redeem |
+| amountStUsdIn | uint256 | amount of mTBILL to redeem |
 
 #### Return Values
 
@@ -1592,7 +1592,7 @@ function cancelRedemptionRequest(uint256 requestId) external
 ```
 
 cancels redemption request by a given `requestId`
-and mints stUSD back to the user. 
+and mints mTBILL back to the user. 
 can be called only from permissioned actor
 
 #### Parameters
@@ -1607,7 +1607,7 @@ can be called only from permissioned actor
 function manuallyRedeem(address user, address tokenOut, uint256 amountStUsdIn, uint256 amountUsdOut) external
 ```
 
-wrapper over the stUSD.burn() function.
+wrapper over the mTBILL.burn() function.
 Burns `amountStUsdIn` from the `user` and emits the 
 event to be able to track this redemption off-chain.
 can be called only from vault`s admin
@@ -1618,10 +1618,10 @@ can be called only from vault`s admin
 | ---- | ---- | ----------- |
 | user | address | address of user |
 | tokenOut | address | address of output USD token |
-| amountStUsdIn | uint256 | amount of stUSD to redeem |
+| amountStUsdIn | uint256 | amount of mTBILL to redeem |
 | amountUsdOut | uint256 | amount of USD token to send to user |
 
-## IStUSD
+## IMTbill
 
 ### mint
 
@@ -1629,7 +1629,7 @@ can be called only from vault`s admin
 function mint(address to, uint256 amount) external
 ```
 
-mints stUSD token `amount` to a given `to` address.
+mints mTBILL token `amount` to a given `to` address.
 should be called only from permissioned actor
 
 #### Parameters
@@ -1645,7 +1645,7 @@ should be called only from permissioned actor
 function burn(address from, uint256 amount) external
 ```
 
-burns stUSD token `amount` to a given `to` address.
+burns mTBILL token `amount` to a given `to` address.
 should be called only from permissioned actor
 
 #### Parameters
@@ -1677,7 +1677,7 @@ should be called only from permissioned actor
 function pause() external
 ```
 
-puts stUSD token on pause.
+puts mTBILL token on pause.
 should be called only from permissioned actor
 
 ### unpause
@@ -1686,7 +1686,7 @@ should be called only from permissioned actor
 function unpause() external
 ```
 
-puts stUSD token on pause.
+puts mTBILL token on pause.
 should be called only from permissioned actor
 
 ## DecimalsCorrectionLibrary
@@ -1872,7 +1872,7 @@ NOTE: This information is only used for _display_ purposes: it in
 no way affects any of the arithmetic of the contract, including
 {IERC20-balanceOf} and {IERC20-transfer}._
 
-## stUSD
+## mTBILL
 
 ### TERMS_URL_METADATA_KEY
 
@@ -1918,7 +1918,7 @@ upgradeable pattern contract`s initializer
 function mint(address to, uint256 amount) external
 ```
 
-mints stUSD token `amount` to a given `to` address.
+mints mTBILL token `amount` to a given `to` address.
 should be called only from permissioned actor
 
 #### Parameters
@@ -1934,7 +1934,7 @@ should be called only from permissioned actor
 function burn(address from, uint256 amount) external
 ```
 
-burns stUSD token `amount` to a given `to` address.
+burns mTBILL token `amount` to a given `to` address.
 should be called only from permissioned actor
 
 #### Parameters
@@ -1950,7 +1950,7 @@ should be called only from permissioned actor
 function pause() external
 ```
 
-puts stUSD token on pause.
+puts mTBILL token on pause.
 should be called only from permissioned actor
 
 ### unpause
@@ -1959,7 +1959,7 @@ should be called only from permissioned actor
 function unpause() external
 ```
 
-puts stUSD token on pause.
+puts mTBILL token on pause.
 should be called only from permissioned actor
 
 ### setMetadata

@@ -8,7 +8,7 @@ import {
   ERC20,
   ERC20Mock,
   MidasAccessControl,
-  StUSD,
+  mTBILL,
 } from '../../typechain-types';
 
 export type OptionalCommonParams = {
@@ -31,9 +31,9 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
   const roles = {
     blacklisted: await accessControl.BLACKLISTED_ROLE(),
     greenlisted: await accessControl.GREENLISTED_ROLE(),
-    minter: await accessControl.ST_USD_MINT_OPERATOR_ROLE(),
-    burner: await accessControl.ST_USD_BURN_OPERATOR_ROLE(),
-    pauser: await accessControl.ST_USD_PAUSE_OPERATOR_ROLE(),
+    minter: await accessControl.M_TBILL_MINT_OPERATOR_ROLE(),
+    burner: await accessControl.M_TBILL_BURN_OPERATOR_ROLE(),
+    pauser: await accessControl.M_TBILL_PAUSE_OPERATOR_ROLE(),
     greenlistedOperator: await accessControl.GREENLIST_OPERATOR_ROLE(),
     blacklistedOperator: await accessControl.BLACKLIST_OPERATOR_ROLE(),
     defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
@@ -45,7 +45,7 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
 };
 
 export const mintToken = async (
-  token: ERC20Mock | StUSD,
+  token: ERC20Mock | mTBILL,
   to: AccountOrContract,
   amountN: number,
 ) => {

@@ -18,7 +18,7 @@ interface IDepositVault is IManageableVault {
      * `fulfillDepositRequest`
      * @param tokenIn address of USD token in
      * @param amountIn amount of `tokenIn` that will be taken from user
-     * @return amountOut amount of stUSD that minted to user
+     * @return amountOut amount of mTBILL that minted to user
      */
     function initiateDepositRequest(address tokenIn, uint256 amountIn)
         external
@@ -27,10 +27,10 @@ interface IDepositVault is IManageableVault {
     /**
      * @notice second step of the depositing proccess.
      * After deposit request was validated off-chain,
-     * admin calculates how much of stUSD`s should be minted to the user.
+     * admin calculates how much of mTBILL`s should be minted to the user.
      * can be called only from permissioned actor.
      * @param requestId id of a deposit request
-     * @param amountStUsdOut amount of stUSD to mint
+     * @param amountStUsdOut amount of mTBILL to mint
      */
     function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut)
         external;
@@ -45,14 +45,14 @@ interface IDepositVault is IManageableVault {
     function cancelDepositRequest(uint256 requestId) external;
 
     /**
-     * @notice wrapper over the stUSD.mint() function.
+     * @notice wrapper over the mTBILL.mint() function.
      * Mints `amountStUsdOut` to the `user` and emits the
      * event to be able to track this deposit off-chain.
      * can be called only from vault`s admin
      * @param user address of user
      * @param tokenIn address of inout USD token
      * @param amountUsdIn amount of USD to deposit
-     * @param amountStUsdOut amount of stUSD token to send to user
+     * @param amountStUsdOut amount of mTBILL token to send to user
      */
     function manuallyDeposit(
         address user,

@@ -25,7 +25,7 @@ type CommonParams = Pick<
 
 type CommonParamsDeposit = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'redemptionVault' | 'owner' | 'stUSD'
+  'redemptionVault' | 'owner' | 'mTBILL'
 >;
 
 type CommonParamsGetOutputAmount = Pick<
@@ -34,7 +34,7 @@ type CommonParamsGetOutputAmount = Pick<
 >;
 
 export const initiateRedemptionRequestTest = async (
-  { redemptionVault, owner, stUSD }: CommonParamsDeposit,
+  { redemptionVault, owner, mTBILL }: CommonParamsDeposit,
   tokenOut: ERC20 | string,
   amountStUsdIn: number,
   opt?: OptionalCommonParams,
@@ -56,9 +56,9 @@ export const initiateRedemptionRequestTest = async (
 
   const feePercentageInBPS = 0;
 
-  const balanceBeforeUser = await stUSD.balanceOf(sender.address);
+  const balanceBeforeUser = await mTBILL.balanceOf(sender.address);
 
-  const supplyBefore = await stUSD.totalSupply();
+  const supplyBefore = await mTBILL.totalSupply();
 
   const fee = await redemptionVault.getFee(tokenOut);
   expect(fee).eq(feePercentageInBPS);
@@ -87,9 +87,9 @@ export const initiateRedemptionRequestTest = async (
 
   const request = await redemptionVault.requests(lastRequestId);
 
-  const balanceAfterUser = await stUSD.balanceOf(sender.address);
+  const balanceAfterUser = await mTBILL.balanceOf(sender.address);
 
-  const supplyAfter = await stUSD.totalSupply();
+  const supplyAfter = await mTBILL.totalSupply();
 
   expect(request.user).eq(sender.address);
   expect(request.fee).eq(feeAmount);
@@ -101,7 +101,7 @@ export const initiateRedemptionRequestTest = async (
 };
 
 export const fulfillRedemptionRequestTest = (
-  { redemptionVault, owner, stUSD }: CommonParamsDeposit,
+  { redemptionVault, owner, mTBILL }: CommonParamsDeposit,
   opt?: OptionalCommonParams,
 ) => {
   return {
@@ -121,7 +121,7 @@ export const fulfillRedemptionRequestTest = (
         return;
       }
 
-      const balanceBeforeStUsdUser = await stUSD.balanceOf(sender.address);
+      const balanceBeforeStUsdUser = await mTBILL.balanceOf(sender.address);
 
       let request = await redemptionVault.requests(requestId);
 
@@ -153,7 +153,7 @@ export const fulfillRedemptionRequestTest = (
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterStUsdUser = await stUSD.balanceOf(sender.address);
+      const balanceAfterStUsdUser = await mTBILL.balanceOf(sender.address);
 
       const balanceAfterContract = await balanceOfBase18(
         tokenContract,
@@ -187,7 +187,7 @@ export const fulfillRedemptionRequestTest = (
   };
 };
 export const cancelRedemptionRequestTest = async (
-  { redemptionVault, owner, stUSD }: CommonParamsDeposit,
+  { redemptionVault, owner, mTBILL }: CommonParamsDeposit,
   requestId: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
@@ -202,9 +202,9 @@ export const cancelRedemptionRequestTest = async (
 
   const requestBefore = await redemptionVault.requests(requestId);
 
-  const balanceBeforeUser = await stUSD.balanceOf(requestBefore.user);
+  const balanceBeforeUser = await mTBILL.balanceOf(requestBefore.user);
 
-  const supplyBefore = await stUSD.totalSupply();
+  const supplyBefore = await mTBILL.totalSupply();
 
   await expect(
     redemptionVault.connect(sender).cancelRedemptionRequest(requestId),
@@ -215,9 +215,9 @@ export const cancelRedemptionRequestTest = async (
 
   const request = await redemptionVault.requests(requestId);
 
-  const balanceAfterUser = await stUSD.balanceOf(requestBefore.user);
+  const balanceAfterUser = await mTBILL.balanceOf(requestBefore.user);
 
-  const supplyAfter = await stUSD.totalSupply();
+  const supplyAfter = await mTBILL.totalSupply();
 
   expect(request.user).eq(ethers.constants.AddressZero);
   expect(request.tokenOut).eq(ethers.constants.AddressZero);
@@ -233,7 +233,7 @@ export const cancelRedemptionRequestTest = async (
 };
 
 export const manualRedeemTest = (
-  { redemptionVault, owner, stUSD }: CommonParamsDeposit,
+  { redemptionVault, owner, mTBILL }: CommonParamsDeposit,
   opt?: OptionalCommonParams,
 ) => {
   return {
@@ -262,7 +262,7 @@ export const manualRedeemTest = (
         return;
       }
 
-      const balanceBeforeStUsd = await stUSD.balanceOf(user);
+      const balanceBeforeStUsd = await mTBILL.balanceOf(user);
 
       const balanceBeforeUser = await balanceOfBase18(token, user);
 
@@ -271,7 +271,7 @@ export const manualRedeemTest = (
         redemptionVault,
       );
 
-      const supplyBefore = await stUSD.totalSupply();
+      const supplyBefore = await mTBILL.totalSupply();
 
       await expect(
         redemptionVault
@@ -284,7 +284,7 @@ export const manualRedeemTest = (
         ].name,
       ).to.not.reverted;
 
-      const balanceAfterStUsd = await stUSD.balanceOf(user);
+      const balanceAfterStUsd = await mTBILL.balanceOf(user);
 
       const balanceAfterUser = await balanceOfBase18(token, user);
 
@@ -293,7 +293,7 @@ export const manualRedeemTest = (
         redemptionVault,
       );
 
-      const supplyAfter = await stUSD.totalSupply();
+      const supplyAfter = await mTBILL.totalSupply();
 
       expect(supplyAfter).eq(supplyBefore.sub(amountIn));
       expect(balanceAfterStUsd).eq(balanceBeforeStUsd.sub(amountIn));

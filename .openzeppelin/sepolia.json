@@ -337,16 +337,16 @@
             "offset": 0,
             "slot": "202",
             "type": "t_mapping(t_bytes32,t_bytes_storage)",
-            "contract": "stUSD",
-            "src": "contracts\\stUSD.sol:29"
+            "contract": "mTBILL",
+            "src": "contracts\\mTBILL.sol:29"
           },
           {
             "label": "__gap",
             "offset": 0,
             "slot": "203",
             "type": "t_array(t_uint256)50_storage",
-            "contract": "stUSD",
-            "src": "contracts\\stUSD.sol:34"
+            "contract": "mTBILL",
+            "src": "contracts\\mTBILL.sol:34"
           }
         ],
         "types": {
@@ -557,10 +557,10 @@
             "src": "contracts\\abstract\\ManageableVault.sol:42"
           },
           {
-            "label": "stUSD",
+            "label": "mTBILL",
             "offset": 0,
             "slot": "2",
-            "type": "t_contract(IStUSD)6479",
+            "type": "t_contract(IMTbill)6479",
             "contract": "ManageableVault",
             "src": "contracts\\abstract\\ManageableVault.sol:47"
           },
@@ -654,8 +654,8 @@
             "label": "contract IDataFeed",
             "numberOfBytes": "20"
           },
-          "t_contract(IStUSD)6479": {
-            "label": "contract IStUSD",
+          "t_contract(IMTbill)6479": {
+            "label": "contract IMTbill",
             "numberOfBytes": "20"
           },
           "t_contract(MidasAccessControl)5882": {
@@ -805,10 +805,10 @@
             "src": "contracts\\abstract\\ManageableVault.sol:42"
           },
           {
-            "label": "stUSD",
+            "label": "mTBILL",
             "offset": 0,
             "slot": "2",
-            "type": "t_contract(IStUSD)6479",
+            "type": "t_contract(IMTbill)6479",
             "contract": "ManageableVault",
             "src": "contracts\\abstract\\ManageableVault.sol:47"
           },
@@ -886,8 +886,8 @@
             "label": "contract IDataFeed",
             "numberOfBytes": "20"
           },
-          "t_contract(IStUSD)6479": {
-            "label": "contract IStUSD",
+          "t_contract(IMTbill)6479": {
+            "label": "contract IMTbill",
             "numberOfBytes": "20"
           },
           "t_contract(MidasAccessControl)5882": {
@@ -1049,10 +1049,10 @@
             "src": "contracts\\abstract\\ManageableVault.sol:48"
           },
           {
-            "label": "stUSD",
+            "label": "mTBILL",
             "offset": 0,
             "slot": "52",
-            "type": "t_contract(IStUSD)6734",
+            "type": "t_contract(IMTbill)6734",
             "contract": "ManageableVault",
             "src": "contracts\\abstract\\ManageableVault.sol:53"
           },
@@ -1158,8 +1158,8 @@
             "label": "contract IDataFeed",
             "numberOfBytes": "20"
           },
-          "t_contract(IStUSD)6734": {
-            "label": "contract IStUSD",
+          "t_contract(IMTbill)6734": {
+            "label": "contract IMTbill",
             "numberOfBytes": "20"
           },
           "t_contract(MidasAccessControl)6121": {
@@ -1335,10 +1335,10 @@
             "src": "contracts\\abstract\\ManageableVault.sol:48"
           },
           {
-            "label": "stUSD",
+            "label": "mTBILL",
             "offset": 0,
             "slot": "52",
-            "type": "t_contract(IStUSD)6734",
+            "type": "t_contract(IMTbill)6734",
             "contract": "ManageableVault",
             "src": "contracts\\abstract\\ManageableVault.sol:53"
           },
@@ -1420,8 +1420,8 @@
             "label": "contract IDataFeed",
             "numberOfBytes": "20"
           },
-          "t_contract(IStUSD)6734": {
-            "label": "contract IStUSD",
+          "t_contract(IMTbill)6734": {
+            "label": "contract IMTbill",
             "numberOfBytes": "20"
           },
           "t_contract(MidasAccessControl)6121": {
@@ -1593,10 +1593,10 @@
             "src": "contracts\\abstract\\ManageableVault.sol:48"
           },
           {
-            "label": "stUSD",
+            "label": "mTBILL",
             "offset": 0,
             "slot": "52",
-            "type": "t_contract(IStUSD)7644",
+            "type": "t_contract(IMTbill)7644",
             "contract": "ManageableVault",
             "src": "contracts\\abstract\\ManageableVault.sol:53"
           },
@@ -1702,8 +1702,8 @@
             "label": "contract IDataFeed",
             "numberOfBytes": "20"
           },
-          "t_contract(IStUSD)7644": {
-            "label": "contract IStUSD",
+          "t_contract(IMTbill)7644": {
+            "label": "contract IMTbill",
             "numberOfBytes": "20"
           },
           "t_contract(MidasAccessControl)6871": {
@@ -1879,10 +1879,10 @@
             "src": "contracts\\abstract\\ManageableVault.sol:48"
           },
           {
-            "label": "stUSD",
+            "label": "mTBILL",
             "offset": 0,
             "slot": "52",
-            "type": "t_contract(IStUSD)6021",
+            "type": "t_contract(IMTbill)6021",
             "contract": "ManageableVault",
             "src": "contracts\\abstract\\ManageableVault.sol:53"
           },
@@ -1964,8 +1964,8 @@
             "label": "contract IDataFeed",
             "numberOfBytes": "20"
           },
-          "t_contract(IStUSD)6021": {
-            "label": "contract IStUSD",
+          "t_contract(IMTbill)6021": {
+            "label": "contract IMTbill",
             "numberOfBytes": "20"
           },
           "t_contract(MidasAccessControl)5475": {
@@ -2137,10 +2137,10 @@
             "src": "contracts\\abstract\\ManageableVault.sol:48"
           },
           {
-            "label": "stUSD",
+            "label": "mTBILL",
             "offset": 0,
             "slot": "52",
-            "type": "t_contract(IStUSD)6015",
+            "type": "t_contract(IMTbill)6015",
             "contract": "ManageableVault",
             "src": "contracts\\abstract\\ManageableVault.sol:53"
           },
@@ -2222,8 +2222,8 @@
             "label": "contract IDataFeed",
             "numberOfBytes": "20"
           },
-          "t_contract(IStUSD)6015": {
-            "label": "contract IStUSD",
+          "t_contract(IMTbill)6015": {
+            "label": "contract IMTbill",
             "numberOfBytes": "20"
           },
           "t_contract(MidasAccessControl)5469": {
