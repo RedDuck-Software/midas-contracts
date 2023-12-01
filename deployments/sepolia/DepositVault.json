@@ -173,7 +173,7 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "amountStUsdOut",
+          "name": "amountMTbillOut",
           "type": "uint256"
         }
       ],
@@ -551,7 +551,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "amountStUsdOut",
+          "name": "amountMTbillOut",
           "type": "uint256"
         }
       ],

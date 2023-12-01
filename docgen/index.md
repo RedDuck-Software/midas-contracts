@@ -114,7 +114,7 @@ and saves deposit request to the storage_
 ### fulfillDepositRequest
 
 ```solidity
-function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut) external
+function fulfillDepositRequest(uint256 requestId, uint256 amountMTbillOut) external
 ```
 
 second step of the depositing proccess.
@@ -127,7 +127,7 @@ can be called only from permissioned actor.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | requestId | uint256 | id of a deposit request |
-| amountStUsdOut | uint256 | amount of mTBILL to mint |
+| amountMTbillOut | uint256 | amount of mTBILL to mint |
 
 ### cancelDepositRequest
 
@@ -152,11 +152,11 @@ deletes it from the storage and fires the event_
 ### manuallyDeposit
 
 ```solidity
-function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut) external
+function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountMTbillOut) external
 ```
 
 wrapper over the mTBILL.mint() function.
-Mints `amountStUsdOut` to the `user` and emits the 
+Mints `amountMTbillOut` to the `user` and emits the 
 event to be able to track this deposit off-chain.
 can be called only from vault`s admin
 
@@ -167,7 +167,7 @@ can be called only from vault`s admin
 | user | address | address of user |
 | tokenIn | address | address of inout USD token |
 | amountUsdIn | uint256 | amount of USD to deposit |
-| amountStUsdOut | uint256 | amount of mTBILL token to send to user |
+| amountMTbillOut | uint256 | amount of mTBILL token to send to user |
 
 ### freeFromMinDeposit
 
@@ -238,11 +238,11 @@ AC role of vault administrator
 ### _fullfillDepositRequest
 
 ```solidity
-function _fullfillDepositRequest(uint256 requestId, address user, uint256 amountStUsdOut) internal
+function _fullfillDepositRequest(uint256 requestId, address user, uint256 amountMTbillOut) internal
 ```
 
 _removes deposit request from the storage
-mints `amountStUsdOut` of mTBILL to user_
+mints `amountMTbillOut` of mTBILL to user_
 
 #### Parameters
 
@@ -250,7 +250,7 @@ mints `amountStUsdOut` of mTBILL to user_
 | ---- | ---- | ----------- |
 | requestId | uint256 | id of a deposit request |
 | user | address | user address |
-| amountStUsdOut | uint256 | amount of mTBILL that should be minted to user |
+| amountMTbillOut | uint256 | amount of mTBILL that should be minted to user |
 
 ### _validateAmountUsdIn
 
@@ -270,11 +270,11 @@ _validates that inputted USD amount >= minAmountToDepositInUsd()_
 ### _manuallyDeposit
 
 ```solidity
-function _manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut) internal
+function _manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountMTbillOut) internal
 ```
 
 _internal implementation of manuallyDeposit()
-mints `amountStUsdOut` amount of mTBILL to the `user`
+mints `amountMTbillOut` amount of mTBILL to the `user`
 and fires the event_
 
 #### Parameters
@@ -284,7 +284,7 @@ and fires the event_
 | user | address | user address |
 | tokenIn | address | address of input USD token |
 | amountUsdIn | uint256 | amount of USD token taken from user |
-| amountStUsdOut | uint256 | amount of mTBILL token to mint to `user` |
+| amountMTbillOut | uint256 | amount of mTBILL token to mint to `user` |
 
 ### _getRequest
 
@@ -310,7 +310,7 @@ Smart contract that handles mTBILL redemptions
 struct RedemptionRequest {
   address user;
   address tokenOut;
-  uint256 amountStUsdIn;
+  uint256 amountTBillIn;
   uint256 fee;
 }
 ```
@@ -352,7 +352,7 @@ upgradeable pattern contract`s initializer
 ### initiateRedemptionRequest
 
 ```solidity
-function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn) external returns (uint256 requestId)
+function initiateRedemptionRequest(address tokenOut, uint256 amountTBillIn) external returns (uint256 requestId)
 ```
 
 first step of mTBILL redemption process
@@ -361,7 +361,7 @@ into the storage. Then request should be validated off-chain
 and fulfilled by the vault`s admin by calling the
 `fulfillRedemptionRequest`
 
-_burns 'amountStUsdIn' amount from user
+_burns 'amountTBillIn' amount from user
 and saves redemption request to the storage_
 
 #### Parameters
@@ -369,7 +369,7 @@ and saves redemption request to the storage_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | tokenOut | address | stable coin token address to redeem to |
-| amountStUsdIn | uint256 | amount of mTBILL to redeem |
+| amountTBillIn | uint256 | amount of mTBILL to redeem |
 
 #### Return Values
 
@@ -421,11 +421,11 @@ and fires the event_
 ### manuallyRedeem
 
 ```solidity
-function manuallyRedeem(address user, address tokenOut, uint256 amountStUsdIn, uint256 amountUsdOut) external
+function manuallyRedeem(address user, address tokenOut, uint256 amountTBillIn, uint256 amountUsdOut) external
 ```
 
 wrapper over the mTBILL.burn() function.
-Burns `amountStUsdIn` from the `user` and emits the 
+Burns `amountTBillIn` from the `user` and emits the 
 event to be able to track this redemption off-chain.
 can be called only from vault`s admin
 
@@ -435,7 +435,7 @@ can be called only from vault`s admin
 | ---- | ---- | ----------- |
 | user | address | address of user |
 | tokenOut | address | address of output USD token |
-| amountStUsdIn | uint256 | amount of mTBILL to redeem |
+| amountTBillIn | uint256 | amount of mTBILL to redeem |
 | amountUsdOut | uint256 | amount of USD token to send to user |
 
 ### getFee
@@ -502,10 +502,10 @@ and emits the event_
 ### _manuallyRedeem
 
 ```solidity
-function _manuallyRedeem(address user, address tokenOut, uint256 amountStUsdIn, uint256 amountUsdOut) internal
+function _manuallyRedeem(address user, address tokenOut, uint256 amountTBillIn, uint256 amountUsdOut) internal
 ```
 
-_burn `amountStUsdIn` amount of mTBILL from `user`
+_burn `amountTBillIn` amount of mTBILL from `user`
 and transfers `amountUsdOut` amount of `tokenOut` to `user`_
 
 #### Parameters
@@ -514,7 +514,7 @@ and transfers `amountUsdOut` amount of `tokenOut` to `user`_
 | ---- | ---- | ----------- |
 | user | address | user address |
 | tokenOut | address | address of output USD token |
-| amountStUsdIn | uint256 | amount of mTBILL token to burn from `user` |
+| amountTBillIn | uint256 | amount of mTBILL token to burn from `user` |
 | amountUsdOut | uint256 | amount of USD token to transfer to `user` |
 
 ### _requireTokenExists
@@ -1311,7 +1311,7 @@ and fulfilled by the vault`s admin by calling the
 ### fulfillDepositRequest
 
 ```solidity
-function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut) external
+function fulfillDepositRequest(uint256 requestId, uint256 amountMTbillOut) external
 ```
 
 second step of the depositing proccess.
@@ -1324,7 +1324,7 @@ can be called only from permissioned actor.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | requestId | uint256 | id of a deposit request |
-| amountStUsdOut | uint256 | amount of mTBILL to mint |
+| amountMTbillOut | uint256 | amount of mTBILL to mint |
 
 ### cancelDepositRequest
 
@@ -1346,11 +1346,11 @@ can be called only from vault`s admin
 ### manuallyDeposit
 
 ```solidity
-function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountStUsdOut) external
+function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountMTbillOut) external
 ```
 
 wrapper over the mTBILL.mint() function.
-Mints `amountStUsdOut` to the `user` and emits the 
+Mints `amountMTbillOut` to the `user` and emits the 
 event to be able to track this deposit off-chain.
 can be called only from vault`s admin
 
@@ -1361,7 +1361,7 @@ can be called only from vault`s admin
 | user | address | address of user |
 | tokenIn | address | address of inout USD token |
 | amountUsdIn | uint256 | amount of USD to deposit |
-| amountStUsdOut | uint256 | amount of mTBILL token to send to user |
+| amountMTbillOut | uint256 | amount of mTBILL token to send to user |
 
 ### freeFromMinDeposit
 
@@ -1545,7 +1545,7 @@ event SetMinAmountToRedeem(address caller, uint256 newValue)
 ### initiateRedemptionRequest
 
 ```solidity
-function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn) external returns (uint256 requestId)
+function initiateRedemptionRequest(address tokenOut, uint256 amountTBillIn) external returns (uint256 requestId)
 ```
 
 first step of mTBILL redemption process
@@ -1559,7 +1559,7 @@ and fulfilled by the vault`s admin by calling the
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | tokenOut | address | stable coin token address to redeem to |
-| amountStUsdIn | uint256 | amount of mTBILL to redeem |
+| amountTBillIn | uint256 | amount of mTBILL to redeem |
 
 #### Return Values
 
@@ -1604,11 +1604,11 @@ can be called only from permissioned actor
 ### manuallyRedeem
 
 ```solidity
-function manuallyRedeem(address user, address tokenOut, uint256 amountStUsdIn, uint256 amountUsdOut) external
+function manuallyRedeem(address user, address tokenOut, uint256 amountTBillIn, uint256 amountUsdOut) external
 ```
 
 wrapper over the mTBILL.burn() function.
-Burns `amountStUsdIn` from the `user` and emits the 
+Burns `amountTBillIn` from the `user` and emits the 
 event to be able to track this redemption off-chain.
 can be called only from vault`s admin
 
@@ -1618,7 +1618,7 @@ can be called only from vault`s admin
 | ---- | ---- | ----------- |
 | user | address | address of user |
 | tokenOut | address | address of output USD token |
-| amountStUsdIn | uint256 | amount of mTBILL to redeem |
+| amountTBillIn | uint256 | amount of mTBILL to redeem |
 | amountUsdOut | uint256 | amount of USD token to send to user |
 
 ## IMTbill

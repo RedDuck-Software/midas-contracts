@@ -140,13 +140,13 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      */
-    function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut)
+    function fulfillDepositRequest(uint256 requestId, uint256 amountMTbillOut)
         external
         onlyVaultAdmin
     {
         DepositRequest memory request = _getRequest(requestId);
 
-        _fullfillDepositRequest(requestId, request.user, amountStUsdOut);
+        _fullfillDepositRequest(requestId, request.user, amountMTbillOut);
     }
 
     /**
@@ -174,11 +174,11 @@ contract DepositVault is ManageableVault, IDepositVault {
         address user,
         address tokenIn,
         uint256 amountUsdIn,
-        uint256 amountStUsdOut
+        uint256 amountMTbillOut
     ) external onlyVaultAdmin {
-        require(amountUsdIn > 0 || amountStUsdOut > 0, "DV: invalid amounts");
+        require(amountUsdIn > 0 || amountMTbillOut > 0, "DV: invalid amounts");
 
-        _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
+        _manuallyDeposit(user, tokenIn, amountUsdIn, amountMTbillOut);
     }
 
     /**
@@ -224,21 +224,21 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @dev removes deposit request from the storage
-     * mints `amountStUsdOut` of mTBILL to `user`
+     * mints `amountMTbillOut` of mTBILL to `user`
      * @param requestId id of a deposit request
      * @param user user address
-     * @param amountStUsdOut amount of mTBILL that should be minted to `user`
+     * @param amountMTbillOut amount of mTBILL that should be minted to `user`
      */
     function _fullfillDepositRequest(
         uint256 requestId,
         address user,
-        uint256 amountStUsdOut
+        uint256 amountMTbillOut
     ) internal {
         delete requests[requestId];
 
-        mTBILL.mint(user, amountStUsdOut);
+        mTBILL.mint(user, amountMTbillOut);
 
-        emit FulfillRequest(msg.sender, requestId, amountStUsdOut);
+        emit FulfillRequest(msg.sender, requestId, amountMTbillOut);
     }
 
     /**
@@ -259,18 +259,18 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @dev internal implementation of manuallyDeposit()
-     * mints `amountStUsdOut` amount of mTBILL to the `user`
+     * mints `amountMTbillOut` amount of mTBILL to the `user`
      * and fires the event
      * @param user user address
      * @param tokenIn address of input USD token
      * @param amountUsdIn amount of USD token taken from user
-     * @param amountStUsdOut amount of mTBILL token to mint to `user`
+     * @param amountMTbillOut amount of mTBILL token to mint to `user`
      */
     function _manuallyDeposit(
         address user,
         address tokenIn,
         uint256 amountUsdIn,
-        uint256 amountStUsdOut
+        uint256 amountMTbillOut
     ) internal {
         require(user != address(0), "DV: invalid user");
 
@@ -278,13 +278,13 @@ contract DepositVault is ManageableVault, IDepositVault {
             _requireTokenExists(tokenIn);
         }
 
-        mTBILL.mint(user, amountStUsdOut);
+        mTBILL.mint(user, amountMTbillOut);
 
         emit PerformManualAction(
             msg.sender,
             user,
             tokenIn,
-            amountStUsdOut,
+            amountMTbillOut,
             amountUsdIn
         );
     }

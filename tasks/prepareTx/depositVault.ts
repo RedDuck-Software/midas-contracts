@@ -30,11 +30,11 @@ task('prepareTx:depositVault:fulfillManualDeposit(address,uin256)')
 task('prepareTx:depositVault:fulfillManualDeposit(address,uin256,uin256)')
   .addPositionalParam('user', undefined, undefined, types.string)
   .addPositionalParam('amountUsdIn', undefined, undefined, types.float)
-  .addPositionalParam('amountStUsdOut', undefined, undefined, types.float)
-  .setAction(async ({ user, amountUsdIn, amountStUsdOut }, hre) => {
+  .addPositionalParam('amountMTbillOut', undefined, undefined, types.float)
+  .setAction(async ({ user, amountUsdIn, amountMTbillOut }, hre) => {
     const amountInParsed = hre.ethers.utils.parseUnits(amountUsdIn.toString());
     const amountOutParsed = hre.ethers.utils.parseUnits(
-      amountStUsdOut.toString(),
+      amountMTbillOut.toString(),
     );
 
     const depositVaultContract = await getDepositVault(hre);

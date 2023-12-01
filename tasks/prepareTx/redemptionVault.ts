@@ -61,10 +61,10 @@ task('prepareTx:redemptionVault:cancelRedemptionRequest')
 task('prepareTx:redemptionVault:manuallyRedeem(address,address,uint256)')
   .addPositionalParam('user', undefined, undefined, types.string)
   .addPositionalParam('tokenOut', undefined, undefined, types.string)
-  .addPositionalParam('amountStUsdIn', undefined, undefined, types.float)
-  .setAction(async ({ user, tokenOut, amountStUsdIn }, hre) => {
+  .addPositionalParam('amountTBillIn', undefined, undefined, types.float)
+  .setAction(async ({ user, tokenOut, amountTBillIn }, hre) => {
     const amountStUsdInParsed = hre.ethers.utils.parseUnits(
-      amountStUsdIn.toString(),
+      amountTBillIn.toString(),
     );
 
     const redemptionVaultContract = await getRedemptionVault(hre);
@@ -81,12 +81,12 @@ task(
 )
   .addPositionalParam('user', undefined, undefined, types.string)
   .addPositionalParam('tokenOut', undefined, undefined, types.string)
-  .addPositionalParam('amountStUsdIn', undefined, undefined, types.float)
+  .addPositionalParam('amountTBillIn', undefined, undefined, types.float)
   .addPositionalParam('amountUsdOut', undefined, undefined, types.float)
 
-  .setAction(async ({ user, tokenOut, amountStUsdIn, amountUsdOut }, hre) => {
+  .setAction(async ({ user, tokenOut, amountTBillIn, amountUsdOut }, hre) => {
     const amountStUsdInParsed = hre.ethers.utils.parseUnits(
-      amountStUsdIn.toString(),
+      amountTBillIn.toString(),
     );
     const amountUsdOutParsed = hre.ethers.utils.parseUnits(
       amountUsdOut.toString(),

@@ -154,10 +154,10 @@ export const fulfillDepositRequest = (
   return {
     'fulfillDepositRequest(uint256, uint256)': async (
       requestId: BigNumberish,
-      amountStUsdOut: number,
+      amountMTbillOut: number,
     ) => {
       const sender = opt?.from ?? owner;
-      const amountOut = parseUnits(amountStUsdOut.toString());
+      const amountOut = parseUnits(amountMTbillOut.toString());
 
       if (opt?.revertMessage) {
         await expect(
@@ -209,7 +209,7 @@ export const manualDepositTest = (
       user: Account,
       tokenIn: ERC20 | string,
       amountUsdIn: number,
-      amountStUsdOut: number,
+      amountMTbillOut: number,
     ) => {
       user = getAccount(user);
 
@@ -220,7 +220,7 @@ export const manualDepositTest = (
       const sender = opt?.from ?? owner;
 
       const amountIn = parseUnits(amountUsdIn.toString());
-      const amountOut = parseUnits(amountStUsdOut.toString());
+      const amountOut = parseUnits(amountMTbillOut.toString());
 
       if (opt?.revertMessage) {
         await expect(

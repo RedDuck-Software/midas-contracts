@@ -942,7 +942,7 @@
                 "slot": "1"
               },
               {
-                "label": "amountStUsdIn",
+                "label": "amountTBillIn",
                 "type": "t_uint256",
                 "offset": 0,
                 "slot": "2"
@@ -1480,7 +1480,7 @@
                 "slot": "1"
               },
               {
-                "label": "amountStUsdIn",
+                "label": "amountTBillIn",
                 "type": "t_uint256",
                 "offset": 0,
                 "slot": "2"
@@ -2024,7 +2024,7 @@
                 "slot": "1"
               },
               {
-                "label": "amountStUsdIn",
+                "label": "amountTBillIn",
                 "type": "t_uint256",
                 "offset": 0,
                 "slot": "2"
@@ -2282,7 +2282,7 @@
                 "slot": "1"
               },
               {
-                "label": "amountStUsdIn",
+                "label": "amountTBillIn",
                 "type": "t_uint256",
                 "offset": 0,
                 "slot": "2"

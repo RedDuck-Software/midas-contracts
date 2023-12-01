@@ -968,7 +968,7 @@ describe('DepositVault', function () {
       );
     });
 
-    it('call for amountStUsdOut = 0', async () => {
+    it('call for amountMTbillOut = 0', async () => {
       const { depositVault, regularAccounts, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
       await addPaymentTokenTest(

@@ -32,7 +32,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     struct RedemptionRequest {
         address user;
         address tokenOut;
-        uint256 amountStUsdIn;
+        uint256 amountTBillIn;
         uint256 fee;
     }
 
@@ -64,10 +64,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     /**
      * @inheritdoc IRedemptionVault
-     * @dev burns 'amountStUsdIn' amount from user
+     * @dev burns 'amountTBillIn' amount from user
      * and saves redemption request to the storage
      */
-    function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn)
+    function initiateRedemptionRequest(address tokenOut, uint256 amountTBillIn)
         external
         onlyGreenlisted(msg.sender)
         pausable
@@ -79,18 +79,18 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         _requireTokenExists(tokenOut);
 
-        require(amountStUsdIn > 0, "RV: 0 amount");
+        require(amountTBillIn > 0, "RV: 0 amount");
 
-        mTBILL.burn(user, amountStUsdIn);
+        mTBILL.burn(user, amountTBillIn);
 
-        uint256 fee = (amountStUsdIn * getFee(tokenOut)) /
+        uint256 fee = (amountTBillIn * getFee(tokenOut)) /
             (ONE_HUNDRED_PERCENT);
-        uint256 amountIncludingSubtractionOfFee = amountStUsdIn - fee;
+        uint256 amountIncludingSubtractionOfFee = amountTBillIn - fee;
 
         requests[requestId] = RedemptionRequest({
             user: user,
             tokenOut: tokenOut,
-            amountStUsdIn: amountIncludingSubtractionOfFee,
+            amountTBillIn: amountIncludingSubtractionOfFee,
             fee: fee
         });
 
@@ -129,7 +129,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         RedemptionRequest memory request = _getRequest(requestId);
 
         delete requests[requestId];
-        uint256 returnAmount = request.amountStUsdIn + request.fee;
+        uint256 returnAmount = request.amountTBillIn + request.fee;
         mTBILL.mint(request.user, returnAmount);
         emit CancelRequest(requestId);
     }
@@ -140,11 +140,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     function manuallyRedeem(
         address user,
         address tokenOut,
-        uint256 amountStUsdIn,
+        uint256 amountTBillIn,
         uint256 amountUsdOut
     ) external onlyVaultAdmin {
-        require(amountStUsdIn > 0 || amountUsdOut > 0, "RV: invalid amounts");
-        _manuallyRedeem(user, tokenOut, amountStUsdIn, amountUsdOut);
+        require(amountTBillIn > 0 || amountUsdOut > 0, "RV: invalid amounts");
+        _manuallyRedeem(user, tokenOut, amountTBillIn, amountUsdOut);
     }
 
     /**
@@ -197,30 +197,30 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
-     * @dev burn `amountStUsdIn` amount of mTBILL from `user`
+     * @dev burn `amountTBillIn` amount of mTBILL from `user`
      * and transfers `amountUsdOut` amount of `tokenOut` to `user`
      * @param user user address
      * @param tokenOut address of output USD token
      * @param amountUsdOut amount of USD token to transfer to `user`
-     * @param amountStUsdIn amount of mTBILL token to burn from `user`
+     * @param amountTBillIn amount of mTBILL token to burn from `user`
      */
     function _manuallyRedeem(
         address user,
         address tokenOut,
-        uint256 amountStUsdIn,
+        uint256 amountTBillIn,
         uint256 amountUsdOut
     ) internal {
         require(user != address(0), "RV: invalid user");
 
         _requireTokenExists(tokenOut);
-        mTBILL.burn(user, amountStUsdIn);
+        mTBILL.burn(user, amountTBillIn);
         _transferToken(user, tokenOut, amountUsdOut);
 
         emit PerformManualAction(
             msg.sender,
             user,
             tokenOut,
-            amountStUsdIn,
+            amountTBillIn,
             amountUsdOut
         );
     }

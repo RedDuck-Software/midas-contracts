@@ -30,9 +30,9 @@ interface IDepositVault is IManageableVault {
      * admin calculates how much of mTBILL`s should be minted to the user.
      * can be called only from permissioned actor.
      * @param requestId id of a deposit request
-     * @param amountStUsdOut amount of mTBILL to mint
+     * @param amountMTbillOut amount of mTBILL to mint
      */
-    function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut)
+    function fulfillDepositRequest(uint256 requestId, uint256 amountMTbillOut)
         external;
 
     /**
@@ -46,19 +46,19 @@ interface IDepositVault is IManageableVault {
 
     /**
      * @notice wrapper over the mTBILL.mint() function.
-     * Mints `amountStUsdOut` to the `user` and emits the
+     * Mints `amountMTbillOut` to the `user` and emits the
      * event to be able to track this deposit off-chain.
      * can be called only from vault`s admin
      * @param user address of user
      * @param tokenIn address of inout USD token
      * @param amountUsdIn amount of USD to deposit
-     * @param amountStUsdOut amount of mTBILL token to send to user
+     * @param amountMTbillOut amount of mTBILL token to send to user
      */
     function manuallyDeposit(
         address user,
         address tokenIn,
         uint256 amountUsdIn,
-        uint256 amountStUsdOut
+        uint256 amountMTbillOut
     ) external;
 
     /**

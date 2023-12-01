@@ -499,7 +499,7 @@ describe('RedemptionVault', function () {
       ](regularAccounts[0], stableCoins.dai, 1, 1);
     });
 
-    it('when amountStUsdIn is 0 and amountUsdOut is not 0', async () => {
+    it('when amountTBillIn is 0 and amountUsdOut is not 0', async () => {
       const { owner, redemptionVault, regularAccounts, stableCoins, mTBILL } =
         await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
@@ -514,7 +514,7 @@ describe('RedemptionVault', function () {
       ](regularAccounts[0], stableCoins.dai, 0, 1);
     });
 
-    it('when amountStUsdIn is not 0 and amountUsdOut is 0', async () => {
+    it('when amountTBillIn is not 0 and amountUsdOut is 0', async () => {
       const { owner, redemptionVault, regularAccounts, stableCoins, mTBILL } =
         await loadFixture(defaultDeploy);
       await addPaymentTokenTest(

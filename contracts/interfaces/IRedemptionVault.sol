@@ -17,10 +17,10 @@ interface IRedemptionVault is IManageableVault {
      * and fulfilled by the vault`s admin by calling the
      * `fulfillRedemptionRequest`
      * @param tokenOut stable coin token address to redeem to
-     * @param amountStUsdIn amount of mTBILL to redeem
+     * @param amountTBillIn amount of mTBILL to redeem
      * @return requestId id of created request
      */
-    function initiateRedemptionRequest(address tokenOut, uint256 amountStUsdIn)
+    function initiateRedemptionRequest(address tokenOut, uint256 amountTBillIn)
         external
         returns (uint256 requestId);
 
@@ -45,18 +45,18 @@ interface IRedemptionVault is IManageableVault {
 
     /**
      * @notice wrapper over the mTBILL.burn() function.
-     * Burns `amountStUsdIn` from the `user` and emits the
+     * Burns `amountTBillIn` from the `user` and emits the
      * event to be able to track this redemption off-chain.
      * can be called only from vault`s admin
      * @param user address of user
      * @param tokenOut address of output USD token
-     * @param amountStUsdIn amount of mTBILL to redeem
+     * @param amountTBillIn amount of mTBILL to redeem
      * @param amountUsdOut amount of USD token to send to user
      */
     function manuallyRedeem(
         address user,
         address tokenOut,
-        uint256 amountStUsdIn,
+        uint256 amountTBillIn,
         uint256 amountUsdOut
     ) external;
 }

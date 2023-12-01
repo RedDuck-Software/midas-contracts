@@ -36,14 +36,14 @@ type CommonParamsGetOutputAmount = Pick<
 export const initiateRedemptionRequestTest = async (
   { redemptionVault, owner, mTBILL }: CommonParamsDeposit,
   tokenOut: ERC20 | string,
-  amountStUsdIn: number,
+  amountTBillIn: number,
   opt?: OptionalCommonParams,
 ) => {
   tokenOut = getAccount(tokenOut);
 
   const sender = opt?.from ?? owner;
 
-  const amountIn = parseUnits(amountStUsdIn.toString());
+  const amountIn = parseUnits(amountTBillIn.toString());
 
   if (opt?.revertMessage) {
     await expect(
@@ -94,7 +94,7 @@ export const initiateRedemptionRequestTest = async (
   expect(request.user).eq(sender.address);
   expect(request.fee).eq(feeAmount);
   expect(request.tokenOut).eq(tokenOut);
-  expect(request.amountStUsdIn).eq(amountIn.sub(feeAmount));
+  expect(request.amountTBillIn).eq(amountIn.sub(feeAmount));
 
   expect(supplyAfter).eq(supplyBefore.sub(amountIn));
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
@@ -170,7 +170,7 @@ export const fulfillRedemptionRequestTest = (
       expect(request.user).eq(ethers.constants.AddressZero);
       expect(request.tokenOut).eq(ethers.constants.AddressZero);
       expect(request.fee).eq(0);
-      expect(request.amountStUsdIn).eq('0');
+      expect(request.amountTBillIn).eq('0');
 
       expect(balanceAfterStUsdUser).eq(balanceBeforeStUsdUser);
 
@@ -222,13 +222,13 @@ export const cancelRedemptionRequestTest = async (
   expect(request.user).eq(ethers.constants.AddressZero);
   expect(request.tokenOut).eq(ethers.constants.AddressZero);
   expect(request.fee).eq('0');
-  expect(request.amountStUsdIn).eq('0');
+  expect(request.amountTBillIn).eq('0');
 
   expect(supplyAfter).eq(
-    supplyBefore.add(requestBefore.amountStUsdIn.add(requestBefore.fee)),
+    supplyBefore.add(requestBefore.amountTBillIn.add(requestBefore.fee)),
   );
   expect(balanceAfterUser).eq(
-    balanceBeforeUser.add(requestBefore.amountStUsdIn.add(requestBefore.fee)),
+    balanceBeforeUser.add(requestBefore.amountTBillIn.add(requestBefore.fee)),
   );
 };
 
@@ -240,14 +240,14 @@ export const manualRedeemTest = (
     'manuallyRedeem(address,address,uint256,uint256)': async (
       user: Account,
       tokenOut: ERC20 | string,
-      amountStUsdIn: number,
+      amountTBillIn: number,
       amountUsdOut: number,
     ) => {
       const sender = opt?.from ?? owner;
 
       user = getAccount(user);
       tokenOut = getAccount(tokenOut);
-      const amountIn = parseUnits(amountStUsdIn.toString());
+      const amountIn = parseUnits(amountTBillIn.toString());
       const amountOut = parseUnits(amountUsdOut.toString());
 
       // eslint-disable-next-line camelcase
