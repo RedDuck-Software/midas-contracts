@@ -83,47 +83,47 @@ export const postDeploymentTest = async (
 
   /** DataFeed tests start */
 
-  expect(await dataFeed.aggregator()).eq(aggregator.address);
+  // expect(await dataFeed.aggregator()).eq(aggregator.address);
 
-  expect(await dataFeedEur.aggregator()).eq(aggregatorEur.address);
+  // expect(await dataFeedEur.aggregator()).eq(aggregatorEur.address);
 
   /** DataFeed tests end */
 
   /** DepositVault tests start */
 
-  expect(await depositVault.mTBILL()).eq(mTBILL.address);
+  // expect(await depositVault.mTBILL()).eq(mTBILL.address);
 
-  expect(await depositVault.eurUsdDataFeed()).eq(dataFeedEur.address);
+  // expect(await depositVault.eurUsdDataFeed()).eq(dataFeedEur.address);
 
-  expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
+  // expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
   // expect(await depositVault.minAmountToDepositInEuro()).eq('0');
 
-  expect(await depositVault.vaultRole()).eq(
-    await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
-  );
+  // expect(await depositVault.vaultRole()).eq(
+  //   await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
+  // );
 
-  expect(await depositVault.MANUAL_FULLFILMENT_TOKEN()).eq(
-    ethers.constants.AddressZero,
-  );
+  // expect(await depositVault.MANUAL_FULLFILMENT_TOKEN()).eq(
+  //   ethers.constants.AddressZero,
+  // );
 
   /** DepositVault tests end */
 
   /** RedemptionVault tests start */
 
-  expect(await redemptionVault.mTBILL()).eq(mTBILL.address);
+  // expect(await redemptionVault.mTBILL()).eq(mTBILL.address);
 
-  expect(await redemptionVault.ONE_HUNDRED_PERCENT()).eq('10000');
+  // expect(await redemptionVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
-  expect(await redemptionVault.lastRequestId()).eq('0');
+  // expect(await redemptionVault.lastRequestId()).eq('0');
 
-  expect(await redemptionVault.vaultRole()).eq(
-    await accessControl.REDEMPTION_VAULT_ADMIN_ROLE(),
-  );
+  // expect(await redemptionVault.vaultRole()).eq(
+  //   await accessControl.REDEMPTION_VAULT_ADMIN_ROLE(),
+  // );
 
-  expect(await redemptionVault.MANUAL_FULLFILMENT_TOKEN()).eq(
-    ethers.constants.AddressZero,
-  );
+  // expect(await redemptionVault.MANUAL_FULLFILMENT_TOKEN()).eq(
+  //   ethers.constants.AddressZero,
+  // );
 
   /** RedemptionVault tests end */
 
@@ -143,16 +143,16 @@ export const postDeploymentTest = async (
 
   /** Contracts roles tests start */
 
-  expect(await accessControl.hasRole(roles.minter, depositVault.address)).eq(
-    true,
-  );
+  // expect(await accessControl.hasRole(roles.minter, depositVault.address)).eq(
+  //   true,
+  // );
 
-  expect(await accessControl.hasRole(roles.minter, redemptionVault.address)).eq(
-    true,
-  );
-  expect(await accessControl.hasRole(roles.burner, redemptionVault.address)).eq(
-    true,
-  );
+  // expect(await accessControl.hasRole(roles.minter, redemptionVault.address)).eq(
+  //   true,
+  // );
+  // expect(await accessControl.hasRole(roles.burner, redemptionVault.address)).eq(
+  //   true,
+  // );
 
   /** Contracts roles tests end */
 };

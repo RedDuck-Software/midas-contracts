@@ -77,7 +77,7 @@ export const getBaseNetworkConfig = (
     : undefined,
   chainId: chainIds[network],
   gas: gases[network],
-  gasPrice: gasPrices[network],
+  gasPrice:'auto', //gasPrices[network],
   blockGasLimit: blockGasLimits[network],
   timeout: timeouts[network],
   initialBaseFeePerGas: initialBasesFeePerGas[network],

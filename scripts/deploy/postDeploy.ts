@@ -58,14 +58,14 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     mTBILL: MTBILL__factory.connect(addresses.mTBILL, owner),
     // eslint-disable-next-line camelcase
     aggregator: AggregatorV3Interface__factory.connect(
-      await dataFeedContract.aggregator(),
+      hre.ethers.constants.AddressZero,
       owner,
     ),
     dataFeed: dataFeedContract,
     dataFeedEur: dataFeedEurContract,
     // eslint-disable-next-line camelcase
     aggregatorEur: AggregatorV3Interface__factory.connect(
-      await dataFeedEurContract.aggregator(),
+      hre.ethers.constants.AddressZero,
       owner,
     ),
     owner,

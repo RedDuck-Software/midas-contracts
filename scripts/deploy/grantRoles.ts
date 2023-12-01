@@ -23,7 +23,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);
 
   if (!addresses) {
-    console.log('addresses', {addresses})
+    console.log('addresses', { addresses });
     return;
   }
 
