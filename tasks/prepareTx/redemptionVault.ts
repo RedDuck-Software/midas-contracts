@@ -63,7 +63,7 @@ task('prepareTx:redemptionVault:manuallyRedeem(address,address,uint256)')
   .addPositionalParam('tokenOut', undefined, undefined, types.string)
   .addPositionalParam('amountTBillIn', undefined, undefined, types.float)
   .setAction(async ({ user, tokenOut, amountTBillIn }, hre) => {
-    const amountStUsdInParsed = hre.ethers.utils.parseUnits(
+    const amountMTBillInParsed = hre.ethers.utils.parseUnits(
       amountTBillIn.toString(),
     );
 
@@ -71,7 +71,7 @@ task('prepareTx:redemptionVault:manuallyRedeem(address,address,uint256)')
 
     const populatedTx = await redemptionVaultContract.populateTransaction[
       'manuallyRedeem(address,address,uint256)'
-    ](user, tokenOut, amountStUsdInParsed);
+    ](user, tokenOut, amountMTBillInParsed);
 
     logPopulatedTx(populatedTx);
   });
@@ -85,7 +85,7 @@ task(
   .addPositionalParam('amountUsdOut', undefined, undefined, types.float)
 
   .setAction(async ({ user, tokenOut, amountTBillIn, amountUsdOut }, hre) => {
-    const amountStUsdInParsed = hre.ethers.utils.parseUnits(
+    const amountMTBillInParsed = hre.ethers.utils.parseUnits(
       amountTBillIn.toString(),
     );
     const amountUsdOutParsed = hre.ethers.utils.parseUnits(
@@ -96,7 +96,7 @@ task(
 
     const populatedTx = await redemptionVaultContract.populateTransaction[
       'manuallyRedeem(address,address,uint256,uint256)'
-    ](user, tokenOut, amountStUsdInParsed, amountUsdOutParsed);
+    ](user, tokenOut, amountMTBillInParsed, amountUsdOutParsed);
 
     logPopulatedTx(populatedTx);
   });

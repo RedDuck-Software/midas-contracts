@@ -69,7 +69,7 @@ mTBILL is backed 100% by U.S. T-Bills, which represent the 'risk-free' investmen
 
 Token can be minted/burned by the addresses that have roles `M_TBILL_MINT_OPERATOR_ROLE` and `M_TBILL_BURN_OPERATOR_ROLE` on [MidasAccessControl](./contracts/access/MidasAccessControl.sol) respectively. Currently, only project owner(s) and special Vault contracts will have those roles. 
 
-The purpose of having a burning role is to be able to make stUSDs redemptions manually (without user`s interaction with contracts).
+The purpose of having a burning role is to be able to make mTBILLs redemptions manually (without user`s interaction with contracts).
 
 mTBILL is an ERC20 token with a few extensions:
 1. ERC20Pausable - token`s transfers can be paused/unpaused by the project owner(s).

@@ -1493,13 +1493,13 @@ Emits an {Initialized} event the first time it is successfully executed._
 ### initialize
 
 ```solidity
-function initialize(address _accessControl, address _stUsd, address _tokensReceiver) external
+function initialize(address _accessControl, address _mTbill, address _tokensReceiver) external
 ```
 
 ### initializeWithoutInitializer
 
 ```solidity
-function initializeWithoutInitializer(address _accessControl, address _stUsd, address _tokensReceiver) external
+function initializeWithoutInitializer(address _accessControl, address _mTbill, address _tokensReceiver) external
 ```
 
 ### vaultRole
