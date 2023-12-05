@@ -11,7 +11,7 @@ import {
   cancelRedemptionRequestTest,
   fulfillRedemptionRequestTest,
   // getOutputAmountWithFeeRedeemTest,
-  initiateRedemptionRequestTest,
+  redeem,
   manualRedeemTest,
 } from './common/redemption-vault.helpers';
 
@@ -50,7 +50,7 @@ describe('RedemptionVault', function () {
       const { redemptionVault, regularAccounts, owner, mTBILL, stableCoins } =
         await loadFixture(defaultDeploy);
 
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         stableCoins.dai,
         0,
@@ -68,7 +68,7 @@ describe('RedemptionVault', function () {
         { accessControl, greenlistable: redemptionVault, owner },
         owner,
       );
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         stableCoins.dai,
         0,
@@ -91,7 +91,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         stableCoins.dai,
         0,
@@ -124,7 +124,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
       await mintToken(mTBILL, regularAccounts[0].address, 1);
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         manualFulfillmentToken,
         1,
@@ -151,7 +151,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
       await mintToken(mTBILL, owner, 1);
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         stableCoins.dai,
         1,
@@ -176,7 +176,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
       await mintToken(mTBILL, owner.address, 1);
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         manualFulfillmentToken,
         1,
@@ -230,7 +230,7 @@ describe('RedemptionVault', function () {
       );
       await mintToken(mTBILL, users.address, 1);
 
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         stableCoins.dai,
         1,
@@ -266,7 +266,7 @@ describe('RedemptionVault', function () {
       await mintToken(mTBILL, users.address, 1);
       await mintToken(stableCoins.dai, redemptionVault.address, 100);
 
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         stableCoins.dai,
         1,
@@ -299,7 +299,7 @@ describe('RedemptionVault', function () {
       );
       await mintToken(mTBILL, users.address, 1);
 
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         manualFulfillmentToken,
         1,
@@ -352,7 +352,7 @@ describe('RedemptionVault', function () {
       );
       await mintToken(mTBILL, users.address, 1);
 
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         stableCoins.dai,
         1,
@@ -383,7 +383,7 @@ describe('RedemptionVault', function () {
       );
       await mintToken(mTBILL, users.address, 1);
 
-      await initiateRedemptionRequestTest(
+      await redeem(
         { redemptionVault, owner, mTBILL },
         manualFulfillmentToken,
         1,

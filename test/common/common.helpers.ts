@@ -8,7 +8,7 @@ import {
   ERC20,
   ERC20Mock,
   MidasAccessControl,
-  mTBILL,
+  MTBILL,
 } from '../../typechain-types';
 
 export type OptionalCommonParams = {
@@ -45,7 +45,7 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
 };
 
 export const mintToken = async (
-  token: ERC20Mock | mTBILL,
+  token: ERC20Mock | MTBILL,
   to: AccountOrContract,
   amountN: number,
 ) => {
