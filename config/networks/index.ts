@@ -105,10 +105,6 @@ export const getForkNetworkConfig = (
   },
   live: false,
   saveDeployments: true,  
-  mining: { 
-    auto: false,
-    interval: 1000
-  },
   forking: {
     url: rpcUrls[network],
   },

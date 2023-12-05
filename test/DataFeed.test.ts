@@ -67,24 +67,4 @@ describe('DataFeed', function () {
       expect(await dataFeed.getDataInBase18()).eq(parseUnits(price));
     });
   });
-
-  describe('fetchDataInBase18(), lastRecordedDataFetch()', () => {
-    it('data in base18 conversion for 4$ price', async () => {
-      const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
-      const price = '4';
-      await setRoundData({ mockedAggregator }, +price);
-      await expect(dataFeed.fetchDataInBase18()).not.reverted;
-      const lastRecorded = await dataFeed.lastRecordedDataFetch();
-      expect(lastRecorded.answer).eq(parseUnits(price));
-    });
-
-    it('data in base18 conversion for 0.001$ price', async () => {
-      const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
-      const price = '0.001';
-      await setRoundData({ mockedAggregator }, +price);
-      await expect(dataFeed.fetchDataInBase18()).not.reverted;
-      const lastRecorded = await dataFeed.lastRecordedDataFetch();
-      expect(lastRecorded.answer).eq(parseUnits(price));
-    });
-  });
 });

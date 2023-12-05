@@ -7,8 +7,10 @@ import { ethers } from 'hardhat';
 import {
   ERC20,
   ERC20Mock,
+  ManageableVault,
   MidasAccessControl,
   MTBILL,
+  Pausable,
 } from '../../typechain-types';
 
 export type OptionalCommonParams = {
@@ -42,6 +44,39 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
   };
 
   return roles;
+};
+
+export const pauseVault = async (
+  vault: Pausable,
+  opt?: OptionalCommonParams,
+) => {
+  const [defaultSigner] = await ethers.getSigners();
+
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? defaultSigner).pause(),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(await vault.pause()).not.reverted;
+
+  expect(await vault.paused()).eq(true);
+};
+
+export const unpauseVault = async (vault: Pausable, opt?: OptionalCommonParams) => {
+  const [defaultSigner] = await ethers.getSigners();
+
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? defaultSigner).unpause(),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(await vault.unpause()).not.reverted;
+
+  expect(await vault.paused()).eq(false);
 };
 
 export const mintToken = async (
