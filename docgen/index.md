@@ -4,17 +4,6 @@
 
 Smart contract that handles mTBILL minting
 
-### DepositRequest
-
-```solidity
-struct DepositRequest {
-  address user;
-  address tokenIn;
-  uint256 amountUsdIn;
-  uint256 fee;
-}
-```
-
 ### minAmountToDepositInEuro
 
 ```solidity
@@ -39,25 +28,6 @@ mapping(address => uint256) totalDeposited
 
 _depositor address => amount deposited_
 
-### requests
-
-```solidity
-mapping(uint256 => struct DepositVault.DepositRequest) requests
-```
-
-stores requests id for deposit requests created by user
-deleted when request is fulfilled or cancelled by permissioned actor
-
-_requestId => DepositRequest_
-
-### lastRequestId
-
-```solidity
-struct Counters.Counter lastRequestId
-```
-
-last deposit request id
-
 ### isFreeFromMinDeposit
 
 ```solidity
@@ -69,7 +39,7 @@ users restricted from depositin minDepositAmountInEuro
 ### initialize
 
 ```solidity
-function initialize(address _ac, address _mTBILL, address _eurUsdDataFeed, uint256 _minAmountToDepositInEuro) external
+function initialize(address _ac, address _mTBILL, address _eurUsdDataFeed, uint256 _minAmountToDepositInEuro, address _usdReceiver) external
 ```
 
 upgradeable pattern contract`s initializer
@@ -82,11 +52,12 @@ upgradeable pattern contract`s initializer
 | _mTBILL | address | address of mTBILL token |
 | _eurUsdDataFeed | address | address of CL`s data feed EUR/USD |
 | _minAmountToDepositInEuro | uint256 | initial value for minAmountToDepositInEuro |
+| _usdReceiver | address |  |
 
-### initiateDepositRequest
+### deposit
 
 ```solidity
-function initiateDepositRequest(address tokenIn, uint256 amountUsdIn) external returns (uint256)
+function deposit(address tokenIn, uint256 amountUsdIn) external
 ```
 
 first step of the depositing proccess.
@@ -95,8 +66,8 @@ into the storage. Then request should be validated off-chain
 and fulfilled by the vault`s admin by calling the
 `fulfillDepositRequest`
 
-_transfers `tokenIn` from msg.sender
-and saves deposit request to the storage_
+_transfers `tokenIn` from `msg.sender`
+to `usdReceiver`_
 
 #### Parameters
 
@@ -104,70 +75,6 @@ and saves deposit request to the storage_
 | ---- | ---- | ----------- |
 | tokenIn | address | address of USD token in |
 | amountUsdIn | uint256 |  |
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 |  |
-
-### fulfillDepositRequest
-
-```solidity
-function fulfillDepositRequest(uint256 requestId, uint256 amountMTbillOut) external
-```
-
-second step of the depositing proccess.
-After deposit request was validated off-chain,
-admin calculates how much of mTBILL`s should be minted to the user.
-can be called only from permissioned actor.
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a deposit request |
-| amountMTbillOut | uint256 | amount of mTBILL to mint |
-
-### cancelDepositRequest
-
-```solidity
-function cancelDepositRequest(uint256 requestId) external
-```
-
-cancels the deposit request by a given `requestId`
-and transfers all the tokens locked for this request back
-to the user.
-can be called only from vault`s admin
-
-_reverts existing deposit request by a given `requestId`,
-deletes it from the storage and fires the event_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a deposit request |
-
-### manuallyDeposit
-
-```solidity
-function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountMTbillOut) external
-```
-
-wrapper over the mTBILL.mint() function.
-Mints `amountMTbillOut` to the `user` and emits the 
-event to be able to track this deposit off-chain.
-can be called only from vault`s admin
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| user | address | address of user |
-| tokenIn | address | address of inout USD token |
-| amountUsdIn | uint256 | amount of USD to deposit |
-| amountMTbillOut | uint256 | amount of mTBILL token to send to user |
 
 ### freeFromMinDeposit
 
@@ -207,20 +114,6 @@ function minAmountToDepositInUsd() public view returns (uint256)
 
 minAmountToDepositInEuro converted to USD in base18
 
-### getFee
-
-```solidity
-function getFee(address token) public view returns (uint256)
-```
-
-returns vault fee
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | fee fee |
-
 ### vaultRole
 
 ```solidity
@@ -234,23 +127,6 @@ AC role of vault administrator
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | [0] | bytes32 | role bytes32 role |
-
-### _fullfillDepositRequest
-
-```solidity
-function _fullfillDepositRequest(uint256 requestId, address user, uint256 amountMTbillOut) internal
-```
-
-_removes deposit request from the storage
-mints `amountMTbillOut` of mTBILL to user_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a deposit request |
-| user | address | user address |
-| amountMTbillOut | uint256 | amount of mTBILL that should be minted to user |
 
 ### _validateAmountUsdIn
 
@@ -267,77 +143,14 @@ _validates that inputted USD amount >= minAmountToDepositInUsd()_
 | user | address | user address |
 | amountUsdIn | uint256 | amount of USD |
 
-### _manuallyDeposit
-
-```solidity
-function _manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountMTbillOut) internal
-```
-
-_internal implementation of manuallyDeposit()
-mints `amountMTbillOut` amount of mTBILL to the `user`
-and fires the event_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| user | address | user address |
-| tokenIn | address | address of input USD token |
-| amountUsdIn | uint256 | amount of USD token taken from user |
-| amountMTbillOut | uint256 | amount of mTBILL token to mint to `user` |
-
-### _getRequest
-
-```solidity
-function _getRequest(uint256 requestId) internal view returns (struct DepositVault.DepositRequest request)
-```
-
-_checks that request is exists and copies it to the memory_
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| request | struct DepositVault.DepositRequest | request object |
-
 ## RedemptionVault
 
 Smart contract that handles mTBILL redemptions
 
-### RedemptionRequest
-
-```solidity
-struct RedemptionRequest {
-  address user;
-  address tokenOut;
-  uint256 amountTBillIn;
-  uint256 fee;
-}
-```
-
-### requests
-
-```solidity
-mapping(uint256 => struct RedemptionVault.RedemptionRequest) requests
-```
-
-stores requests id for redemption requests created by user
-deleted when request is fulfilled or cancelled by permissioned actor
-
-_requestId => RedemptionRequest_
-
-### lastRequestId
-
-```solidity
-struct Counters.Counter lastRequestId
-```
-
-counter for request ids
-
 ### initialize
 
 ```solidity
-function initialize(address _ac, address _mTBILL) external
+function initialize(address _ac, address _mTBILL, address _mTokenReceiver) external
 ```
 
 upgradeable pattern contract`s initializer
@@ -348,21 +161,20 @@ upgradeable pattern contract`s initializer
 | ---- | ---- | ----------- |
 | _ac | address | address of MidasAccessControll contract |
 | _mTBILL | address | address of mTBILL token |
+| _mTokenReceiver | address |  |
 
-### initiateRedemptionRequest
+### redeem
 
 ```solidity
-function initiateRedemptionRequest(address tokenOut, uint256 amountTBillIn) external returns (uint256 requestId)
+function redeem(address tokenOut, uint256 amountTBillIn) external
 ```
 
-first step of mTBILL redemption process
-Burns mTBILL from the user, and saves a redemption request
-into the storage. Then request should be validated off-chain
-and fulfilled by the vault`s admin by calling the
-`fulfillRedemptionRequest`
+Transfers mTBILL from the user to the admin.
+After that admin should validate the redeemption and transfer
+selected `tokenOut` back to user
 
-_burns 'amountTBillIn' amount from user
-and saves redemption request to the storage_
+_transfers 'amountTBillIn' amount from user
+to `tokensReceiver`_
 
 #### Parameters
 
@@ -370,89 +182,6 @@ and saves redemption request to the storage_
 | ---- | ---- | ----------- |
 | tokenOut | address | stable coin token address to redeem to |
 | amountTBillIn | uint256 | amount of mTBILL to redeem |
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of created request |
-
-### fulfillRedemptionRequest
-
-```solidity
-function fulfillRedemptionRequest(uint256 requestId, uint256 amountUsdOut) external
-```
-
-second step of the depositing proccess.
-After deposit request was validated off-chain,
-admin calculates how much of USD should be transferred to the user.
-can be called only from permissioned actor.
-
-_deletes request by a given `requestId` from storage,
-transfers `amountUsdOut` to user. USD token balance of the vault
-should be sufficient to make the transfer_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a redemption request |
-| amountUsdOut | uint256 | amount of USD token to transfer to user |
-
-### cancelRedemptionRequest
-
-```solidity
-function cancelRedemptionRequest(uint256 requestId) external
-```
-
-cancels redemption request by a given `requestId`
-and mints mTBILL back to the user. 
-can be called only from permissioned actor
-
-_deletes request by a given `requestId` from storage
-and fires the event_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a redemption request |
-
-### manuallyRedeem
-
-```solidity
-function manuallyRedeem(address user, address tokenOut, uint256 amountTBillIn, uint256 amountUsdOut) external
-```
-
-wrapper over the mTBILL.burn() function.
-Burns `amountTBillIn` from the `user` and emits the 
-event to be able to track this redemption off-chain.
-can be called only from vault`s admin
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| user | address | address of user |
-| tokenOut | address | address of output USD token |
-| amountTBillIn | uint256 | amount of mTBILL to redeem |
-| amountUsdOut | uint256 | amount of USD token to send to user |
-
-### getFee
-
-```solidity
-function getFee(address token) public view returns (uint256)
-```
-
-returns redemption fee
-
-_fee applies to inputted mTBILL amount_
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | fee fee percentage multiplied by 100 |
 
 ### vaultRole
 
@@ -467,55 +196,6 @@ AC role of vault administrator
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | [0] | bytes32 | role bytes32 role |
-
-### _getRequest
-
-```solidity
-function _getRequest(uint256 requestId) internal view returns (struct RedemptionVault.RedemptionRequest request)
-```
-
-_checks that request is exists and copies it to memory_
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| request | struct RedemptionVault.RedemptionRequest | request object |
-
-### _fulfillRedemptionRequest
-
-```solidity
-function _fulfillRedemptionRequest(struct RedemptionVault.RedemptionRequest request, uint256 requestId, uint256 amountUsdOut) internal
-```
-
-_deletes request from storage, transfers USD token to user
-and emits the event_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| request | struct RedemptionVault.RedemptionRequest | request object |
-| requestId | uint256 | id of the request object |
-| amountUsdOut | uint256 | amount of USD token to transfer to user |
-
-### _manuallyRedeem
-
-```solidity
-function _manuallyRedeem(address user, address tokenOut, uint256 amountTBillIn, uint256 amountUsdOut) internal
-```
-
-_burn `amountTBillIn` amount of mTBILL from `user`
-and transfers `amountUsdOut` amount of `tokenOut` to `user`_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| user | address | user address |
-| tokenOut | address | address of output USD token |
-| amountTBillIn | uint256 | amount of mTBILL token to burn from `user` |
-| amountUsdOut | uint256 | amount of USD token to transfer to `user` |
 
 ### _requireTokenExists
 
@@ -561,6 +241,14 @@ contract IMTbill mTBILL
 
 mTBILL token
 
+### tokensReceiver
+
+```solidity
+address tokensReceiver
+```
+
+address to which USD and mTokens will be sent
+
 ### _paymentTokens
 
 ```solidity
@@ -588,7 +276,7 @@ _checks that msg.sender do have a vaultRole() role_
 ### __ManageableVault_init
 
 ```solidity
-function __ManageableVault_init(address _ac, address _mTBILL) internal
+function __ManageableVault_init(address _ac, address _mTBILL, address _tokensReceiver) internal
 ```
 
 _upgradeable pattern contract`s initializer_
@@ -599,6 +287,7 @@ _upgradeable pattern contract`s initializer_
 | ---- | ---- | ----------- |
 | _ac | address | address of MidasAccessControll contract |
 | _mTBILL | address | address of mTBILL token |
+| _tokensReceiver | address |  |
 
 ### withdrawToken
 
@@ -606,7 +295,7 @@ _upgradeable pattern contract`s initializer_
 function withdrawToken(address token, uint256 amount, address withdrawTo) external
 ```
 
-withdraws `amoount` of a given `token` from the contract.
+withdraws `amount` of a given `token` from the contract.
 can be called only from permissioned actor.
 
 #### Parameters
@@ -650,24 +339,6 @@ _reverts if token is not presented_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | token | address | token address |
-
-### setFee
-
-```solidity
-function setFee(address token, uint256 newFee) external
-```
-
-sets new `_fee` value
-can be called only from permissioned actor.
-
-_reverts is token is not presented_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| token | address |  |
-| newFee | uint256 | token address |
 
 ### getPaymentTokens
 
@@ -718,25 +389,9 @@ AC role of vault`s pauser
 function _tokenTransferFrom(address user, address token, uint256 amount) internal
 ```
 
-_do safe transfer from on a given token
-and converts amount from base18 to amount for a given token_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| user | address | user address |
-| token | address | address of token |
-| amount | uint256 | amount of `token` to transfer to `user` |
-
-### _transferToken
-
-```solidity
-function _transferToken(address user, address token, uint256 amount) internal
-```
-
-_do safe transfer on a given token. Doesnt perform transfer if
-token is `MANUAL_FULLFILMENT_TOKEN` as it should be transferred off-chain_
+_do safeTransferFrom on a given token
+and converts `amount` from base18
+to amount with a correct precision_
 
 #### Parameters
 
@@ -783,7 +438,7 @@ _checks that `token` is presented in `_paymentTokens`_
 ## MidasInitializable
 
 Base Initializable contract that implements constructor
-that calls _disableInitializers() to prevent 
+that calls _disableInitializers() to prevent
 initialization of implementation contract
 
 ### constructor
@@ -977,14 +632,6 @@ actor that is blacklisted
 Base contract that implements basic functions and modifiers
 with pause functionality
 
-### pausable
-
-```solidity
-modifier pausable()
-```
-
-_checks if contract is on pause_
-
 ### onlyPauseAdmin
 
 ```solidity
@@ -1008,27 +655,17 @@ _upgradeable pattern contract`s initializer_
 | ---- | ---- | ----------- |
 | _accessControl | address | MidasAccessControl contract address |
 
-### changePauseState
+### pause
 
 ```solidity
-function changePauseState(bool newState) public
+function pause() external
 ```
 
-_upgradeable pattern contract`s initializer_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| newState | bool | is new pause state |
-
-### getIsOnPause
+### unpause
 
 ```solidity
-function getIsOnPause() external view returns (bool)
+function unpause() external
 ```
-
-_returns isOnPause property_
 
 ### pauseAdminRole
 
@@ -1037,15 +674,6 @@ function pauseAdminRole() public view virtual returns (bytes32)
 ```
 
 _virtual function to determine pauseAdmin role_
-
-### _pausable
-
-```solidity
-function _pausable() internal view
-```
-
-_checks if user has pauseAdmin role and if not,
-requires to be unpaused_
 
 ## WithMidasAccessControl
 
@@ -1148,20 +776,6 @@ updates `aggregator` address
 | ---- | ---- | ----------- |
 | _aggregator | address | new AggregatorV3Interface contract address |
 
-### fetchDataInBase18
-
-```solidity
-function fetchDataInBase18() external returns (uint256 answer)
-```
-
-saves latest aggregator answer to storage and returns it
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| answer | uint256 | fetched aggregator answer |
-
 ### getDataInBase18
 
 ```solidity
@@ -1177,31 +791,7 @@ and converts it to the base18 precision
 | ---- | ---- | ----------- |
 | answer | uint256 | fetched aggregator answer |
 
-### lastRecordedDataFetch
-
-```solidity
-function lastRecordedDataFetch() external view returns (struct IDataFeed.RecordedDataFetch)
-```
-
-returns last data saved via fetchDataInBase18()
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | struct IDataFeed.RecordedDataFetch | answer stored fetch object |
-
 ## IDataFeed
-
-### RecordedDataFetch
-
-```solidity
-struct RecordedDataFetch {
-  uint80 roundId;
-  uint256 answer;
-  uint256 timestamp;
-}
-```
 
 ### initialize
 
@@ -1232,20 +822,6 @@ updates `aggregator` address
 | ---- | ---- | ----------- |
 | _aggregator | address | new AggregatorV3Interface contract address |
 
-### fetchDataInBase18
-
-```solidity
-function fetchDataInBase18() external returns (uint256 answer)
-```
-
-saves latest aggregator answer to storage and returns it
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| answer | uint256 | fetched aggregator answer |
-
 ### getDataInBase18
 
 ```solidity
@@ -1261,20 +837,6 @@ and converts it to the base18 precision
 | ---- | ---- | ----------- |
 | answer | uint256 | fetched aggregator answer |
 
-### lastRecordedDataFetch
-
-```solidity
-function lastRecordedDataFetch() external view returns (struct IDataFeed.RecordedDataFetch)
-```
-
-returns last data saved via fetchDataInBase18()
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | struct IDataFeed.RecordedDataFetch | answer stored fetch object |
-
 ## IDepositVault
 
 ### SetMinAmountToDeposit
@@ -1283,10 +845,22 @@ returns last data saved via fetchDataInBase18()
 event SetMinAmountToDeposit(address caller, uint256 newValue)
 ```
 
-### initiateDepositRequest
+### Deposit
 
 ```solidity
-function initiateDepositRequest(address tokenIn, uint256 amountIn) external returns (uint256 amountOut)
+event Deposit(address user, address usdTokenIn, uint256 amount)
+```
+
+### FreeFromMinDeposit
+
+```solidity
+event FreeFromMinDeposit(address user)
+```
+
+### deposit
+
+```solidity
+function deposit(address tokenIn, uint256 amountIn) external
 ```
 
 first step of the depositing proccess.
@@ -1301,67 +875,6 @@ and fulfilled by the vault`s admin by calling the
 | ---- | ---- | ----------- |
 | tokenIn | address | address of USD token in |
 | amountIn | uint256 | amount of `tokenIn` that will be taken from user |
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| amountOut | uint256 | amount of mTBILL that minted to user |
-
-### fulfillDepositRequest
-
-```solidity
-function fulfillDepositRequest(uint256 requestId, uint256 amountMTbillOut) external
-```
-
-second step of the depositing proccess.
-After deposit request was validated off-chain,
-admin calculates how much of mTBILL`s should be minted to the user.
-can be called only from permissioned actor.
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a deposit request |
-| amountMTbillOut | uint256 | amount of mTBILL to mint |
-
-### cancelDepositRequest
-
-```solidity
-function cancelDepositRequest(uint256 requestId) external
-```
-
-cancels the deposit request by a given `requestId`
-and transfers all the tokens locked for this request back
-to the user.
-can be called only from vault`s admin
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a deposit request |
-
-### manuallyDeposit
-
-```solidity
-function manuallyDeposit(address user, address tokenIn, uint256 amountUsdIn, uint256 amountMTbillOut) external
-```
-
-wrapper over the mTBILL.mint() function.
-Mints `amountMTbillOut` to the `user` and emits the 
-event to be able to track this deposit off-chain.
-can be called only from vault`s admin
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| user | address | address of user |
-| tokenIn | address | address of inout USD token |
-| amountUsdIn | uint256 | amount of USD to deposit |
-| amountMTbillOut | uint256 | amount of mTBILL token to send to user |
 
 ### freeFromMinDeposit
 
@@ -1392,234 +905,6 @@ can be called only from vault`s admin
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | newValue | uint256 | new min. deposit value |
-
-## IManageableVault
-
-### WithdrawToken
-
-```solidity
-event WithdrawToken(address caller, address token, address withdrawTo, uint256 amount)
-```
-
-### AddPaymentToken
-
-```solidity
-event AddPaymentToken(address token, address caller)
-```
-
-### RemovePaymentToken
-
-```solidity
-event RemovePaymentToken(address token, address caller)
-```
-
-### SetFee
-
-```solidity
-event SetFee(address caller, address token, uint256 newFee)
-```
-
-### InitiateRequest
-
-```solidity
-event InitiateRequest(uint256 requestId, address user, address token, uint256 amount)
-```
-
-### FulfillRequest
-
-```solidity
-event FulfillRequest(address caller, uint256 requestId, uint256 amountOut)
-```
-
-### CancelRequest
-
-```solidity
-event CancelRequest(uint256 requestId)
-```
-
-### PerformManualAction
-
-```solidity
-event PerformManualAction(address caller, address user, address token, uint256 amountStUsd, uint256 amountUsd)
-```
-
-### FeeCollected
-
-```solidity
-event FeeCollected(uint256 requestId, address user, uint256 feeAmount)
-```
-
-### withdrawToken
-
-```solidity
-function withdrawToken(address token, uint256 amount, address withdrawTo) external
-```
-
-withdraws `amount` of a given `token` from the contract.
-can be called only from permissioned actor.
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| token | address | token address |
-| amount | uint256 | token amount |
-| withdrawTo | address | withdraw destination address |
-
-### addPaymentToken
-
-```solidity
-function addPaymentToken(address token) external
-```
-
-adds a token to the stablecoins list.
-can be called only from permissioned actor.
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| token | address | token address |
-
-### removePaymentToken
-
-```solidity
-function removePaymentToken(address token) external
-```
-
-removes a token from stablecoins list.
-can be called only from permissioned actor.
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| token | address | token address |
-
-### setFee
-
-```solidity
-function setFee(address token, uint256 newFee) external
-```
-
-sets new `_fee` value
-can be called only from permissioned actor.
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| token | address |  |
-| newFee | uint256 | token address |
-
-### getFee
-
-```solidity
-function getFee(address token) external view returns (uint256)
-```
-
-returns vault fee
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | fee fee |
-
-## IPausable
-
-### ChangeState
-
-```solidity
-event ChangeState(bool newState)
-```
-
-## IRedemptionVault
-
-### SetMinAmountToRedeem
-
-```solidity
-event SetMinAmountToRedeem(address caller, uint256 newValue)
-```
-
-### initiateRedemptionRequest
-
-```solidity
-function initiateRedemptionRequest(address tokenOut, uint256 amountTBillIn) external returns (uint256 requestId)
-```
-
-first step of mTBILL redemption process
-Burns mTBILL from the user, and saves a redemption request
-into the storage. Then request should be validated off-chain
-and fulfilled by the vault`s admin by calling the
-`fulfillRedemptionRequest`
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| tokenOut | address | stable coin token address to redeem to |
-| amountTBillIn | uint256 | amount of mTBILL to redeem |
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of created request |
-
-### fulfillRedemptionRequest
-
-```solidity
-function fulfillRedemptionRequest(uint256 requestId, uint256 amountUsdOut) external
-```
-
-second step of the depositing proccess.
-After deposit request was validated off-chain,
-admin calculates how much of USD should be transferred to the user.
-can be called only from permissioned actor.
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a redemption request |
-| amountUsdOut | uint256 | amount of USD token to transfer to user |
-
-### cancelRedemptionRequest
-
-```solidity
-function cancelRedemptionRequest(uint256 requestId) external
-```
-
-cancels redemption request by a given `requestId`
-and mints mTBILL back to the user. 
-can be called only from permissioned actor
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| requestId | uint256 | id of a redemption request |
-
-### manuallyRedeem
-
-```solidity
-function manuallyRedeem(address user, address tokenOut, uint256 amountTBillIn, uint256 amountUsdOut) external
-```
-
-wrapper over the mTBILL.burn() function.
-Burns `amountTBillIn` from the `user` and emits the 
-event to be able to track this redemption off-chain.
-can be called only from vault`s admin
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| user | address | address of user |
-| tokenOut | address | address of output USD token |
-| amountTBillIn | uint256 | amount of mTBILL to redeem |
-| amountUsdOut | uint256 | amount of USD token to send to user |
 
 ## IMTbill
 
@@ -1689,6 +974,112 @@ function unpause() external
 puts mTBILL token on pause.
 should be called only from permissioned actor
 
+## IManageableVault
+
+### WithdrawToken
+
+```solidity
+event WithdrawToken(address caller, address token, address withdrawTo, uint256 amount)
+```
+
+### AddPaymentToken
+
+```solidity
+event AddPaymentToken(address token, address caller)
+```
+
+### RemovePaymentToken
+
+```solidity
+event RemovePaymentToken(address token, address caller)
+```
+
+### SetFee
+
+```solidity
+event SetFee(address caller, address token, uint256 newFee)
+```
+
+### withdrawToken
+
+```solidity
+function withdrawToken(address token, uint256 amount, address withdrawTo) external
+```
+
+withdraws `amount` of a given `token` from the contract.
+can be called only from permissioned actor.
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | token address |
+| amount | uint256 | token amount |
+| withdrawTo | address | withdraw destination address |
+
+### addPaymentToken
+
+```solidity
+function addPaymentToken(address token) external
+```
+
+adds a token to the stablecoins list.
+can be called only from permissioned actor.
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | token address |
+
+### removePaymentToken
+
+```solidity
+function removePaymentToken(address token) external
+```
+
+removes a token from stablecoins list.
+can be called only from permissioned actor.
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | token address |
+
+## IPausable
+
+### ChangeState
+
+```solidity
+event ChangeState(bool newState)
+```
+
+## IRedemptionVault
+
+### Redeem
+
+```solidity
+event Redeem(address user, address usdTokenOut, uint256 amount)
+```
+
+### redeem
+
+```solidity
+function redeem(address tokenOut, uint256 amountTBillIn) external
+```
+
+Transfers mTBILL from the user to the admin.
+After that admin should validate the redeemption and transfer
+selected `tokenOut` back to user
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| tokenOut | address | stable coin token address to redeem to |
+| amountTBillIn | uint256 | amount of mTBILL to redeem |
+
 ## DecimalsCorrectionLibrary
 
 ### convert
@@ -1757,6 +1148,121 @@ amount with decimals 18_
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | [0] | uint256 | amount converted amount with 18 decimals |
+
+## mTBILL
+
+### TERMS_URL_METADATA_KEY
+
+```solidity
+bytes32 TERMS_URL_METADATA_KEY
+```
+
+default terms url metadata encoded key
+
+### DESCRIPTION_URL_METADATA_KEY
+
+```solidity
+bytes32 DESCRIPTION_URL_METADATA_KEY
+```
+
+default encoded key for description url metadata
+
+### metadata
+
+```solidity
+mapping(bytes32 => bytes) metadata
+```
+
+metadata key => metadata value
+
+### initialize
+
+```solidity
+function initialize(address _accessControl) external
+```
+
+upgradeable pattern contract`s initializer
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| _accessControl | address | address of MidasAccessControll contract |
+
+### mint
+
+```solidity
+function mint(address to, uint256 amount) external
+```
+
+mints mTBILL token `amount` to a given `to` address.
+should be called only from permissioned actor
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| to | address | addres to mint tokens to |
+| amount | uint256 | amount to mint |
+
+### burn
+
+```solidity
+function burn(address from, uint256 amount) external
+```
+
+burns mTBILL token `amount` to a given `to` address.
+should be called only from permissioned actor
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| from | address | addres to burn tokens from |
+| amount | uint256 | amount to burn |
+
+### pause
+
+```solidity
+function pause() external
+```
+
+puts mTBILL token on pause.
+should be called only from permissioned actor
+
+### unpause
+
+```solidity
+function unpause() external
+```
+
+puts mTBILL token on pause.
+should be called only from permissioned actor
+
+### setMetadata
+
+```solidity
+function setMetadata(bytes32 key, bytes data) external
+```
+
+updates contract`s metadata.
+should be called only from permissioned actor
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| key | bytes32 | metadata map. key |
+| data | bytes | metadata map. value |
+
+### _beforeTokenTransfer
+
+```solidity
+function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual
+```
+
+_overrides _beforeTokenTransfer function to ban
+blaclisted users from using the token functions_
 
 ## AggregatorV3Mock
 
@@ -1871,121 +1377,6 @@ overridden;
 NOTE: This information is only used for _display_ purposes: it in
 no way affects any of the arithmetic of the contract, including
 {IERC20-balanceOf} and {IERC20-transfer}._
-
-## mTBILL
-
-### TERMS_URL_METADATA_KEY
-
-```solidity
-bytes32 TERMS_URL_METADATA_KEY
-```
-
-default terms url metadata encoded key
-
-### DESCRIPTION_URL_METADATA_KEY
-
-```solidity
-bytes32 DESCRIPTION_URL_METADATA_KEY
-```
-
-default encoded key for description url metadata
-
-### metadata
-
-```solidity
-mapping(bytes32 => bytes) metadata
-```
-
-metadata key => metadata value
-
-### initialize
-
-```solidity
-function initialize(address _accessControl) external
-```
-
-upgradeable pattern contract`s initializer
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _accessControl | address | address of MidasAccessControll contract |
-
-### mint
-
-```solidity
-function mint(address to, uint256 amount) external
-```
-
-mints mTBILL token `amount` to a given `to` address.
-should be called only from permissioned actor
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| to | address | addres to mint tokens to |
-| amount | uint256 | amount to mint |
-
-### burn
-
-```solidity
-function burn(address from, uint256 amount) external
-```
-
-burns mTBILL token `amount` to a given `to` address.
-should be called only from permissioned actor
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| from | address | addres to burn tokens from |
-| amount | uint256 | amount to burn |
-
-### pause
-
-```solidity
-function pause() external
-```
-
-puts mTBILL token on pause.
-should be called only from permissioned actor
-
-### unpause
-
-```solidity
-function unpause() external
-```
-
-puts mTBILL token on pause.
-should be called only from permissioned actor
-
-### setMetadata
-
-```solidity
-function setMetadata(bytes32 key, bytes data) external
-```
-
-updates contract`s metadata.
-should be called only from permissioned actor
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| key | bytes32 | metadata map. key |
-| data | bytes | metadata map. value |
-
-### _beforeTokenTransfer
-
-```solidity
-function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual
-```
-
-_overrrides _beforeTokenTransfer function to ban
-blaclisted users from using the token functions_
 
 ## BlacklistableTester
 
@@ -2102,13 +1493,13 @@ Emits an {Initialized} event the first time it is successfully executed._
 ### initialize
 
 ```solidity
-function initialize(address _accessControl, address _stUsd) external
+function initialize(address _accessControl, address _stUsd, address _tokensReceiver) external
 ```
 
 ### initializeWithoutInitializer
 
 ```solidity
-function initializeWithoutInitializer(address _accessControl, address _stUsd) external
+function initializeWithoutInitializer(address _accessControl, address _stUsd, address _tokensReceiver) external
 ```
 
 ### vaultRole
@@ -2124,12 +1515,6 @@ AC role of vault administrator
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | [0] | bytes32 | role bytes32 role |
-
-### getFee
-
-```solidity
-function getFee(address) external view returns (uint256)
-```
 
 ## MidasAccessControlTest
 
