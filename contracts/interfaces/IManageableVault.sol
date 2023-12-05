@@ -19,35 +19,6 @@ interface IManageableVault {
 
     event SetFee(address indexed caller, address indexed token, uint256 newFee);
 
-    event InitiateRequest(
-        uint256 indexed requestId,
-        address indexed user,
-        address indexed token,
-        uint256 amount
-    );
-
-    event FulfillRequest(
-        address indexed caller,
-        uint256 indexed requestId,
-        uint256 amountOut
-    );
-
-    event CancelRequest(uint256 indexed requestId);
-
-    event PerformManualAction(
-        address indexed caller,
-        address indexed user,
-        address indexed token,
-        uint256 amountStUsd,
-        uint256 amountUsd
-    );
-
-    event FeeCollected(
-        uint256 indexed requestId,
-        address indexed user,
-        uint256 feeAmount
-    );
-
     /**
      * @notice withdraws `amount` of a given `token` from the contract.
      * can be called only from permissioned actor.
@@ -74,17 +45,4 @@ interface IManageableVault {
      * @param token token address
      */
     function removePaymentToken(address token) external;
-
-    /**
-     * @notice sets new `_fee` value
-     * can be called only from permissioned actor.
-     * @param newFee token address
-     */
-    function setFee(address token, uint256 newFee) external;
-
-    /**
-     * @notice returns vault fee
-     * @return fee fee
-     */
-    function getFee(address token) external view returns (uint256);
 }

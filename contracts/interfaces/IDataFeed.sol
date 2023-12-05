@@ -12,12 +12,6 @@ import "../libraries/DecimalsCorrectionLibrary.sol";
  * @author RedDuck Software
  */
 interface IDataFeed {
-    struct RecordedDataFetch {
-        uint80 roundId;
-        uint256 answer;
-        uint256 timestamp;
-    }
-
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac MidasAccessControl contract address
@@ -32,24 +26,9 @@ interface IDataFeed {
     function changeAggregator(address _aggregator) external;
 
     /**
-     * @notice saves latest aggregator answer to storage and returns it
-     * @return answer fetched aggregator answer
-     */
-    function fetchDataInBase18() external returns (uint256 answer);
-
-    /**
      * @notice fetches answer from aggregator
      * and converts it to the base18 precision
      * @return answer fetched aggregator answer
      */
     function getDataInBase18() external view returns (uint256 answer);
-
-    /**
-     * @notice returns last data saved via fetchDataInBase18()
-     * @return answer stored fetch object
-     */
-    function lastRecordedDataFetch()
-        external
-        view
-        returns (RecordedDataFetch memory);
 }

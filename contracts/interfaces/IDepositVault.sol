@@ -10,6 +10,14 @@ import "./IManageableVault.sol";
 interface IDepositVault is IManageableVault {
     event SetMinAmountToDeposit(address indexed caller, uint256 newValue);
 
+    event Deposit(
+        address indexed user,
+        address indexed usdTokenIn,
+        uint256 amount
+    );
+
+    event FreeFromMinDeposit(address indexed user);
+
     /**
      * @notice first step of the depositing proccess.
      * Transfers stablecoin from the user and saves the deposit request
@@ -18,48 +26,8 @@ interface IDepositVault is IManageableVault {
      * `fulfillDepositRequest`
      * @param tokenIn address of USD token in
      * @param amountIn amount of `tokenIn` that will be taken from user
-     * @return amountOut amount of mTBILL that minted to user
      */
-    function initiateDepositRequest(address tokenIn, uint256 amountIn)
-        external
-        returns (uint256 amountOut);
-
-    /**
-     * @notice second step of the depositing proccess.
-     * After deposit request was validated off-chain,
-     * admin calculates how much of mTBILL`s should be minted to the user.
-     * can be called only from permissioned actor.
-     * @param requestId id of a deposit request
-     * @param amountMTbillOut amount of mTBILL to mint
-     */
-    function fulfillDepositRequest(uint256 requestId, uint256 amountMTbillOut)
-        external;
-
-    /**
-     * @notice cancels the deposit request by a given `requestId`
-     * and transfers all the tokens locked for this request back
-     * to the user.
-     * can be called only from vault`s admin
-     * @param requestId id of a deposit request
-     */
-    function cancelDepositRequest(uint256 requestId) external;
-
-    /**
-     * @notice wrapper over the mTBILL.mint() function.
-     * Mints `amountMTbillOut` to the `user` and emits the
-     * event to be able to track this deposit off-chain.
-     * can be called only from vault`s admin
-     * @param user address of user
-     * @param tokenIn address of inout USD token
-     * @param amountUsdIn amount of USD to deposit
-     * @param amountMTbillOut amount of mTBILL token to send to user
-     */
-    function manuallyDeposit(
-        address user,
-        address tokenIn,
-        uint256 amountUsdIn,
-        uint256 amountMTbillOut
-    ) external;
+    function deposit(address tokenIn, uint256 amountIn) external;
 
     /**
      * @notice frees given `user` from the minimal deposit

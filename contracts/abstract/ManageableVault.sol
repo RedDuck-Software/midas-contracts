@@ -42,6 +42,11 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     IMTbill public mTBILL;
 
     /**
+     * @notice address to which USD and mTokens will be sent
+     */
+    address public tokensReceiver;
+
+    /**
      * @dev tokens that can be used as USD representation
      */
     EnumerableSet.AddressSet internal _paymentTokens;
@@ -65,13 +70,16 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
      * @param _mTBILL address of mTBILL token
      */
     // solhint-disable func-name-mixedcase
-    function __ManageableVault_init(address _ac, address _mTBILL)
-        internal
-        onlyInitializing
-    {
+    function __ManageableVault_init(
+        address _ac,
+        address _mTBILL,
+        address _tokensReceiver
+    ) internal onlyInitializing {
         mTBILL = IMTbill(_mTBILL);
         __Greenlistable_init(_ac);
         __Pausable_init(_ac);
+
+        tokensReceiver = _tokensReceiver;
     }
 
     /**
@@ -110,20 +118,6 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     }
 
     /**
-     * @inheritdoc IManageableVault
-     * @dev reverts if token is not presented
-     */
-    function setFee(address token, uint256 newFee) external onlyVaultAdmin {
-        _requireTokenExists(token);
-
-        require(newFee <= ONE_HUNDRED_PERCENT, "MV: fee exceeds limit");
-
-        _feesForTokens[token] = newFee;
-
-        emit SetFee(msg.sender, token, newFee);
-    }
-
-    /**
      * @notice returns array of stablecoins supported by the vault
      * can be called only from permissioned actor.
      * @return paymentTokens array of payment tokens
@@ -159,33 +153,9 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
         address token,
         uint256 amount
     ) internal {
-        // MANUAL_FULLFILMENT_TOKEN should be transferred off-chain
-        if (token == MANUAL_FULLFILMENT_TOKEN) return;
-
         IERC20(token).safeTransferFrom(
             user,
-            address(this),
-            amount.convertFromBase18(_tokenDecimals(token))
-        );
-    }
-
-    /**
-     * @dev do safeTransfer on a given token. Doesnt perform transfer if
-     * token is `MANUAL_FULLFILMENT_TOKEN` as it should be transferred off-chain
-     * @param user user address
-     * @param token address of token
-     * @param amount amount of `token` to transfer to `user`
-     */
-    function _transferToken(
-        address user,
-        address token,
-        uint256 amount
-    ) internal {
-        // MANUAL_FULLFILMENT_TOKEN should be transferred off-chain
-        if (token == MANUAL_FULLFILMENT_TOKEN) return;
-
-        IERC20(token).safeTransfer(
-            user,
+            tokensReceiver,
             amount.convertFromBase18(_tokenDecimals(token))
         );
     }
