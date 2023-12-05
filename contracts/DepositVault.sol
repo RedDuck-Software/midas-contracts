@@ -27,11 +27,17 @@ contract DepositVault is ManageableVault, IDepositVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
+    using Counters for Counters.Counter;
 
     /**
      * @notice minimal USD amount in EUR for first user`s deposit
      */
     uint256 public minAmountToDepositInEuro;
+
+    /**
+     * @notice last deposit request id
+     */
+    Counters.Counter public lastRequestId;
 
     /**
      * @notice EUR/USD data feed
@@ -85,6 +91,9 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         _requireTokenExists(tokenIn);
 
+        lastRequestId.increment();
+        uint256 requestId = lastRequestId.current();
+
         if (!isFreeFromMinDeposit[user]) {
             _validateAmountUsdIn(user, amountUsdIn);
         }
@@ -93,7 +102,12 @@ contract DepositVault is ManageableVault, IDepositVault {
         totalDeposited[user] += amountUsdIn;
         _tokenTransferFrom(user, tokenIn, amountUsdIn);
 
-        emit Deposit(user, tokenIn, amountUsdIn);
+        emit Deposit(requestId, user, tokenIn, amountUsdIn);
+    }
+
+    function fulfillDeposit(uint256 requestId) external onlyVaultAdmin {
+        // TODO: something else?)
+        emit Fulfill(requestId);
     }
 
     /**

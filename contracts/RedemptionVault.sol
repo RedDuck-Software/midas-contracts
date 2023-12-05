@@ -27,6 +27,12 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
+    using Counters for Counters.Counter;
+
+    /**
+     * @notice last deposit request id
+     */
+    Counters.Counter public lastRequestId;
 
     /**
      * @dev leaving a storage gap for futures updates
@@ -59,10 +65,18 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         address user = msg.sender;
 
+        lastRequestId.increment();
+        uint256 requestId = lastRequestId.current();
+
         _requireTokenExists(tokenOut);
         _tokenTransferFrom(user, address(mTBILL), amountTBillIn);
 
-        emit Redeem(user, tokenOut, amountTBillIn);
+        emit Redeem(requestId, user, tokenOut, amountTBillIn);
+    }
+
+    function fulfillRedeem(uint256 requestId) external onlyVaultAdmin {
+        // TODO: something else?)
+        emit Fulfill(requestId);
     }
 
     /**

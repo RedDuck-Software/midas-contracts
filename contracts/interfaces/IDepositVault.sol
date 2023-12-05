@@ -11,10 +11,13 @@ interface IDepositVault is IManageableVault {
     event SetMinAmountToDeposit(address indexed caller, uint256 newValue);
 
     event Deposit(
+        uint256 indexed id,
         address indexed user,
         address indexed usdTokenIn,
         uint256 amount
     );
+
+    event Fulfill(uint256 indexed id);
 
     event FreeFromMinDeposit(address indexed user);
 

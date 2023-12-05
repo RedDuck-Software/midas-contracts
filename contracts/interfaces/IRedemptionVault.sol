@@ -9,10 +9,13 @@ import "./IManageableVault.sol";
  */
 interface IRedemptionVault is IManageableVault {
     event Redeem(
+        uint256 indexed id,
         address indexed user,
         address indexed usdTokenOut,
         uint256 amount
     );
+
+    event Fulfill(uint256 indexed id);
 
     /**
      * @notice Transfers mTBILL from the user to the admin.
