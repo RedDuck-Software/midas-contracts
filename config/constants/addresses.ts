@@ -9,10 +9,14 @@ export interface MidasAddresses {
   etfDataFeed: string;
   eurToUsdFeed: string;
   accessControl: string;
+  tokensReceiver: string;
 }
 
-export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefined> = {
+export const midasAddressesPerNetwork: ConfigPerNetwork<
+  MidasAddresses | undefined
+> = {
   main: {
+    tokensReceiver: '',
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
     depositVault: '',
     etfDataFeed: '',
@@ -21,6 +25,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
     mTBILL: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
   },
   sepolia: {
+    tokensReceiver: '',
     depositVault: '0xc2c78dcb340935509634B343840fAa5052367f29',
     redemptionVault: '0xbCe90740A9C6B59FC1D45fdc0e1F3b6C795c85dC',
     mTBILL: '0xDd82C21F721746Bd77D84E8B05EdDED0f8e50980',
@@ -30,6 +35,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
   },
   hardhat: undefined,
   localhost: {
+    tokensReceiver: '',
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
     depositVault: '0xf6835A934F2E12D33b357cD89Bd9beD3Be37f321',
     etfDataFeed: '0xB1f752624ad00b88a4830E3ae9184D64bbF48cad',

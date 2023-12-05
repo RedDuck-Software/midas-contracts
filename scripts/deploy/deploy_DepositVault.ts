@@ -18,7 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   console.log('Deploying DepositVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(DEPOSIT_VAULT_CONTRACT_NAME, owner),
-    [addresses?.accessControl, addresses?.mTBILL, addresses?.eurToUsdFeed, hre.ethers.utils.parseUnits('100000')],
+    [addresses?.accessControl, addresses?.mTBILL, addresses?.eurToUsdFeed, hre.ethers.utils.parseUnits('100000'), addresses?.tokensReceiver],
     {
       unsafeAllow: ['constructor'],
     },

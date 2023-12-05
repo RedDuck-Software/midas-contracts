@@ -68,6 +68,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       hre.ethers.constants.AddressZero,
       owner,
     ),
+    minAmountToDeposit: hre.ethers.utils.parseUnits('100000'),
+    tokensReceiver: addresses.tokensReceiver,
     owner,
   });
 
