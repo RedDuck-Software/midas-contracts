@@ -24,7 +24,7 @@ import {
   // eslint-disable-next-line camelcase
   RedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
-  StUSDTest__factory,
+  mTBILLTest__factory,
   // eslint-disable-next-line camelcase
   WithMidasAccessControlTester__factory,
   // eslint-disable-next-line camelcase
@@ -40,7 +40,7 @@ export const defaultDeploy = async () => {
   ).deploy();
   await accessControl.initialize();
 
-  const mTBILL = await new StUSDTest__factory(owner).deploy();
+  const mTBILL = await new mTBILLTest__factory(owner).deploy();
   await mTBILL.initialize(accessControl.address);
 
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();

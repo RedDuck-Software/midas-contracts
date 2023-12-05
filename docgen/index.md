@@ -2247,7 +2247,7 @@ through proxies.
 
 Emits an {Initialized} event the first time it is successfully executed._
 
-## stUSDTest
+## mTBILLTest
 
 ### _disableInitializers
 
