@@ -80,7 +80,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function deposit(
         address tokenIn,
         uint256 amountUsdIn
-    ) external onlyGreenlisted(msg.sender) pausable {
+    ) external onlyGreenlisted(msg.sender) whenNotPaused {
         address user = msg.sender;
 
         _requireTokenExists(tokenIn);

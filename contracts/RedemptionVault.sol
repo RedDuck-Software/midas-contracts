@@ -54,7 +54,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     function redeem(
         address tokenOut,
         uint256 amountTBillIn
-    ) external onlyGreenlisted(msg.sender) pausable {
+    ) external onlyGreenlisted(msg.sender) whenNotPaused {
         require(amountTBillIn > 0, "RV: 0 amount");
 
         address user = msg.sender;
