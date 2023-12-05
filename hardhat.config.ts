@@ -17,7 +17,7 @@ import {
 
 const { OPTIMIZER, REPORT_GAS, FORKING_NETWORK, ETHERSCAN_API_KEY } = ENV;
 
-console.log({FORKING_NETWORK})
+console.log({ FORKING_NETWORK });
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -37,10 +37,10 @@ const config: HardhatUserConfig = {
       1: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       hardhat: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       localhost: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
-      sepolia: '0xf10AE7626b420CcDd80C31588E2D3cCD7B2621A2',
+      sepolia: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
     },
   },
-  verify: {
+  verify: { 
     etherscan: {
       apiKey: ETHERSCAN_API_KEY,
     },

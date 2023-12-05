@@ -91,7 +91,7 @@ export const getNetworkConfig = (
 ): NetworkUserConfig => ({
   ...getBaseNetworkConfig(forkingNetwork ?? network, tags),
   url: rpcUrls[network],
-  chainId: 1,
+  chainId: chainIds[network],
   saveDeployments: true,
 });
 
