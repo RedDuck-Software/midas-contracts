@@ -15,8 +15,6 @@ interface IRedemptionVault is IManageableVault {
         uint256 amount
     );
 
-    event Fulfill(uint256 indexed id);
-
     /**
      * @notice Transfers mTBILL from the user to the admin.
      * After that admin should validate the redeemption and transfer

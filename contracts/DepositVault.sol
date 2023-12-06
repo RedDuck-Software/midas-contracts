@@ -105,11 +105,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         emit Deposit(requestId, user, tokenIn, amountUsdIn);
     }
 
-    function fulfillDeposit(uint256 requestId) external onlyVaultAdmin {
-        // TODO: something else?)
-        emit Fulfill(requestId);
-    }
-
     /**
      * @inheritdoc IDepositVault
      */

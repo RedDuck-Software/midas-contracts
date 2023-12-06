@@ -53,18 +53,25 @@ export const redeem = async (
 
   const supplyBefore = await mTBILL.totalSupply();
 
+  const lastReqId = await redemptionVault.lastRequestId();
+
   await expect(redemptionVault.connect(sender).redeem(tokenOut, amountIn))
     .to.emit(
       redemptionVault,
-      redemptionVault.interface.events['Redeem(address,address,uint256)'].name,
+      redemptionVault.interface.events[
+        'Redeem(uint256,address,address,uint256)'
+      ].name,
     )
-    .withArgs(sender, tokenOut, amountTBillIn).to.not.reverted;
+    .withArgs(lastReqId.add(1), sender, tokenOut, amountTBillIn).to.not
+    .reverted;
+  const newLastReqId = await redemptionVault.lastRequestId();
 
   const balanceAfterUser = await mTBILL.balanceOf(sender.address);
   const balanceAfterReceiver = await mTBILL.balanceOf(tokensReceiver);
 
   const supplyAfter = await mTBILL.totalSupply();
 
+  expect(newLastReqId).eq(lastReqId.add(1));
   expect(supplyAfter).eq(supplyBefore);
   expect(await mTBILL.balanceOf(redemptionVault.address)).eq(0);
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));

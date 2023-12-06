@@ -99,13 +99,21 @@ export const deposit = async (
     sender.address,
   );
 
+  const lastReqId = await depositVault.lastRequestId();
+
   await expect(depositVault.connect(sender).deposit(tokenIn, amountIn))
     .to.emit(
       depositVault,
-      depositVault.interface.events['Deposit(address,address,uint256)'].name,
+      depositVault.interface.events['Deposit(uint256,address,address,uint256)']
+        .name,
     )
-    .withArgs(sender.address, tokenContract.address, amountUsdIn).to.not
-    .reverted;
+    .withArgs(
+      lastReqId.add(1),
+      sender.address,
+      tokenContract.address,
+      amountUsdIn,
+    ).to.not.reverted;
+  const newLastReqId = await depositVault.lastRequestId();
 
   const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
 
@@ -115,8 +123,8 @@ export const deposit = async (
   );
   const balanceAfterUser = await balanceOfBase18(tokenContract, sender.address);
 
+  expect(newLastReqId).eq(lastReqId.add(1));
   expect(totalDepositedAfter).eq(totalDepositedBefore.add(amountIn));
-
   expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
 };

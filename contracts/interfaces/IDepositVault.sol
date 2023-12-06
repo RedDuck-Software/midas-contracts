@@ -17,8 +17,6 @@ interface IDepositVault is IManageableVault {
         uint256 amount
     );
 
-    event Fulfill(uint256 indexed id);
-
     event FreeFromMinDeposit(address indexed user);
 
     /**

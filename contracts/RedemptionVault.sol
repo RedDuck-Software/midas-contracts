@@ -74,11 +74,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         emit Redeem(requestId, user, tokenOut, amountTBillIn);
     }
 
-    function fulfillRedeem(uint256 requestId) external onlyVaultAdmin {
-        // TODO: something else?)
-        emit Fulfill(requestId);
-    }
-
     /**
      * @inheritdoc ManageableVault
      */
