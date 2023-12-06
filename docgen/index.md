@@ -12,6 +12,14 @@ uint256 minAmountToDepositInEuro
 
 minimal USD amount in EUR for first user`s deposit
 
+### lastRequestId
+
+```solidity
+struct Counters.Counter lastRequestId
+```
+
+last deposit request id
+
 ### eurUsdDataFeed
 
 ```solidity
@@ -52,7 +60,7 @@ upgradeable pattern contract`s initializer
 | _mTBILL | address | address of mTBILL token |
 | _eurUsdDataFeed | address | address of CL`s data feed EUR/USD |
 | _minAmountToDepositInEuro | uint256 | initial value for minAmountToDepositInEuro |
-| _usdReceiver | address |  |
+| _usdReceiver | address | address of usd tokens receiver |
 
 ### deposit
 
@@ -61,13 +69,13 @@ function deposit(address tokenIn, uint256 amountUsdIn) external
 ```
 
 first step of the depositing proccess.
-Transfers stablecoin from the user and saves the deposit request
-into the storage. Then request should be validated off-chain
-and fulfilled by the vault`s admin by calling the
-`fulfillDepositRequest`
+Transfers usd token from the user.
+Then request should be validated off-chain and if
+everything is okay, admin should mint necessary amount
+of mTBILL token back to user
 
 _transfers `tokenIn` from `msg.sender`
-to `usdReceiver`_
+to `tokensReceiver`_
 
 #### Parameters
 
@@ -147,6 +155,14 @@ _validates that inputted USD amount >= minAmountToDepositInUsd()_
 
 Smart contract that handles mTBILL redemptions
 
+### lastRequestId
+
+```solidity
+struct Counters.Counter lastRequestId
+```
+
+last redemption request id
+
 ### initialize
 
 ```solidity
@@ -161,7 +177,7 @@ upgradeable pattern contract`s initializer
 | ---- | ---- | ----------- |
 | _ac | address | address of MidasAccessControll contract |
 | _mTBILL | address | address of mTBILL token |
-| _mTokenReceiver | address |  |
+| _mTokenReceiver | address | address of mTBILL token receiver |
 
 ### redeem
 
@@ -170,7 +186,7 @@ function redeem(address tokenOut, uint256 amountTBillIn) external
 ```
 
 Transfers mTBILL from the user to the admin.
-After that admin should validate the redeemption and transfer
+After that admin should validate the redemption and transfer
 selected `tokenOut` back to user
 
 _transfers 'amountTBillIn' amount from user
@@ -287,7 +303,7 @@ _upgradeable pattern contract`s initializer_
 | ---- | ---- | ----------- |
 | _ac | address | address of MidasAccessControll contract |
 | _mTBILL | address | address of mTBILL token |
-| _tokensReceiver | address |  |
+| _tokensReceiver | address | address to which USD and mTokens will be sent |
 
 ### withdrawToken
 
@@ -391,7 +407,8 @@ function _tokenTransferFrom(address user, address token, uint256 amount) interna
 
 _do safeTransferFrom on a given token
 and converts `amount` from base18
-to amount with a correct precision_
+to amount with a correct precision. Sends tokens
+from `user` to `tokensReceiver`_
 
 #### Parameters
 
@@ -399,7 +416,7 @@ to amount with a correct precision_
 | ---- | ---- | ----------- |
 | user | address | user address |
 | token | address | address of token |
-| amount | uint256 | amount of `token` to transfer to `user` |
+| amount | uint256 | amount of `token` to transfer from `user` |
 
 ### _tokenDecimals
 
@@ -446,34 +463,6 @@ initialization of implementation contract
 ```solidity
 constructor() internal
 ```
-
-## Blacklistable
-
-Base contract that implements basic functions and modifiers
-to work with blacklistable
-
-### onlyNotBlacklisted
-
-```solidity
-modifier onlyNotBlacklisted(address account)
-```
-
-_checks that a given `account` doesnt
-have BLACKLISTED_ROLE_
-
-### __Blacklistable_init
-
-```solidity
-function __Blacklistable_init(address _accessControl) internal
-```
-
-_upgradeable pattern contract`s initializer_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _accessControl | address | MidasAccessControl contract address |
 
 ## Greenlistable
 
@@ -735,62 +724,6 @@ function _onlyNotRole(bytes32 role, address account) internal view
 
 _checks that given `address` do not have `role`_
 
-## DataFeed
-
-Wrapper of ChainLink`s AggregatorV3 data feeds
-
-### aggregator
-
-```solidity
-contract AggregatorV3Interface aggregator
-```
-
-AggregatorV3Interface contract address
-
-### initialize
-
-```solidity
-function initialize(address _ac, address _aggregator) external
-```
-
-upgradeable pattern contract`s initializer
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _ac | address | MidasAccessControl contract address |
-| _aggregator | address | AggregatorV3Interface contract address |
-
-### changeAggregator
-
-```solidity
-function changeAggregator(address _aggregator) external
-```
-
-updates `aggregator` address
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _aggregator | address | new AggregatorV3Interface contract address |
-
-### getDataInBase18
-
-```solidity
-function getDataInBase18() external view returns (uint256 answer)
-```
-
-fetches answer from aggregator
-and converts it to the base18 precision
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| answer | uint256 | fetched aggregator answer |
-
 ## IDataFeed
 
 ### initialize
@@ -845,17 +778,39 @@ and converts it to the base18 precision
 event SetMinAmountToDeposit(address caller, uint256 newValue)
 ```
 
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| caller | address | function caller (msg.sender) |
+| newValue | uint256 | new min amount to deposit value |
+
 ### Deposit
 
 ```solidity
-event Deposit(address user, address usdTokenIn, uint256 amount)
+event Deposit(uint256 id, address user, address usdTokenIn, uint256 amount)
 ```
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | unique id of a deposit |
+| user | address | address that initiated the deposit |
+| usdTokenIn | address | address of usd token |
+| amount | uint256 | amount of `usdTokenIn` |
 
 ### FreeFromMinDeposit
 
 ```solidity
 event FreeFromMinDeposit(address user)
 ```
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| user | address | address that was freed from min deposit check |
 
 ### deposit
 
@@ -864,10 +819,10 @@ function deposit(address tokenIn, uint256 amountIn) external
 ```
 
 first step of the depositing proccess.
-Transfers stablecoin from the user and saves the deposit request
-into the storage. Then request should be validated off-chain
-and fulfilled by the vault`s admin by calling the
-`fulfillDepositRequest`
+Transfers usd token from the user.
+Then request should be validated off-chain and if
+everything is okay, admin should mint necessary amount
+of mTBILL token back to user
 
 #### Parameters
 
@@ -982,11 +937,27 @@ should be called only from permissioned actor
 event WithdrawToken(address caller, address token, address withdrawTo, uint256 amount)
 ```
 
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| caller | address | function caller (msg.sender) |
+| token | address | token that was withdrawn |
+| withdrawTo | address | address to which tokens were withdrawn |
+| amount | uint256 | `token` transfer amount |
+
 ### AddPaymentToken
 
 ```solidity
 event AddPaymentToken(address token, address caller)
 ```
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | address of token that |
+| caller | address | function caller (msg.sender) |
 
 ### RemovePaymentToken
 
@@ -994,11 +965,12 @@ event AddPaymentToken(address token, address caller)
 event RemovePaymentToken(address token, address caller)
 ```
 
-### SetFee
+#### Parameters
 
-```solidity
-event SetFee(address caller, address token, uint256 newFee)
-```
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| token | address | address of token that |
+| caller | address | function caller (msg.sender) |
 
 ### withdrawToken
 
@@ -1047,21 +1019,22 @@ can be called only from permissioned actor.
 | ---- | ---- | ----------- |
 | token | address | token address |
 
-## IPausable
-
-### ChangeState
-
-```solidity
-event ChangeState(bool newState)
-```
-
 ## IRedemptionVault
 
 ### Redeem
 
 ```solidity
-event Redeem(address user, address usdTokenOut, uint256 amount)
+event Redeem(uint256 id, address user, address usdTokenOut, uint256 amount)
 ```
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| id | uint256 | unique id of a redemption |
+| user | address | address that initiated the redeem |
+| usdTokenOut | address | address of usd token that user wants to receive after redeem |
+| amount | uint256 | amount of `usdTokenOut` |
 
 ### redeem
 
@@ -1070,7 +1043,7 @@ function redeem(address tokenOut, uint256 amountTBillIn) external
 ```
 
 Transfers mTBILL from the user to the admin.
-After that admin should validate the redeemption and transfer
+After that admin should validate the redemption and transfer
 selected `tokenOut` back to user
 
 #### Parameters
@@ -1149,331 +1122,7 @@ amount with decimals 18_
 | ---- | ---- | ----------- |
 | [0] | uint256 | amount converted amount with 18 decimals |
 
-## mTBILL
-
-### TERMS_URL_METADATA_KEY
-
-```solidity
-bytes32 TERMS_URL_METADATA_KEY
-```
-
-default terms url metadata encoded key
-
-### DESCRIPTION_URL_METADATA_KEY
-
-```solidity
-bytes32 DESCRIPTION_URL_METADATA_KEY
-```
-
-default encoded key for description url metadata
-
-### metadata
-
-```solidity
-mapping(bytes32 => bytes) metadata
-```
-
-metadata key => metadata value
-
-### initialize
-
-```solidity
-function initialize(address _accessControl) external
-```
-
-upgradeable pattern contract`s initializer
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| _accessControl | address | address of MidasAccessControll contract |
-
-### mint
-
-```solidity
-function mint(address to, uint256 amount) external
-```
-
-mints mTBILL token `amount` to a given `to` address.
-should be called only from permissioned actor
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| to | address | addres to mint tokens to |
-| amount | uint256 | amount to mint |
-
-### burn
-
-```solidity
-function burn(address from, uint256 amount) external
-```
-
-burns mTBILL token `amount` to a given `to` address.
-should be called only from permissioned actor
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| from | address | addres to burn tokens from |
-| amount | uint256 | amount to burn |
-
-### pause
-
-```solidity
-function pause() external
-```
-
-puts mTBILL token on pause.
-should be called only from permissioned actor
-
-### unpause
-
-```solidity
-function unpause() external
-```
-
-puts mTBILL token on pause.
-should be called only from permissioned actor
-
-### setMetadata
-
-```solidity
-function setMetadata(bytes32 key, bytes data) external
-```
-
-updates contract`s metadata.
-should be called only from permissioned actor
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| key | bytes32 | metadata map. key |
-| data | bytes | metadata map. value |
-
-### _beforeTokenTransfer
-
-```solidity
-function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual
-```
-
-_overrides _beforeTokenTransfer function to ban
-blaclisted users from using the token functions_
-
-## AggregatorV3Mock
-
-### _latestRoundData
-
-```solidity
-int256 _latestRoundData
-```
-
-### _latestRoundId
-
-```solidity
-uint80 _latestRoundId
-```
-
-### decimals
-
-```solidity
-function decimals() external view returns (uint8)
-```
-
-### description
-
-```solidity
-function description() external view returns (string)
-```
-
-### version
-
-```solidity
-function version() external view returns (uint256)
-```
-
-### setRoundData
-
-```solidity
-function setRoundData(int256 _data) external
-```
-
-### getRoundData
-
-```solidity
-function getRoundData(uint80 _roundId) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
-```
-
-### latestRoundData
-
-```solidity
-function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
-```
-
-## ERC20Mock
-
-### constructor
-
-```solidity
-constructor(uint8 decimals_) public
-```
-
-### mint
-
-```solidity
-function mint(address to, uint256 amount) external
-```
-
-### decimals
-
-```solidity
-function decimals() public view returns (uint8)
-```
-
-_Returns the number of decimals used to get its user representation.
-For example, if `decimals` equals `2`, a balance of `505` tokens should
-be displayed to a user as `5.05` (`505 / 10 ** 2`).
-
-Tokens usually opt for a value of 18, imitating the relationship between
-Ether and Wei. This is the value {ERC20} uses, unless this function is
-overridden;
-
-NOTE: This information is only used for _display_ purposes: it in
-no way affects any of the arithmetic of the contract, including
-{IERC20-balanceOf} and {IERC20-transfer}._
-
-## ERC20MockWithName
-
-### constructor
-
-```solidity
-constructor(uint8 decimals_, string name, string symb) public
-```
-
-### mint
-
-```solidity
-function mint(address to, uint256 amount) external
-```
-
-### decimals
-
-```solidity
-function decimals() public view returns (uint8)
-```
-
-_Returns the number of decimals used to get its user representation.
-For example, if `decimals` equals `2`, a balance of `505` tokens should
-be displayed to a user as `5.05` (`505 / 10 ** 2`).
-
-Tokens usually opt for a value of 18, imitating the relationship between
-Ether and Wei. This is the value {ERC20} uses, unless this function is
-overridden;
-
-NOTE: This information is only used for _display_ purposes: it in
-no way affects any of the arithmetic of the contract, including
-{IERC20-balanceOf} and {IERC20-transfer}._
-
-## BlacklistableTester
-
-### initialize
-
-```solidity
-function initialize(address _accessControl) external
-```
-
-### initializeWithoutInitializer
-
-```solidity
-function initializeWithoutInitializer(address _accessControl) external
-```
-
-### onlyNotBlacklistedTester
-
-```solidity
-function onlyNotBlacklistedTester(address account) external
-```
-
-### _disableInitializers
-
-```solidity
-function _disableInitializers() internal
-```
-
-_Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.
-Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized
-to any version. It is recommended to use this to lock implementation contracts that are designed to be called
-through proxies.
-
-Emits an {Initialized} event the first time it is successfully executed._
-
-## DataFeedTest
-
-### _disableInitializers
-
-```solidity
-function _disableInitializers() internal
-```
-
-_Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.
-Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized
-to any version. It is recommended to use this to lock implementation contracts that are designed to be called
-through proxies.
-
-Emits an {Initialized} event the first time it is successfully executed._
-
-## DecimalsCorrectionTester
-
-### convertAmountFromBase18Public
-
-```solidity
-function convertAmountFromBase18Public(uint256 amount, uint256 decimals) public pure returns (uint256)
-```
-
-### convertAmountToBase18Public
-
-```solidity
-function convertAmountToBase18Public(uint256 amount, uint256 decimals) public pure returns (uint256)
-```
-
 ## DepositVaultTest
-
-### _disableInitializers
-
-```solidity
-function _disableInitializers() internal
-```
-
-_Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.
-Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized
-to any version. It is recommended to use this to lock implementation contracts that are designed to be called
-through proxies.
-
-Emits an {Initialized} event the first time it is successfully executed._
-
-## GreenlistableTester
-
-### initialize
-
-```solidity
-function initialize(address _accessControl) external
-```
-
-### initializeWithoutInitializer
-
-```solidity
-function initializeWithoutInitializer(address _accessControl) external
-```
-
-### onlyGreenlistedTester
-
-```solidity
-function onlyGreenlistedTester(address account) external
-```
 
 ### _disableInitializers
 
@@ -1516,21 +1165,6 @@ AC role of vault administrator
 | ---- | ---- | ----------- |
 | [0] | bytes32 | role bytes32 role |
 
-## MidasAccessControlTest
-
-### _disableInitializers
-
-```solidity
-function _disableInitializers() internal
-```
-
-_Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.
-Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized
-to any version. It is recommended to use this to lock implementation contracts that are designed to be called
-through proxies.
-
-Emits an {Initialized} event the first time it is successfully executed._
-
 ## PausableTester
 
 ### initialize
@@ -1567,72 +1201,6 @@ through proxies.
 Emits an {Initialized} event the first time it is successfully executed._
 
 ## RedemptionVaultTest
-
-### _disableInitializers
-
-```solidity
-function _disableInitializers() internal
-```
-
-_Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.
-Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized
-to any version. It is recommended to use this to lock implementation contracts that are designed to be called
-through proxies.
-
-Emits an {Initialized} event the first time it is successfully executed._
-
-## WithMidasAccessControlTester
-
-### initialize
-
-```solidity
-function initialize(address _accessControl) external
-```
-
-### initializeWithoutInitializer
-
-```solidity
-function initializeWithoutInitializer(address _accessControl) external
-```
-
-### grantRoleTester
-
-```solidity
-function grantRoleTester(bytes32 role, address account) external
-```
-
-### revokeRoleTester
-
-```solidity
-function revokeRoleTester(bytes32 role, address account) external
-```
-
-### withOnlyRole
-
-```solidity
-function withOnlyRole(bytes32 role, address account) external
-```
-
-### withOnlyNotRole
-
-```solidity
-function withOnlyNotRole(bytes32 role, address account) external
-```
-
-### _disableInitializers
-
-```solidity
-function _disableInitializers() internal
-```
-
-_Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.
-Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized
-to any version. It is recommended to use this to lock implementation contracts that are designed to be called
-through proxies.
-
-Emits an {Initialized} event the first time it is successfully executed._
-
-## mTBILLTest
 
 ### _disableInitializers
 
