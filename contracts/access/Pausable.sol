@@ -3,7 +3,6 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "../access/WithMidasAccessControl.sol";
-import "../interfaces/IPausable.sol";
 
 /**
  * @title Pausable

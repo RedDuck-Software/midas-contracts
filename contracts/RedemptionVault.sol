@@ -30,7 +30,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     using Counters for Counters.Counter;
 
     /**
-     * @notice last deposit request id
+     * @notice last redemption request id
      */
     Counters.Counter public lastRequestId;
 
@@ -43,6 +43,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _mTBILL address of mTBILL token
+     * @param _mTokenReceiver address of mTBILL token receiver
      */
     function initialize(
         address _ac,

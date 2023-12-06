@@ -65,6 +65,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param _mTBILL address of mTBILL token
      * @param _eurUsdDataFeed address of CL`s data feed EUR/USD
      * @param _minAmountToDepositInEuro initial value for minAmountToDepositInEuro
+     * @param _usdReceiver address of usd tokens receiver
      */
     function initialize(
         address _ac,
@@ -81,7 +82,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      * @dev transfers `tokenIn` from `msg.sender`
-     * to `usdReceiver`
+     * to `tokensReceiver`
      */
     function deposit(
         address tokenIn,

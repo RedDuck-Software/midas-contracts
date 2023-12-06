@@ -6,6 +6,12 @@ pragma solidity 0.8.9;
  * @author RedDuck Software
  */
 interface IManageableVault {
+    /**
+     * @param caller function caller (msg.sender)
+     * @param token token that was withdrawn
+     * @param withdrawTo address to which tokens were withdrawn
+     * @param amount `token` transfer amount
+     */
     event WithdrawToken(
         address indexed caller,
         address indexed token,
@@ -13,11 +19,17 @@ interface IManageableVault {
         uint256 amount
     );
 
+    /**
+     * @param token address of token that
+     * @param caller function caller (msg.sender)
+     */
     event AddPaymentToken(address indexed token, address indexed caller);
 
+    /**
+     * @param token address of token that
+     * @param caller function caller (msg.sender)
+     */
     event RemovePaymentToken(address indexed token, address indexed caller);
-
-    event SetFee(address indexed caller, address indexed token, uint256 newFee);
 
     /**
      * @notice withdraws `amount` of a given `token` from the contract.

@@ -68,6 +68,7 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
      * @dev upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _mTBILL address of mTBILL token
+     * @param _tokensReceiver address to which USD and mTokens will be sent
      */
     // solhint-disable func-name-mixedcase
     function __ManageableVault_init(
@@ -143,10 +144,11 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     /**
      * @dev do safeTransferFrom on a given token
      * and converts `amount` from base18
-     * to amount with a correct precision
+     * to amount with a correct precision. Sends tokens
+     * from `user` to `tokensReceiver`
      * @param user user address
      * @param token address of token
-     * @param amount amount of `token` to transfer to `user`
+     * @param amount amount of `token` to transfer from `user`
      */
     function _tokenTransferFrom(
         address user,
