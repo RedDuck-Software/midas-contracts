@@ -12,7 +12,9 @@ export interface MidasAddresses {
   tokensReceiver: string;
 }
 
-export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefined> = {
+export const midasAddressesPerNetwork: ConfigPerNetwork<
+  MidasAddresses | undefined
+> = {
   main: {
     tokensReceiver: '',
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',

@@ -64,7 +64,10 @@ export const pauseVault = async (
   expect(await vault.paused()).eq(true);
 };
 
-export const unpauseVault = async (vault: Pausable, opt?: OptionalCommonParams) => {
+export const unpauseVault = async (
+  vault: Pausable,
+  opt?: OptionalCommonParams,
+) => {
   const [defaultSigner] = await ethers.getSigners();
 
   if (opt?.revertMessage) {

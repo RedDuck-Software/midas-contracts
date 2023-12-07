@@ -52,11 +52,6 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     EnumerableSet.AddressSet internal _paymentTokens;
 
     /**
-     * @dev fees for different tokens
-     */
-    mapping(address => uint256) internal _feesForTokens;
-
-    /**
      * @dev checks that msg.sender do have a vaultRole() role
      */
     modifier onlyVaultAdmin() {
@@ -145,18 +140,16 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
      * @dev do safeTransferFrom on a given token
      * and converts `amount` from base18
      * to amount with a correct precision. Sends tokens
-     * from `user` to `tokensReceiver`
-     * @param user user address
+     * from `msg.sender` to `tokensReceiver`
      * @param token address of token
      * @param amount amount of `token` to transfer from `user`
      */
-    function _tokenTransferFrom(
-        address user,
+    function _tokenTransferFromUser(
         address token,
         uint256 amount
     ) internal {
         IERC20(token).safeTransferFrom(
-            user,
+            msg.sender,
             tokensReceiver,
             amount.convertFromBase18(_tokenDecimals(token))
         );

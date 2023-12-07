@@ -125,7 +125,7 @@ export const defaultDeploy = async () => {
     depositVault,
     owner,
     redemptionVault,
-    mTBILL: mTBILL,
+    mTBILL,
   });
 
   // role granting testers
@@ -147,7 +147,7 @@ export const defaultDeploy = async () => {
     redemptionVault,
     aggregatorEur: mockedAggregatorEur,
     dataFeedEur: eurToUsdDataFeed,
-    mTBILL: mTBILL,
+    mTBILL,
     minAmountToDeposit: '0',
     tokensReceiver: tokensReceiver.address,
   });

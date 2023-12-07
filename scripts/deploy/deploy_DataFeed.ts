@@ -18,7 +18,6 @@ import {
 // eslint-disable-next-line camelcase
 import { AggregatorV3Mock__factory } from '../../typechain-types';
 
-
 // EUR/USD: 0xb49f677943bc038e9857d61e7d053caa2c1734c1
 // IB01/USD: 0x32d1463eb53b73c095625719afa544d5426354cb
 

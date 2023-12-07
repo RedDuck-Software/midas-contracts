@@ -1,5 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
+import { BigNumberish } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { getAllRoles } from './common.helpers';
@@ -12,7 +13,6 @@ import {
   RedemptionVault,
   MTBILL,
 } from '../../typechain-types';
-import { BigNumberish } from 'ethers';
 
 type Params = {
   accessControl: MidasAccessControl;

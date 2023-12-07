@@ -101,7 +101,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(amountUsdIn > 0, "DV: invalid amount");
 
         totalDeposited[user] += amountUsdIn;
-        _tokenTransferFrom(user, tokenIn, amountUsdIn);
+        _tokenTransferFromUser(tokenIn, amountUsdIn);
 
         emit Deposit(requestId, user, tokenIn, amountUsdIn);
     }

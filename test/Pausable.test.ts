@@ -1,13 +1,13 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 
+import { pauseVault, unpauseVault } from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
 
 import {
   // eslint-disable-next-line camelcase
   PausableTester__factory,
 } from '../typechain-types';
-import { pauseVault, unpauseVault } from './common/common.helpers';
 
 describe('Pausable', () => {
   it('deployment', async () => {

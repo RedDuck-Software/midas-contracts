@@ -40,7 +40,7 @@ const config: HardhatUserConfig = {
       sepolia: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
     },
   },
-  verify: { 
+  verify: {
     etherscan: {
       apiKey: ETHERSCAN_API_KEY,
     },
