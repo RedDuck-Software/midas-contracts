@@ -84,10 +84,11 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev transfers `tokenIn` from `msg.sender`
      * to `tokensReceiver`
      */
-    function deposit(
-        address tokenIn,
-        uint256 amountUsdIn
-    ) external onlyGreenlisted(msg.sender) whenNotPaused {
+    function deposit(address tokenIn, uint256 amountUsdIn)
+        external
+        onlyGreenlisted(msg.sender)
+        whenNotPaused
+    {
         address user = msg.sender;
 
         _requireTokenExists(tokenIn);
@@ -132,7 +133,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function minAmountToDepositInUsd() public view returns (uint256) {
         return
             (minAmountToDepositInEuro * eurUsdDataFeed.getDataInBase18()) /
-            10 ** 18;
+            10**18;
     }
 
     /**
@@ -147,10 +148,10 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param user user address
      * @param amountUsdIn amount of USD
      */
-    function _validateAmountUsdIn(
-        address user,
-        uint256 amountUsdIn
-    ) internal view {
+    function _validateAmountUsdIn(address user, uint256 amountUsdIn)
+        internal
+        view
+    {
         if (totalDeposited[user] != 0) return;
         require(
             amountUsdIn >= minAmountToDepositInUsd(),

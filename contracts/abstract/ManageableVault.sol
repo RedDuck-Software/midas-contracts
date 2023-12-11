@@ -144,10 +144,7 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
      * @param token address of token
      * @param amount amount of `token` to transfer from `user`
      */
-    function _tokenTransferFromUser(
-        address token,
-        uint256 amount
-    ) internal {
+    function _tokenTransferFromUser(address token, uint256 amount) internal {
         IERC20(token).safeTransferFrom(
             msg.sender,
             tokensReceiver,

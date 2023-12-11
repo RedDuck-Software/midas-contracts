@@ -45,20 +45,20 @@ contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
     /**
      * @inheritdoc IMTbill
      */
-    function mint(
-        address to,
-        uint256 amount
-    ) external onlyRole(M_TBILL_MINT_OPERATOR_ROLE, msg.sender) {
+    function mint(address to, uint256 amount)
+        external
+        onlyRole(M_TBILL_MINT_OPERATOR_ROLE, msg.sender)
+    {
         _mint(to, amount);
     }
 
     /**
      * @inheritdoc IMTbill
      */
-    function burn(
-        address from,
-        uint256 amount
-    ) external onlyRole(M_TBILL_BURN_OPERATOR_ROLE, msg.sender) {
+    function burn(address from, uint256 amount)
+        external
+        onlyRole(M_TBILL_BURN_OPERATOR_ROLE, msg.sender)
+    {
         _burn(from, amount);
     }
 
@@ -87,10 +87,10 @@ contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
     /**
      * @inheritdoc IMTbill
      */
-    function setMetadata(
-        bytes32 key,
-        bytes memory data
-    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
+    function setMetadata(bytes32 key, bytes memory data)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE, msg.sender)
+    {
         metadata[key] = data;
     }
 
