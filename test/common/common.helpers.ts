@@ -7,8 +7,10 @@ import { ethers } from 'hardhat';
 import {
   ERC20,
   ERC20Mock,
+  ManageableVault,
   MidasAccessControl,
-  StUSD,
+  MTBILL,
+  Pausable,
 } from '../../typechain-types';
 
 export type OptionalCommonParams = {
@@ -31,9 +33,9 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
   const roles = {
     blacklisted: await accessControl.BLACKLISTED_ROLE(),
     greenlisted: await accessControl.GREENLISTED_ROLE(),
-    minter: await accessControl.ST_USD_MINT_OPERATOR_ROLE(),
-    burner: await accessControl.ST_USD_BURN_OPERATOR_ROLE(),
-    pauser: await accessControl.ST_USD_PAUSE_OPERATOR_ROLE(),
+    minter: await accessControl.M_TBILL_MINT_OPERATOR_ROLE(),
+    burner: await accessControl.M_TBILL_BURN_OPERATOR_ROLE(),
+    pauser: await accessControl.M_TBILL_PAUSE_OPERATOR_ROLE(),
     greenlistedOperator: await accessControl.GREENLIST_OPERATOR_ROLE(),
     blacklistedOperator: await accessControl.BLACKLIST_OPERATOR_ROLE(),
     defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
@@ -44,8 +46,44 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
   return roles;
 };
 
+export const pauseVault = async (
+  vault: Pausable,
+  opt?: OptionalCommonParams,
+) => {
+  const [defaultSigner] = await ethers.getSigners();
+
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? defaultSigner).pause(),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(await vault.pause()).not.reverted;
+
+  expect(await vault.paused()).eq(true);
+};
+
+export const unpauseVault = async (
+  vault: Pausable,
+  opt?: OptionalCommonParams,
+) => {
+  const [defaultSigner] = await ethers.getSigners();
+
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? defaultSigner).unpause(),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(await vault.unpause()).not.reverted;
+
+  expect(await vault.paused()).eq(false);
+};
+
 export const mintToken = async (
-  token: ERC20Mock | StUSD,
+  token: ERC20Mock | MTBILL,
   to: AccountOrContract,
   amountN: number,
 ) => {

@@ -8,7 +8,7 @@ import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgrade
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "../interfaces/IManageableVault.sol";
-import "../interfaces/IStUSD.sol";
+import "../interfaces/IMTbill.sol";
 import "../interfaces/IDataFeed.sol";
 
 import "../access/Greenlistable.sol";
@@ -37,19 +37,19 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
      */
     uint256 public constant ONE_HUNDRED_PERCENT = 100 * 100;
     /**
-     * @notice stUSD token
+     * @notice mTBILL token
      */
-    IStUSD public stUSD;
+    IMTbill public mTBILL;
+
+    /**
+     * @notice address to which USD and mTokens will be sent
+     */
+    address public tokensReceiver;
 
     /**
      * @dev tokens that can be used as USD representation
      */
     EnumerableSet.AddressSet internal _paymentTokens;
-
-    /**
-     * @dev fees for different tokens
-     */
-    mapping(address => uint256) internal _feesForTokens;
 
     /**
      * @dev checks that msg.sender do have a vaultRole() role
@@ -62,16 +62,20 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     /**
      * @dev upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _stUSD address of stUSD token
+     * @param _mTBILL address of mTBILL token
+     * @param _tokensReceiver address to which USD and mTokens will be sent
      */
     // solhint-disable func-name-mixedcase
-    function __ManageableVault_init(address _ac, address _stUSD)
-        internal
-        onlyInitializing
-    {
-        stUSD = IStUSD(_stUSD);
+    function __ManageableVault_init(
+        address _ac,
+        address _mTBILL,
+        address _tokensReceiver
+    ) internal onlyInitializing {
+        mTBILL = IMTbill(_mTBILL);
         __Greenlistable_init(_ac);
         __Pausable_init(_ac);
+
+        tokensReceiver = _tokensReceiver;
     }
 
     /**
@@ -110,20 +114,6 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     }
 
     /**
-     * @inheritdoc IManageableVault
-     * @dev reverts if token is not presented
-     */
-    function setFee(address token, uint256 newFee) external onlyVaultAdmin {
-        _requireTokenExists(token);
-
-        require(newFee <= ONE_HUNDRED_PERCENT, "MV: fee exceeds limit");
-
-        _feesForTokens[token] = newFee;
-
-        emit SetFee(msg.sender, token, newFee);
-    }
-
-    /**
      * @notice returns array of stablecoins supported by the vault
      * can be called only from permissioned actor.
      * @return paymentTokens array of payment tokens
@@ -149,43 +139,18 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     /**
      * @dev do safeTransferFrom on a given token
      * and converts `amount` from base18
-     * to amount with a correct precision
-     * @param user user address
+     * to amount with a correct precision. Sends tokens
+     * from `msg.sender` to `tokensReceiver`
      * @param token address of token
-     * @param amount amount of `token` to transfer to `user`
+     * @param amount amount of `token` to transfer from `user`
      */
-    function _tokenTransferFrom(
-        address user,
+    function _tokenTransferFromUser(
         address token,
         uint256 amount
     ) internal {
-        // MANUAL_FULLFILMENT_TOKEN should be transferred off-chain
-        if (token == MANUAL_FULLFILMENT_TOKEN) return;
-
         IERC20(token).safeTransferFrom(
-            user,
-            address(this),
-            amount.convertFromBase18(_tokenDecimals(token))
-        );
-    }
-
-    /**
-     * @dev do safeTransfer on a given token. Doesnt perform transfer if
-     * token is `MANUAL_FULLFILMENT_TOKEN` as it should be transferred off-chain
-     * @param user user address
-     * @param token address of token
-     * @param amount amount of `token` to transfer to `user`
-     */
-    function _transferToken(
-        address user,
-        address token,
-        uint256 amount
-    ) internal {
-        // MANUAL_FULLFILMENT_TOKEN should be transferred off-chain
-        if (token == MANUAL_FULLFILMENT_TOKEN) return;
-
-        IERC20(token).safeTransfer(
-            user,
+            msg.sender,
+            tokensReceiver,
             amount.convertFromBase18(_tokenDecimals(token))
         );
     }

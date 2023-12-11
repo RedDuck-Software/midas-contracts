@@ -10,7 +10,7 @@ import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./interfaces/IDepositVault.sol";
-import "./interfaces/IStUSD.sol";
+import "./interfaces/IMTbill.sol";
 import "./interfaces/IDataFeed.sol";
 
 import "./access/Greenlistable.sol";
@@ -20,7 +20,7 @@ import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
  * @title DepositVault
- * @notice Smart contract that handles stUSD minting
+ * @notice Smart contract that handles mTBILL minting
  * @author RedDuck Software
  */
 contract DepositVault is ManageableVault, IDepositVault {
@@ -29,17 +29,15 @@ contract DepositVault is ManageableVault, IDepositVault {
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
 
-    struct DepositRequest {
-        address user;
-        address tokenIn;
-        uint256 amountUsdIn;
-        uint256 fee;
-    }
-
     /**
      * @notice minimal USD amount in EUR for first user`s deposit
      */
     uint256 public minAmountToDepositInEuro;
+
+    /**
+     * @notice last deposit request id
+     */
+    Counters.Counter public lastRequestId;
 
     /**
      * @notice EUR/USD data feed
@@ -50,18 +48,6 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev depositor address => amount deposited
      */
     mapping(address => uint256) public totalDeposited;
-
-    /**
-     * @dev requestId => DepositRequest
-     * @notice stores requests id for deposit requests created by user
-     * deleted when request is fulfilled or cancelled by permissioned actor
-     * */
-    mapping(uint256 => DepositRequest) public requests;
-
-    /**
-     * @notice last deposit request id
-     */
-    Counters.Counter public lastRequestId;
 
     /**
      * @notice users restricted from depositin minDepositAmountInEuro
@@ -76,17 +62,19 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _stUSD address of stUSD token
+     * @param _mTBILL address of mTBILL token
      * @param _eurUsdDataFeed address of CL`s data feed EUR/USD
      * @param _minAmountToDepositInEuro initial value for minAmountToDepositInEuro
+     * @param _usdReceiver address of usd tokens receiver
      */
     function initialize(
         address _ac,
-        address _stUSD,
+        address _mTBILL,
         address _eurUsdDataFeed,
-        uint256 _minAmountToDepositInEuro
+        uint256 _minAmountToDepositInEuro,
+        address _usdReceiver
     ) external initializer {
-        __ManageableVault_init(_ac, _stUSD);
+        __ManageableVault_init(_ac, _mTBILL, _usdReceiver);
         minAmountToDepositInEuro = _minAmountToDepositInEuro;
         eurUsdDataFeed = IDataFeed(_eurUsdDataFeed);
     }
@@ -94,91 +82,28 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      * @dev transfers `tokenIn` from `msg.sender`
-     * and saves deposit request to the storage
+     * to `tokensReceiver`
      */
-    function initiateDepositRequest(address tokenIn, uint256 amountUsdIn)
-        external
-        onlyGreenlisted(msg.sender)
-        pausable
-        returns (uint256)
-    {
+    function deposit(
+        address tokenIn,
+        uint256 amountUsdIn
+    ) external onlyGreenlisted(msg.sender) whenNotPaused {
         address user = msg.sender;
+
+        _requireTokenExists(tokenIn);
 
         lastRequestId.increment();
         uint256 requestId = lastRequestId.current();
 
-        _requireTokenExists(tokenIn);
-        if (!isFreeFromMinDeposit[msg.sender]) {
+        if (!isFreeFromMinDeposit[user]) {
             _validateAmountUsdIn(user, amountUsdIn);
         }
         require(amountUsdIn > 0, "DV: invalid amount");
 
-        uint256 fee = (amountUsdIn * getFee(tokenIn)) / (ONE_HUNDRED_PERCENT);
-        uint256 amountIncludingSubtractionOfFee = amountUsdIn - fee;
+        totalDeposited[user] += amountUsdIn;
+        _tokenTransferFromUser(tokenIn, amountUsdIn);
 
-        totalDeposited[user] += amountIncludingSubtractionOfFee;
-        _tokenTransferFrom(msg.sender, tokenIn, amountUsdIn);
-
-        requests[requestId] = DepositRequest(
-            user,
-            tokenIn,
-            amountIncludingSubtractionOfFee,
-            fee
-        );
-
-        emit InitiateRequest(
-            requestId,
-            user,
-            tokenIn,
-            amountIncludingSubtractionOfFee
-        );
-        emit FeeCollected(requestId, msg.sender, fee);
-
-        return requestId;
-    }
-
-    /**
-     * @inheritdoc IDepositVault
-     */
-    function fulfillDepositRequest(uint256 requestId, uint256 amountStUsdOut)
-        external
-        onlyVaultAdmin
-    {
-        DepositRequest memory request = _getRequest(requestId);
-
-        _fullfillDepositRequest(requestId, request.user, amountStUsdOut);
-    }
-
-    /**
-     * @inheritdoc IDepositVault
-     * @dev reverts existing deposit request by a given `requestId`,
-     * deletes it from the storage and fires the event
-     */
-    function cancelDepositRequest(uint256 requestId) external onlyVaultAdmin {
-        DepositRequest memory request = _getRequest(requestId);
-
-        delete requests[requestId];
-
-        uint256 returnAmount = request.amountUsdIn + request.fee;
-        totalDeposited[request.user] -= request.amountUsdIn;
-
-        _transferToken(request.user, request.tokenIn, returnAmount);
-
-        emit CancelRequest(requestId);
-    }
-
-    /**
-     * @inheritdoc IDepositVault
-     */
-    function manuallyDeposit(
-        address user,
-        address tokenIn,
-        uint256 amountUsdIn,
-        uint256 amountStUsdOut
-    ) external onlyVaultAdmin {
-        require(amountUsdIn > 0 || amountStUsdOut > 0, "DV: invalid amounts");
-
-        _manuallyDeposit(user, tokenIn, amountUsdIn, amountStUsdOut);
+        emit Deposit(requestId, user, tokenIn, amountUsdIn);
     }
 
     /**
@@ -188,6 +113,8 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(!isFreeFromMinDeposit[user], "DV: already free");
 
         isFreeFromMinDeposit[user] = true;
+
+        emit FreeFromMinDeposit(user);
     }
 
     /**
@@ -205,14 +132,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function minAmountToDepositInUsd() public view returns (uint256) {
         return
             (minAmountToDepositInEuro * eurUsdDataFeed.getDataInBase18()) /
-            10**18;
-    }
-
-    /**
-     * @inheritdoc IManageableVault
-     */
-    function getFee(address token) public view returns (uint256) {
-        return _feesForTokens[token];
+            10 ** 18;
     }
 
     /**
@@ -223,82 +143,18 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     /**
-     * @dev removes deposit request from the storage
-     * mints `amountStUsdOut` of stUSD to `user`
-     * @param requestId id of a deposit request
-     * @param user user address
-     * @param amountStUsdOut amount of stUSD that should be minted to `user`
-     */
-    function _fullfillDepositRequest(
-        uint256 requestId,
-        address user,
-        uint256 amountStUsdOut
-    ) internal {
-        delete requests[requestId];
-
-        stUSD.mint(user, amountStUsdOut);
-
-        emit FulfillRequest(msg.sender, requestId, amountStUsdOut);
-    }
-
-    /**
      * @dev validates that inputted USD amount >= minAmountToDepositInUsd()
      * @param user user address
      * @param amountUsdIn amount of USD
      */
-    function _validateAmountUsdIn(address user, uint256 amountUsdIn)
-        internal
-        view
-    {
+    function _validateAmountUsdIn(
+        address user,
+        uint256 amountUsdIn
+    ) internal view {
         if (totalDeposited[user] != 0) return;
         require(
             amountUsdIn >= minAmountToDepositInUsd(),
             "DV: usd amount < min"
         );
-    }
-
-    /**
-     * @dev internal implementation of manuallyDeposit()
-     * mints `amountStUsdOut` amount of stUSd to the `user`
-     * and fires the event
-     * @param user user address
-     * @param tokenIn address of input USD token
-     * @param amountUsdIn amount of USD token taken from user
-     * @param amountStUsdOut amount of stUSD token to mint to `user`
-     */
-    function _manuallyDeposit(
-        address user,
-        address tokenIn,
-        uint256 amountUsdIn,
-        uint256 amountStUsdOut
-    ) internal {
-        require(user != address(0), "DV: invalid user");
-
-        if (tokenIn != MANUAL_FULLFILMENT_TOKEN) {
-            _requireTokenExists(tokenIn);
-        }
-
-        stUSD.mint(user, amountStUsdOut);
-
-        emit PerformManualAction(
-            msg.sender,
-            user,
-            tokenIn,
-            amountStUsdOut,
-            amountUsdIn
-        );
-    }
-
-    /**
-     * @dev checks that request is exists and copies it to the memory
-     * @return request request object
-     */
-    function _getRequest(uint256 requestId)
-        internal
-        view
-        returns (DepositRequest memory request)
-    {
-        request = requests[requestId];
-        require(request.user != address(0), "DV: r not exists");
     }
 }

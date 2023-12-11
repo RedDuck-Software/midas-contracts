@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.9;
 
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "../access/WithMidasAccessControl.sol";
-import "../interfaces/IPausable.sol";
 
 /**
  * @title Pausable
@@ -10,21 +10,7 @@ import "../interfaces/IPausable.sol";
  * with pause functionality
  * @author RedDuck Software
  */
-abstract contract Pausable is WithMidasAccessControl, IPausable {
-    /**
-     * @dev isOnPause property to determine
-     * whether contract is on pause or not
-     */
-    bool private _isOnPause;
-
-    /**
-     * @dev checks if contract is on pause
-     */
-    modifier pausable() {
-        _pausable();
-        _;
-    }
-
+abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
     /**
      * @dev checks that a given `account`
      * has a determinedPauseAdminRole
@@ -38,42 +24,20 @@ abstract contract Pausable is WithMidasAccessControl, IPausable {
      * @dev upgradeable pattern contract`s initializer
      * @param _accessControl MidasAccessControl contract address
      */
-    // solhint-disable func-name-mixedcase
     function __Pausable_init(address _accessControl) internal onlyInitializing {
         __WithMidasAccessControl_init(_accessControl);
     }
 
-    /**
-     * @dev upgradeable pattern contract`s initializer
-     * @param newState is new pause state
-     */
-    function changePauseState(bool newState) public onlyPauseAdmin {
-        require(_isOnPause != newState, "P: same state");
-
-        _isOnPause = newState;
-
-        emit ChangeState(newState);
+    function pause() external onlyPauseAdmin {
+        _pause();
     }
 
-    /**
-     * @dev returns isOnPause property
-     */
-    function getIsOnPause() external view returns (bool) {
-        return _isOnPause;
+    function unpause() external onlyPauseAdmin {
+        _unpause();
     }
 
     /**
      * @dev virtual function to determine pauseAdmin role
      */
     function pauseAdminRole() public view virtual returns (bytes32);
-
-    /**
-     * @dev checks if user has pauseAdmin role and if not,
-     * requires to be unpaused
-     */
-    function _pausable() internal view {
-        if (!accessControl.hasRole(pauseAdminRole(), msg.sender)) {
-            require(!_isOnPause, "P: is on pause");
-        }
-    }
 }

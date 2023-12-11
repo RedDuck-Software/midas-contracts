@@ -4,20 +4,20 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { logPopulatedTx } from '..';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 
-export const getStUsd = async (hre: HardhatRuntimeEnvironment) => {
+export const getMTBill = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);
-  return await hre.ethers.getContractAt('stUSD', addresses?.stUSD ?? '');
+  return await hre.ethers.getContractAt('mTBILL', addresses?.mTBILL ?? '');
 };
 
-task('prepareTx:stUsd:mint')
+task('prepareTx:mTBILL:mint')
   .addPositionalParam('to', undefined, undefined, types.string)
   .addPositionalParam('amount', undefined, undefined, types.float)
   .setAction(async ({ to, amount }, hre) => {
     const amountParsed = hre.ethers.utils.parseUnits(amount.toString());
 
-    const stUsdContract = await getStUsd(hre);
+    const mTBillContract = await getMTBill(hre);
 
-    const populatedTx = await stUsdContract.populateTransaction.mint(
+    const populatedTx = await mTBillContract.populateTransaction.mint(
       to,
       amountParsed,
     );
@@ -25,14 +25,14 @@ task('prepareTx:stUsd:mint')
     logPopulatedTx(populatedTx);
   });
 
-task('prepareTx:stUsd:burn')
+task('prepareTx:mTBILL:burn')
   .addPositionalParam('from', undefined, undefined, types.string)
   .addPositionalParam('amount', undefined, undefined, types.float)
   .setAction(async ({ from, amount }, hre) => {
     const amountParsed = hre.ethers.utils.parseUnits(amount.toString());
-    const stUsdContract = await getStUsd(hre);
+    const mTBillContract = await getMTBill(hre);
 
-    const populatedTx = await stUsdContract.populateTransaction.burn(
+    const populatedTx = await mTBillContract.populateTransaction.burn(
       from,
       amountParsed,
     );
@@ -40,23 +40,23 @@ task('prepareTx:stUsd:burn')
     logPopulatedTx(populatedTx);
   });
 
-task('prepareTx:stUsd:pause').setAction(async (_, hre) => {
-  const stUsdContract = await getStUsd(hre);
+task('prepareTx:mTBILL:pause').setAction(async (_, hre) => {
+  const mTBillContract = await getMTBill(hre);
 
-  const populatedTx = await stUsdContract.populateTransaction.pause();
-
-  logPopulatedTx(populatedTx);
-});
-
-task('prepareTx:stUsd:unpause').setAction(async (_, hre) => {
-  const stUsdContract = await getStUsd(hre);
-
-  const populatedTx = await stUsdContract.populateTransaction.unpause();
+  const populatedTx = await mTBillContract.populateTransaction.pause();
 
   logPopulatedTx(populatedTx);
 });
 
-task('prepareTx:stUsd:setMetadata')
+task('prepareTx:mTBILL:unpause').setAction(async (_, hre) => {
+  const mTBillContract = await getMTBill(hre);
+
+  const populatedTx = await mTBillContract.populateTransaction.unpause();
+
+  logPopulatedTx(populatedTx);
+});
+
+task('prepareTx:mTBILL:setMetadata')
   .addPositionalParam('key', undefined, undefined, types.string)
   .addPositionalParam('value', undefined, undefined, types.string)
   .setAction(async ({ key, value }, hre) => {
@@ -66,9 +66,9 @@ task('prepareTx:stUsd:setMetadata')
       [value],
     );
 
-    const stUsdContract = await getStUsd(hre);
+    const mTBillContract = await getMTBill(hre);
 
-    const populatedTx = await stUsdContract.populateTransaction.setMetadata(
+    const populatedTx = await mTBillContract.populateTransaction.setMetadata(
       keyBytes32,
       valueBytes,
     );
@@ -76,25 +76,25 @@ task('prepareTx:stUsd:setMetadata')
     logPopulatedTx(populatedTx);
   });
 
-task('prepareTx:stUsd:addToBlackList')
+task('prepareTx:mTBILL:addToBlackList')
   .addPositionalParam('account', undefined, undefined, types.string)
   .setAction(async ({ account }, hre) => {
-    const stUsdContract = await getStUsd(hre);
+    const mTBillContract = await getMTBill(hre);
 
-    const populatedTx = await stUsdContract.populateTransaction.addToBlackList(
+    const populatedTx = await mTBillContract.populateTransaction.addToBlackList(
       account,
     );
 
     logPopulatedTx(populatedTx);
   });
 
-task('prepareTx:stUsd:removeFromBlackList')
+task('prepareTx:mTBILL:removeFromBlackList')
   .addPositionalParam('account', undefined, undefined, types.string)
   .setAction(async ({ account }, hre) => {
-    const stUsdContract = await getStUsd(hre);
+    const mTBillContract = await getMTBill(hre);
 
     const populatedTx =
-      await stUsdContract.populateTransaction.removeFromBlackList(account);
+      await mTBillContract.populateTransaction.removeFromBlackList(account);
 
     logPopulatedTx(populatedTx);
   });

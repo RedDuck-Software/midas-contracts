@@ -1,6 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 
+import { pauseVault, unpauseVault } from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
 
 import {
@@ -13,6 +14,8 @@ describe('Pausable', () => {
     const { pausableTester, roles } = await loadFixture(defaultDeploy);
 
     expect(await pausableTester.pauseAdminRole()).eq(roles.defaultAdmin);
+
+    expect(await pausableTester.paused()).eq(false);
   });
 
   it('onlyInitializing', async () => {
@@ -26,48 +29,85 @@ describe('Pausable', () => {
   });
 
   describe('onlyPauseAdmin modifier', async () => {
-    it('fail: can`t change state if doesn`t have role', async () => {
+    it('should fail: can`t pause if doesn`t have role', async () => {
       const { pausableTester, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
 
-      await expect(
-        pausableTester.connect(regularAccounts[0]).changePauseState(true),
-      ).to.revertedWith('WMAC: hasnt role');
+      await pauseVault(pausableTester, {
+        from: regularAccounts[0],
+        revertMessage: 'WMAC: hasnt role',
+      });
     });
 
     it('can change state if has role', async () => {
       const { pausableTester } = await loadFixture(defaultDeploy);
 
-      await expect(pausableTester.changePauseState(true)).to.not.reverted;
+      await pauseVault(pausableTester);
     });
   });
 
-  describe('changePauseState(bool)', async () => {
-    it('fail: can`t change if state is the same', async () => {
-      const { pausableTester } = await loadFixture(defaultDeploy);
-
-      await expect(pausableTester.changePauseState(false)).to.revertedWith(
-        'P: same state',
+  describe('pause()', async () => {
+    it('fail: can`t pause if caller doesnt have admin role', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
       );
+
+      await pauseVault(pausableTester, {
+        from: regularAccounts[0],
+        revertMessage: 'WMAC: hasnt role',
+      });
     });
 
-    it('can change state', async () => {
-      const { pausableTester } = await loadFixture(defaultDeploy);
-
-      await expect(pausableTester.changePauseState(true)).to.emit(
-        pausableTester,
-        pausableTester.interface.events['ChangeState(bool)'].name,
+    it('fail: when paused', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
       );
 
-      expect(await pausableTester.getIsOnPause()).to.eq(true);
+      await pauseVault(pausableTester);
+      await pauseVault(pausableTester, {
+        revertMessage: 'Pausable: paused',
+      });
+    });
 
-      await expect(pausableTester.changePauseState(false)).to.emit(
-        pausableTester,
-        pausableTester.interface.events['ChangeState(bool)'].name,
+    it('when not paused and caller is admin', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
       );
 
-      expect(await pausableTester.getIsOnPause()).to.eq(false);
+      await pauseVault(pausableTester);
+    });
+  });
+
+  describe('unpause()', async () => {
+    it('fail: can`t unpause if caller doesnt have admin role', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await unpauseVault(pausableTester, {
+        from: regularAccounts[0],
+        revertMessage: 'WMAC: hasnt role',
+      });
+    });
+
+    it('fail: when not paused', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await unpauseVault(pausableTester, {
+        revertMessage: 'Pausable: not paused',
+      });
+    });
+
+    it('when paused and caller is admin', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await pauseVault(pausableTester);
+      await unpauseVault(pausableTester);
     });
   });
 });

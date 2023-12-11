@@ -24,7 +24,7 @@ import {
   // eslint-disable-next-line camelcase
   RedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
-  StUSDTest__factory,
+  MTBILLTest__factory,
   // eslint-disable-next-line camelcase
   WithMidasAccessControlTester__factory,
   // eslint-disable-next-line camelcase
@@ -32,7 +32,7 @@ import {
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
-  const [owner, ...regularAccounts] = await ethers.getSigners();
+  const [owner, tokensReceiver, ...regularAccounts] = await ethers.getSigners();
 
   // main contracts
   const accessControl = await new MidasAccessControlTest__factory(
@@ -40,8 +40,8 @@ export const defaultDeploy = async () => {
   ).deploy();
   await accessControl.initialize();
 
-  const stUSD = await new StUSDTest__factory(owner).deploy();
-  await stUSD.initialize(accessControl.address);
+  const mTBILL = await new MTBILLTest__factory(owner).deploy();
+  await mTBILL.initialize(accessControl.address);
 
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
   const mockedAggregatorDecimals = await mockedAggregator.decimals();
@@ -71,15 +71,21 @@ export const defaultDeploy = async () => {
   const depositVault = await new DepositVaultTest__factory(owner).deploy();
   await depositVault.initialize(
     accessControl.address,
-    stUSD.address,
+    mTBILL.address,
     eurToUsdDataFeed.address,
     0,
+    tokensReceiver.address,
   );
 
   const redemptionVault = await new RedemptionVaultTest__factory(
     owner,
   ).deploy();
-  await redemptionVault.initialize(accessControl.address, stUSD.address);
+
+  await redemptionVault.initialize(
+    accessControl.address,
+    mTBILL.address,
+    tokensReceiver.address,
+  );
 
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),
@@ -119,7 +125,7 @@ export const defaultDeploy = async () => {
     depositVault,
     owner,
     redemptionVault,
-    stUsd: stUSD,
+    mTBILL,
   });
 
   // role granting testers
@@ -141,11 +147,13 @@ export const defaultDeploy = async () => {
     redemptionVault,
     aggregatorEur: mockedAggregatorEur,
     dataFeedEur: eurToUsdDataFeed,
-    stUsd: stUSD,
+    mTBILL,
+    minAmountToDeposit: '0',
+    tokensReceiver: tokensReceiver.address,
   });
 
   return {
-    stUSD,
+    mTBILL,
     accessControl,
     wAccessControlTester,
     roles,
@@ -165,5 +173,6 @@ export const defaultDeploy = async () => {
     mockedAggregatorEur,
     offChainUsdToken,
     mockedAggregatorEurDecimals,
+    tokensReceiver,
   };
 };

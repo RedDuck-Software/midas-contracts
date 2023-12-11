@@ -41,6 +41,7 @@ export const addPaymentTokenTest = async (
   const paymentTokens = await vault.getPaymentTokens();
   expect(paymentTokens.find((v) => v === token)).not.eq(undefined);
 };
+
 export const removePaymentTokenTest = async (
   { vault, owner }: CommonParamsChangePaymentToken,
   token: ERC20 | string,

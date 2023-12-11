@@ -61,17 +61,17 @@ task('prepareTx:redemptionVault:cancelRedemptionRequest')
 task('prepareTx:redemptionVault:manuallyRedeem(address,address,uint256)')
   .addPositionalParam('user', undefined, undefined, types.string)
   .addPositionalParam('tokenOut', undefined, undefined, types.string)
-  .addPositionalParam('amountStUsdIn', undefined, undefined, types.float)
-  .setAction(async ({ user, tokenOut, amountStUsdIn }, hre) => {
-    const amountStUsdInParsed = hre.ethers.utils.parseUnits(
-      amountStUsdIn.toString(),
+  .addPositionalParam('amountTBillIn', undefined, undefined, types.float)
+  .setAction(async ({ user, tokenOut, amountTBillIn }, hre) => {
+    const amountMTBillInParsed = hre.ethers.utils.parseUnits(
+      amountTBillIn.toString(),
     );
 
     const redemptionVaultContract = await getRedemptionVault(hre);
 
     const populatedTx = await redemptionVaultContract.populateTransaction[
       'manuallyRedeem(address,address,uint256)'
-    ](user, tokenOut, amountStUsdInParsed);
+    ](user, tokenOut, amountMTBillInParsed);
 
     logPopulatedTx(populatedTx);
   });
@@ -81,12 +81,12 @@ task(
 )
   .addPositionalParam('user', undefined, undefined, types.string)
   .addPositionalParam('tokenOut', undefined, undefined, types.string)
-  .addPositionalParam('amountStUsdIn', undefined, undefined, types.float)
+  .addPositionalParam('amountTBillIn', undefined, undefined, types.float)
   .addPositionalParam('amountUsdOut', undefined, undefined, types.float)
 
-  .setAction(async ({ user, tokenOut, amountStUsdIn, amountUsdOut }, hre) => {
-    const amountStUsdInParsed = hre.ethers.utils.parseUnits(
-      amountStUsdIn.toString(),
+  .setAction(async ({ user, tokenOut, amountTBillIn, amountUsdOut }, hre) => {
+    const amountMTBillInParsed = hre.ethers.utils.parseUnits(
+      amountTBillIn.toString(),
     );
     const amountUsdOutParsed = hre.ethers.utils.parseUnits(
       amountUsdOut.toString(),
@@ -96,7 +96,7 @@ task(
 
     const populatedTx = await redemptionVaultContract.populateTransaction[
       'manuallyRedeem(address,address,uint256,uint256)'
-    ](user, tokenOut, amountStUsdInParsed, amountUsdOutParsed);
+    ](user, tokenOut, amountMTBillInParsed, amountUsdOutParsed);
 
     logPopulatedTx(populatedTx);
   });

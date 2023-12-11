@@ -1,4 +1,4 @@
-import type { HardhatUserConfig } from 'hardhat/config';
+import { task, type HardhatUserConfig } from 'hardhat/config';
 
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
@@ -17,7 +17,7 @@ import {
 
 const { OPTIMIZER, REPORT_GAS, FORKING_NETWORK, ETHERSCAN_API_KEY } = ENV;
 
-console.log({FORKING_NETWORK})
+console.log({ FORKING_NETWORK });
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -34,10 +34,10 @@ const config: HardhatUserConfig = {
   },
   namedAccounts: {
     deployer: {
-      1: 0,
-      hardhat: 0,
-      localhost: 0,
-      sepolia: '0xf10AE7626b420CcDd80C31588E2D3cCD7B2621A2',
+      1: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      hardhat: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      localhost: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      sepolia: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
     },
   },
   verify: {

@@ -1,5 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
+import { BigNumberish } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { getAllRoles } from './common.helpers';
@@ -10,12 +11,12 @@ import {
   DepositVault,
   MidasAccessControl,
   RedemptionVault,
-  StUSD,
+  MTBILL,
 } from '../../typechain-types';
 
 type Params = {
   accessControl: MidasAccessControl;
-  stUsd: StUSD;
+  mTBILL: MTBILL;
   dataFeed: DataFeed;
   dataFeedEur: DataFeed;
   aggregator: AggregatorV3Interface;
@@ -23,6 +24,8 @@ type Params = {
   aggregatorEur: AggregatorV3Interface;
   redemptionVault: RedemptionVault;
   owner: SignerWithAddress;
+  tokensReceiver: string;
+  minAmountToDeposit: BigNumberish;
   execute?: (role: string, address: string) => Promise<any>;
 };
 
@@ -30,12 +33,17 @@ export const initGrantRoles = async ({
   accessControl,
   depositVault,
   redemptionVault,
-  stUsd,
+  mTBILL,
   owner,
   execute,
 }: Omit<
   Params,
-  'aggregator' | 'dataFeed' | 'dataFeedEur' | 'aggregatorEur'
+  | 'aggregator'
+  | 'dataFeed'
+  | 'dataFeedEur'
+  | 'aggregatorEur'
+  | 'minAmountToDeposit'
+  | 'tokensReceiver'
 >) => {
   const roles = await getAllRoles(accessControl);
 
@@ -66,24 +74,24 @@ export const postDeploymentTest = async (
     dataFeed,
     depositVault,
     redemptionVault,
-    stUsd,
+    mTBILL,
     dataFeedEur,
     aggregatorEur,
     owner,
+    tokensReceiver,
+    minAmountToDeposit = '0',
   }: Params,
 ) => {
   const roles = await getAllRoles(accessControl);
 
-  /** stUSD tests start */
-  expect(await stUsd.name()).eq('stUSD');
-  expect(await stUsd.symbol()).eq('stUSD');
-  expect(await stUsd.paused()).eq(false);
+  /** mTBILL tests start */
+  expect(await mTBILL.name()).eq('mTBILL');
+  expect(await mTBILL.symbol()).eq('mTBILL');
+  expect(await mTBILL.paused()).eq(false);
 
-  /** stUSD tests end */
+  /** mTBILL tests end */
 
   /** DataFeed tests start */
-
-  expect(await dataFeed.aggregator()).eq(aggregator.address);
 
   expect(await dataFeedEur.aggregator()).eq(aggregatorEur.address);
 
@@ -91,13 +99,15 @@ export const postDeploymentTest = async (
 
   /** DepositVault tests start */
 
-  expect(await depositVault.stUSD()).eq(stUsd.address);
+  expect(await depositVault.mTBILL()).eq(mTBILL.address);
+
+  expect(await depositVault.tokensReceiver()).eq(tokensReceiver);
 
   expect(await depositVault.eurUsdDataFeed()).eq(dataFeedEur.address);
 
   expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
-  // expect(await depositVault.minAmountToDepositInEuro()).eq('0');
+  expect(await depositVault.minAmountToDepositInEuro()).eq(minAmountToDeposit);
 
   expect(await depositVault.vaultRole()).eq(
     await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
@@ -111,11 +121,11 @@ export const postDeploymentTest = async (
 
   /** RedemptionVault tests start */
 
-  expect(await redemptionVault.stUSD()).eq(stUsd.address);
+  expect(await redemptionVault.mTBILL()).eq(mTBILL.address);
+
+  expect(await redemptionVault.tokensReceiver()).eq(tokensReceiver);
 
   expect(await redemptionVault.ONE_HUNDRED_PERCENT()).eq('10000');
-
-  expect(await redemptionVault.lastRequestId()).eq('0');
 
   expect(await redemptionVault.vaultRole()).eq(
     await accessControl.REDEMPTION_VAULT_ADMIN_ROLE(),
@@ -138,21 +148,4 @@ export const postDeploymentTest = async (
   expect(await accessControl.getRoleAdmin(roles.blacklisted)).eq(
     roles.blacklistedOperator,
   );
-
-  /** Owners roles tests end */
-
-  /** Contracts roles tests start */
-
-  expect(await accessControl.hasRole(roles.minter, depositVault.address)).eq(
-    true,
-  );
-
-  expect(await accessControl.hasRole(roles.minter, redemptionVault.address)).eq(
-    true,
-  );
-  expect(await accessControl.hasRole(roles.burner, redemptionVault.address)).eq(
-    true,
-  );
-
-  /** Contracts roles tests end */
 };

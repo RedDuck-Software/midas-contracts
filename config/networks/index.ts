@@ -77,7 +77,7 @@ export const getBaseNetworkConfig = (
     : undefined,
   chainId: chainIds[network],
   gas: gases[network],
-  gasPrice: gasPrices[network],
+  gasPrice: 'auto', // gasPrices[network],
   blockGasLimit: blockGasLimits[network],
   timeout: timeouts[network],
   initialBaseFeePerGas: initialBasesFeePerGas[network],
@@ -91,7 +91,7 @@ export const getNetworkConfig = (
 ): NetworkUserConfig => ({
   ...getBaseNetworkConfig(forkingNetwork ?? network, tags),
   url: rpcUrls[network],
-  chainId: 1,
+  chainId: chainIds[network],
   saveDeployments: true,
 });
 
@@ -104,11 +104,7 @@ export const getForkNetworkConfig = (
     mnemonic: mnemonics[network],
   },
   live: false,
-  saveDeployments: true,  
-  mining: { 
-    auto: false,
-    interval: 1000
-  },
+  saveDeployments: true,
   forking: {
     url: rpcUrls[network],
   },

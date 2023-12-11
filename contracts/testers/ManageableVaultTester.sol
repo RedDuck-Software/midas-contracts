@@ -4,21 +4,21 @@ pragma solidity 0.8.9;
 import "../abstract/ManageableVault.sol";
 
 contract ManageableVaultTester is ManageableVault {
-    function initialize(address _accessControl, address _stUsd)
-        external
-        initializer
-    {
-        __ManageableVault_init(_accessControl, _stUsd);
+    function initialize(
+        address _accessControl,
+        address _mTbill,
+        address _tokensReceiver
+    ) external initializer {
+        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver);
     }
 
     function initializeWithoutInitializer(
         address _accessControl,
-        address _stUsd
+        address _mTbill,
+        address _tokensReceiver
     ) external {
-        __ManageableVault_init(_accessControl, _stUsd);
+        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver);
     }
 
     function vaultRole() public view virtual override returns (bytes32) {}
-
-    function getFee(address) external view override returns (uint256) {}
 }

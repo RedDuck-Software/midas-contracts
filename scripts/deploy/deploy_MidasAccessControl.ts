@@ -15,6 +15,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const owner = await hre.ethers.getSigner(deployer);
 
   console.log('Deploying MidasAccessControl...');
+
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(MIDAS_AC_CONTRACT_NAME, owner),
     [],
@@ -28,7 +29,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     await deployment.deployTransaction.wait(5);
     console.log('Waited.');
   }
-  
+
   await logDeployProxy(hre, MIDAS_AC_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };

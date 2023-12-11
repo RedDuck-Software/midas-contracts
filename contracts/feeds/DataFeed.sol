@@ -22,12 +22,6 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     AggregatorV3Interface public aggregator;
 
     /**
-     * @notice checks that a given `account`
-     * have GREENLISTED_ROLE
-     */
-    IDataFeed.RecordedDataFetch private _lastRecordedDataFetch;
-
-    /**
      * @inheritdoc IDataFeed
      */
     function initialize(address _ac, address _aggregator) external initializer {
@@ -50,33 +44,8 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     /**
      * @inheritdoc IDataFeed
      */
-    function fetchDataInBase18() external returns (uint256 answer) {
-        (uint80 roundId, uint256 _answer) = _getDataInBase18();
-        answer = _answer;
-
-        _lastRecordedDataFetch = RecordedDataFetch(
-            roundId,
-            answer,
-            block.timestamp
-        );
-    }
-
-    /**
-     * @inheritdoc IDataFeed
-     */
     function getDataInBase18() external view returns (uint256 answer) {
         (, answer) = _getDataInBase18();
-    }
-
-    /**
-     * @inheritdoc IDataFeed
-     */
-    function lastRecordedDataFetch()
-        external
-        view
-        returns (IDataFeed.RecordedDataFetch memory)
-    {
-        return _lastRecordedDataFetch;
     }
 
     /**
