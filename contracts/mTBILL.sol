@@ -13,17 +13,6 @@ import "./access/Blacklistable.sol";
 //solhint-disable contract-name-camelcase
 contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
     /**
-     * @notice default terms url metadata encoded key
-     */
-    bytes32 public constant TERMS_URL_METADATA_KEY = keccak256("urls.terms");
-
-    /**
-     * @notice default encoded key for description url metadata
-     */
-    bytes32 public constant DESCRIPTION_URL_METADATA_KEY =
-        keccak256("urls.description");
-
-    /**
      * @notice metadata key => metadata value
      */
     mapping(bytes32 => bytes) public metadata;

@@ -60,7 +60,8 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         returns (uint80 roundId, uint256 answer)
     {
         uint8 decimals = aggregator.decimals();
-        (uint80 _roundId, int256 _answer, , , ) = aggregator.latestRoundData();
+        (uint80 _roundId, int256 _answer,,,) = aggregator.latestRoundData();
+        require(_answer > 0, "DF: feed is deprecated");
         roundId = _roundId;
         answer = uint256(_answer).convertToBase18(decimals);
     }

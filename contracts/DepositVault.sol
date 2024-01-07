@@ -74,6 +74,8 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 _minAmountToDepositInEuro,
         address _usdReceiver
     ) external initializer {
+        require(_eurUsdDataFeed != address(0), "zero address");
+
         __ManageableVault_init(_ac, _mTBILL, _usdReceiver);
         minAmountToDepositInEuro = _minAmountToDepositInEuro;
         eurUsdDataFeed = IDataFeed(_eurUsdDataFeed);
@@ -152,7 +154,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         internal
         view
     {
-        if (totalDeposited[user] != 0) return;
         require(
             amountUsdIn >= minAmountToDepositInUsd(),
             "DV: usd amount < min"
