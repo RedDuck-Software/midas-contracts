@@ -7,7 +7,6 @@ import { ethers } from 'hardhat';
 import {
   ERC20,
   ERC20Mock,
-  ManageableVault,
   MidasAccessControl,
   MTBILL,
   Pausable,

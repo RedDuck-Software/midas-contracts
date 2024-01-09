@@ -22,6 +22,11 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     AggregatorV3Interface public aggregator;
 
     /**
+     * @dev healty difference between `block.timestamp` and `updatedAt` timestamps
+     */
+    uint256 private constant _HEALTHY_DIFF = 1 days;
+
+    /**
      * @inheritdoc IDataFeed
      */
     function initialize(address _ac, address _aggregator) external initializer {
@@ -60,7 +65,14 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         returns (uint80 roundId, uint256 answer)
     {
         uint8 decimals = aggregator.decimals();
-        (uint80 _roundId, int256 _answer, , , ) = aggregator.latestRoundData();
+        (uint80 _roundId, int256 _answer, , uint256 updatedAt, ) = aggregator
+            .latestRoundData();
+        require(_answer > 0, "DF: feed is deprecated");
+        require(
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp - updatedAt <= _HEALTHY_DIFF,
+            "DF: feed is unhealthy"
+        );
         roundId = _roundId;
         answer = uint256(_answer).convertToBase18(decimals);
     }

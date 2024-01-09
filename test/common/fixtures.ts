@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import { constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
@@ -29,6 +30,10 @@ import {
   WithMidasAccessControlTester__factory,
   // eslint-disable-next-line camelcase
   DataFeedTest__factory,
+  // eslint-disable-next-line camelcase
+  AggregatorV3DeprecatedMock__factory,
+  // eslint-disable-next-line camelcase
+  AggregatorV3UnhealthyMock__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -41,6 +46,7 @@ export const defaultDeploy = async () => {
   await accessControl.initialize();
 
   const mTBILL = await new MTBILLTest__factory(owner).deploy();
+  await expect(mTBILL.initialize(ethers.constants.AddressZero)).to.be.reverted;
   await mTBILL.initialize(accessControl.address);
 
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
@@ -69,6 +75,42 @@ export const defaultDeploy = async () => {
   );
 
   const depositVault = await new DepositVaultTest__factory(owner).deploy();
+  await expect(
+    depositVault.initialize(
+      ethers.constants.AddressZero,
+      mTBILL.address,
+      eurToUsdDataFeed.address,
+      0,
+      tokensReceiver.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    depositVault.initialize(
+      accessControl.address,
+      ethers.constants.AddressZero,
+      eurToUsdDataFeed.address,
+      0,
+      tokensReceiver.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    depositVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      ethers.constants.AddressZero,
+      0,
+      tokensReceiver.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    depositVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      eurToUsdDataFeed.address,
+      0,
+      ethers.constants.AddressZero,
+    ),
+  ).to.be.reverted;
   await depositVault.initialize(
     accessControl.address,
     mTBILL.address,
@@ -80,6 +122,28 @@ export const defaultDeploy = async () => {
   const redemptionVault = await new RedemptionVaultTest__factory(
     owner,
   ).deploy();
+
+  await expect(
+    redemptionVault.initialize(
+      ethers.constants.AddressZero,
+      mTBILL.address,
+      tokensReceiver.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      ethers.constants.AddressZero,
+      tokensReceiver.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      ethers.constants.AddressZero,
+    ),
+  ).to.be.reverted;
 
   await redemptionVault.initialize(
     accessControl.address,
@@ -152,6 +216,36 @@ export const defaultDeploy = async () => {
     tokensReceiver: tokensReceiver.address,
   });
 
+  const mockedDeprecatedAggregator =
+    await new AggregatorV3DeprecatedMock__factory(owner).deploy();
+  await mockedDeprecatedAggregator.setRoundData(
+    parseUnits('5', mockedAggregatorDecimals),
+  );
+
+  await mockedDeprecatedAggregator.setRoundData(
+    parseUnits('1.07778', mockedAggregatorEurDecimals),
+  );
+  const dataFeedDeprecated = await new DataFeedTest__factory(owner).deploy();
+  await dataFeedDeprecated.initialize(
+    accessControl.address,
+    mockedDeprecatedAggregator.address,
+  );
+
+  const mockedUnhealthyAggregator =
+    await new AggregatorV3UnhealthyMock__factory(owner).deploy();
+  await mockedUnhealthyAggregator.setRoundData(
+    parseUnits('5', mockedAggregatorDecimals),
+  );
+
+  await mockedUnhealthyAggregator.setRoundData(
+    parseUnits('1.07778', mockedAggregatorEurDecimals),
+  );
+  const dataFeedUnhealthy = await new DataFeedTest__factory(owner).deploy();
+  await dataFeedUnhealthy.initialize(
+    accessControl.address,
+    mockedUnhealthyAggregator.address,
+  );
+
   return {
     mTBILL,
     accessControl,
@@ -174,5 +268,7 @@ export const defaultDeploy = async () => {
     offChainUsdToken,
     mockedAggregatorEurDecimals,
     tokensReceiver,
+    dataFeedDeprecated,
+    dataFeedUnhealthy,
   };
 };

@@ -46,6 +46,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
 };
 
 export const getCurrentAddresses = (hre: HardhatRuntimeEnvironment) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (midasAddressesPerNetwork as any)[hre.network.name] as
     | MidasAddresses
     | undefined;

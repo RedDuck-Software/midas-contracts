@@ -1,22 +1,14 @@
 import { expect } from 'chai';
-import { BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
-import { ethers } from 'hardhat';
 
 import {
-  Account,
   OptionalCommonParams,
   balanceOfBase18,
   getAccount,
 } from './common.helpers';
-import { getRoundData, setRoundData } from './data-feed.helpers';
 import { defaultDeploy } from './fixtures';
 
 import {
-  // eslint-disable-next-line camelcase
-  AggregatorV3Mock__factory,
-  // eslint-disable-next-line camelcase
-  DataFeed__factory,
   ERC20,
   // eslint-disable-next-line camelcase
   ERC20__factory,
@@ -30,11 +22,6 @@ type CommonParams = Pick<
 type CommonParamsDeposit = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
   'depositVault' | 'owner' | 'mTBILL'
->;
-
-type CommonParamsGetOutputAmount = Pick<
-  Awaited<ReturnType<typeof defaultDeploy>>,
-  'depositVault' | 'mockedAggregator'
 >;
 
 export const setMinAmountToDepositTest = async (
@@ -64,7 +51,7 @@ export const setMinAmountToDepositTest = async (
 };
 
 export const deposit = async (
-  { depositVault, owner, mTBILL }: CommonParamsDeposit,
+  { depositVault, owner }: CommonParamsDeposit,
   tokenIn: ERC20 | string,
   amountUsdIn: number,
   opt?: OptionalCommonParams,

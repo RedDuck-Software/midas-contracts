@@ -47,6 +47,7 @@ abstract contract WithMidasAccessControl is
         internal
         onlyInitializing
     {
+        require(_accessControl != address(0), "zero address");
         accessControl = MidasAccessControl(_accessControl);
     }
 

@@ -60,9 +60,7 @@ describe('Pausable', () => {
     });
 
     it('fail: when paused', async () => {
-      const { pausableTester, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { pausableTester } = await loadFixture(defaultDeploy);
 
       await pauseVault(pausableTester);
       await pauseVault(pausableTester, {
@@ -71,9 +69,7 @@ describe('Pausable', () => {
     });
 
     it('when not paused and caller is admin', async () => {
-      const { pausableTester, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { pausableTester } = await loadFixture(defaultDeploy);
 
       await pauseVault(pausableTester);
     });
@@ -92,9 +88,7 @@ describe('Pausable', () => {
     });
 
     it('fail: when not paused', async () => {
-      const { pausableTester, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { pausableTester } = await loadFixture(defaultDeploy);
 
       await unpauseVault(pausableTester, {
         revertMessage: 'Pausable: not paused',
@@ -102,9 +96,7 @@ describe('Pausable', () => {
     });
 
     it('when paused and caller is admin', async () => {
-      const { pausableTester, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
+      const { pausableTester } = await loadFixture(defaultDeploy);
 
       await pauseVault(pausableTester);
       await unpauseVault(pausableTester);

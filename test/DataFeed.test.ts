@@ -68,3 +68,17 @@ describe('DataFeed', function () {
     });
   });
 });
+
+describe('DataFeed Deprecated', function () {
+  it('should fail when: feed is deprecated', async () => {
+    const { dataFeedDeprecated } = await loadFixture(defaultDeploy);
+    await expect(dataFeedDeprecated.getDataInBase18()).to.be.reverted;
+  });
+});
+
+describe('DataFeed Unhealthy', function () {
+  it('should fail when: feed is unhealthy', async () => {
+    const { dataFeedUnhealthy } = await loadFixture(defaultDeploy);
+    await expect(dataFeedUnhealthy.getDataInBase18()).to.be.reverted;
+  });
+});

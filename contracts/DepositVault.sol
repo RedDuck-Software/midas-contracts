@@ -74,6 +74,8 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 _minAmountToDepositInEuro,
         address _usdReceiver
     ) external initializer {
+        require(_eurUsdDataFeed != address(0), "zero address");
+
         __ManageableVault_init(_ac, _mTBILL, _usdReceiver);
         minAmountToDepositInEuro = _minAmountToDepositInEuro;
         eurUsdDataFeed = IDataFeed(_eurUsdDataFeed);
@@ -83,6 +85,8 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @inheritdoc IDepositVault
      * @dev transfers `tokenIn` from `msg.sender`
      * to `tokensReceiver`
+     * @param tokenIn address of token to deposit.
+     * @param amountUsdIn amount of token to deposit in 10**18 decimals.
      */
     function deposit(address tokenIn, uint256 amountUsdIn)
         external

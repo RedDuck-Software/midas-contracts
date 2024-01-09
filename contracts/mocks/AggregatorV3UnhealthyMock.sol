@@ -8,7 +8,7 @@ import "../access/WithMidasAccessControl.sol";
 import "../libraries/DecimalsCorrectionLibrary.sol";
 import "../interfaces/IDataFeed.sol";
 
-contract AggregatorV3Mock is AggregatorV3Interface {
+contract AggregatorV3UnhealthyMock is AggregatorV3Interface {
     int256 private _latestRoundData;
     uint80 private _latestRoundId;
 
@@ -48,7 +48,13 @@ contract AggregatorV3Mock is AggregatorV3Interface {
             uint80 answeredInRound
         )
     {
-        // solhint-disable-next-line not-rely-on-time
-        return (_latestRoundId, _latestRoundData, 0, block.timestamp, 0);
+        return (
+            _latestRoundId,
+            _latestRoundData,
+            0,
+            // solhint-disable-next-line not-rely-on-time
+            block.timestamp - 2 days,
+            0
+        );
     }
 }

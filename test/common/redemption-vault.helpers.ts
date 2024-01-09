@@ -1,31 +1,14 @@
 import { expect } from 'chai';
-import { BigNumberish } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
-import { ethers } from 'hardhat';
 
 import { OptionalCommonParams, getAccount } from './common.helpers';
-import { getRoundData, setRoundData } from './data-feed.helpers';
 import { defaultDeploy } from './fixtures';
 
-import {
-  ERC20,
-  // eslint-disable-next-line camelcase
-  ERC20__factory,
-} from '../../typechain-types';
-
-type CommonParams = Pick<
-  Awaited<ReturnType<typeof defaultDeploy>>,
-  'redemptionVault' | 'owner'
->;
+import { ERC20 } from '../../typechain-types';
 
 type CommonParamsDeposit = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
   'redemptionVault' | 'owner' | 'mTBILL'
->;
-
-type CommonParamsGetOutputAmount = Pick<
-  Awaited<ReturnType<typeof defaultDeploy>>,
-  'redemptionVault' | 'mockedAggregator'
 >;
 
 export const redeem = async (

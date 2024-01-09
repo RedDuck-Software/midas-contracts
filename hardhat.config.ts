@@ -1,4 +1,4 @@
-import { task, type HardhatUserConfig } from 'hardhat/config';
+import { type HardhatUserConfig } from 'hardhat/config';
 
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
@@ -51,6 +51,7 @@ const config: HardhatUserConfig = {
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     localhost: getNetworkConfig('localhost', FORKING_NETWORK as any),
   },
   gasReporter: {

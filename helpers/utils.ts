@@ -76,7 +76,7 @@ export const tryEtherscanVerifyImplementation = async (
       console.error('Unable to verify. Error: ', err);
       return false;
     })
-    .then((_) => {
+    .then(() => {
       return true;
     });
 };
@@ -84,6 +84,7 @@ export const tryEtherscanVerifyImplementation = async (
 export const verify = async (
   hre: HardhatRuntimeEnvironment,
   contractAddress: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...constructorArguments: any[]
 ) => {
   console.log('Arguments: ', constructorArguments);
