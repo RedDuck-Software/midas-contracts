@@ -26,6 +26,7 @@ type Params = {
   owner: SignerWithAddress;
   tokensReceiver: string;
   minAmountToDeposit: BigNumberish;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   execute?: (role: string, address: string) => Promise<any>;
 };
 
@@ -33,6 +34,7 @@ export const initGrantRoles = async ({
   accessControl,
   depositVault,
   redemptionVault,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mTBILL,
   owner,
   execute,
@@ -70,8 +72,6 @@ export const postDeploymentTest = async (
   { ethers }: HardhatRuntimeEnvironment,
   {
     accessControl,
-    aggregator,
-    dataFeed,
     depositVault,
     redemptionVault,
     mTBILL,
@@ -139,6 +139,7 @@ export const postDeploymentTest = async (
 
   /** Owners roles tests start */
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { blacklisted: _, greenlisted: __, ...rolesToCheck } = roles;
 
   for (const role of Object.values(rolesToCheck)) {

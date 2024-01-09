@@ -4,7 +4,6 @@ import { ethers } from 'hardhat';
 
 import { acErrors, greenList } from './common/ac.helpers';
 import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
-import { setRoundData } from './common/data-feed.helpers';
 import { defaultDeploy } from './common/fixtures';
 import { addPaymentTokenTest } from './common/manageable-vault.helpers';
 import { redeem } from './common/redemption-vault.helpers';

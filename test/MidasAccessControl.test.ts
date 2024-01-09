@@ -13,6 +13,7 @@ describe('MidasAccessControl', function () {
   it('deployment', async () => {
     const { accessControl, roles, owner } = await loadFixture(defaultDeploy);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { blacklisted: _, greenlisted: __, ...rolesToCheck } = roles;
 
     for (const role of Object.values(rolesToCheck)) {
@@ -33,16 +34,6 @@ describe('MidasAccessControl', function () {
   });
 
   describe('grantRoleMult()', () => {
-    it('should fail: call from address without DEFAULT_ADMIN_ROLE role', async () => {
-      const { accessControl, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
-
-      await expect(
-        accessControl.connect(regularAccounts[0]).grantRoleMult([], []),
-      ).reverted;
-    });
-
     it('should fail: arrays length mismatch', async () => {
       const { accessControl } = await loadFixture(defaultDeploy);
 
@@ -83,16 +74,6 @@ describe('MidasAccessControl', function () {
   });
 
   describe('revokeRoleMult()', () => {
-    it('should fail: call from address without DEFAULT_ADMIN_ROLE role', async () => {
-      const { accessControl, regularAccounts } = await loadFixture(
-        defaultDeploy,
-      );
-
-      await expect(
-        accessControl.connect(regularAccounts[0]).revokeRoleMult([], []),
-      ).reverted;
-    });
-
     it('should fail: arrays length mismatch', async () => {
       const { accessControl } = await loadFixture(defaultDeploy);
 

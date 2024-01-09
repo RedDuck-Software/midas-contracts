@@ -154,6 +154,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         internal
         view
     {
+        if (totalDeposited[user] != 0) return;
         require(
             amountUsdIn >= minAmountToDepositInUsd(),
             "DV: usd amount < min"
