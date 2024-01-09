@@ -85,6 +85,8 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @inheritdoc IDepositVault
      * @dev transfers `tokenIn` from `msg.sender`
      * to `tokensReceiver`
+     * @param tokenIn address of token to deposit.
+     * @param amountUsdIn amount of token to deposit in 10**18 decimals.
      */
     function deposit(address tokenIn, uint256 amountUsdIn)
         external
