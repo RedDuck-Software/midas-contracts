@@ -30,6 +30,8 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
      * @inheritdoc IDataFeed
      */
     function initialize(address _ac, address _aggregator) external initializer {
+        require(_aggregator != address(0), "DF: invalid address");
+
         __WithMidasAccessControl_init(_ac);
         aggregator = AggregatorV3Interface(_aggregator);
     }
