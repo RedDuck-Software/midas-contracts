@@ -24,7 +24,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     /**
      * @dev healty difference between `block.timestamp` and `updatedAt` timestamps
      */
-    uint256 private constant _HEALTHY_DIFF = 3 days;
+    uint256 private constant _HEALTHY_DIFF = 1 days;
 
     /**
      * @inheritdoc IDataFeed
