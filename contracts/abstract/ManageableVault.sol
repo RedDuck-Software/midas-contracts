@@ -73,6 +73,7 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     ) internal onlyInitializing {
         require(_mTBILL != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
+        require(_tokensReceiver != address(this), "invalid address");
 
         mTBILL = IMTbill(_mTBILL);
         __Greenlistable_init(_ac);
