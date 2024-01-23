@@ -12,16 +12,15 @@ export interface MidasAddresses {
   tokensReceiver: string;
 }
 
-export const midasAddressesPerNetwork: ConfigPerNetwork<
-  MidasAddresses | undefined
-> = {
+export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefined> = {
   main: {
     tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
     depositVault: '0xcbCf1e67F1988e2572a2A620321Aef2ff73369f0',
-    etfDataFeed: '',
+    // TODO: remove this data feed
+    etfDataFeed: '0x6022a020Ca5c611304B9E97F37AEE0C38455081A',
     eurToUsdFeed: '0x6022a020Ca5c611304B9E97F37AEE0C38455081A',
-    redemptionVault: '',
+    redemptionVault: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
     mTBILL: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
   },
   sepolia: {
@@ -40,7 +39,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
     depositVault: '0xcbCf1e67F1988e2572a2A620321Aef2ff73369f0',
     etfDataFeed: '',
     eurToUsdFeed: '0x6022a020Ca5c611304B9E97F37AEE0C38455081A',
-    redemptionVault: '',
+    redemptionVault: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
     mTBILL: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
   },
 };
