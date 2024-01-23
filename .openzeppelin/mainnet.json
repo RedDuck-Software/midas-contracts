@@ -14,6 +14,11 @@
       "address": "0xDD629E5241CbC5919847783e6C96B2De4754e438",
       "txHash": "0xc42c47e97ff8b449371fd3ace5087692ed3736195cf37d41d9617da50432bdc7",
       "kind": "transparent"
+    },
+    {
+      "address": "0x6022a020Ca5c611304B9E97F37AEE0C38455081A",
+      "txHash": "0x0aefdecb0a945b05eceb9aa5855094c0790812ae10afc182e4b6f81fd39aa024",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -311,6 +316,66 @@
           "t_uint256": {
             "label": "uint256",
             "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "03b06394c994fe5248bdb171d11302cc8b7524eeb6414343d12fb79e4bb9425d": {
+      "address": "0xE85f2B707Ec5Ae8e07238F99562264f304E30109",
+      "txHash": "0x981b3707c631669090dbd3b2a890a8b2b5bc1426dbbce03cdf973a52f3eb3d9b",
+      "layout": {
+        "solcVersion": "0.8.9",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "accessControl",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_contract(MidasAccessControl)3365",
+            "contract": "WithMidasAccessControl",
+            "src": "contracts/access/WithMidasAccessControl.sol:24"
+          },
+          {
+            "label": "aggregator",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(AggregatorV3Interface)45",
+            "contract": "DataFeed",
+            "src": "contracts/feeds/DataFeed.sol:22"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(AggregatorV3Interface)45": {
+            "label": "contract AggregatorV3Interface",
+            "numberOfBytes": "20"
+          },
+          "t_contract(MidasAccessControl)3365": {
+            "label": "contract MidasAccessControl",
+            "numberOfBytes": "20"
           },
           "t_uint8": {
             "label": "uint8",

@@ -46,13 +46,13 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    main: getNetworkConfig('main'),
+    main: getNetworkConfig('main', []),
     sepolia: getNetworkConfig('sepolia'),
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    localhost: getNetworkConfig('localhost', FORKING_NETWORK as any),
+    localhost: getNetworkConfig('localhost', [], FORKING_NETWORK as any),
   },
   gasReporter: {
     enabled: REPORT_GAS,

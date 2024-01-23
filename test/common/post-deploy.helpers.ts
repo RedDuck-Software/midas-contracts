@@ -61,11 +61,11 @@ export const initGrantRoles = async ({
     }
   };
 
-  await checkAndExecute(roles.minter, depositVault.address);
+  // await checkAndExecute(roles.minter, depositVault.address);
 
-  await checkAndExecute(roles.minter, redemptionVault.address);
+  // await checkAndExecute(roles.minter, redemptionVault.address);
 
-  await checkAndExecute(roles.burner, redemptionVault.address);
+  // await checkAndExecute(roles.burner, redemptionVault.address);
 };
 
 export const postDeploymentTest = async (
