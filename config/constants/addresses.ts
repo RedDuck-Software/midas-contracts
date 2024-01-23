@@ -12,11 +12,13 @@ export interface MidasAddresses {
   tokensReceiver: string;
 }
 
-export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefined> = {
+export const midasAddressesPerNetwork: ConfigPerNetwork<
+  MidasAddresses | undefined
+> = {
   main: {
     tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
-    depositVault: '',
+    depositVault: '0xcbCf1e67F1988e2572a2A620321Aef2ff73369f0',
     etfDataFeed: '',
     eurToUsdFeed: '0x6022a020Ca5c611304B9E97F37AEE0C38455081A',
     redemptionVault: '',
@@ -33,12 +35,12 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
   },
   hardhat: undefined,
   localhost: {
-    tokensReceiver: '',
+    tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
-    depositVault: '0xf6835A934F2E12D33b357cD89Bd9beD3Be37f321',
-    etfDataFeed: '0xB1f752624ad00b88a4830E3ae9184D64bbF48cad',
-    eurToUsdFeed: '0xf4c6D1B597EC392bAF9685BA8631cDe33020B913',
-    redemptionVault: '0x10Da412782649A40c487f20101266098f1671145',
+    depositVault: '0xcbCf1e67F1988e2572a2A620321Aef2ff73369f0',
+    etfDataFeed: '',
+    eurToUsdFeed: '0x6022a020Ca5c611304B9E97F37AEE0C38455081A',
+    redemptionVault: '',
     mTBILL: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
   },
 };
