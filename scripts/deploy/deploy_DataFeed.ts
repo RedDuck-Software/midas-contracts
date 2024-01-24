@@ -22,7 +22,7 @@ import { AggregatorV3Mock__factory } from '../../typechain-types';
 // IB01/USD: 0x32d1463eb53b73c095625719afa544d5426354cb
 
 const aggregatorsByNetwork: Record<number, string> = {
-  1: '0xb49f677943bc038e9857d61e7d053caa2c1734c1',
+  1: '0x32d1463eb53b73c095625719afa544d5426354cb',
   11155111: '',
 };
 
@@ -76,7 +76,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getCurrentAddresses(hre);
 
-  console.log('Deploying DataFeed...');
+  console.log('Deploying DataFeed...', aggregator);
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(DATA_FEED_CONTRACT_NAME, owner),
     [addresses?.accessControl, aggregator],

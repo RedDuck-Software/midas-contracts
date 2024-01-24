@@ -30,41 +30,39 @@ type Params = {
   execute?: (role: string, address: string) => Promise<any>;
 };
 
-export const initGrantRoles = async ({
-  accessControl,
-  depositVault,
-  redemptionVault,
+export const initGrantRoles = async (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  mTBILL,
-  owner,
-  execute,
-}: Omit<
-  Params,
-  | 'aggregator'
-  | 'dataFeed'
-  | 'dataFeedEur'
-  | 'aggregatorEur'
-  | 'minAmountToDeposit'
-  | 'tokensReceiver'
->) => {
-  const roles = await getAllRoles(accessControl);
-
-  const checkAndExecute = async (role: string, address: string) => {
-    if (!(await accessControl.hasRole(role, address))) {
-      if (execute) await execute(role, address);
-      else {
-        await accessControl
-          .connect(owner)
-          .grantRole(role, address)
-          .then((tx) => tx.wait());
-      }
-    }
-  };
-
+  _: // accessControl,
+  // depositVault,
+  // redemptionVault,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // mTBILL,
+  // owner,
+  // execute,
+  Omit<
+    Params,
+    | 'aggregator'
+    | 'dataFeed'
+    | 'dataFeedEur'
+    | 'aggregatorEur'
+    | 'minAmountToDeposit'
+    | 'tokensReceiver'
+  >,
+) => {
+  // const roles = await getAllRoles(accessControl);
+  // const checkAndExecute = async (role: string, address: string) => {
+  //   if (!(await accessControl.hasRole(role, address))) {
+  //     if (execute) await execute(role, address);
+  //     else {
+  //       await accessControl
+  //         .connect(owner)
+  //         .grantRole(role, address)
+  //         .then((tx) => tx.wait());
+  //     }
+  //   }
+  // };
   // await checkAndExecute(roles.minter, depositVault.address);
-
   // await checkAndExecute(roles.minter, redemptionVault.address);
-
   // await checkAndExecute(roles.burner, redemptionVault.address);
 };
 
