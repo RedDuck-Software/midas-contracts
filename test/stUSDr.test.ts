@@ -108,7 +108,7 @@ describe.only('stUSDr', function () {
   describe('mint()', () => {
     it('should fail: call when mTBILL allowance is insufficient', async () => {
       const { owner, stUSDr, mTBILL } = await loadFixture(defaultDeploy);
-      await mint({ owner, stUSDr, mTBILL }, 11, {
+      await mint({ owner, stUSDr, mTBILL }, owner, 11, {
         revertMessage: 'ERC20: insufficient allowance',
       });
     });
@@ -116,14 +116,14 @@ describe.only('stUSDr', function () {
     it('should fail: call when mTBILL user balance is insufficient', async () => {
       const { owner, stUSDr, mTBILL } = await loadFixture(defaultDeploy);
       await approveBase18(owner, mTBILL, stUSDr, 10);
-      await mint({ owner, stUSDr, mTBILL }, 10, {
+      await mint({ owner, stUSDr, mTBILL }, owner, 10, {
         revertMessage: 'ERC20: transfer amount exceeds balance',
       });
     });
 
     it('should fail: when amount shares is 0', async () => {
       const { owner, stUSDr, mTBILL } = await loadFixture(defaultDeploy);
-      await mint({ owner, stUSDr, mTBILL }, 0, {
+      await mint({ owner, stUSDr, mTBILL }, owner, 0, {
         revertMessage: 'RERC20: amount is 0',
       });
     });
@@ -135,7 +135,7 @@ describe.only('stUSDr', function () {
       await mintMTBILL({ mTBILL, owner }, owner, parseUnits('1'));
       await approveBase18(owner, mTBILL, stUSDr, 1);
       await setRoundData({ mockedAggregator }, 108);
-      await mint({ owner, stUSDr, mTBILL }, parseUnits('1'));
+      await mint({ owner, stUSDr, mTBILL }, owner, parseUnits('1'));
     });
 
     it('exchange smallest friction of mTBILL for stUSDr when price is 108', async () => {
@@ -145,7 +145,7 @@ describe.only('stUSDr', function () {
       await mintMTBILL({ mTBILL, owner }, owner, 1);
       await approveBase18(owner, mTBILL, stUSDr, 1);
       await setRoundData({ mockedAggregator }, 108);
-      await mint({ owner, stUSDr, mTBILL }, 1);
+      await mint({ owner, stUSDr, mTBILL }, owner, 1);
     });
 
     it('exchange 1 mTBILL for stUSDr when price is 108, then check balance when price is 110', async () => {
@@ -155,7 +155,7 @@ describe.only('stUSDr', function () {
       await mintMTBILL({ mTBILL, owner }, owner, parseUnits('1'));
       await approveBase18(owner, mTBILL, stUSDr, 1);
       await setRoundData({ mockedAggregator }, 108);
-      await mint({ owner, stUSDr, mTBILL }, parseUnits('1'));
+      await mint({ owner, stUSDr, mTBILL }, owner, parseUnits('1'));
       await setRoundData({ mockedAggregator }, 110);
       expect(await stUSDr.balanceOf(owner.address)).eq(parseUnits('110'));
     });
@@ -183,7 +183,7 @@ describe.only('stUSDr', function () {
       await mintMTBILL({ mTBILL, owner }, owner, parseUnits('1'));
       await approveBase18(owner, mTBILL, stUSDr, 1);
       await setRoundData({ mockedAggregator }, 108);
-      await mint({ owner, stUSDr, mTBILL }, parseUnits('1'));
+      await mint({ owner, stUSDr, mTBILL }, owner, parseUnits('1'));
 
       await burn({ owner, stUSDr, mTBILL }, 108);
     });
@@ -199,7 +199,7 @@ describe.only('stUSDr', function () {
       await mintMTBILL({ mTBILL, owner }, owner, parseUnits('1'));
       await approveBase18(owner, mTBILL, stUSDr, 1);
       await setRoundData({ mockedAggregator }, 108);
-      await mint({ owner, stUSDr, mTBILL }, parseUnits('1'));
+      await mint({ owner, stUSDr, mTBILL }, owner, parseUnits('1'));
 
       await stUSDr.connect(owner).pause();
 

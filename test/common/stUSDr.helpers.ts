@@ -6,7 +6,12 @@ import {
   solidityKeccak256,
 } from 'ethers/lib/utils';
 
-import { Account, OptionalCommonParams, getAccount } from './common.helpers';
+import {
+  Account,
+  AccountOrContract,
+  OptionalCommonParams,
+  getAccount,
+} from './common.helpers';
 import { defaultDeploy } from './fixtures';
 
 type CommonParams = Pick<
@@ -16,12 +21,13 @@ type CommonParams = Pick<
 
 export const mint = async (
   { mTBILL, stUSDr, owner }: CommonParams,
+  to: AccountOrContract,
   amountShares: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
   if (opt?.revertMessage) {
     await expect(
-      stUSDr.connect(opt?.from ?? owner).mint(amountShares),
+      stUSDr.connect(opt?.from ?? owner).mint(getAccount(to), amountShares),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -42,7 +48,9 @@ export const mint = async (
   const totalSharesBefore = await stUSDr.totalShares();
   const totalSupplyBefore = await stUSDr.totalSupply();
 
-  await expect(stUSDr.connect(opt?.from ?? owner).mint(amountShares))
+  await expect(
+    stUSDr.connect(opt?.from ?? owner).mint(getAccount(to), amountShares),
+  )
     .to.emit(
       stUSDr,
       stUSDr.interface.events['TransferShares(address,address,uint256)'].name,

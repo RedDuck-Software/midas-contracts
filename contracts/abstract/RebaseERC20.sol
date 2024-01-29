@@ -75,14 +75,14 @@ abstract contract RebaseERC20 is
         return _shares[_account];
     }
 
-    function mint(uint256 sharesAmount) external {
+    function mint(address receiver, uint256 sharesAmount) external {
         IERC20Upgradeable(underlyingToken).safeTransferFrom(
             msg.sender,
             address(this),
             sharesAmount
         );
 
-        _mint(msg.sender, sharesAmount);
+        _mint(receiver, sharesAmount);
     }
 
     function burn(uint256 tokenAmount) external {
