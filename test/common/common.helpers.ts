@@ -40,6 +40,7 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
     defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
     depositVaultAdmin: await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
     redemptionVaultAdmin: await accessControl.REDEMPTION_VAULT_ADMIN_ROLE(),
+    stUSDrAdmin: await accessControl.ST_USDR_ADMIN_ROLE(),
   };
 
   return roles;

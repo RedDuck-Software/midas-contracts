@@ -70,6 +70,8 @@ contract MidasAccessControl is
 
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
 
+        _setupRole(ST_USDR_ADMIN_ROLE, admin);
+
         _setupRole(DEPOSIT_VAULT_ADMIN_ROLE, admin);
         _setupRole(REDEMPTION_VAULT_ADMIN_ROLE, admin);
 

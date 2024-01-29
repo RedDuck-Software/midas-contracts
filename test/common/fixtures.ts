@@ -34,6 +34,8 @@ import {
   AggregatorV3DeprecatedMock__factory,
   // eslint-disable-next-line camelcase
   AggregatorV3UnhealthyMock__factory,
+  StUSDr__factory,
+  StUSDrTest__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -72,6 +74,14 @@ export const defaultDeploy = async () => {
   await eurToUsdDataFeed.initialize(
     accessControl.address,
     mockedAggregatorEur.address,
+  );
+
+  const stUSDr = await new StUSDrTest__factory(owner).deploy();
+
+  await stUSDr.initialize(
+    accessControl.address,
+    mTBILL.address,
+    dataFeed.address,
   );
 
   const depositVault = await new DepositVaultTest__factory(owner).deploy();
@@ -247,6 +257,8 @@ export const defaultDeploy = async () => {
   );
 
   return {
+    ac: accessControl,
+    stUSDr,
     mTBILL,
     accessControl,
     wAccessControlTester,

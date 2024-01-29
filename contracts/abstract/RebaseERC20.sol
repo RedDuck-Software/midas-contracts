@@ -3,17 +3,23 @@
 pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "../interfaces/IDataFeed.sol";
 import "../interfaces/IDataFeed.sol";
 import "../access/WithMidasAccessControl.sol";
+import "../access/Pausable.sol";
 
 abstract contract RebaseERC20 is
     WithMidasAccessControl,
+    Pausable,
     IERC20Upgradeable,
     IERC20MetadataUpgradeable
 {
-    uint256 public constant DIVIDER = 10e24;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+
+    uint256 public constant DIVIDER = 1e18;
 
     address public priceFeed;
 
@@ -28,7 +34,7 @@ abstract contract RebaseERC20 is
     event TransferShares(
         address indexed from,
         address indexed to,
-        uint256 sharesValue
+        uint256 sharesAmount
     );
 
     constructor() {
@@ -40,7 +46,7 @@ abstract contract RebaseERC20 is
         address _underlyingToken,
         address _priceFeed
     ) internal onlyInitializing {
-        __WithMidasAccessControl_init(_ac);
+        __Pausable_init(_ac);
         underlyingToken = _underlyingToken;
         priceFeed = _priceFeed;
     }
@@ -67,6 +73,25 @@ abstract contract RebaseERC20 is
 
     function sharesOf(address _account) public view returns (uint256) {
         return _shares[_account];
+    }
+
+    function mint(uint256 sharesAmount) external {
+        IERC20Upgradeable(underlyingToken).safeTransferFrom(
+            msg.sender,
+            address(this),
+            sharesAmount
+        );
+
+        _mint(msg.sender, sharesAmount);
+    }
+
+    function burn(uint256 tokenAmount) external {
+        uint256 sharesBurned = _burn(msg.sender, tokenAmount);
+
+        IERC20Upgradeable(underlyingToken).safeTransfer(
+            msg.sender,
+            sharesBurned
+        );
     }
 
     function transfer(
@@ -157,6 +182,53 @@ abstract contract RebaseERC20 is
         emit TransferShares(from, to, sharesAmount);
     }
 
+    function _mint(address account, uint256 sharesAmount) internal {
+        require(sharesAmount > 0, "RERC20: amount is 0");
+
+        uint256 utPrice = getUnderlyingTokenPrice();
+        uint256 tokenAmount = (sharesAmount * utPrice) / DIVIDER;
+
+        _beforeTokenTransfer(address(0), account, sharesAmount);
+
+        _totalShares += sharesAmount;
+        unchecked {
+            // Overflow not possible: balance + amount is at most totalSupply + amount, which is checked above.
+            _shares[account] += sharesAmount;
+        }
+
+        emit Transfer(address(0), account, tokenAmount);
+        emit TransferShares(address(0), account, sharesAmount);
+    }
+
+    function _burn(
+        address account,
+        uint256 tokenAmount
+    ) internal returns (uint256) {
+        uint256 utPrice = getUnderlyingTokenPrice();
+        uint256 sharesAmount = (tokenAmount * DIVIDER) / utPrice;
+
+        require(sharesAmount > 0, "RERC20: amount is 0");
+
+        _beforeTokenTransfer(account, address(0), sharesAmount);
+
+        uint256 accountShares = _shares[account];
+        require(
+            accountShares >= sharesAmount,
+            "ERC20: burn amount exceeds balance"
+        );
+
+        unchecked {
+            _shares[account] = accountShares - sharesAmount;
+            // Overflow not possible: amount <= accountBalance <= totalSupply.
+            _totalShares -= sharesAmount;
+        }
+
+        emit Transfer(account, address(0), tokenAmount);
+        emit TransferShares(account, address(0), sharesAmount);
+
+        return sharesAmount;
+    }
+
     function _approve(
         address owner,
         address spender,
@@ -190,12 +262,18 @@ abstract contract RebaseERC20 is
         address from,
         address to,
         uint256
-    ) internal view {}
+    ) internal view {
+        require(!paused(), "ERC20Pausable: token transfer while paused");
+    }
 
     function getTokenAmount(
         uint256 _sharesAmount
     ) public view returns (uint256) {
         return (_sharesAmount * getUnderlyingTokenPrice()) / DIVIDER;
+    }
+
+    function pauseAdminRole() public view virtual override returns (bytes32) {
+        return ST_USDR_ADMIN_ROLE;
     }
 
     function getSharesAmount(

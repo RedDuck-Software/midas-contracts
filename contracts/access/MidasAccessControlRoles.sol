@@ -50,6 +50,12 @@ abstract contract MidasAccessControlRoles {
         keccak256("REDEMPTION_VAULT_ADMIN_ROLE");
 
     /**
+     * @notice actor that have admin rights in stUSDr contract
+     */
+    bytes32 public constant ST_USDR_ADMIN_ROLE =
+        keccak256("ST_USDR_ADMIN_ROLE");
+
+    /**
      * @notice actor that is greenlisted
      */
     bytes32 public constant GREENLISTED_ROLE = keccak256("GREENLISTED_ROLE");
