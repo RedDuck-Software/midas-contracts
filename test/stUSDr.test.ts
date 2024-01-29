@@ -9,8 +9,9 @@ import { mint as mintMTBILL } from './common/mTBILL.helpers';
 import { burn, mint } from './common/stUSDr.helpers';
 import { approveBase18 } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
+import { constants } from 'ethers';
 
-describe.only('stUSDr', function () {
+describe('stUSDr', function () {
   it('deployment', async () => {
     const { stUSDr, dataFeed, ac, mTBILL } = await loadFixture(defaultDeploy);
 
@@ -37,6 +38,14 @@ describe.only('stUSDr', function () {
         ethers.constants.AddressZero,
       ),
     ).revertedWith('Initializable: contract is already initialized');
+
+    await expect(
+      stUSDr.initializeWithoutInitializer(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+      ),
+    ).revertedWith('Initializable: contract is not initializing');
   });
 
   describe('pause()', () => {
@@ -102,6 +111,242 @@ describe.only('stUSDr', function () {
       ).to.not.reverted;
 
       expect(await stUSDr.paused()).eq(false);
+    });
+  });
+
+  describe('balanceOf()', () => {
+    it('when price is 100 and sharesOf is 1', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator } = await loadFixture(
+        defaultDeploy,
+      );
+      const shares = parseUnits('1');
+      await setRoundData({ mockedAggregator }, 100);
+      await stUSDr.mintTest(owner.address, shares);
+      expect(await stUSDr.balanceOf(owner.address)).eq(parseUnits('100'));
+      expect(await stUSDr.sharesOf(owner.address)).eq(parseUnits('1'));
+      expect(await stUSDr.totalShares()).eq(parseUnits('1'));
+      expect(await stUSDr.totalSupply()).eq(parseUnits('100'));
+    });
+
+    it('when price is 100 and sharesOf is 1 and then price goes to 200', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator } = await loadFixture(
+        defaultDeploy,
+      );
+      const shares = parseUnits('1');
+      await setRoundData({ mockedAggregator }, 100);
+      await stUSDr.mintTest(owner.address, shares);
+
+      expect(await stUSDr.balanceOf(owner.address)).eq(parseUnits('100'));
+
+      await setRoundData({ mockedAggregator }, 200);
+
+      expect(await stUSDr.balanceOf(owner.address)).eq(parseUnits('200'));
+      expect(await stUSDr.totalSupply()).eq(parseUnits('200'));
+    });
+  });
+
+  describe('transfer(),transferFrom()', () => {
+    it('should fail: when transfer exceeds balance', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+
+      await expect(
+        stUSDr.transfer(regularAccounts[0].address, parseUnits('50')),
+      ).revertedWith('ERC20: transfer amount exceeds balance');
+    });
+
+    it('should fail: transferFrom() when transfer exceeds allowance', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+
+      await expect(
+        stUSDr.transferFrom(
+          regularAccounts[0].address,
+          owner.address,
+          parseUnits('50'),
+        ),
+      ).revertedWith('ERC20: insufficient allowance');
+    });
+
+    it('should fail: transfer() when from is address(0)', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+
+      await expect(
+        stUSDr.transferTest(constants.AddressZero, owner.address, 1),
+      ).revertedWith('ERC20: transfer from the zero address');
+    });
+
+    it('transferFrom() when allowance is uint.max', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+      await stUSDr.mintTest(owner.address, 1);
+
+      await stUSDr
+        .connect(regularAccounts[0])
+        .approve(owner.address, constants.MaxUint256);
+
+      await expect(
+        stUSDr.transferFrom(regularAccounts[0].address, owner.address, 1),
+      ).not.reverted;
+
+      expect(
+        (await stUSDr.allowance(regularAccounts[0].address, owner.address)).eq(
+          constants.MaxUint256,
+        ),
+      );
+    });
+
+    it('transferFrom() when allowance is set to transfer amount', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+      await stUSDr.mintTest(owner.address, 1);
+
+      await stUSDr.connect(regularAccounts[0]).approve(owner.address, 1);
+
+      await expect(
+        stUSDr.transferFrom(regularAccounts[0].address, owner.address, 1),
+      ).not.reverted;
+
+      expect(
+        (await stUSDr.allowance(regularAccounts[0].address, owner.address)).eq(
+          0,
+        ),
+      );
+    });
+
+    it('should fail: when transfer to address(0)', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+
+      await expect(
+        stUSDr.transfer(constants.AddressZero, parseUnits('50')),
+      ).revertedWith('ERC20: transfer to the zero address');
+    });
+
+    it('when balance is 100, transfer 50 when price per share is 100', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      const shares = parseUnits('1');
+      await setRoundData({ mockedAggregator }, 100);
+      await stUSDr.mintTest(owner.address, shares);
+
+      await stUSDr.transfer(regularAccounts[0].address, parseUnits('50'));
+      expect(await stUSDr.balanceOf(owner.address)).eq(parseUnits('50'));
+      expect(await stUSDr.balanceOf(regularAccounts[0].address)).eq(
+        parseUnits('50'),
+      );
+
+      expect(await stUSDr.sharesOf(owner.address)).eq(parseUnits('0.5'));
+      expect(await stUSDr.sharesOf(regularAccounts[0].address)).eq(
+        parseUnits('0.5'),
+      );
+    });
+  });
+
+  describe('approve(),allowance(),increaseAllowance(),decreaseAllowance()', () => {
+    it('should fail: approve() when from is address(0)', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+
+      await expect(
+        stUSDr.approveTest(constants.AddressZero, owner.address, 1),
+      ).revertedWith('ERC20: approve from the zero address');
+    });
+    it('should fail: when approve to address(0)', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+
+      await expect(
+        stUSDr.approve(constants.AddressZero, parseUnits('50')),
+      ).revertedWith('ERC20: approve to the zero address');
+    });
+
+    it('should fail: decreaseAllowance() when decrease amount is > current allowance', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      await setRoundData({ mockedAggregator }, 100);
+
+      await stUSDr.approve(regularAccounts[0].address, parseUnits('50'));
+
+      await expect(
+        stUSDr.decreaseAllowance(regularAccounts[0].address, parseUnits('51')),
+      ).revertedWith('ERC20: decreased allowance below zero');
+    });
+
+    it('approve for 100 tokens then price is changed', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      const shares = parseUnits('1');
+      await setRoundData({ mockedAggregator }, 100);
+
+      await stUSDr.approve(regularAccounts[0].address, parseUnits('100'));
+
+      expect(
+        await stUSDr.allowance(owner.address, regularAccounts[0].address),
+      ).eq(parseUnits('100'));
+
+      await setRoundData({ mockedAggregator }, 150);
+
+      expect(
+        await stUSDr.allowance(owner.address, regularAccounts[0].address),
+      ).eq(parseUnits('100'));
+    });
+
+    it('approve for 100 tokens, increaseAllowance by 50 then price is changed', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      const shares = parseUnits('1');
+      await setRoundData({ mockedAggregator }, 100);
+
+      await stUSDr.approve(regularAccounts[0].address, parseUnits('100'));
+
+      expect(
+        await stUSDr.allowance(owner.address, regularAccounts[0].address),
+      ).eq(parseUnits('100'));
+
+      await stUSDr.increaseAllowance(
+        regularAccounts[0].address,
+        parseUnits('50'),
+      );
+
+      await setRoundData({ mockedAggregator }, 150);
+
+      expect(
+        await stUSDr.allowance(owner.address, regularAccounts[0].address),
+      ).eq(parseUnits('150'));
+    });
+
+    it('approve for 100 tokens, decreaseAllowance by 50 then price is changed', async () => {
+      const { owner, stUSDr, mTBILL, mockedAggregator, regularAccounts } =
+        await loadFixture(defaultDeploy);
+      const shares = parseUnits('1');
+      await setRoundData({ mockedAggregator }, 100);
+
+      await stUSDr.approve(regularAccounts[0].address, parseUnits('100'));
+
+      expect(
+        await stUSDr.allowance(owner.address, regularAccounts[0].address),
+      ).eq(parseUnits('100'));
+
+      await stUSDr.decreaseAllowance(
+        regularAccounts[0].address,
+        parseUnits('50'),
+      );
+
+      await setRoundData({ mockedAggregator }, 150);
+
+      expect(
+        await stUSDr.allowance(owner.address, regularAccounts[0].address),
+      ).eq(parseUnits('50'));
     });
   });
 

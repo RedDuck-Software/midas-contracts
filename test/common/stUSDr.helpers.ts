@@ -61,7 +61,6 @@ export const mint = async (
     ).to.not.reverted;
 
   const balanceAfter = await stUSDr.balanceOf(minter);
-  console.log(balanceAfter.toString());
   const balanceMTBILLAfter = await mTBILL.balanceOf(minter);
   const balanceMTBILLAfterContract = await mTBILL.balanceOf(stUSDr.address);
   const sharesAfter = await stUSDr.sharesOf(minter);
