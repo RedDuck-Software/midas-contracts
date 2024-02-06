@@ -16,26 +16,26 @@ import { defaultDeploy } from './fixtures';
 
 type CommonParams = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'stUSDr' | 'mTBILL' | 'owner'
+  'miUSD' | 'mTBILL' | 'owner'
 >;
 
 export const mint = async (
-  { mTBILL, stUSDr, owner }: CommonParams,
+  { mTBILL, miUSD, owner }: CommonParams,
   to: AccountOrContract,
   amountShares: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
   if (opt?.revertMessage) {
     await expect(
-      stUSDr.connect(opt?.from ?? owner).mint(getAccount(to), amountShares),
+      miUSD.connect(opt?.from ?? owner).mint(getAccount(to), amountShares),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   const minter = getAccount(opt?.from ?? owner);
-  const price = await stUSDr.getUnderlyingTokenPrice();
+  const price = await miUSD.getUnderlyingTokenPrice();
 
-  const balanceBefore = await stUSDr.balanceOf(minter);
+  const balanceBefore = await miUSD.balanceOf(minter);
 
   const expectedTokensMinted = BigNumber.from(amountShares)
     .mul(price)
@@ -43,29 +43,29 @@ export const mint = async (
   const expectedBalanceAfter = balanceBefore.add(expectedTokensMinted);
 
   const balanceMTBILLBefore = await mTBILL.balanceOf(minter);
-  const balanceMTBILLBeforeContract = await mTBILL.balanceOf(stUSDr.address);
-  const sharesBefore = await stUSDr.sharesOf(minter);
-  const totalSharesBefore = await stUSDr.totalShares();
-  const totalSupplyBefore = await stUSDr.totalSupply();
+  const balanceMTBILLBeforeContract = await mTBILL.balanceOf(miUSD.address);
+  const sharesBefore = await miUSD.sharesOf(minter);
+  const totalSharesBefore = await miUSD.totalShares();
+  const totalSupplyBefore = await miUSD.totalSupply();
 
   await expect(
-    stUSDr.connect(opt?.from ?? owner).mint(getAccount(to), amountShares),
+    miUSD.connect(opt?.from ?? owner).mint(getAccount(to), amountShares),
   )
     .to.emit(
-      stUSDr,
-      stUSDr.interface.events['TransferShares(address,address,uint256)'].name,
+      miUSD,
+      miUSD.interface.events['TransferShares(address,address,uint256)'].name,
     )
     .to.emit(
-      stUSDr,
-      stUSDr.interface.events['Transfer(address,address,uint256)'].name,
+      miUSD,
+      miUSD.interface.events['Transfer(address,address,uint256)'].name,
     ).to.not.reverted;
 
-  const balanceAfter = await stUSDr.balanceOf(minter);
+  const balanceAfter = await miUSD.balanceOf(minter);
   const balanceMTBILLAfter = await mTBILL.balanceOf(minter);
-  const balanceMTBILLAfterContract = await mTBILL.balanceOf(stUSDr.address);
-  const sharesAfter = await stUSDr.sharesOf(minter);
-  const totalSharesAfter = await stUSDr.totalShares();
-  const totalSupplyAfter = await stUSDr.totalSupply();
+  const balanceMTBILLAfterContract = await mTBILL.balanceOf(miUSD.address);
+  const sharesAfter = await miUSD.sharesOf(minter);
+  const totalSharesAfter = await miUSD.totalShares();
+  const totalSupplyAfter = await miUSD.totalSupply();
 
   expect(balanceAfter).eq(expectedBalanceAfter);
   expect(balanceMTBILLAfter).eq(balanceMTBILLBefore.sub(amountShares));
@@ -78,22 +78,22 @@ export const mint = async (
 };
 
 export const burn = async (
-  { mTBILL, stUSDr, owner }: CommonParams,
+  { mTBILL, miUSD, owner }: CommonParams,
   amountTokens: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
   if (opt?.revertMessage) {
     await expect(
-      stUSDr.connect(opt?.from ?? owner).burn(amountTokens),
+      miUSD.connect(opt?.from ?? owner).burn(amountTokens),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   const minter = getAccount(opt?.from ?? owner);
-  const price = await stUSDr.getUnderlyingTokenPrice();
+  const price = await miUSD.getUnderlyingTokenPrice();
 
-  const balanceBefore = await stUSDr.balanceOf(minter);
-  const sharesBefore = await stUSDr.sharesOf(minter);
+  const balanceBefore = await miUSD.balanceOf(minter);
+  const sharesBefore = await miUSD.sharesOf(minter);
 
   const expectedSharesBurned = BigNumber.from(amountTokens)
     .mul(parseUnits('1'))
@@ -102,26 +102,26 @@ export const burn = async (
   const expectedSharesAfter = sharesBefore.sub(expectedSharesBurned);
 
   const balanceMTBILLBefore = await mTBILL.balanceOf(minter);
-  const balanceMTBILLBeforeContract = await mTBILL.balanceOf(stUSDr.address);
-  const totalSharesBefore = await stUSDr.totalShares();
-  const totalSupplyBefore = await stUSDr.totalSupply();
+  const balanceMTBILLBeforeContract = await mTBILL.balanceOf(miUSD.address);
+  const totalSharesBefore = await miUSD.totalShares();
+  const totalSupplyBefore = await miUSD.totalSupply();
 
-  await expect(stUSDr.connect(opt?.from ?? owner).burn(amountTokens))
+  await expect(miUSD.connect(opt?.from ?? owner).burn(amountTokens))
     .to.emit(
-      stUSDr,
-      stUSDr.interface.events['TransferShares(address,address,uint256)'].name,
+      miUSD,
+      miUSD.interface.events['TransferShares(address,address,uint256)'].name,
     )
     .to.emit(
-      stUSDr,
-      stUSDr.interface.events['Transfer(address,address,uint256)'].name,
+      miUSD,
+      miUSD.interface.events['Transfer(address,address,uint256)'].name,
     ).to.not.reverted;
 
-  const balanceAfter = await stUSDr.balanceOf(minter);
+  const balanceAfter = await miUSD.balanceOf(minter);
   const balanceMTBILLAfter = await mTBILL.balanceOf(minter);
-  const balanceMTBILLAfterContract = await mTBILL.balanceOf(stUSDr.address);
-  const sharesAfter = await stUSDr.sharesOf(minter);
-  const totalSharesAfter = await stUSDr.totalShares();
-  const totalSupplyAfter = await stUSDr.totalSupply();
+  const balanceMTBILLAfterContract = await mTBILL.balanceOf(miUSD.address);
+  const sharesAfter = await miUSD.sharesOf(minter);
+  const totalSharesAfter = await miUSD.totalShares();
+  const totalSupplyAfter = await miUSD.totalSupply();
 
   expect(balanceAfter).eq(balanceBefore.sub(amountTokens));
   expect(balanceMTBILLAfter).eq(balanceMTBILLBefore.add(expectedSharesBurned));

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import "../stUSDr.sol";
+import "../miUSD.sol";
 
 //solhint-disable contract-name-camelcase
-contract stUSDrTest is stUSDr {
+contract miUSDTest is miUSD {
     function mintTest(address _receiver, uint256 _amountShares) external {
         _mint(_receiver, _amountShares);
     }

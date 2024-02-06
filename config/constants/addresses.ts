@@ -3,13 +3,14 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { ConfigPerNetwork } from '../types/index';
 
 export interface MidasAddresses {
-  depositVault: string;
-  redemptionVault: string;
+  depositVault?: string;
+  redemptionVault?: string;
   mTBILL: string;
+  miUSD?: string;
   etfDataFeed: string;
-  eurToUsdFeed: string;
+  eurToUsdFeed?: string;
   accessControl: string;
-  tokensReceiver: string;
+  tokensReceiver?: string;
 }
 
 export const midasAddressesPerNetwork: ConfigPerNetwork<
@@ -24,6 +25,16 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
     eurToUsdFeed: '0x6022a020Ca5c611304B9E97F37AEE0C38455081A',
     redemptionVault: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
     mTBILL: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
+  },
+  etherlink: {
+    miUSD: '0x3606A832B3901D0916Cca7B93109B7437147F39a',
+    tokensReceiver: '',
+    accessControl: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
+    depositVault: '',
+    etfDataFeed: '0xcbCf1e67F1988e2572a2A620321Aef2ff73369f0',
+    eurToUsdFeed: '',
+    redemptionVault: '',
+    mTBILL: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
   },
   sepolia: {
     tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',

@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import "./abstract/RebaseERC20.sol";
 
-contract stUSDr is RebaseERC20 {
+contract miUSD is RebaseERC20 {
     function initialize(
         address _ac,
         address _mTBILL,
@@ -14,10 +14,10 @@ contract stUSDr is RebaseERC20 {
     }
 
     function name() public pure override returns (string memory) {
-        return "stUSDr";
+        return "miUSD";
     }
 
     function symbol() public pure override returns (string memory) {
-        return "stUSDr";
+        return "miUSD";
     }
 }
