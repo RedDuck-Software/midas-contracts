@@ -10,6 +10,7 @@ import './tasks';
 
 import {
   ENV,
+  chainIds,
   getForkNetworkConfig,
   getHardhatNetworkConfig,
   getNetworkConfig,
@@ -49,7 +50,7 @@ const config: HardhatUserConfig = {
   networks: {
     main: getNetworkConfig('main', []),
     sepolia: getNetworkConfig('sepolia'),
-    etherlink: getNetworkConfig('etherlink'),
+    etherlink: getNetworkConfig('etherlink', []),
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),
@@ -64,6 +65,16 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        chainId: chainIds['etherlink'],
+        network: 'etherlink',
+        urls: {
+          apiURL: 'https://testnet-explorer.etherlink.com/api',
+          browserURL: 'https://testnet-explorer.etherlink.com',
+        },
+      },
+    ],
   },
   paths: {
     deploy: 'deploy/',

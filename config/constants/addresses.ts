@@ -27,14 +27,14 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
     mTBILL: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
   },
   etherlink: {
-    miUSD: '0x3606A832B3901D0916Cca7B93109B7437147F39a',
+    miUSD: '0xF804a646C034749b5484bF7dfE875F6A4F969840',
     tokensReceiver: '',
-    accessControl: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
+    accessControl: '0xA14fdaA5437150804fab13A1dBc53c0e5a37Ba3E',
     depositVault: '',
-    etfDataFeed: '0xcbCf1e67F1988e2572a2A620321Aef2ff73369f0',
+    etfDataFeed: '0xf4eC6BBF5CB55441bFD2a2Cf702B40A0Eb1d6e5d',
     eurToUsdFeed: '',
     redemptionVault: '',
-    mTBILL: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
+    mTBILL: '0x2a8c22E3b10036f3AEF5875d04f8441d4188b656',
   },
   sepolia: {
     tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',

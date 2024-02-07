@@ -34,6 +34,41 @@
       "address": "0x3606A832B3901D0916Cca7B93109B7437147F39a",
       "txHash": "0x6e701b3e97ee6a1aaa8402e41344fadacb76c1d9fad8016a5847b459ec190572",
       "kind": "transparent"
+    },
+    {
+      "address": "0x1C2757c1FeF1038428b5bEF062495ce94BBe92b2",
+      "txHash": "0xd90dd2e3cfd51ec8f2a28cec9d1c62bedae3f53668d43adfa0ba28f1616fe775",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xA14fdaA5437150804fab13A1dBc53c0e5a37Ba3E",
+      "txHash": "0x36be643e40196a47048ed841bdba7742b1c2e17e410b35c1ad365b20ff61d71a",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x6d62D3C3C8f9912890788b50299bF4D2C64823b6",
+      "txHash": "0xf18f4e5edadfa91c94aaa9d6337967aa1ee077e0737de77c66ff45aa52d3f0c5",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xDDFDa068cd7975690a3B272cFec3513B04A8bC1e",
+      "txHash": "0x3906d3ea19da96c7bee88c9d03eb66b7c8ee7dc21e407cc99b6549663b56a3fc",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xf4eC6BBF5CB55441bFD2a2Cf702B40A0Eb1d6e5d",
+      "txHash": "0xa30e2ee1838422fcdd2296ab1efcc4ce12d033817e0cd7b4bf2ae61247e8a1dd",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x2a8c22E3b10036f3AEF5875d04f8441d4188b656",
+      "txHash": "0xf80876d8102b76c2c33272feedacadd2322e1db9199289dfcc51d5b495e11547",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xF804a646C034749b5484bF7dfE875F6A4F969840",
+      "txHash": "0xab94862e13ce357643514f6a7ad17b8a0ca301374f5ec7f6c65bdc60ae37209c",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -641,6 +676,252 @@
           "t_uint8": {
             "label": "uint8",
             "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "7e636ea833efc2d62180aec4ebf533aa0e3127fa21e3ac414c73a1bf9c95368a": {
+      "address": "0x1b57176d6b2625C8f58841665D90e23EF711bC24",
+      "txHash": "0xe2486c3e371f07b3cc0174345f224326f82c16170a02619a05418d98c2f205ac",
+      "layout": {
+        "solcVersion": "0.8.9",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "accessControl",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_contract(MidasAccessControl)4529",
+            "contract": "WithMidasAccessControl",
+            "src": "contracts/access/WithMidasAccessControl.sol:24"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:116"
+          },
+          {
+            "label": "priceFeed",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_address",
+            "contract": "RebaseERC20",
+            "src": "contracts/abstract/RebaseERC20.sol:24"
+          },
+          {
+            "label": "underlyingToken",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_address",
+            "contract": "RebaseERC20",
+            "src": "contracts/abstract/RebaseERC20.sol:26"
+          },
+          {
+            "label": "_totalShares",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_uint256",
+            "contract": "RebaseERC20",
+            "src": "contracts/abstract/RebaseERC20.sol:28"
+          },
+          {
+            "label": "_shares",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "RebaseERC20",
+            "src": "contracts/abstract/RebaseERC20.sol:30"
+          },
+          {
+            "label": "_allowances",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "RebaseERC20",
+            "src": "contracts/abstract/RebaseERC20.sol:32"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(MidasAccessControl)4529": {
+            "label": "contract MidasAccessControl",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "2b499af7a7321c1e7b9ec2db8f73dad86e04c26aa50a90a7f8140610ad7e70ec": {
+      "address": "0xe786DA4812Fb91e8d69bC8047c5dB489c70cEa30",
+      "txHash": "0xb71b038d51ddce05cd7715b71002f38e9321757af584be46e4ea222a3bcbb047",
+      "layout": {
+        "solcVersion": "0.8.9",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "accessControl",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_contract(MidasAccessControl)3370",
+            "contract": "WithMidasAccessControl",
+            "src": "contracts/access/WithMidasAccessControl.sol:24"
+          },
+          {
+            "label": "_latestRoundId",
+            "offset": 22,
+            "slot": "0",
+            "type": "t_uint80",
+            "contract": "ManualAggregatorV3",
+            "src": "contracts/feeds/ManualAggregatorV3.sol:12"
+          },
+          {
+            "label": "_roundData",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_uint80,t_struct(RoundData)3564_storage)",
+            "contract": "ManualAggregatorV3",
+            "src": "contracts/feeds/ManualAggregatorV3.sol:21"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(MidasAccessControl)3370": {
+            "label": "contract MidasAccessControl",
+            "numberOfBytes": "20"
+          },
+          "t_int256": {
+            "label": "int256",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint80,t_struct(RoundData)3564_storage)": {
+            "label": "mapping(uint80 => struct ManualAggregatorV3.RoundData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoundData)3564_storage": {
+            "label": "struct ManualAggregatorV3.RoundData",
+            "members": [
+              {
+                "label": "answer",
+                "type": "t_int256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "startedAt",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "updatedAt",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "answeredInRound",
+                "type": "t_uint80",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          },
+          "t_uint80": {
+            "label": "uint80",
+            "numberOfBytes": "10"
           }
         }
       }

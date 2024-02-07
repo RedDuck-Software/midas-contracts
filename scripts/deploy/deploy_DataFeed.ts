@@ -24,7 +24,7 @@ import { AggregatorV3Mock__factory } from '../../typechain-types';
 const aggregatorsByNetwork: Record<number, string> = {
   1: '0x32d1463eb53b73c095625719afa544d5426354cb',
   11155111: '',
-  128123: '0x0aC07510A254ED6CDE1B2C72F9965206022B98FA',
+  128123: '0x6d62D3C3C8f9912890788b50299bF4D2C64823b6',
 };
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {

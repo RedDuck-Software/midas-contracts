@@ -32,7 +32,6 @@ contract ManualAggregatorV3 is AggregatorV3Interface, WithMidasAccessControl {
         uint80 round,
         RoundData calldata roundData
     ) external onlyRole(ST_USDR_ADMIN_ROLE, msg.sender) {
-        require(round > _latestRoundId, "!round");
         _latestRoundId = round;
         _roundData[round] = roundData;
     }
