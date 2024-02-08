@@ -925,6 +925,116 @@
           }
         }
       }
+    },
+    "393bdde5ccc516eedc761b90893ce3e9204b6cb6ca3bbe272cd2302aee7137a3": {
+      "address": "0xb93B94C99C6DF85cC9faA338e68C27c72484251E",
+      "txHash": "0x8c84aa8c80a4ac16e150c23b809fa6bc85147e34120a50b5c973e1a3f409325a",
+      "layout": {
+        "solcVersion": "0.8.9",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "accessControl",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_contract(MidasAccessControl)3370",
+            "contract": "WithMidasAccessControl",
+            "src": "contracts/access/WithMidasAccessControl.sol:24"
+          },
+          {
+            "label": "_latestRoundId",
+            "offset": 22,
+            "slot": "0",
+            "type": "t_uint80",
+            "contract": "ManualAggregatorV3",
+            "src": "contracts/feeds/ManualAggregatorV3.sol:15"
+          },
+          {
+            "label": "_roundData",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_uint80,t_struct(RoundData)3569_storage)",
+            "contract": "ManualAggregatorV3",
+            "src": "contracts/feeds/ManualAggregatorV3.sol:24"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(MidasAccessControl)3370": {
+            "label": "contract MidasAccessControl",
+            "numberOfBytes": "20"
+          },
+          "t_int256": {
+            "label": "int256",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint80,t_struct(RoundData)3569_storage)": {
+            "label": "mapping(uint80 => struct ManualAggregatorV3.RoundData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoundData)3569_storage": {
+            "label": "struct ManualAggregatorV3.RoundData",
+            "members": [
+              {
+                "label": "answer",
+                "type": "t_int256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "startedAt",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "updatedAt",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "answeredInRound",
+                "type": "t_uint80",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          },
+          "t_uint80": {
+            "label": "uint80",
+            "numberOfBytes": "10"
+          }
+        }
+      }
     }
   }
 }

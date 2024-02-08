@@ -9,6 +9,9 @@ import "../libraries/DecimalsCorrectionLibrary.sol";
 import "../interfaces/IDataFeed.sol";
 
 contract ManualAggregatorV3 is AggregatorV3Interface, WithMidasAccessControl {
+    bytes32 public constant MANUAL_AGGREGATOR_KEEPER =
+        keccak256("MANUAL_AGGREGATOR_KEEPER");
+
     uint80 private _latestRoundId;
 
     struct RoundData {
@@ -31,7 +34,7 @@ contract ManualAggregatorV3 is AggregatorV3Interface, WithMidasAccessControl {
     function setLatestRoundData(
         uint80 round,
         RoundData calldata roundData
-    ) external onlyRole(ST_USDR_ADMIN_ROLE, msg.sender) {
+    ) external onlyRole(MANUAL_AGGREGATOR_KEEPER, msg.sender) {
         _latestRoundId = round;
         _roundData[round] = roundData;
     }

@@ -49,7 +49,7 @@ describe('miUSD', function () {
   });
 
   describe('pause()', () => {
-    it('should fail: call from address without ST_USDR_ADMIN_ROLE role', async () => {
+    it('should fail: call from address without MI_USD_ADMIN_ROLE role', async () => {
       const { miUSD, regularAccounts } = await loadFixture(defaultDeploy);
       const caller = regularAccounts[0];
 
@@ -79,7 +79,7 @@ describe('miUSD', function () {
   });
 
   describe('unpause()', () => {
-    it('should fail: call from address without ST_USDR_ADMIN_ROLE role', async () => {
+    it('should fail: call from address without MI_USD_ADMIN_ROLE role', async () => {
       const { owner, miUSD, regularAccounts } = await loadFixture(
         defaultDeploy,
       );

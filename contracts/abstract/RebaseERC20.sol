@@ -272,9 +272,7 @@ abstract contract RebaseERC20 is
         return (_sharesAmount * getUnderlyingTokenPrice()) / DIVIDER;
     }
 
-    function pauseAdminRole() public view virtual override returns (bytes32) {
-        return ST_USDR_ADMIN_ROLE;
-    }
+    function pauseAdminRole() public view virtual override returns (bytes32);
 
     function getSharesAmount(
         uint256 _tokenAmount

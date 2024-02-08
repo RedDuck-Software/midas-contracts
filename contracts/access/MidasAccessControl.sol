@@ -31,9 +31,10 @@ contract MidasAccessControl is
      * @param roles array of bytes32 roles
      * @param addresses array of user addresses
      */
-    function grantRoleMult(bytes32[] memory roles, address[] memory addresses)
-        external
-    {
+    function grantRoleMult(
+        bytes32[] memory roles,
+        address[] memory addresses
+    ) external {
         require(roles.length == addresses.length, "MAC: mismatch arrays");
         address sender = msg.sender;
 
@@ -50,9 +51,10 @@ contract MidasAccessControl is
      * @param roles array of bytes32 roles
      * @param addresses array of user addresses
      */
-    function revokeRoleMult(bytes32[] memory roles, address[] memory addresses)
-        external
-    {
+    function revokeRoleMult(
+        bytes32[] memory roles,
+        address[] memory addresses
+    ) external {
         require(roles.length == addresses.length, "MAC: mismatch arrays");
         address sender = msg.sender;
 
@@ -70,7 +72,7 @@ contract MidasAccessControl is
 
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
 
-        _setupRole(ST_USDR_ADMIN_ROLE, admin);
+        _setupRole(MI_USD_ADMIN_ROLE, admin);
 
         _setupRole(DEPOSIT_VAULT_ADMIN_ROLE, admin);
         _setupRole(REDEMPTION_VAULT_ADMIN_ROLE, admin);

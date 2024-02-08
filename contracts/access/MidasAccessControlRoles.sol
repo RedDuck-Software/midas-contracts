@@ -52,8 +52,7 @@ abstract contract MidasAccessControlRoles {
     /**
      * @notice actor that have admin rights in miUSD contract
      */
-    bytes32 public constant ST_USDR_ADMIN_ROLE =
-        keccak256("ST_USDR_ADMIN_ROLE");
+    bytes32 public constant MI_USD_ADMIN_ROLE = keccak256("MI_USD_ADMIN_ROLE");
 
     /**
      * @notice actor that is greenlisted

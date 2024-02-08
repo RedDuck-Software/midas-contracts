@@ -2,7 +2,10 @@ import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { MANUAL_AGGREGATOR_CONTRACT_NAME } from '../../config';
+import {
+  MANUAL_AGGREGATOR_CONTRACT_NAME,
+  MIDAS_AC_CONTRACT_NAME,
+} from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
   logDeployProxy,
@@ -24,6 +27,21 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     },
   );
   console.log('Upgraded ManualAggregator:', deployment.address);
+
+  console.log('grant role');
+
+  const ac = await hre.ethers.getContractAt(
+    MIDAS_AC_CONTRACT_NAME,
+    addresses?.accessControl ?? '',
+    deployer,
+  );
+
+  const tx = await ac.grantRole(
+    await deployment.MANUAL_AGGREGATOR_KEEPER(),
+    '0x5Dfa1A1A58e3dCaEF8B610e55181eBcDd4495718',
+  );
+
+  console.log('role granted', tx.hash);
 
   await logDeployProxy(
     hre,

@@ -20,4 +20,8 @@ contract miUSD is RebaseERC20 {
     function symbol() public pure override returns (string memory) {
         return "miUSD";
     }
+
+    function pauseAdminRole() public view virtual override returns (bytes32) {
+        return MI_USD_ADMIN_ROLE;
+    }
 }
