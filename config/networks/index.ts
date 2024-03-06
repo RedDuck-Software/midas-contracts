@@ -7,6 +7,7 @@ import { ConfigPerNetwork, Network, RpcUrl } from '../types';
 const { ALCHEMY_KEY, INFURA_KEY, MNEMONIC_DEV, MNEMONIC_PROD } = ENV;
 
 export const rpcUrls: ConfigPerNetwork<RpcUrl> = {
+  goerli: `https://goerli.infura.io/v3/${INFURA_KEY}`,
   main: ALCHEMY_KEY
     ? `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
     : `https://mainnet.infura.io/v3/${INFURA_KEY}`,
@@ -19,6 +20,7 @@ export const rpcUrls: ConfigPerNetwork<RpcUrl> = {
 };
 
 export const gasPrices: ConfigPerNetwork<number | undefined> = {
+  goerli: undefined,
   etherlink: undefined,
   main: 1 * GWEI,
   sepolia: undefined,
@@ -27,6 +29,7 @@ export const gasPrices: ConfigPerNetwork<number | undefined> = {
 };
 
 export const chainIds: ConfigPerNetwork<number> = {
+  goerli: 5,
   main: 1,
   etherlink: 128123,
   sepolia: 11155111,
@@ -35,6 +38,7 @@ export const chainIds: ConfigPerNetwork<number> = {
 };
 
 export const mnemonics: ConfigPerNetwork<string | undefined> = {
+  goerli: MNEMONIC_DEV,
   etherlink: MNEMONIC_PROD,
   main: MNEMONIC_PROD,
   sepolia: MNEMONIC_DEV,
@@ -45,6 +49,7 @@ export const mnemonics: ConfigPerNetwork<string | undefined> = {
 export const gases: ConfigPerNetwork<number | undefined> = {
   etherlink: undefined,
   main: undefined,
+  goerli: undefined,
   sepolia: 1_250_000,
   hardhat: undefined,
   localhost: 1_250_000,
@@ -52,6 +57,7 @@ export const gases: ConfigPerNetwork<number | undefined> = {
 
 export const timeouts: ConfigPerNetwork<number | undefined> = {
   main: undefined,
+  goerli: undefined,
   etherlink: undefined,
   sepolia: 999999,
   hardhat: undefined,
@@ -61,6 +67,7 @@ export const timeouts: ConfigPerNetwork<number | undefined> = {
 export const blockGasLimits: ConfigPerNetwork<number | undefined> = {
   main: 300 * 10 ** 6,
   sepolia: undefined,
+  goerli: undefined,
   etherlink: undefined,
   hardhat: 300 * 10 ** 6,
   localhost: undefined,
@@ -71,6 +78,7 @@ export const initialBasesFeePerGas: ConfigPerNetwork<number | undefined> = {
   sepolia: undefined,
   etherlink: undefined,
   hardhat: 0,
+  goerli: undefined,
   localhost: undefined,
 };
 

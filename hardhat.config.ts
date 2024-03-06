@@ -38,6 +38,7 @@ const config: HardhatUserConfig = {
       1: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       hardhat: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       localhost: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      goerli: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       sepolia: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       etherlink: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
     },
@@ -51,6 +52,7 @@ const config: HardhatUserConfig = {
     main: getNetworkConfig('main', []),
     sepolia: getNetworkConfig('sepolia'),
     etherlink: getNetworkConfig('etherlink', []),
+    goerli: getNetworkConfig('goerli', []),
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),

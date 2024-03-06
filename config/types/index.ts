@@ -3,6 +3,7 @@ type RpcNetwork = NetworkBase | 'mainnet';
 export type Network =
   | NetworkBase
   | 'main'
+  | 'goerli'
   | 'hardhat'
   | 'localhost'
   | 'etherlink';

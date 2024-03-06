@@ -16,6 +16,15 @@ export interface MidasAddresses {
 export const midasAddressesPerNetwork: ConfigPerNetwork<
   MidasAddresses | undefined
 > = {
+  goerli: {
+    tokensReceiver: '',
+    depositVault: '',
+    redemptionVault: '',
+    mTBILL: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
+    etfDataFeed: '0x0aC07510A254ED6CDE1B2C72F9965206022B98FA',
+    eurToUsdFeed: '',
+    accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
+  },
   main: {
     tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
