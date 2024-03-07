@@ -1,4 +1,4 @@
-import './mTBILL';
+import './stUSD';
 import './ac';
 import './depositVault';
 import './redemptionVault';

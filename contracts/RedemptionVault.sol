@@ -10,7 +10,7 @@ import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./interfaces/IRedemptionVault.sol";
-import "./interfaces/IMTbill.sol";
+import "./interfaces/ISTUsd.sol";
 import "./interfaces/IDataFeed.sol";
 
 import "./abstract/ManageableVault.sol";
@@ -20,7 +20,7 @@ import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
  * @title RedemptionVault
- * @notice Smart contract that handles mTBILL redemptions
+ * @notice Smart contract that handles stUSD redemptions
  * @author RedDuck Software
  */
 contract RedemptionVault is ManageableVault, IRedemptionVault {
@@ -42,28 +42,27 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _mTBILL address of mTBILL token
-     * @param _tokensReceiver address of mTBILL token receiver
+     * @param _stUSD address of stUSD token
+     * @param _tokensReceiver address of stUSD token receiver
      */
     function initialize(
         address _ac,
-        address _mTBILL,
+        address _stUSD,
         address _tokensReceiver
     ) external initializer {
-        __ManageableVault_init(_ac, _mTBILL, _tokensReceiver);
+        __ManageableVault_init(_ac, _stUSD, _tokensReceiver);
     }
 
     /**
      * @inheritdoc IRedemptionVault
-     * @dev transfers 'amountTBillIn' amount from user
+     * @dev transfers 'amountSTUsdIn' amount from user
      * to `tokensReceiver`
      */
-    function redeem(address tokenOut, uint256 amountTBillIn)
-        external
-        onlyGreenlisted(msg.sender)
-        whenNotPaused
-    {
-        require(amountTBillIn > 0, "RV: 0 amount");
+    function redeem(
+        address tokenOut,
+        uint256 amountSTUsdIn
+    ) external onlyGreenlisted(msg.sender) whenNotPaused {
+        require(amountSTUsdIn > 0, "RV: 0 amount");
 
         address user = msg.sender;
 
@@ -71,9 +70,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         uint256 requestId = lastRequestId.current();
 
         _requireTokenExists(tokenOut);
-        _tokenTransferFromUser(address(mTBILL), amountTBillIn);
+        _tokenTransferFromUser(address(stUSD), amountSTUsdIn);
 
-        emit Redeem(requestId, user, tokenOut, amountTBillIn);
+        emit Redeem(requestId, user, tokenOut, amountSTUsdIn);
     }
 
     /**

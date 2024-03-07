@@ -13,7 +13,7 @@ import {
   // eslint-disable-next-line camelcase
   RedemptionVault__factory,
   // eslint-disable-next-line camelcase
-  MTBILL__factory,
+  StUSD__factory,
 } from '../../typechain-types';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
@@ -41,7 +41,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       owner,
     ),
     // eslint-disable-next-line camelcase
-    mTBILL: MTBILL__factory.connect(addresses.mTBILL, owner),
+    stUSD: StUSD__factory.connect(addresses.stUSD, owner),
     owner,
   });
 

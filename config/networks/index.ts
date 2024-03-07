@@ -28,7 +28,7 @@ export const chainIds: ConfigPerNetwork<number> = {
   main: 1,
   sepolia: 11155111,
   hardhat: 31337,
-  localhost: 31337,
+  localhost: 1,
 };
 
 export const mnemonics: ConfigPerNetwork<string | undefined> = {

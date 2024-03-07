@@ -10,7 +10,7 @@ import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./interfaces/IDepositVault.sol";
-import "./interfaces/IMTbill.sol";
+import "./interfaces/ISTUsd.sol";
 import "./interfaces/IDataFeed.sol";
 
 import "./access/Greenlistable.sol";
@@ -20,7 +20,7 @@ import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
  * @title DepositVault
- * @notice Smart contract that handles mTBILL minting
+ * @notice Smart contract that handles stUSD minting
  * @author RedDuck Software
  */
 contract DepositVault is ManageableVault, IDepositVault {
@@ -62,21 +62,21 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _mTBILL address of mTBILL token
+     * @param _stUSD address of stUSD token
      * @param _eurUsdDataFeed address of CL`s data feed EUR/USD
      * @param _minAmountToDepositInEuro initial value for minAmountToDepositInEuro
      * @param _usdReceiver address of usd tokens receiver
      */
     function initialize(
         address _ac,
-        address _mTBILL,
+        address _stUSD,
         address _eurUsdDataFeed,
         uint256 _minAmountToDepositInEuro,
         address _usdReceiver
     ) external initializer {
         require(_eurUsdDataFeed != address(0), "zero address");
 
-        __ManageableVault_init(_ac, _mTBILL, _usdReceiver);
+        __ManageableVault_init(_ac, _stUSD, _usdReceiver);
         minAmountToDepositInEuro = _minAmountToDepositInEuro;
         eurUsdDataFeed = IDataFeed(_eurUsdDataFeed);
     }
@@ -88,11 +88,10 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param tokenIn address of token to deposit.
      * @param amountUsdIn amount of token to deposit in 10**18 decimals.
      */
-    function deposit(address tokenIn, uint256 amountUsdIn)
-        external
-        onlyGreenlisted(msg.sender)
-        whenNotPaused
-    {
+    function deposit(
+        address tokenIn,
+        uint256 amountUsdIn
+    ) external onlyGreenlisted(msg.sender) whenNotPaused {
         address user = msg.sender;
 
         _requireTokenExists(tokenIn);
@@ -137,7 +136,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function minAmountToDepositInUsd() public view returns (uint256) {
         return
             (minAmountToDepositInEuro * eurUsdDataFeed.getDataInBase18()) /
-            10**18;
+            10 ** 18;
     }
 
     /**
@@ -152,10 +151,10 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param user user address
      * @param amountUsdIn amount of USD
      */
-    function _validateAmountUsdIn(address user, uint256 amountUsdIn)
-        internal
-        view
-    {
+    function _validateAmountUsdIn(
+        address user,
+        uint256 amountUsdIn
+    ) internal view {
         if (totalDeposited[user] != 0) return;
         require(
             amountUsdIn >= minAmountToDepositInUsd(),

@@ -37,7 +37,7 @@ interface IDepositVault is IManageableVault {
      * Transfers usd token from the user.
      * Then request should be validated off-chain and if
      * everything is okay, admin should mint necessary amount
-     * of mTBILL token back to user
+     * of stUSD token back to user
      * @param tokenIn address of USD token in
      * @param amountIn amount of `tokenIn` that will be taken from user
      */

@@ -21,7 +21,7 @@ type CommonParams = Pick<
 
 type CommonParamsDeposit = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'depositVault' | 'owner' | 'mTBILL'
+  'depositVault' | 'owner' | 'stUSD'
 >;
 
 export const setMinAmountToDepositTest = async (

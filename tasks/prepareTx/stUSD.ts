@@ -6,7 +6,7 @@ import { getCurrentAddresses } from '../../config/constants/addresses';
 
 export const getMTBill = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);
-  return await hre.ethers.getContractAt('mTBILL', addresses?.mTBILL ?? '');
+  return await hre.ethers.getContractAt('mTBILL', addresses?.stUSD ?? '');
 };
 
 task('prepareTx:mTBILL:mint')

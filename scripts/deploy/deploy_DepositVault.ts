@@ -20,7 +20,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     await hre.ethers.getContractFactory(DEPOSIT_VAULT_CONTRACT_NAME, owner),
     [
       addresses?.accessControl,
-      addresses?.mTBILL,
+      addresses?.stUSD,
       addresses?.eurToUsdFeed,
       hre.ethers.utils.parseUnits('100000'),
       addresses?.tokensReceiver,

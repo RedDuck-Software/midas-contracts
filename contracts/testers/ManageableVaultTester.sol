@@ -6,18 +6,18 @@ import "../abstract/ManageableVault.sol";
 contract ManageableVaultTester is ManageableVault {
     function initialize(
         address _accessControl,
-        address _mTbill,
+        address _stUSD,
         address _tokensReceiver
     ) external initializer {
-        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver);
+        __ManageableVault_init(_accessControl, _stUSD, _tokensReceiver);
     }
 
     function initializeWithoutInitializer(
         address _accessControl,
-        address _mTbill,
+        address _stUSD,
         address _tokensReceiver
     ) external {
-        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver);
+        __ManageableVault_init(_accessControl, _stUSD, _tokensReceiver);
     }
 
     function vaultRole() public view virtual override returns (bytes32) {}

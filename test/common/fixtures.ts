@@ -25,7 +25,7 @@ import {
   // eslint-disable-next-line camelcase
   RedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
-  MTBILLTest__factory,
+  StUSDTest__factory,
   // eslint-disable-next-line camelcase
   WithMidasAccessControlTester__factory,
   // eslint-disable-next-line camelcase
@@ -45,9 +45,9 @@ export const defaultDeploy = async () => {
   ).deploy();
   await accessControl.initialize();
 
-  const mTBILL = await new MTBILLTest__factory(owner).deploy();
-  await expect(mTBILL.initialize(ethers.constants.AddressZero)).to.be.reverted;
-  await mTBILL.initialize(accessControl.address);
+  const stUSD = await new StUSDTest__factory(owner).deploy();
+  await expect(stUSD.initialize(ethers.constants.AddressZero)).to.be.reverted;
+  await stUSD.initialize(accessControl.address);
 
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
   const mockedAggregatorDecimals = await mockedAggregator.decimals();
@@ -78,7 +78,7 @@ export const defaultDeploy = async () => {
   await expect(
     depositVault.initialize(
       ethers.constants.AddressZero,
-      mTBILL.address,
+      stUSD.address,
       eurToUsdDataFeed.address,
       0,
       tokensReceiver.address,
@@ -96,7 +96,7 @@ export const defaultDeploy = async () => {
   await expect(
     depositVault.initialize(
       accessControl.address,
-      mTBILL.address,
+      stUSD.address,
       ethers.constants.AddressZero,
       0,
       tokensReceiver.address,
@@ -105,7 +105,7 @@ export const defaultDeploy = async () => {
   await expect(
     depositVault.initialize(
       accessControl.address,
-      mTBILL.address,
+      stUSD.address,
       eurToUsdDataFeed.address,
       0,
       ethers.constants.AddressZero,
@@ -113,7 +113,7 @@ export const defaultDeploy = async () => {
   ).to.be.reverted;
   await depositVault.initialize(
     accessControl.address,
-    mTBILL.address,
+    stUSD.address,
     eurToUsdDataFeed.address,
     0,
     tokensReceiver.address,
@@ -126,7 +126,7 @@ export const defaultDeploy = async () => {
   await expect(
     redemptionVault.initialize(
       ethers.constants.AddressZero,
-      mTBILL.address,
+      stUSD.address,
       tokensReceiver.address,
     ),
   ).to.be.reverted;
@@ -140,14 +140,14 @@ export const defaultDeploy = async () => {
   await expect(
     redemptionVault.initialize(
       accessControl.address,
-      mTBILL.address,
+      stUSD.address,
       ethers.constants.AddressZero,
     ),
   ).to.be.reverted;
 
   await redemptionVault.initialize(
     accessControl.address,
-    mTBILL.address,
+    stUSD.address,
     tokensReceiver.address,
   );
 
@@ -189,7 +189,7 @@ export const defaultDeploy = async () => {
     depositVault,
     owner,
     redemptionVault,
-    mTBILL,
+    stUSD: stUSD,
   });
 
   // role granting testers
@@ -211,7 +211,7 @@ export const defaultDeploy = async () => {
     redemptionVault,
     aggregatorEur: mockedAggregatorEur,
     dataFeedEur: eurToUsdDataFeed,
-    mTBILL,
+    stUSD: stUSD,
     minAmountToDeposit: '0',
     tokensReceiver: tokensReceiver.address,
   });
@@ -247,7 +247,7 @@ export const defaultDeploy = async () => {
   );
 
   return {
-    mTBILL,
+    stUSD,
     accessControl,
     wAccessControlTester,
     roles,

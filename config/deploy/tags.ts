@@ -10,8 +10,8 @@ export const MIDAS_AC_CONTRACT_NAME = 'MidasAccessControl';
 export const REDEMPTION_VAULT_DEPLOY_TAG = 'RedemptionVault';
 export const REDEMPTION_VAULT_CONTRACT_NAME = 'RedemptionVault';
 
-export const ST_USD_DEPLOY_TAG = 'mTBILL';
-export const M_TBILL_CONTRACT_NAME = 'mTBILL';
+export const ST_USD_DEPLOY_TAG = 'stUSD';
+export const ST_USD_CONTRACT_NAME = 'stUSD';
 
 export const GRANT_ROLES_TAG = 'GANT_ROLES';
 

@@ -7,11 +7,11 @@ import { defaultDeploy } from './fixtures';
 
 type CommonParams = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'mTBILL' | 'owner'
+  'stUSD' | 'owner'
 >;
 
 export const setMetadataTest = async (
-  { mTBILL, owner }: CommonParams,
+  { stUSD, owner }: CommonParams,
   key: string,
   value: string,
   opt?: OptionalCommonParams,
@@ -21,20 +21,20 @@ export const setMetadataTest = async (
 
   if (opt?.revertMessage) {
     await expect(
-      mTBILL.connect(opt?.from ?? owner).setMetadata(keyBytes32, valueBytes),
+      stUSD.connect(opt?.from ?? owner).setMetadata(keyBytes32, valueBytes),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   await expect(
-    mTBILL.connect(opt?.from ?? owner).setMetadata(keyBytes32, valueBytes),
+    stUSD.connect(opt?.from ?? owner).setMetadata(keyBytes32, valueBytes),
   ).not.reverted;
 
-  expect(await mTBILL.metadata(keyBytes32)).eq(valueBytes);
+  expect(await stUSD.metadata(keyBytes32)).eq(valueBytes);
 };
 
 export const mint = async (
-  { mTBILL, owner }: CommonParams,
+  { stUSD, owner }: CommonParams,
   to: Account,
   amount: BigNumberish,
   opt?: OptionalCommonParams,
@@ -43,25 +43,25 @@ export const mint = async (
 
   if (opt?.revertMessage) {
     await expect(
-      mTBILL.connect(opt?.from ?? owner).mint(to, amount),
+      stUSD.connect(opt?.from ?? owner).mint(to, amount),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  const balanceBefore = await mTBILL.balanceOf(to);
+  const balanceBefore = await stUSD.balanceOf(to);
 
-  await expect(mTBILL.connect(owner).mint(to, amount)).to.emit(
-    mTBILL,
-    mTBILL.interface.events['Transfer(address,address,uint256)'].name,
+  await expect(stUSD.connect(owner).mint(to, amount)).to.emit(
+    stUSD,
+    stUSD.interface.events['Transfer(address,address,uint256)'].name,
   ).to.not.reverted;
 
-  const balanceAfter = await mTBILL.balanceOf(to);
+  const balanceAfter = await stUSD.balanceOf(to);
 
   expect(balanceAfter.sub(balanceBefore)).eq(amount);
 };
 
 export const burn = async (
-  { mTBILL, owner }: CommonParams,
+  { stUSD, owner }: CommonParams,
   from: Account,
   amount: BigNumberish,
   opt?: OptionalCommonParams,
@@ -70,19 +70,19 @@ export const burn = async (
 
   if (opt?.revertMessage) {
     await expect(
-      mTBILL.connect(opt?.from ?? owner).burn(from, amount),
+      stUSD.connect(opt?.from ?? owner).burn(from, amount),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  const balanceBefore = await mTBILL.balanceOf(from);
+  const balanceBefore = await stUSD.balanceOf(from);
 
-  await expect(mTBILL.connect(owner).burn(from, amount)).to.emit(
-    mTBILL,
-    mTBILL.interface.events['Transfer(address,address,uint256)'].name,
+  await expect(stUSD.connect(owner).burn(from, amount)).to.emit(
+    stUSD,
+    stUSD.interface.events['Transfer(address,address,uint256)'].name,
   ).to.not.reverted;
 
-  const balanceAfter = await mTBILL.balanceOf(from);
+  const balanceAfter = await stUSD.balanceOf(from);
 
   expect(balanceBefore.sub(balanceAfter)).eq(amount);
 };

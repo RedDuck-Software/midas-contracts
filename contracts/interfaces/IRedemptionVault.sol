@@ -23,11 +23,11 @@ interface IRedemptionVault is IManageableVault {
     );
 
     /**
-     * @notice Transfers mTBILL from the user to the admin.
+     * @notice Transfers stUSD from the user to the admin.
      * After that admin should validate the redemption and transfer
      * selected `tokenOut` back to user
      * @param tokenOut stable coin token address to redeem to
-     * @param amountTBillIn amount of mTBILL to redeem
+     * @param amountSTUsdIn amount of stUSD to redeem
      */
-    function redeem(address tokenOut, uint256 amountTBillIn) external;
+    function redeem(address tokenOut, uint256 amountSTUsdIn) external;
 }

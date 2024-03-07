@@ -8,7 +8,7 @@ import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgrade
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "../interfaces/IManageableVault.sol";
-import "../interfaces/IMTbill.sol";
+import "../interfaces/ISTUsd.sol";
 import "../interfaces/IDataFeed.sol";
 
 import "../access/Greenlistable.sol";
@@ -37,9 +37,9 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
      */
     uint256 public constant ONE_HUNDRED_PERCENT = 100 * 100;
     /**
-     * @notice mTBILL token
+     * @notice stUSD token
      */
-    IMTbill public mTBILL;
+    ISTUsd public stUSD;
 
     /**
      * @notice address to which USD and mTokens will be sent
@@ -62,20 +62,20 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     /**
      * @dev upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _mTBILL address of mTBILL token
+     * @param _stUSD address of stUSD token
      * @param _tokensReceiver address to which USD and mTokens will be sent
      */
     // solhint-disable func-name-mixedcase
     function __ManageableVault_init(
         address _ac,
-        address _mTBILL,
+        address _stUSD,
         address _tokensReceiver
     ) internal onlyInitializing {
-        require(_mTBILL != address(0), "zero address");
+        require(_stUSD != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
         require(_tokensReceiver != address(this), "invalid address");
 
-        mTBILL = IMTbill(_mTBILL);
+        stUSD = ISTUsd(_stUSD);
         __Greenlistable_init(_ac);
         __Pausable_init(_ac);
 

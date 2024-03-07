@@ -10,10 +10,11 @@ import { redeem } from './common/redemption-vault.helpers';
 
 describe('RedemptionVault', function () {
   it('deployment', async () => {
-    const { redemptionVault, mTBILL, tokensReceiver, roles } =
-      await loadFixture(defaultDeploy);
+    const { redemptionVault, stUSD, tokensReceiver, roles } = await loadFixture(
+      defaultDeploy,
+    );
 
-    expect(await redemptionVault.mTBILL()).eq(mTBILL.address);
+    expect(await redemptionVault.stUSD()).eq(stUSD.address);
 
     expect(await redemptionVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
@@ -42,17 +43,17 @@ describe('RedemptionVault', function () {
 
   describe('redeem()', () => {
     it('should fail: call from address without GREENLISTED_ROLE role', async () => {
-      const { redemptionVault, regularAccounts, owner, mTBILL, stableCoins } =
+      const { redemptionVault, regularAccounts, owner, stUSD, stableCoins } =
         await loadFixture(defaultDeploy);
 
-      await redeem({ redemptionVault, owner, mTBILL }, stableCoins.dai, 0, {
+      await redeem({ redemptionVault, owner, stUSD }, stableCoins.dai, 0, {
         revertMessage: acErrors.WMAC_HASNT_ROLE,
         from: regularAccounts[0],
       });
     });
 
     it('should fail: when 0 amount passed', async () => {
-      const { owner, redemptionVault, accessControl, stableCoins, mTBILL } =
+      const { owner, redemptionVault, accessControl, stableCoins, stUSD } =
         await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: redemptionVault, owner },
@@ -64,13 +65,13 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await redeem({ redemptionVault, owner, mTBILL }, stableCoins.dai, 0, {
+      await redeem({ redemptionVault, owner, stUSD }, stableCoins.dai, 0, {
         revertMessage: 'RV: 0 amount',
       });
     });
 
-    it('should fail: when mTBILL allowance is insufficient', async () => {
-      const { owner, redemptionVault, accessControl, stableCoins, mTBILL } =
+    it('should fail: when stUSD allowance is insufficient', async () => {
+      const { owner, redemptionVault, accessControl, stableCoins, stUSD } =
         await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: redemptionVault, owner },
@@ -82,7 +83,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
       );
 
-      await redeem({ redemptionVault, owner, mTBILL }, stableCoins.dai, 1, {
+      await redeem({ redemptionVault, owner, stUSD }, stableCoins.dai, 1, {
         revertMessage: 'ERC20: insufficient allowance',
       });
     });
@@ -95,7 +96,7 @@ describe('RedemptionVault', function () {
         regularAccounts,
         manualFulfillmentToken,
         stableCoins,
-        mTBILL,
+        stUSD,
       } = await loadFixture(defaultDeploy);
       await pauseVault(redemptionVault);
       await greenList(
@@ -106,11 +107,11 @@ describe('RedemptionVault', function () {
         { vault: redemptionVault, owner },
         stableCoins.dai,
       );
-      await mintToken(mTBILL, regularAccounts[0].address, 1);
-      await approveBase18(owner, mTBILL, redemptionVault, 1);
+      await mintToken(stUSD, regularAccounts[0].address, 1);
+      await approveBase18(owner, stUSD, redemptionVault, 1);
 
       await redeem(
-        { redemptionVault, owner, mTBILL },
+        { redemptionVault, owner, stUSD },
         manualFulfillmentToken,
         1,
         {
@@ -121,7 +122,7 @@ describe('RedemptionVault', function () {
     });
 
     it('is on pause but admin can do everything', async () => {
-      const { owner, redemptionVault, accessControl, stableCoins, mTBILL } =
+      const { owner, redemptionVault, accessControl, stableCoins, stUSD } =
         await loadFixture(defaultDeploy);
       await pauseVault(redemptionVault);
 
@@ -133,9 +134,9 @@ describe('RedemptionVault', function () {
         { vault: redemptionVault, owner },
         stableCoins.dai,
       );
-      await mintToken(mTBILL, owner, 1);
-      await approveBase18(owner, mTBILL, redemptionVault, 1);
-      await redeem({ redemptionVault, owner, mTBILL }, stableCoins.dai, 1, {
+      await mintToken(stUSD, owner, 1);
+      await approveBase18(owner, stUSD, redemptionVault, 1);
+      await redeem({ redemptionVault, owner, stUSD }, stableCoins.dai, 1, {
         revertMessage: 'Pausable: paused',
       });
     });
@@ -147,7 +148,7 @@ describe('RedemptionVault', function () {
         accessControl,
         manualFulfillmentToken,
         stableCoins,
-        mTBILL,
+        stUSD,
       } = await loadFixture(defaultDeploy);
       await greenList(
         { accessControl, greenlistable: redemptionVault, owner },
@@ -157,10 +158,10 @@ describe('RedemptionVault', function () {
         { vault: redemptionVault, owner },
         stableCoins.dai,
       );
-      await mintToken(mTBILL, owner.address, 1);
-      await approveBase18(owner, mTBILL, redemptionVault, 1);
+      await mintToken(stUSD, owner.address, 1);
+      await approveBase18(owner, stUSD, redemptionVault, 1);
       await redeem(
-        { redemptionVault, owner, mTBILL },
+        { redemptionVault, owner, stUSD },
         manualFulfillmentToken,
         1,
       );

@@ -5,324 +5,324 @@ import { ethers } from 'hardhat';
 
 import { blackList, acErrors, unBlackList } from './common/ac.helpers';
 import { defaultDeploy } from './common/fixtures';
-import { burn, mint, setMetadataTest } from './common/mTBILL.helpers';
+import { burn, mint, setMetadataTest } from './common/stUSD.helpers';
 
-describe('mTBILL', function () {
+describe('stUSD', function () {
   it('deployment', async () => {
-    const { mTBILL } = await loadFixture(defaultDeploy);
+    const { stUSD } = await loadFixture(defaultDeploy);
 
-    expect(await mTBILL.name()).eq('mTBILL');
-    expect(await mTBILL.symbol()).eq('mTBILL');
+    expect(await stUSD.name()).eq('stUSD');
+    expect(await stUSD.symbol()).eq('stUSD');
 
-    expect(await mTBILL.paused()).eq(false);
+    expect(await stUSD.paused()).eq(false);
   });
 
   it('initialize', async () => {
-    const { mTBILL } = await loadFixture(defaultDeploy);
+    const { stUSD } = await loadFixture(defaultDeploy);
 
-    await expect(mTBILL.initialize(ethers.constants.AddressZero)).revertedWith(
+    await expect(stUSD.initialize(ethers.constants.AddressZero)).revertedWith(
       'Initializable: contract is already initialized',
     );
   });
 
   describe('pause()', () => {
-    it('should fail: call from address without M_TBILL_PAUSE_OPERATOR_ROLE role', async () => {
-      const { mTBILL, regularAccounts } = await loadFixture(defaultDeploy);
+    it('should fail: call from address without ST_USD_PAUSE_OPERATOR_ROLE role', async () => {
+      const { stUSD, regularAccounts } = await loadFixture(defaultDeploy);
       const caller = regularAccounts[0];
 
-      await expect(mTBILL.connect(caller).pause()).revertedWith(
+      await expect(stUSD.connect(caller).pause()).revertedWith(
         acErrors.WMAC_HASNT_ROLE,
       );
     });
 
     it('should fail: call when already paused', async () => {
-      const { owner, mTBILL } = await loadFixture(defaultDeploy);
+      const { owner, stUSD } = await loadFixture(defaultDeploy);
 
-      await mTBILL.connect(owner).pause();
-      await expect(mTBILL.connect(owner).pause()).revertedWith(
+      await stUSD.connect(owner).pause();
+      await expect(stUSD.connect(owner).pause()).revertedWith(
         `Pausable: paused`,
       );
     });
 
     it('call when unpaused', async () => {
-      const { owner, mTBILL } = await loadFixture(defaultDeploy);
-      expect(await mTBILL.paused()).eq(false);
-      await expect(mTBILL.connect(owner).pause()).to.emit(
-        mTBILL,
-        mTBILL.interface.events['Paused(address)'].name,
+      const { owner, stUSD } = await loadFixture(defaultDeploy);
+      expect(await stUSD.paused()).eq(false);
+      await expect(stUSD.connect(owner).pause()).to.emit(
+        stUSD,
+        stUSD.interface.events['Paused(address)'].name,
       ).to.not.reverted;
-      expect(await mTBILL.paused()).eq(true);
+      expect(await stUSD.paused()).eq(true);
     });
   });
 
   describe('unpause()', () => {
-    it('should fail: call from address without M_TBILL_PAUSE_OPERATOR_ROLE role', async () => {
-      const { owner, mTBILL, regularAccounts } = await loadFixture(
+    it('should fail: call from address without ST_USD_PAUSE_OPERATOR_ROLE role', async () => {
+      const { owner, stUSD, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
       const caller = regularAccounts[0];
 
-      await mTBILL.connect(owner).pause();
-      await expect(mTBILL.connect(caller).unpause()).revertedWith(
+      await stUSD.connect(owner).pause();
+      await expect(stUSD.connect(caller).unpause()).revertedWith(
         acErrors.WMAC_HASNT_ROLE,
       );
     });
 
     it('should fail: call when already paused', async () => {
-      const { owner, mTBILL } = await loadFixture(defaultDeploy);
+      const { owner, stUSD } = await loadFixture(defaultDeploy);
 
-      await expect(mTBILL.connect(owner).unpause()).revertedWith(
+      await expect(stUSD.connect(owner).unpause()).revertedWith(
         `Pausable: not paused`,
       );
     });
 
     it('call when paused', async () => {
-      const { owner, mTBILL } = await loadFixture(defaultDeploy);
-      expect(await mTBILL.paused()).eq(false);
-      await mTBILL.connect(owner).pause();
-      expect(await mTBILL.paused()).eq(true);
+      const { owner, stUSD } = await loadFixture(defaultDeploy);
+      expect(await stUSD.paused()).eq(false);
+      await stUSD.connect(owner).pause();
+      expect(await stUSD.paused()).eq(true);
 
-      await expect(mTBILL.connect(owner).unpause()).to.emit(
-        mTBILL,
-        mTBILL.interface.events['Unpaused(address)'].name,
+      await expect(stUSD.connect(owner).unpause()).to.emit(
+        stUSD,
+        stUSD.interface.events['Unpaused(address)'].name,
       ).to.not.reverted;
 
-      expect(await mTBILL.paused()).eq(false);
+      expect(await stUSD.paused()).eq(false);
     });
   });
 
   describe('mint()', () => {
-    it('should fail: call from address without M_TBILL_MINT_OPERATOR_ROLE role', async () => {
-      const { owner, mTBILL, regularAccounts } = await loadFixture(
+    it('should fail: call from address without ST_USD_MINT_OPERATOR_ROLE role', async () => {
+      const { owner, stUSD, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
       const caller = regularAccounts[0];
 
-      await mint({ mTBILL, owner }, owner, 0, {
+      await mint({ stUSD, owner }, owner, 0, {
         from: caller,
         revertMessage: acErrors.WMAC_HASNT_ROLE,
       });
     });
 
-    it('call from address with M_TBILL_MINT_OPERATOR_ROLE role', async () => {
-      const { owner, mTBILL, regularAccounts } = await loadFixture(
+    it('call from address with ST_USD_MINT_OPERATOR_ROLE role', async () => {
+      const { owner, stUSD, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
 
       const amount = parseUnits('100');
       const to = regularAccounts[0].address;
 
-      await mint({ mTBILL, owner }, to, amount);
+      await mint({ stUSD, owner }, to, amount);
     });
   });
 
   describe('burn()', () => {
-    it('should fail: call from address without M_TBILL_BURN_OPERATOR_ROLE role', async () => {
-      const { owner, mTBILL, regularAccounts } = await loadFixture(
+    it('should fail: call from address without ST_USD_BURN_OPERATOR_ROLE role', async () => {
+      const { owner, stUSD, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
       const caller = regularAccounts[0];
 
-      await burn({ mTBILL, owner }, owner, 0, {
+      await burn({ stUSD, owner }, owner, 0, {
         from: caller,
         revertMessage: acErrors.WMAC_HASNT_ROLE,
       });
     });
 
     it('should fail: call when user has insufficient balance', async () => {
-      const { owner, mTBILL, regularAccounts } = await loadFixture(
+      const { owner, stUSD, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
 
       const amount = parseUnits('100');
       const to = regularAccounts[0].address;
 
-      await burn({ mTBILL, owner }, to, amount, {
+      await burn({ stUSD, owner }, to, amount, {
         revertMessage: 'ERC20: burn amount exceeds balance',
       });
     });
 
-    it('call from address with M_TBILL_MINT_OPERATOR_ROLE role', async () => {
-      const { owner, mTBILL, regularAccounts } = await loadFixture(
+    it('call from address with ST_USD_MINT_OPERATOR_ROLE role', async () => {
+      const { owner, stUSD, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
 
       const amount = parseUnits('100');
       const to = regularAccounts[0].address;
 
-      await mint({ mTBILL, owner }, to, amount);
-      await burn({ mTBILL, owner }, to, amount);
+      await mint({ stUSD, owner }, to, amount);
+      await burn({ stUSD, owner }, to, amount);
     });
   });
 
   describe('setMetadata()', () => {
     it('should fail: call from address without DEFAULT_ADMIN_ROLE role', async () => {
-      const { owner, mTBILL, regularAccounts } = await loadFixture(
+      const { owner, stUSD, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
       const caller = regularAccounts[0];
-      await setMetadataTest({ mTBILL, owner }, 'url', 'some value', {
+      await setMetadataTest({ stUSD, owner }, 'url', 'some value', {
         from: caller,
         revertMessage: acErrors.WMAC_HASNT_ROLE,
       });
     });
 
     it('call from address with DEFAULT_ADMIN_ROLE role', async () => {
-      const { owner, mTBILL } = await loadFixture(defaultDeploy);
-      await setMetadataTest({ mTBILL, owner }, 'url', 'some value', undefined);
+      const { owner, stUSD } = await loadFixture(defaultDeploy);
+      await setMetadataTest({ stUSD, owner }, 'url', 'some value', undefined);
     });
   });
 
   describe('_beforeTokenTransfer()', () => {
     it('should fail: mint(...) when address is blacklisted', async () => {
-      const { owner, mTBILL, regularAccounts, accessControl } =
+      const { owner, stUSD, regularAccounts, accessControl } =
         await loadFixture(defaultDeploy);
       const blacklisted = regularAccounts[0];
 
       await blackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
-      await mint({ mTBILL, owner }, blacklisted, 1, {
+      await mint({ stUSD, owner }, blacklisted, 1, {
         revertMessage: acErrors.WMAC_HAS_ROLE,
       });
     });
 
     it('should fail: burn(...) when address is blacklisted', async () => {
-      const { owner, mTBILL, regularAccounts, accessControl } =
+      const { owner, stUSD, regularAccounts, accessControl } =
         await loadFixture(defaultDeploy);
       const blacklisted = regularAccounts[0];
 
-      await mint({ mTBILL, owner }, blacklisted, 1);
+      await mint({ stUSD, owner }, blacklisted, 1);
       await blackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
-      await burn({ mTBILL, owner }, blacklisted, 1, {
+      await burn({ stUSD, owner }, blacklisted, 1, {
         revertMessage: acErrors.WMAC_HAS_ROLE,
       });
     });
 
     it('should fail: transfer(...) when from address is blacklisted', async () => {
-      const { owner, mTBILL, regularAccounts, accessControl } =
+      const { owner, stUSD, regularAccounts, accessControl } =
         await loadFixture(defaultDeploy);
       const blacklisted = regularAccounts[0];
       const to = regularAccounts[1];
 
-      await mint({ mTBILL, owner }, blacklisted, 1);
+      await mint({ stUSD, owner }, blacklisted, 1);
       await blackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
 
       await expect(
-        mTBILL.connect(blacklisted).transfer(to.address, 1),
+        stUSD.connect(blacklisted).transfer(to.address, 1),
       ).revertedWith(acErrors.WMAC_HAS_ROLE);
     });
 
     it('should fail: transfer(...) when to address is blacklisted', async () => {
-      const { owner, mTBILL, regularAccounts, accessControl } =
+      const { owner, stUSD, regularAccounts, accessControl } =
         await loadFixture(defaultDeploy);
       const blacklisted = regularAccounts[0];
       const from = regularAccounts[1];
 
-      await mint({ mTBILL, owner }, from, 1);
+      await mint({ stUSD, owner }, from, 1);
       await blackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
 
       await expect(
-        mTBILL.connect(from).transfer(blacklisted.address, 1),
+        stUSD.connect(from).transfer(blacklisted.address, 1),
       ).revertedWith(acErrors.WMAC_HAS_ROLE);
     });
 
     it('should fail: transferFrom(...) when from address is blacklisted', async () => {
-      const { owner, mTBILL, regularAccounts, accessControl } =
+      const { owner, stUSD, regularAccounts, accessControl } =
         await loadFixture(defaultDeploy);
       const blacklisted = regularAccounts[0];
       const to = regularAccounts[1];
 
-      await mint({ mTBILL, owner }, blacklisted, 1);
+      await mint({ stUSD, owner }, blacklisted, 1);
       await blackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
 
-      await mTBILL.connect(blacklisted).approve(to.address, 1);
+      await stUSD.connect(blacklisted).approve(to.address, 1);
 
       await expect(
-        mTBILL.connect(to).transferFrom(blacklisted.address, to.address, 1),
+        stUSD.connect(to).transferFrom(blacklisted.address, to.address, 1),
       ).revertedWith(acErrors.WMAC_HAS_ROLE);
     });
 
     it('should fail: transferFrom(...) when to address is blacklisted', async () => {
-      const { owner, mTBILL, regularAccounts, accessControl } =
+      const { owner, stUSD, regularAccounts, accessControl } =
         await loadFixture(defaultDeploy);
 
       const blacklisted = regularAccounts[0];
       const from = regularAccounts[1];
       const caller = regularAccounts[2];
 
-      await mint({ mTBILL, owner }, from, 1);
+      await mint({ stUSD, owner }, from, 1);
 
       await blackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
-      await mTBILL.connect(from).approve(caller.address, 1);
+      await stUSD.connect(from).approve(caller.address, 1);
 
       await expect(
-        mTBILL
+        stUSD
           .connect(caller)
           .transferFrom(from.address, blacklisted.address, 1),
       ).revertedWith(acErrors.WMAC_HAS_ROLE);
     });
 
     it('transferFrom(...) when caller address is blacklisted', async () => {
-      const { owner, mTBILL, regularAccounts, accessControl } =
+      const { owner, stUSD, regularAccounts, accessControl } =
         await loadFixture(defaultDeploy);
 
       const blacklisted = regularAccounts[0];
       const from = regularAccounts[1];
       const to = regularAccounts[2];
 
-      await mint({ mTBILL, owner }, from, 1);
+      await mint({ stUSD, owner }, from, 1);
       await blackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
 
-      await mTBILL.connect(from).approve(blacklisted.address, 1);
+      await stUSD.connect(from).approve(blacklisted.address, 1);
 
       await expect(
-        mTBILL.connect(blacklisted).transferFrom(from.address, to.address, 1),
+        stUSD.connect(blacklisted).transferFrom(from.address, to.address, 1),
       ).not.reverted;
     });
 
     it('transfer(...) when caller address was blacklisted and then un-blacklisted', async () => {
-      const { owner, mTBILL, regularAccounts, accessControl } =
+      const { owner, stUSD, regularAccounts, accessControl } =
         await loadFixture(defaultDeploy);
 
       const blacklisted = regularAccounts[0];
       const to = regularAccounts[2];
 
-      await mint({ mTBILL, owner }, blacklisted, 1);
+      await mint({ stUSD, owner }, blacklisted, 1);
       await blackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
 
       await expect(
-        mTBILL.connect(blacklisted).transfer(to.address, 1),
+        stUSD.connect(blacklisted).transfer(to.address, 1),
       ).revertedWith(acErrors.WMAC_HAS_ROLE);
 
       await unBlackList(
-        { blacklistable: mTBILL, accessControl, owner },
+        { blacklistable: stUSD, accessControl, owner },
         blacklisted,
       );
 
-      await expect(mTBILL.connect(blacklisted).transfer(to.address, 1)).not
+      await expect(stUSD.connect(blacklisted).transfer(to.address, 1)).not
         .reverted;
     });
   });

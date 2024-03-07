@@ -11,12 +11,12 @@ import {
   DepositVault,
   MidasAccessControl,
   RedemptionVault,
-  MTBILL,
+  StUSD,
 } from '../../typechain-types';
 
 type Params = {
   accessControl: MidasAccessControl;
-  mTBILL: MTBILL;
+  stUSD: StUSD;
   dataFeed: DataFeed;
   dataFeedEur: DataFeed;
   aggregator: AggregatorV3Interface;
@@ -36,7 +36,7 @@ export const initGrantRoles = async (
   // depositVault,
   // redemptionVault,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // mTBILL,
+  // stUSD,
   // owner,
   // execute,
   Omit<
@@ -72,7 +72,7 @@ export const postDeploymentTest = async (
     accessControl,
     depositVault,
     redemptionVault,
-    mTBILL,
+    stUSD: stUSD,
     dataFeedEur,
     aggregatorEur,
     owner,
@@ -82,12 +82,12 @@ export const postDeploymentTest = async (
 ) => {
   const roles = await getAllRoles(accessControl);
 
-  /** mTBILL tests start */
-  expect(await mTBILL.name()).eq('mTBILL');
-  expect(await mTBILL.symbol()).eq('mTBILL');
-  expect(await mTBILL.paused()).eq(false);
+  /** stUSD tests start */
+  expect(await stUSD.name()).eq('stUSD');
+  expect(await stUSD.symbol()).eq('stUSD');
+  expect(await stUSD.paused()).eq(false);
 
-  /** mTBILL tests end */
+  /** stUSD tests end */
 
   /** DataFeed tests start */
 
@@ -97,7 +97,7 @@ export const postDeploymentTest = async (
 
   /** DepositVault tests start */
 
-  expect(await depositVault.mTBILL()).eq(mTBILL.address);
+  expect(await depositVault.stUSD()).eq(stUSD.address);
 
   expect(await depositVault.tokensReceiver()).eq(tokensReceiver);
 
@@ -119,7 +119,7 @@ export const postDeploymentTest = async (
 
   /** RedemptionVault tests start */
 
-  expect(await redemptionVault.mTBILL()).eq(mTBILL.address);
+  expect(await redemptionVault.stUSD()).eq(stUSD.address);
 
   expect(await redemptionVault.tokensReceiver()).eq(tokensReceiver);
 

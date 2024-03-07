@@ -3,15 +3,15 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 
-import "./interfaces/IMTbill.sol";
+import "./interfaces/ISTUsd.sol";
 import "./access/Blacklistable.sol";
 
 /**
- * @title mTBILL
+ * @title stUSD
  * @author RedDuck Software
  */
 //solhint-disable contract-name-camelcase
-contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
+contract stUSD is ERC20PausableUpgradeable, Blacklistable, ISTUsd {
     /**
      * @notice metadata key => metadata value
      */
@@ -28,58 +28,58 @@ contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
      */
     function initialize(address _accessControl) external initializer {
         __Blacklistable_init(_accessControl);
-        __ERC20_init("mTBILL", "mTBILL");
+        __ERC20_init("stUSD", "stUSD");
     }
 
     /**
-     * @inheritdoc IMTbill
+     * @inheritdoc ISTUsd
      */
-    function mint(address to, uint256 amount)
-        external
-        onlyRole(M_TBILL_MINT_OPERATOR_ROLE, msg.sender)
-    {
+    function mint(
+        address to,
+        uint256 amount
+    ) external onlyRole(ST_USD_MINT_OPERATOR_ROLE, msg.sender) {
         _mint(to, amount);
     }
 
     /**
-     * @inheritdoc IMTbill
+     * @inheritdoc ISTUsd
      */
-    function burn(address from, uint256 amount)
-        external
-        onlyRole(M_TBILL_BURN_OPERATOR_ROLE, msg.sender)
-    {
+    function burn(
+        address from,
+        uint256 amount
+    ) external onlyRole(ST_USD_BURN_OPERATOR_ROLE, msg.sender) {
         _burn(from, amount);
     }
 
     /**
-     * @inheritdoc IMTbill
+     * @inheritdoc ISTUsd
      */
     function pause()
         external
         override
-        onlyRole(M_TBILL_PAUSE_OPERATOR_ROLE, msg.sender)
+        onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender)
     {
         _pause();
     }
 
     /**
-     * @inheritdoc IMTbill
+     * @inheritdoc ISTUsd
      */
     function unpause()
         external
         override
-        onlyRole(M_TBILL_PAUSE_OPERATOR_ROLE, msg.sender)
+        onlyRole(ST_USD_PAUSE_OPERATOR_ROLE, msg.sender)
     {
         _unpause();
     }
 
     /**
-     * @inheritdoc IMTbill
+     * @inheritdoc ISTUsd
      */
-    function setMetadata(bytes32 key, bytes memory data)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE, msg.sender)
-    {
+    function setMetadata(
+        bytes32 key,
+        bytes memory data
+    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
         metadata[key] = data;
     }
 
