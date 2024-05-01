@@ -13,6 +13,9 @@ export const REDEMPTION_VAULT_CONTRACT_NAME = 'RedemptionVault';
 export const ST_USD_DEPLOY_TAG = 'mTBILL';
 export const M_TBILL_CONTRACT_NAME = 'mTBILL';
 
+export const M_BASIS_CONTRACT_NAME = 'mBASIS';
+export const M_BASIS_DEPLOY_TAG = 'mBASIS';
+
 export const GRANT_ROLES_TAG = 'GANT_ROLES';
 
 export const POST_DEPLOY_TAG = 'POST_DEPLOY';
