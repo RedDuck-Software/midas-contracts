@@ -13,6 +13,24 @@ import "./access/Blacklistable.sol";
 //solhint-disable contract-name-camelcase
 contract mBASIS is ERC20PausableUpgradeable, Blacklistable, IMTbill {
     /**
+     * @notice actor that can mint mBASIS
+     */
+    bytes32 public constant M_BASIS_MINT_OPERATOR_ROLE =
+        keccak256("M_BASIS_MINT_OPERATOR_ROLE");
+
+    /**
+     * @notice actor that can burn mBASIS
+     */
+    bytes32 public constant M_BASIS_BURN_OPERATOR_ROLE =
+        keccak256("M_BASIS_BURN_OPERATOR_ROLE");
+
+    /**
+     * @notice actor that can pause mBASIS
+     */
+    bytes32 public constant M_BASIS_PAUSE_OPERATOR_ROLE =
+        keccak256("M_BASIS_PAUSE_OPERATOR_ROLE");
+
+    /**
      * @notice metadata key => metadata value
      */
     mapping(bytes32 => bytes) public metadata;

@@ -38,24 +38,6 @@ abstract contract MidasAccessControlRoles {
         keccak256("M_TBILL_PAUSE_OPERATOR_ROLE");
 
     /**
-     * @notice actor that can mint mBASIS
-     */
-    bytes32 public constant M_BASIS_MINT_OPERATOR_ROLE =
-        keccak256("M_BASIS_MINT_OPERATOR_ROLE");
-
-    /**
-     * @notice actor that can burn mBASIS
-     */
-    bytes32 public constant M_BASIS_BURN_OPERATOR_ROLE =
-        keccak256("M_BASIS_BURN_OPERATOR_ROLE");
-
-    /**
-     * @notice actor that can pause mBASIS
-     */
-    bytes32 public constant M_BASIS_PAUSE_OPERATOR_ROLE =
-        keccak256("M_BASIS_PAUSE_OPERATOR_ROLE");
-
-    /**
      * @notice actor that have admin rights in deposit vault
      */
     bytes32 public constant DEPOSIT_VAULT_ADMIN_ROLE =
