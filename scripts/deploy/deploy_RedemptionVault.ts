@@ -9,19 +9,30 @@ import {
   tryEtherscanVerifyImplementation,
 } from '../../helpers/utils';
 
+const forToken = 'eUSD';
+
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);
 
+  if (!addresses) throw new Error('Addresses are not set');
   const { deployer } = await hre.getNamedAccounts();
 
   console.log({ deployer });
+
+  const tokenAddresses = addresses[forToken];
+
+  if (!tokenAddresses) throw new Error('Token addresses are not set');
 
   const owner = await hre.ethers.getSigner(deployer);
 
   console.log('Deploying RedemptionVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(REDEMPTION_VAULT_CONTRACT_NAME, owner),
-    [addresses?.accessControl, addresses?.mTBILL, addresses?.tokensReceiver],
+    [
+      addresses?.accessControl,
+      tokenAddresses?.token,
+      tokenAddresses?.tokensReceiver,
+    ],
     {
       unsafeAllow: ['constructor'],
     },

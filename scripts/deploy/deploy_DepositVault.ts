@@ -9,21 +9,28 @@ import {
   tryEtherscanVerifyImplementation,
 } from '../../helpers/utils';
 
+const forToken = 'eUSD';
+
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
 
   const addresses = getCurrentAddresses(hre);
 
+  if (!addresses) throw new Error('Addresses are not set');
+  const tokenAddresses = addresses[forToken];
+
+  if (!tokenAddresses) throw new Error('Token addresses are not set');
+
   console.log('Deploying DepositVault...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(DEPOSIT_VAULT_CONTRACT_NAME, owner),
     [
       addresses?.accessControl,
-      addresses?.mTBILL,
+      tokenAddresses?.token,
       addresses?.eurToUsdFeed,
       hre.ethers.utils.parseUnits('100000'),
-      addresses?.tokensReceiver,
+      tokenAddresses?.tokensReceiver,
     ],
     {
       unsafeAllow: ['constructor'],

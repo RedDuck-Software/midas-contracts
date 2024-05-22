@@ -9,6 +9,7 @@ import 'solidity-docgen';
 import './tasks';
 
 import {
+  chainIds,
   ENV,
   getForkNetworkConfig,
   getHardhatNetworkConfig,
@@ -38,6 +39,7 @@ const config: HardhatUserConfig = {
       hardhat: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       localhost: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       sepolia: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      etherlink: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
     },
   },
   verify: {
@@ -47,6 +49,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     main: getNetworkConfig('main', []),
+    etherlink: getNetworkConfig('etherlink', []),
     sepolia: getNetworkConfig('sepolia'),
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
@@ -62,6 +65,16 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        chainId: chainIds['etherlink'],
+        network: 'etherlink',
+        urls: {
+          apiURL: 'https://testnet-explorer.etherlink.com/api',
+          browserURL: 'https://testnet-explorer.etherlink.com',
+        },
+      },
+    ],
   },
   paths: {
     deploy: 'deploy/',
