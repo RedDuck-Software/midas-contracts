@@ -7,6 +7,7 @@ export interface MidasAddresses {
   redemptionVault?: string;
   mTBILL?: string;
   mBASIS?: string;
+  eUSD?: string;
   etfDataFeed?: string;
   eurToUsdFeed?: string;
   accessControl?: string;
