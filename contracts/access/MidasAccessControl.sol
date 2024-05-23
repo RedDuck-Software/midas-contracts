@@ -62,6 +62,11 @@ contract MidasAccessControl is
         }
     }
 
+    //solhint-disable disable-next-line
+    function renounceRole(bytes32, address) public override {
+        revert("MAC: Forbidden");
+    }
+
     /**
      * @dev setup roles during the contracts initialization
      */
