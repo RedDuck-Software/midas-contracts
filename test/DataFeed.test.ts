@@ -7,6 +7,11 @@ import { acErrors } from './common/ac.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import { defaultDeploy } from './common/fixtures';
 
+import {
+  // eslint-disable-next-line camelcase
+  DataFeedTest__factory,
+} from '../typechain-types';
+
 describe('DataFeed', function () {
   it('deployment', async () => {
     const { dataFeed, mockedAggregator } = await loadFixture(defaultDeploy);
@@ -15,7 +20,7 @@ describe('DataFeed', function () {
   });
 
   it('initialize', async () => {
-    const { dataFeed } = await loadFixture(defaultDeploy);
+    const { dataFeed, owner } = await loadFixture(defaultDeploy);
 
     await expect(
       dataFeed.initialize(
@@ -23,6 +28,15 @@ describe('DataFeed', function () {
         ethers.constants.AddressZero,
       ),
     ).revertedWith('Initializable: contract is already initialized');
+
+    const dataFeedNew = await new DataFeedTest__factory(owner).deploy();
+
+    await expect(
+      dataFeedNew.initialize(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+      ),
+    ).revertedWith('DF: invalid address');
   });
 
   describe('changeAggregator()', () => {
