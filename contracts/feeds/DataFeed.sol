@@ -37,6 +37,11 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     int256 public maxExpectedAnswer;
 
     /**
+     * @dev leaving a storage gap for futures updates
+     */
+    uint256[50] private __gap;
+
+    /**
      * @inheritdoc IDataFeed
      */
     function initialize(

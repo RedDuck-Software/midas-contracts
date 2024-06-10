@@ -52,6 +52,11 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     EnumerableSet.AddressSet internal _paymentTokens;
 
     /**
+     * @dev leaving a storage gap for futures updates
+     */
+    uint256[50] private __gap;
+
+    /**
      * @dev checks that msg.sender do have a vaultRole() role
      */
     modifier onlyVaultAdmin() {
