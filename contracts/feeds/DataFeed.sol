@@ -27,14 +27,14 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     uint256 public healthyDiff;
 
     /**
-     * @dev minimal price expected to receive from the `aggregator`
+     * @dev minimal answer expected to receive from the `aggregator`
      */
-    int256 public minExpectedPrice;
+    int256 public minExpectedAnswer;
 
     /**
-     * @dev maximal price expected to receive from the `aggregator`
+     * @dev maximal answer expected to receive from the `aggregator`
      */
-    int256 public maxExpectedPrice;
+    int256 public maxExpectedAnswer;
 
     /**
      * @inheritdoc IDataFeed
@@ -43,14 +43,14 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         address _ac,
         address _aggregator,
         uint256 _healthyDiff,
-        int256 _minExpectedPrice,
-        int256 _maxExpectedPrice
+        int256 _minExpectedAnswer,
+        int256 _maxExpectedAnswer
     ) external initializer {
         require(_aggregator != address(0), "DF: invalid address");
         require(_healthyDiff > 0, "DF: invalid diff");
-        require(_maxExpectedPrice > 0, "DF: invalid exp. price");
+        require(_maxExpectedAnswer > 0, "DF: invalid exp. price");
         require(
-            _maxExpectedPrice > _minExpectedPrice,
+            _maxExpectedAnswer > _minExpectedAnswer,
             "DF: invalid exp. prices"
         );
 
@@ -58,8 +58,8 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         aggregator = AggregatorV3Interface(_aggregator);
 
         healthyDiff = _healthyDiff;
-        minExpectedPrice = _minExpectedPrice;
-        maxExpectedPrice = _maxExpectedPrice;
+        minExpectedAnswer = _minExpectedAnswer;
+        maxExpectedAnswer = _maxExpectedAnswer;
     }
 
     /**
@@ -99,8 +99,8 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         require(
             // solhint-disable-next-line not-rely-on-time
             block.timestamp - updatedAt <= healthyDiff &&
-                _answer >= minExpectedPrice &&
-                _answer <= maxExpectedPrice,
+                _answer >= minExpectedAnswer &&
+                _answer <= maxExpectedAnswer,
             "DF: feed is unhealthy"
         );
         roundId = _roundId;

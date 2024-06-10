@@ -17,15 +17,15 @@ interface IDataFeed {
      * @param _ac MidasAccessControl contract address
      * @param _aggregator AggregatorV3Interface contract address
      * @param _healthyDiff max. staleness time for data feed answers
-     * @param _minExpectedPrice min.expected answer value from data feed
-     * @param _maxExpectedPrice max.expected answer value from data feed
+     * @param _minExpectedAnswer min.expected answer value from data feed
+     * @param _maxExpectedAnswer max.expected answer value from data feed
      */
     function initialize(
         address _ac,
         address _aggregator,
         uint256 _healthyDiff,
-        int256 _minExpectedPrice,
-        int256 _maxExpectedPrice
+        int256 _minExpectedAnswer,
+        int256 _maxExpectedAnswer
     ) external;
 
     /**

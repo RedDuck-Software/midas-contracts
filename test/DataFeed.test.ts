@@ -19,10 +19,10 @@ describe('DataFeed', function () {
 
     expect(await dataFeed.aggregator()).eq(mockedAggregator.address);
     expect(await dataFeed.healthyDiff()).eq(3 * 24 * 3600);
-    expect(await dataFeed.minExpectedPrice()).eq(
+    expect(await dataFeed.minExpectedAnswer()).eq(
       parseUnits('0.1', mockedAggregatorDecimals),
     );
-    expect(await dataFeed.maxExpectedPrice()).eq(
+    expect(await dataFeed.maxExpectedAnswer()).eq(
       parseUnits('10000', mockedAggregatorDecimals),
     );
   });
