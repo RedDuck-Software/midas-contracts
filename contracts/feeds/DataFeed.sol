@@ -24,16 +24,42 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     /**
      * @dev healty difference between `block.timestamp` and `updatedAt` timestamps
      */
-    uint256 private constant _HEALTHY_DIFF = 3 days;
+    uint256 public healthyDiff;
+
+    /**
+     * @dev minimal price expected to receive from the `aggregator`
+     */
+    int256 public minExpectedPrice;
+
+    /**
+     * @dev maximal price expected to receive from the `aggregator`
+     */
+    int256 public maxExpectedPrice;
 
     /**
      * @inheritdoc IDataFeed
      */
-    function initialize(address _ac, address _aggregator) external initializer {
+    function initialize(
+        address _ac,
+        address _aggregator,
+        uint256 _healthyDiff,
+        int256 _minExpectedPrice,
+        int256 _maxExpectedPrice
+    ) external initializer {
         require(_aggregator != address(0), "DF: invalid address");
+        require(_healthyDiff > 0, "DF: invalid diff");
+        require(_maxExpectedPrice > 0, "DF: invalid exp. price");
+        require(
+            _maxExpectedPrice > _minExpectedPrice,
+            "DF: invalid exp. prices"
+        );
 
         __WithMidasAccessControl_init(_ac);
         aggregator = AggregatorV3Interface(_aggregator);
+
+        healthyDiff = _healthyDiff;
+        minExpectedPrice = _minExpectedPrice;
+        maxExpectedPrice = _maxExpectedPrice;
     }
 
     /**
@@ -72,7 +98,9 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         require(_answer > 0, "DF: feed is deprecated");
         require(
             // solhint-disable-next-line not-rely-on-time
-            block.timestamp - updatedAt <= _HEALTHY_DIFF,
+            block.timestamp - updatedAt <= healthyDiff &&
+                _answer >= minExpectedPrice &&
+                _answer <= maxExpectedPrice,
             "DF: feed is unhealthy"
         );
         roundId = _roundId;
