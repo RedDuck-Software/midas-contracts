@@ -27,6 +27,11 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     uint256 private constant _HEALTHY_DIFF = 3 days;
 
     /**
+     * @dev leaving a storage gap for futures updates
+     */
+    uint256[50] private __gap;
+
+    /**
      * @inheritdoc IDataFeed
      */
     function initialize(address _ac, address _aggregator) external initializer {
