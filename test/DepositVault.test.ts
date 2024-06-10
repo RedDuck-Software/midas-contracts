@@ -362,7 +362,7 @@ describe('DepositVault', function () {
         { accessControl, greenlistable: depositVault, owner },
         owner,
       );
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 0, {
+      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 1, {
         revertMessage: 'MV: token not exists',
       });
     });
