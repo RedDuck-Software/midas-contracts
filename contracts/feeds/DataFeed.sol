@@ -48,7 +48,8 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     ) external initializer {
         require(_aggregator != address(0), "DF: invalid address");
         require(_healthyDiff > 0, "DF: invalid diff");
-        require(_maxExpectedAnswer > 0, "DF: invalid exp. price");
+        require(_minExpectedAnswer > 0, "DF: invalid min exp. price");
+        require(_maxExpectedAnswer > 0, "DF: invalid max exp. price");
         require(
             _maxExpectedAnswer > _minExpectedAnswer,
             "DF: invalid exp. prices"

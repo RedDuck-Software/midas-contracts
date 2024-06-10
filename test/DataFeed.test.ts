@@ -58,7 +58,11 @@ describe('DataFeed', function () {
 
     await expect(
       dataFeedNew.initialize(dataFeedNew.address, dataFeedNew.address, 1, 0, 0),
-    ).revertedWith('DF: invalid exp. price');
+    ).revertedWith('DF: invalid min exp. price');
+
+    await expect(
+      dataFeedNew.initialize(dataFeedNew.address, dataFeedNew.address, 1, 1, 0),
+    ).revertedWith('DF: invalid max exp. price');
 
     await expect(
       dataFeedNew.initialize(dataFeedNew.address, dataFeedNew.address, 1, 2, 1),
