@@ -21,7 +21,7 @@ contract MidasAccessControl is
      */
     function initialize() external initializer {
         __AccessControl_init();
-        _setupRoles();
+        _setupRoles(msg.sender);
     }
 
     /**
@@ -31,14 +31,14 @@ contract MidasAccessControl is
      * @param roles array of bytes32 roles
      * @param addresses array of user addresses
      */
-    function grantRoleMult(bytes32[] memory roles, address[] memory addresses)
-        external
-    {
+    function grantRoleMult(
+        bytes32[] memory roles,
+        address[] memory addresses
+    ) external {
         require(roles.length == addresses.length, "MAC: mismatch arrays");
-        address sender = msg.sender;
 
         for (uint256 i = 0; i < roles.length; i++) {
-            _checkRole(getRoleAdmin(roles[i]), sender);
+            _checkRole(getRoleAdmin(roles[i]), msg.sender);
             _grantRole(roles[i], addresses[i]);
         }
     }
@@ -50,14 +50,13 @@ contract MidasAccessControl is
      * @param roles array of bytes32 roles
      * @param addresses array of user addresses
      */
-    function revokeRoleMult(bytes32[] memory roles, address[] memory addresses)
-        external
-    {
+    function revokeRoleMult(
+        bytes32[] memory roles,
+        address[] memory addresses
+    ) external {
         require(roles.length == addresses.length, "MAC: mismatch arrays");
-        address sender = msg.sender;
-
         for (uint256 i = 0; i < roles.length; i++) {
-            _checkRole(getRoleAdmin(roles[i]), sender);
+            _checkRole(getRoleAdmin(roles[i]), msg.sender);
             _revokeRole(roles[i], addresses[i]);
         }
     }
@@ -70,9 +69,7 @@ contract MidasAccessControl is
     /**
      * @dev setup roles during the contracts initialization
      */
-    function _setupRoles() private {
-        address admin = msg.sender;
-
+    function _setupRoles(address admin) private {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
 
         _setupRole(DEPOSIT_VAULT_ADMIN_ROLE, admin);
