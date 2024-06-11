@@ -4,6 +4,12 @@ export const DATA_FEED_CONTRACT_NAME = 'DataFeed';
 export const DEPOSIT_VAULT_DEPLOY_TAG = 'DepositVault';
 export const DEPOSIT_VAULT_CONTRACT_NAME = 'DepositVault';
 
+export const M_BASIS_DEPOSIT_VAULT_DEPLOY_TAG = 'MBasisDepositVault';
+export const M_BASIS_DEPOSIT_VAULT_CONTRACT_NAME = 'MBasisDepositVault';
+
+export const M_BASIS_REDEMPTION_VAULT_DEPLOY_TAG = 'MBasisRedemptionVault';
+export const M_BASIS_REDEMPTION_VAULT_CONTRACT_NAME = 'MBasisRedemptionVault';
+
 export const MIDAS_AC_DEPLOY_TAG = 'MidasAccessControl';
 export const MIDAS_AC_CONTRACT_NAME = 'MidasAccessControl';
 

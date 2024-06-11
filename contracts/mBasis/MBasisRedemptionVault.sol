@@ -10,7 +10,7 @@ import "../RedemptionVault.sol";
  */
 contract MBasisRedemptionVault is RedemptionVault {
     /**
-     * @notice actor that can manage MBasisDepositVault
+     * @notice actor that can manage MBasisRedemptionVault
      */
     bytes32 public constant M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE =
         keccak256("M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE");
