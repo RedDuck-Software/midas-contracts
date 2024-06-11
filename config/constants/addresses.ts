@@ -39,6 +39,12 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
       depositVault: '0xE85f2B707Ec5Ae8e07238F99562264f304E30109',
       token: '0xefED40D1eb1577d1073e9C4F277463486D39b084',
     },
+    mBASIS: {
+      token: '0xDDFDa068cd7975690a3B272cFec3513B04A8bC1e',
+      tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      depositVault: '0x2a8c22E3b10036f3AEF5875d04f8441d4188b656',
+      redemptionVault: '0x4388ba8E20Ca05DFeDa6C286e1912A2B96f43Fea',
+    },
     etfDataFeed: '0x4E677F7FE252DE44682a913f609EA3eb6F29DC3E',
     eurToUsdFeed: '0xE23c07Ecad6D822500CbE8306d72A90578CA9F11',
     accessControl: '0xbf25b58cB8DfaD688F7BcB2b87D71C23A6600AaC',
