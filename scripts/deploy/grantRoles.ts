@@ -15,6 +15,7 @@ import {
   // eslint-disable-next-line camelcase
   MTBILL__factory,
 } from '../../typechain-types';
+const forToken = 'eUSD';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
@@ -23,25 +24,31 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);
 
   if (!addresses) {
-    console.log('addresses', { addresses });
     return;
   }
+
+  const tokenAddresses = addresses[forToken];
+
+  if (!tokenAddresses) throw new Error('Token addresses are not set');
 
   await initGrantRoles({
     // eslint-disable-next-line camelcase
     accessControl: MidasAccessControl__factory.connect(
-      addresses.accessControl,
+      addresses.accessControl!,
       owner,
     ),
     // eslint-disable-next-line camelcase
-    depositVault: DepositVault__factory.connect(addresses.depositVault, owner),
+    depositVault: DepositVault__factory.connect(
+      tokenAddresses.depositVault!,
+      owner,
+    ),
     // eslint-disable-next-line camelcase
     redemptionVault: RedemptionVault__factory.connect(
-      addresses.redemptionVault,
+      tokenAddresses.redemptionVault!,
       owner,
     ),
     // eslint-disable-next-line camelcase
-    mTBILL: MTBILL__factory.connect(addresses.mTBILL, owner),
+    mTBILL: MTBILL__factory.connect(tokenAddresses.token!, owner),
     owner,
   });
 

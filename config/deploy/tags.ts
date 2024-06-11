@@ -16,6 +16,9 @@ export const M_TBILL_CONTRACT_NAME = 'mTBILL';
 export const M_BASIS_CONTRACT_NAME = 'mBASIS';
 export const M_BASIS_DEPLOY_TAG = 'mBASIS';
 
+export const E_USD_CONTRACT_NAME = 'eUSD';
+export const E_USD_DEPLOY_TAG = 'eUSD';
+
 export const GRANT_ROLES_TAG = 'GANT_ROLES';
 
 export const POST_DEPLOY_TAG = 'POST_DEPLOY';
