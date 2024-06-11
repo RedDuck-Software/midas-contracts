@@ -26,7 +26,7 @@ describe('mBASIS', function () {
   });
 
   describe('pause()', () => {
-    it('should fail: call from address without M_TBILL_PAUSE_OPERATOR_ROLE role', async () => {
+    it('should fail: call from address without M_BASIS_PAUSE_OPERATOR_ROLE role', async () => {
       const { mBASIS, regularAccounts } = await loadFixture(defaultDeploy);
       const caller = regularAccounts[0];
 
@@ -56,7 +56,7 @@ describe('mBASIS', function () {
   });
 
   describe('unpause()', () => {
-    it('should fail: call from address without M_TBILL_PAUSE_OPERATOR_ROLE role', async () => {
+    it('should fail: call from address without M_BASIS_PAUSE_OPERATOR_ROLE role', async () => {
       const { owner, mBASIS, regularAccounts } = await loadFixture(
         defaultDeploy,
       );

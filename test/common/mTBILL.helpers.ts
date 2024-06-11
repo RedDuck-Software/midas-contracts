@@ -9,17 +9,18 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 type CommonParams = {
   mTBILL?: MTBILL;
+  eUSD?: MTBILL;
   mBASIS?: MTBILL;
   owner: SignerWithAddress;
 };
 
 export const setMetadataTest = async (
-  { mTBILL, mBASIS, owner }: CommonParams,
+  { mTBILL, mBASIS, eUSD, owner }: CommonParams,
   key: string,
   value: string,
   opt?: OptionalCommonParams,
 ) => {
-  mTBILL ??= mBASIS!;
+  mTBILL ??= mBASIS ?? eUSD!;
 
   const keyBytes32 = solidityKeccak256(['string'], [key]);
   const valueBytes = defaultAbiCoder.encode(['string'], [value]);
@@ -39,12 +40,12 @@ export const setMetadataTest = async (
 };
 
 export const mint = async (
-  { mTBILL, mBASIS, owner }: CommonParams,
+  { mTBILL, mBASIS, eUSD, owner }: CommonParams,
   to: Account,
   amount: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
-  mTBILL ??= mBASIS!;
+  mTBILL ??= mBASIS ?? eUSD!;
 
   to = getAccount(to);
 
@@ -68,12 +69,12 @@ export const mint = async (
 };
 
 export const burn = async (
-  { mTBILL, mBASIS, owner }: CommonParams,
+  { mTBILL, mBASIS, eUSD, owner }: CommonParams,
   from: Account,
   amount: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
-  mTBILL ??= mBASIS!;
+  mTBILL ??= mBASIS ?? eUSD!;
 
   from = getAccount(from);
 

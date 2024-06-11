@@ -36,6 +36,8 @@ import {
   AggregatorV3UnhealthyMock__factory,
   // eslint-disable-next-line camelcase
   MBASISTest__factory,
+  // eslint-disable-next-line camelcase
+  EUSDTest__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -55,11 +57,24 @@ export const defaultDeploy = async () => {
   await expect(mBASIS.initialize(ethers.constants.AddressZero)).to.be.reverted;
   await mBASIS.initialize(accessControl.address);
 
+  const eUSD = await new EUSDTest__factory(owner).deploy();
+  await expect(eUSD.initialize(ethers.constants.AddressZero)).to.be.reverted;
+  await eUSD.initialize(accessControl.address);
+
   await accessControl.grantRoleMult(
     [
       await mBASIS.M_BASIS_BURN_OPERATOR_ROLE(),
       await mBASIS.M_BASIS_MINT_OPERATOR_ROLE(),
       await mBASIS.M_BASIS_PAUSE_OPERATOR_ROLE(),
+    ],
+    [owner.address, owner.address, owner.address],
+  );
+
+  await accessControl.grantRoleMult(
+    [
+      await eUSD.E_USD_BURN_OPERATOR_ROLE(),
+      await eUSD.E_USD_MINT_OPERATOR_ROLE(),
+      await eUSD.E_USD_PAUSE_OPERATOR_ROLE(),
     ],
     [owner.address, owner.address, owner.address],
   );
@@ -285,6 +300,7 @@ export const defaultDeploy = async () => {
   return {
     mTBILL,
     mBASIS,
+    eUSD,
     accessControl,
     wAccessControlTester,
     roles,
