@@ -32,6 +32,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
       redemptionVault: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
     },
     mBASIS: {
+      token: '0x2a8c22E3b10036f3AEF5875d04f8441d4188b656',
       tokensReceiver: '0xB8633297f9D9A8eaD48f1335ab04b14C189639f0',
     },
   },
@@ -67,6 +68,10 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
       tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
       depositVault: '0xcbCf1e67F1988e2572a2A620321Aef2ff73369f0',
       redemptionVault: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
+    },
+    mBASIS: {
+      token: '0xDDFDa068cd7975690a3B272cFec3513B04A8bC1e',
+      tokensReceiver: '0xB8633297f9D9A8eaD48f1335ab04b14C189639f0',
     },
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
     etfDataFeed: '0xc747FdDFC46CDC915bEA866D519dFc5Eae5c947f',

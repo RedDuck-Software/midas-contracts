@@ -59,7 +59,7 @@ export const timeouts: ConfigPerNetwork<number | undefined> = {
 };
 
 export const blockGasLimits: ConfigPerNetwork<number | undefined> = {
-  main: 300 * 10 ** 6,
+  main: undefined,
   sepolia: undefined,
   etherlink: undefined,
   hardhat: 300 * 10 ** 6,
