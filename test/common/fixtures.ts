@@ -34,6 +34,8 @@ import {
   AggregatorV3DeprecatedMock__factory,
   // eslint-disable-next-line camelcase
   AggregatorV3UnhealthyMock__factory,
+  // eslint-disable-next-line camelcase
+  MBASISTest__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -48,6 +50,19 @@ export const defaultDeploy = async () => {
   const mTBILL = await new MTBILLTest__factory(owner).deploy();
   await expect(mTBILL.initialize(ethers.constants.AddressZero)).to.be.reverted;
   await mTBILL.initialize(accessControl.address);
+
+  const mBASIS = await new MBASISTest__factory(owner).deploy();
+  await expect(mBASIS.initialize(ethers.constants.AddressZero)).to.be.reverted;
+  await mBASIS.initialize(accessControl.address);
+
+  await accessControl.grantRoleMult(
+    [
+      await mBASIS.M_BASIS_BURN_OPERATOR_ROLE(),
+      await mBASIS.M_BASIS_MINT_OPERATOR_ROLE(),
+      await mBASIS.M_BASIS_PAUSE_OPERATOR_ROLE(),
+    ],
+    [owner.address, owner.address, owner.address],
+  );
 
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
   const mockedAggregatorDecimals = await mockedAggregator.decimals();
@@ -269,6 +284,7 @@ export const defaultDeploy = async () => {
 
   return {
     mTBILL,
+    mBASIS,
     accessControl,
     wAccessControlTester,
     roles,
