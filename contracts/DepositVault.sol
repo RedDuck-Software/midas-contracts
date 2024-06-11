@@ -143,7 +143,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc ManageableVault
      */
-    function vaultRole() public pure override returns (bytes32) {
+    function vaultRole() public pure virtual override returns (bytes32) {
         return DEPOSIT_VAULT_ADMIN_ROLE;
     }
 

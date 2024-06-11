@@ -18,11 +18,11 @@ export const rpcUrls: ConfigPerNetwork<RpcUrl> = {
   localhost: 'http://localhost:8545',
 };
 
-export const gasPrices: ConfigPerNetwork<number | undefined> = {
+export const gasPrices: ConfigPerNetwork<number | 'auto' | undefined> = {
   etherlink: undefined,
-  main: 1 * GWEI,
-  sepolia: undefined,
-  hardhat: 1 * GWEI,
+  main: 'auto',
+  sepolia: 'auto',
+  hardhat: 'auto',
   localhost: 70 * GWEI,
 };
 
@@ -44,10 +44,10 @@ export const mnemonics: ConfigPerNetwork<string | undefined> = {
 
 export const gases: ConfigPerNetwork<number | undefined> = {
   main: undefined,
-  sepolia: 1_250_000,
+  sepolia: undefined,
   hardhat: undefined,
   etherlink: undefined,
-  localhost: 1_250_000,
+  localhost: undefined,
 };
 
 export const timeouts: ConfigPerNetwork<number | undefined> = {
@@ -85,7 +85,7 @@ export const getBaseNetworkConfig = (
     : undefined,
   chainId: chainIds[network],
   gas: gases[network],
-  gasPrice: 'auto', // gasPrices[network],
+  gasPrice: gasPrices[network],
   blockGasLimit: blockGasLimits[network],
   timeout: timeouts[network],
   initialBaseFeePerGas: initialBasesFeePerGas[network],
@@ -113,6 +113,10 @@ export const getForkNetworkConfig = (
   },
   live: false,
   saveDeployments: true,
+  mining: {
+    auto: false,
+    interval: 1000,
+  },
   forking: {
     url: rpcUrls[network],
   },

@@ -14,6 +14,7 @@ import {
   RedemptionVault__factory,
   // eslint-disable-next-line camelcase
   MTBILL__factory,
+  // eslint-disable-next-line camelcase
   EUSD__factory,
 } from '../../typechain-types';
 const forToken = 'eUSD';
@@ -34,12 +35,14 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   if (!tokenAddresses) throw new Error('Token addresses are not set');
 
+  // eslint-disable-next-line camelcase
   const ac = MidasAccessControl__factory.connect(
     addresses.accessControl!,
     owner,
   );
 
-  const eusd = EUSD__factory.connect(addresses.eUSD?.token!, owner);
+  // eslint-disable-next-line camelcase
+  const eusd = EUSD__factory.connect(addresses.eUSD!.token!, owner);
   const rolesToTransfer = [
     await ac.DEPOSIT_VAULT_ADMIN_ROLE(),
     await ac.REDEMPTION_VAULT_ADMIN_ROLE(),

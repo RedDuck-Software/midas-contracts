@@ -51,11 +51,14 @@ const config: HardhatUserConfig = {
     main: getNetworkConfig('main', []),
     etherlink: getNetworkConfig('etherlink', []),
     sepolia: getNetworkConfig('sepolia'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    localhost: getNetworkConfig('localhost', [], FORKING_NETWORK as any),
+    localhost: FORKING_NETWORK
+      ? getForkNetworkConfig(FORKING_NETWORK)
+      : getNetworkConfig('localhost', [], FORKING_NETWORK as any),
   },
   gasReporter: {
     enabled: REPORT_GAS,
@@ -67,7 +70,7 @@ const config: HardhatUserConfig = {
     apiKey: ETHERSCAN_API_KEY,
     customChains: [
       {
-        chainId: chainIds['etherlink'],
+        chainId: chainIds.etherlink,
         network: 'etherlink',
         urls: {
           apiURL: 'https://testnet-explorer.etherlink.com/api',

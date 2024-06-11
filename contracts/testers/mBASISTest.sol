@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import "../mBASIS.sol";
+import "../mBasis/mBASIS.sol";
 
 //solhint-disable contract-name-camelcase
 contract mBASISTest is mBASIS {

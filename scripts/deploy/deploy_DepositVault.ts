@@ -9,7 +9,7 @@ import {
   tryEtherscanVerifyImplementation,
 } from '../../helpers/utils';
 
-const forToken = 'eUSD';
+const forToken = 'mBASIS';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
