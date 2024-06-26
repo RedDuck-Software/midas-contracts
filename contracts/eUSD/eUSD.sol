@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
-import "./mTBILL.sol";
+import "../mTBILL.sol";
 
 /**
  * @title eUSD
@@ -37,7 +37,7 @@ contract eUSD is mTBILL {
      */
     function initialize(address _accessControl) external override initializer {
         __Blacklistable_init(_accessControl);
-        __ERC20_init("Etherlink USD", "eUSD");
+        __ERC20_init("Midas Eternal USD", "eUSD");
     }
 
     /**
