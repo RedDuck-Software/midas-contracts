@@ -362,7 +362,7 @@ describe('DepositVault', function () {
         { accessControl, greenlistable: depositVault, owner },
         owner,
       );
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 0, {
+      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 1, {
         revertMessage: 'MV: token not exists',
       });
     });
@@ -381,6 +381,27 @@ describe('DepositVault', function () {
       await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 0, {
         revertMessage: 'DV: invalid amount',
       });
+    });
+
+    it('should fail: when rounding is invalid', async () => {
+      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
+        await loadFixture(defaultDeploy);
+      await greenList(
+        { accessControl, greenlistable: depositVault, owner },
+        owner,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+      );
+      await deposit(
+        { depositVault, owner, mTBILL },
+        stableCoins.dai,
+        0.0000000001,
+        {
+          revertMessage: 'MV: invalid rounding',
+        },
+      );
     });
 
     it('should fail: call with insufficient allowance', async () => {
