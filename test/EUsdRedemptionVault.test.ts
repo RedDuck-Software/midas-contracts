@@ -10,7 +10,7 @@ import { defaultDeploy } from './common/fixtures';
 import { redeem } from './common/redemption-vault.helpers';
 import { constants } from 'ethers';
 
-describe.only('EUsdRedemptionVault', function () {
+describe('EUsdRedemptionVault', function () {
   it('deployment', async () => {
     const { eUSdRedemptionVault, eUSD, tokensReceiver } = await loadFixture(
       defaultDeploy,

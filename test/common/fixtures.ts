@@ -205,13 +205,11 @@ export const defaultDeploy = async () => {
   await accessControl.grantRoleMult(
     [
       await eUSdRedemptionVault.DEFAULT_ADMIN_ROLE(),
-      await eUSdRedemptionVault.E_USD_DEPOSIT_VAULT_ADMIN_ROLE(),
       await eUSdRedemptionVault.E_USD_GREENLIST_OPERATOR_ROLE(),
       await eUSdRedemptionVault.E_USD_REDEMPTION_VAULT_ADMIN_ROLE(),
       await eUSdRedemptionVault.E_USD_VAULT_ROLES_OPERATOR(),
     ],
     [
-      eUsdOwner.address,
       eUsdOwner.address,
       eUsdOwner.address,
       eUsdOwner.address,
