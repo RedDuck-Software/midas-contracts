@@ -14,6 +14,12 @@ abstract contract EUsdMidasAccessControlRoles {
         keccak256("E_USD_VAULT_ROLES_OPERATOR");
 
     /**
+     * @notice actor that can manage EUsdDepositVault
+     */
+    bytes32 public constant E_USD_DEPOSIT_VAULT_ADMIN_ROLE =
+        keccak256("E_USD_DEPOSIT_VAULT_ADMIN_ROLE");
+
+    /**
      * @notice actor that can manage EUsdRedemptionVault
      */
     bytes32 public constant E_USD_REDEMPTION_VAULT_ADMIN_ROLE =

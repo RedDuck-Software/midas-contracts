@@ -41,21 +41,21 @@ contract eUSD is mTBILL {
     }
 
     /**
-     * @dev AC role, owner of which can mint mBASIS token
+     * @dev AC role, owner of which can mint eUSD token
      */
     function _minterRole() internal pure override returns (bytes32) {
         return E_USD_MINT_OPERATOR_ROLE;
     }
 
     /**
-     * @dev AC role, owner of which can burn mBASIS token
+     * @dev AC role, owner of which can burn eUSD token
      */
     function _burnerRole() internal pure override returns (bytes32) {
         return E_USD_BURN_OPERATOR_ROLE;
     }
 
     /**
-     * @dev AC role, owner of which can pause mBASIS token
+     * @dev AC role, owner of which can pause eUSD token
      */
     function _pauserRole() internal pure override returns (bytes32) {
         return E_USD_PAUSE_OPERATOR_ROLE;

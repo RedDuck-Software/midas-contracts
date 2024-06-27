@@ -37,6 +37,11 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
       depositVault: '0x27C0D44B02E1B732F37ba31C466a35053A7780B8',
       redemptionVault: '0x73cB9a00cEB8FC9134a46eEE20D1fd00BEEe9D84',
     },
+    eUSD: {
+      token: '0xe786DA4812Fb91e8d69bC8047c5dB489c70cEa30',
+      tokensReceiver: '0x9d13371c8DeA0361ac78B4c109ea3CB748427CF5',
+      redemptionVault: '0x39592BdBf6f3b96dD4547063945aB9ece769AE4D',
+    },
   },
   sepolia: {
     mTBILL: {
