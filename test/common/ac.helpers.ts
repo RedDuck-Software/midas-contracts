@@ -18,6 +18,7 @@ type CommonParamsBlackList = {
 type CommonParamsGreenList = {
   greenlistable: Greenlistable;
   accessControl: MidasAccessControl;
+  role?: string;
   owner: SignerWithAddress;
 };
 
@@ -93,7 +94,7 @@ export const unBlackList = async (
 };
 
 export const greenList = async (
-  { greenlistable, accessControl, owner }: CommonParamsGreenList,
+  { greenlistable, accessControl, owner, role }: CommonParamsGreenList,
   account: Account,
   opt?: OptionalCommonParams,
 ) => {
@@ -103,7 +104,7 @@ export const greenList = async (
     await expect(
       accessControl
         .connect(opt?.from ?? owner)
-        .grantRole(await greenlistable.GREENLISTED_ROLE(), account),
+        .grantRole(role ?? (await greenlistable.GREENLISTED_ROLE()), account),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -111,7 +112,7 @@ export const greenList = async (
   await expect(
     accessControl
       .connect(opt?.from ?? owner)
-      .grantRole(await greenlistable.GREENLISTED_ROLE(), account),
+      .grantRole(role ?? (await greenlistable.GREENLISTED_ROLE()), account),
   ).to.emit(
     accessControl,
     accessControl.interface.events['RoleGranted(bytes32,address,address)'].name,
@@ -119,14 +120,14 @@ export const greenList = async (
 
   expect(
     await accessControl.hasRole(
-      await accessControl.GREENLISTED_ROLE(),
+      role ?? (await accessControl.GREENLISTED_ROLE()),
       account,
     ),
   ).eq(true);
 };
 
 export const unGreenList = async (
-  { greenlistable, accessControl, owner }: CommonParamsGreenList,
+  { greenlistable, accessControl, owner, role }: CommonParamsGreenList,
   account: Account,
   opt?: OptionalCommonParams,
 ) => {
@@ -136,7 +137,7 @@ export const unGreenList = async (
     await expect(
       accessControl
         .connect(opt?.from ?? owner)
-        .revokeRole(await greenlistable.GREENLISTED_ROLE(), account),
+        .revokeRole(role ?? (await greenlistable.GREENLISTED_ROLE()), account),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -144,7 +145,7 @@ export const unGreenList = async (
   await expect(
     accessControl
       .connect(opt?.from ?? owner)
-      .revokeRole(await greenlistable.GREENLISTED_ROLE(), account),
+      .revokeRole(role ?? (await greenlistable.GREENLISTED_ROLE()), account),
   ).to.emit(
     accessControl,
     accessControl.interface.events['RoleRevoked(bytes32,address,address)'].name,
@@ -152,7 +153,7 @@ export const unGreenList = async (
 
   expect(
     await accessControl.hasRole(
-      await accessControl.GREENLISTED_ROLE(),
+      role ?? (await accessControl.GREENLISTED_ROLE()),
       account,
     ),
   ).eq(false);

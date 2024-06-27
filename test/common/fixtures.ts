@@ -38,10 +38,12 @@ import {
   MBASISTest__factory,
   // eslint-disable-next-line camelcase
   EUSDTest__factory,
+  EUsdRedemptionVaultTest__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
-  const [owner, tokensReceiver, ...regularAccounts] = await ethers.getSigners();
+  const [owner, eUsdOwner, tokensReceiver, ...regularAccounts] =
+    await ethers.getSigners();
 
   // main contracts
   const accessControl = await new MidasAccessControlTest__factory(
@@ -190,6 +192,33 @@ export const defaultDeploy = async () => {
     tokensReceiver.address,
   );
 
+  const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
+    owner,
+  ).deploy();
+
+  await eUSdRedemptionVault.initialize(
+    accessControl.address,
+    eUSD.address,
+    tokensReceiver.address,
+  );
+
+  await accessControl.grantRoleMult(
+    [
+      await eUSdRedemptionVault.DEFAULT_ADMIN_ROLE(),
+      await eUSdRedemptionVault.E_USD_DEPOSIT_VAULT_ADMIN_ROLE(),
+      await eUSdRedemptionVault.E_USD_GREENLIST_OPERATOR_ROLE(),
+      await eUSdRedemptionVault.E_USD_REDEMPTION_VAULT_ADMIN_ROLE(),
+      await eUSdRedemptionVault.E_USD_VAULT_ROLES_OPERATOR(),
+    ],
+    [
+      eUsdOwner.address,
+      eUsdOwner.address,
+      eUsdOwner.address,
+      eUsdOwner.address,
+      eUsdOwner.address,
+    ],
+  );
+
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),
     usdt: await new ERC20Mock__factory(owner).deploy(18),
@@ -298,7 +327,9 @@ export const defaultDeploy = async () => {
   );
 
   return {
+    eUSdRedemptionVault,
     mTBILL,
+    eUsdOwner,
     mBASIS,
     eUSD,
     accessControl,

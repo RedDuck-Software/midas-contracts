@@ -11,7 +11,7 @@ describe('eUSD', function () {
   it('deployment', async () => {
     const { eUSD } = await loadFixture(defaultDeploy);
 
-    expect(await eUSD.name()).eq('Etherlink USD');
+    expect(await eUSD.name()).eq('Midas Eternal USD');
     expect(await eUSD.symbol()).eq('eUSD');
 
     expect(await eUSD.paused()).eq(false);

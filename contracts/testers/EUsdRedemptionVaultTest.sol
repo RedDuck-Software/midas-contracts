@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import "../eUSD/eUSD.sol";
+import "../eUSD/EUsdRedemptionVault.sol";
 
-//solhint-disable contract-name-camelcase
-contract eUSDTest is eUSD {
+contract EUsdRedemptionVaultTest is EUsdRedemptionVault {
     function _disableInitializers() internal override {}
 }
