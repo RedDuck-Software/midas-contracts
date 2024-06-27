@@ -10,6 +10,9 @@ export const M_BASIS_DEPOSIT_VAULT_CONTRACT_NAME = 'MBasisDepositVault';
 export const M_BASIS_REDEMPTION_VAULT_DEPLOY_TAG = 'MBasisRedemptionVault';
 export const M_BASIS_REDEMPTION_VAULT_CONTRACT_NAME = 'MBasisRedemptionVault';
 
+export const E_USD_REDEMPTION_VAULT_DEPLOY_TAG = 'EUsdRedemptionVault';
+export const E_USD_REDEMPTION_VAULT_CONTRACT_NAME = 'EUsdRedemptionVault';
+
 export const MIDAS_AC_DEPLOY_TAG = 'MidasAccessControl';
 export const MIDAS_AC_CONTRACT_NAME = 'MidasAccessControl';
 

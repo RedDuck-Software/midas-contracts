@@ -2,12 +2,12 @@ import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { E_USD_CONTRACT_NAME } from '../../config';
-import { getCurrentAddresses } from '../../config/constants/addresses';
+import { E_USD_CONTRACT_NAME } from '../../../config';
+import { getCurrentAddresses } from '../../../config/constants/addresses';
 import {
   logDeployProxy,
   tryEtherscanVerifyImplementation,
-} from '../../helpers/utils';
+} from '../../../helpers/utils';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);

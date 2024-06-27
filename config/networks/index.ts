@@ -119,6 +119,7 @@ export const getForkNetworkConfig = (
   },
   forking: {
     url: rpcUrls[network],
+    enabled: true,
   },
 });
 
