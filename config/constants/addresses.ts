@@ -38,9 +38,9 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
       redemptionVault: '0x73cB9a00cEB8FC9134a46eEE20D1fd00BEEe9D84',
     },
     eUSD: {
-      token: '0xe786DA4812Fb91e8d69bC8047c5dB489c70cEa30',
-      tokensReceiver: '0x9d13371c8DeA0361ac78B4c109ea3CB748427CF5',
-      redemptionVault: '0x39592BdBf6f3b96dD4547063945aB9ece769AE4D',
+      tokensReceiver: '0xb5C5f2f9d9d9e7c2E885549AFb857306d119c701',
+      token: '0xb5C5f2f9d9d9e7c2E885549AFb857306d119c701',
+      redemptionVault: '0x8459f6e174deE33FC72BDAE74a3080751eC92c27',
     },
   },
   sepolia: {
