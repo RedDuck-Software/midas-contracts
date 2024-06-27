@@ -1,3 +1,4 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumberish } from 'ethers';
 import { defaultAbiCoder, solidityKeccak256 } from 'ethers/lib/utils';
@@ -5,17 +6,23 @@ import { defaultAbiCoder, solidityKeccak256 } from 'ethers/lib/utils';
 import { Account, OptionalCommonParams, getAccount } from './common.helpers';
 import { defaultDeploy } from './fixtures';
 
-type CommonParams = Pick<
-  Awaited<ReturnType<typeof defaultDeploy>>,
-  'mTBILL' | 'owner'
->;
+import { MBASISTest, MTBILL, MTBILLTest } from '../../typechain-types';
+
+type CommonParams = {
+  mTBILL?: MTBILL;
+  eUSD?: MTBILL;
+  mBASIS?: MTBILL;
+  owner: SignerWithAddress;
+};
 
 export const setMetadataTest = async (
-  { mTBILL, owner }: CommonParams,
+  { mTBILL, mBASIS, eUSD, owner }: CommonParams,
   key: string,
   value: string,
   opt?: OptionalCommonParams,
 ) => {
+  mTBILL ??= mBASIS ?? eUSD!;
+
   const keyBytes32 = solidityKeccak256(['string'], [key]);
   const valueBytes = defaultAbiCoder.encode(['string'], [value]);
 
@@ -34,11 +41,13 @@ export const setMetadataTest = async (
 };
 
 export const mint = async (
-  { mTBILL, owner }: CommonParams,
+  { mTBILL, mBASIS, eUSD, owner }: CommonParams,
   to: Account,
   amount: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
+  mTBILL ??= mBASIS ?? eUSD!;
+
   to = getAccount(to);
 
   if (opt?.revertMessage) {
@@ -61,11 +70,13 @@ export const mint = async (
 };
 
 export const burn = async (
-  { mTBILL, owner }: CommonParams,
+  { mTBILL, mBASIS, eUSD, owner }: CommonParams,
   from: Account,
   amount: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
+  mTBILL ??= mBASIS ?? eUSD!;
+
   from = getAccount(from);
 
   if (opt?.revertMessage) {

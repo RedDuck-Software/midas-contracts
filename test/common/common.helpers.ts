@@ -58,7 +58,8 @@ export const pauseVault = async (
     return;
   }
 
-  await expect(await vault.pause()).not.reverted;
+  await expect(await vault.connect(opt?.from ?? defaultSigner).pause()).not
+    .reverted;
 
   expect(await vault.paused()).eq(true);
 };
@@ -76,7 +77,8 @@ export const unpauseVault = async (
     return;
   }
 
-  await expect(await vault.unpause()).not.reverted;
+  await expect(await vault.connect(opt?.from ?? defaultSigner).unpause()).not
+    .reverted;
 
   expect(await vault.paused()).eq(false);
 };

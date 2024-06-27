@@ -12,7 +12,7 @@ import "./WithMidasAccessControl.sol";
 abstract contract Greenlistable is WithMidasAccessControl {
     /**
      * @dev checks that a given `account`
-     * have GREENLISTED_ROLE
+     * have `greenlistedRole()`
      */
     modifier onlyGreenlisted(address account) {
         _onlyGreenlisted(account);
@@ -32,12 +32,20 @@ abstract contract Greenlistable is WithMidasAccessControl {
     }
 
     /**
-     * @dev checks that a given `account` doesnt
-     * have GREENLISTED_ROLE
+     * @notice AC role of a greenlist
+     * @return role bytes32 role
+     */
+    function greenlistedRole() public view virtual returns (bytes32) {
+        return GREENLISTED_ROLE;
+    }
+
+    /**
+     * @dev checks that a given `account`
+     * have a `greenlistedRole()`
      */
     function _onlyGreenlisted(address account)
         private
         view
-        onlyRole(GREENLISTED_ROLE, account)
+        onlyRole(greenlistedRole(), account)
     {}
 }

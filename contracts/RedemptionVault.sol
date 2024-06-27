@@ -79,7 +79,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @inheritdoc ManageableVault
      */
-    function vaultRole() public pure override returns (bytes32) {
+    function vaultRole() public pure virtual override returns (bytes32) {
         return REDEMPTION_VAULT_ADMIN_ROLE;
     }
 

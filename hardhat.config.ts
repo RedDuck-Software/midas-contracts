@@ -9,6 +9,7 @@ import 'solidity-docgen';
 import './tasks';
 
 import {
+  chainIds,
   ENV,
   getForkNetworkConfig,
   getHardhatNetworkConfig,
@@ -38,6 +39,7 @@ const config: HardhatUserConfig = {
       hardhat: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       localhost: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       sepolia: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      etherlink: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
     },
   },
   verify: {
@@ -47,12 +49,16 @@ const config: HardhatUserConfig = {
   },
   networks: {
     main: getNetworkConfig('main', []),
+    etherlink: getNetworkConfig('etherlink', []),
     sepolia: getNetworkConfig('sepolia'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
       : getHardhatNetworkConfig(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    localhost: getNetworkConfig('localhost', [], FORKING_NETWORK as any),
+    localhost: FORKING_NETWORK
+      ? getForkNetworkConfig(FORKING_NETWORK)
+      : getNetworkConfig('localhost', [], FORKING_NETWORK as any),
   },
   gasReporter: {
     enabled: REPORT_GAS,
@@ -62,6 +68,16 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        chainId: chainIds.etherlink,
+        network: 'etherlink',
+        urls: {
+          apiURL: 'https://testnet-explorer.etherlink.com/api',
+          browserURL: 'https://testnet-explorer.etherlink.com',
+        },
+      },
+    ],
   },
   paths: {
     deploy: 'deploy/',

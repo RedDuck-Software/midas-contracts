@@ -34,10 +34,17 @@ import {
   AggregatorV3DeprecatedMock__factory,
   // eslint-disable-next-line camelcase
   AggregatorV3UnhealthyMock__factory,
+  // eslint-disable-next-line camelcase
+  MBASISTest__factory,
+  // eslint-disable-next-line camelcase
+  EUSDTest__factory,
+  // eslint-disable-next-line camelcase
+  EUsdRedemptionVaultTest__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
-  const [owner, tokensReceiver, ...regularAccounts] = await ethers.getSigners();
+  const [owner, eUsdOwner, tokensReceiver, ...regularAccounts] =
+    await ethers.getSigners();
 
   // main contracts
   const accessControl = await new MidasAccessControlTest__factory(
@@ -48,6 +55,32 @@ export const defaultDeploy = async () => {
   const mTBILL = await new MTBILLTest__factory(owner).deploy();
   await expect(mTBILL.initialize(ethers.constants.AddressZero)).to.be.reverted;
   await mTBILL.initialize(accessControl.address);
+
+  const mBASIS = await new MBASISTest__factory(owner).deploy();
+  await expect(mBASIS.initialize(ethers.constants.AddressZero)).to.be.reverted;
+  await mBASIS.initialize(accessControl.address);
+
+  const eUSD = await new EUSDTest__factory(owner).deploy();
+  await expect(eUSD.initialize(ethers.constants.AddressZero)).to.be.reverted;
+  await eUSD.initialize(accessControl.address);
+
+  await accessControl.grantRoleMult(
+    [
+      await mBASIS.M_BASIS_BURN_OPERATOR_ROLE(),
+      await mBASIS.M_BASIS_MINT_OPERATOR_ROLE(),
+      await mBASIS.M_BASIS_PAUSE_OPERATOR_ROLE(),
+    ],
+    [owner.address, owner.address, owner.address],
+  );
+
+  await accessControl.grantRoleMult(
+    [
+      await eUSD.E_USD_BURN_OPERATOR_ROLE(),
+      await eUSD.E_USD_MINT_OPERATOR_ROLE(),
+      await eUSD.E_USD_PAUSE_OPERATOR_ROLE(),
+    ],
+    [owner.address, owner.address, owner.address],
+  );
 
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
   const mockedAggregatorDecimals = await mockedAggregator.decimals();
@@ -160,6 +193,31 @@ export const defaultDeploy = async () => {
     tokensReceiver.address,
   );
 
+  const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
+    owner,
+  ).deploy();
+
+  await eUSdRedemptionVault.initialize(
+    accessControl.address,
+    eUSD.address,
+    tokensReceiver.address,
+  );
+
+  await accessControl.grantRoleMult(
+    [
+      await eUSdRedemptionVault.DEFAULT_ADMIN_ROLE(),
+      await eUSdRedemptionVault.E_USD_GREENLIST_OPERATOR_ROLE(),
+      await eUSdRedemptionVault.E_USD_REDEMPTION_VAULT_ADMIN_ROLE(),
+      await eUSdRedemptionVault.E_USD_VAULT_ROLES_OPERATOR(),
+    ],
+    [
+      eUsdOwner.address,
+      eUsdOwner.address,
+      eUsdOwner.address,
+      eUsdOwner.address,
+    ],
+  );
+
   const stableCoins = {
     usdc: await new ERC20Mock__factory(owner).deploy(8),
     usdt: await new ERC20Mock__factory(owner).deploy(18),
@@ -268,7 +326,11 @@ export const defaultDeploy = async () => {
   );
 
   return {
+    eUSdRedemptionVault,
     mTBILL,
+    eUsdOwner,
+    mBASIS,
+    eUSD,
     accessControl,
     wAccessControlTester,
     roles,

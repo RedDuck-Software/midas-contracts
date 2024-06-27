@@ -32,19 +32,19 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   // eslint-disable-next-line camelcase
   const dataFeedContract = DataFeed__factory.connect(
-    addresses.etfDataFeed,
+    addresses.etfDataFeed!,
     owner,
   );
   // eslint-disable-next-line camelcase
   const dataFeedEurContract = DataFeed__factory.connect(
-    addresses.eurToUsdFeed,
+    addresses.eurToUsdFeed!,
     owner,
   );
 
   await postDeploymentTest(hre, {
     // eslint-disable-next-line camelcase
     accessControl: MidasAccessControl__factory.connect(
-      addresses.accessControl,
+      addresses.accessControl!,
       owner,
     ),
     // eslint-disable-next-line camelcase

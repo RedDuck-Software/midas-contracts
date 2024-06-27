@@ -1,10 +1,16 @@
 type NetworkBase = 'sepolia';
 type RpcNetwork = NetworkBase | 'mainnet';
-export type Network = NetworkBase | 'main' | 'hardhat' | 'localhost';
+export type Network =
+  | NetworkBase
+  | 'main'
+  | 'hardhat'
+  | 'localhost'
+  | 'etherlink';
 export type RpcUrl =
   | `https://eth-${RpcNetwork}.g.alchemy.com/v2/${string}`
   | `https://${RpcNetwork}.infura.io/v3/${string}`
-  | `http://localhost:${number}`;
+  | `http://localhost:${number}`
+  | `https://${string}.${string}`;
 
 export type ConfigPerNetwork<T> = Record<Network, T>;
 
