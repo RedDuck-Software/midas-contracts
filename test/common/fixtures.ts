@@ -38,6 +38,7 @@ import {
   MBASISTest__factory,
   // eslint-disable-next-line camelcase
   EUSDTest__factory,
+  // eslint-disable-next-line camelcase
   EUsdRedemptionVaultTest__factory,
 } from '../../typechain-types';
 

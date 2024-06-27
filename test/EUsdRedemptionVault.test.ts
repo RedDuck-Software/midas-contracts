@@ -1,14 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
+import { constants } from 'ethers';
 import { ethers } from 'hardhat';
 
 import { acErrors, greenList } from './common/ac.helpers';
 import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
-
 import { defaultDeploy } from './common/fixtures';
-
 import { redeem } from './common/redemption-vault.helpers';
-import { constants } from 'ethers';
 
 describe('EUsdRedemptionVault', function () {
   it('deployment', async () => {
