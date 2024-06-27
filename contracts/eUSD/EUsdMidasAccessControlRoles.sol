@@ -8,6 +8,12 @@ pragma solidity 0.8.9;
  */
 abstract contract EUsdMidasAccessControlRoles {
     /**
+     * @notice actor that can manage vault admin roles
+     */
+    bytes32 public constant E_USD_VAULT_ROLES_OPERATOR =
+        keccak256("E_USD_VAULT_ROLES_OPERATOR");
+
+    /**
      * @notice actor that can manage EUsdRedemptionVault
      */
     bytes32 public constant E_USD_REDEMPTION_VAULT_ADMIN_ROLE =
