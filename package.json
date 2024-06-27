@@ -39,6 +39,7 @@
     "deploy:main:feed": "yarn hh:run:main scripts/deploy/deploy_DataFeed.ts",
     "deploy:eUSD": "yarn hh:run scripts/deploy/eUSD/deploy_eUSD.ts",
     "deploy:eUSD:rv": "yarn hh:run scripts/deploy/eUSD/deploy_EUsdRedemptionVault.ts",
+    "deploy:eUSD:dv": "yarn hh:run scripts/deploy/eUSD/deploy_EUsdDepositVault.ts",
     "deploy:mBASIS": "yarn hh:run scripts/deploy/deploy_mBASIS.ts",
     "deploy:mBASIS:dv": "yarn hh:run scripts/deploy/deploy_MBasisDepositVault.ts",
     "deploy:mBASIS:rv": "yarn hh:run scripts/deploy/deploy_MBasisRedemptionVault.ts",

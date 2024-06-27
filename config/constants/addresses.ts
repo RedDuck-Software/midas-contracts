@@ -38,9 +38,10 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
       redemptionVault: '0x73cB9a00cEB8FC9134a46eEE20D1fd00BEEe9D84',
     },
     eUSD: {
-      tokensReceiver: '0xb5C5f2f9d9d9e7c2E885549AFb857306d119c701',
+      tokensReceiver: '0x9d13371c8DeA0361ac78B4c109ea3CB748427CF5',
       token: '0xb5C5f2f9d9d9e7c2E885549AFb857306d119c701',
-      redemptionVault: '0x8459f6e174deE33FC72BDAE74a3080751eC92c27',
+      depositVault: '0xdD2EC1Da19950B6B836D46882897D0D8fe4cF487',
+      redemptionVault: '0x672DCEE688aa1685701a4A4138CB20d07272D116',
     },
   },
   sepolia: {
@@ -55,6 +56,12 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<
       tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       depositVault: '0x8459f6e174deE33FC72BDAE74a3080751eC92c27',
       redemptionVault: '0x141f0E9ed8bA2295254C9DF9476ccE7bC29172B1',
+    },
+    eUSD: {
+      token: '0xDd5a54bA2aB379A5e642c58F98aD793A183960E2',
+      tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      depositVault: '0x056339C044055819E8Db84E71f5f2E1F536b2E5b',
+      redemptionVault: '0xE4f2AE539442e1D3Fb40F03ceEbF4A372a390d24',
     },
     etfDataFeed: '0x4E677F7FE252DE44682a913f609EA3eb6F29DC3E',
     eurToUsdFeed: '0xE23c07Ecad6D822500CbE8306d72A90578CA9F11',
