@@ -40,6 +40,8 @@ import {
   EUSDTest__factory,
   // eslint-disable-next-line camelcase
   EUsdRedemptionVaultTest__factory,
+  // eslint-disable-next-line camelcase
+  CustomAggregatorV3CompatibleFeedTester__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -224,6 +226,25 @@ export const defaultDeploy = async () => {
     dai: await new ERC20Mock__factory(owner).deploy(9),
   };
 
+  // eslint-disable-next-line camelcase
+  const customFeed = await new CustomAggregatorV3CompatibleFeedTester__factory(
+    owner,
+  ).deploy();
+
+  await customFeed.initialize(
+    accessControl.address,
+    2,
+    parseUnits('10000', 8),
+    parseUnits('1', 8),
+    'Custom Data Feed',
+  );
+
+  // role granting testers
+  await accessControl.grantRole(
+    await customFeed.CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE(),
+    owner.address,
+  );
+
   const manualFulfillmentToken =
     await redemptionVault.MANUAL_FULLFILMENT_TOKEN();
 
@@ -326,6 +347,7 @@ export const defaultDeploy = async () => {
   );
 
   return {
+    customFeed,
     eUSdRedemptionVault,
     mTBILL,
     eUsdOwner,
