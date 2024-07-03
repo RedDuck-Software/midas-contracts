@@ -18,8 +18,10 @@ import {
 } from './common/manageable-vault.helpers';
 
 import {
+  EUsdDepositVault__factory,
   // eslint-disable-next-line camelcase
   ManageableVaultTester__factory,
+  MBasisDepositVault__factory,
 } from '../typechain-types';
 
 describe('DepositVault', function () {
@@ -43,6 +45,28 @@ describe('DepositVault', function () {
 
     expect(await depositVault.MANUAL_FULLFILMENT_TOKEN()).eq(
       ethers.constants.AddressZero,
+    );
+  });
+
+  it('MBasisDepositVault', async () => {
+    const fixture = await loadFixture(defaultDeploy);
+
+    const tester = await new MBasisDepositVault__factory(
+      fixture.owner,
+    ).deploy();
+
+    expect(await tester.vaultRole()).eq(
+      await tester.M_BASIS_DEPOSIT_VAULT_ADMIN_ROLE(),
+    );
+  });
+
+  it('EUsdDepositVault', async () => {
+    const fixture = await loadFixture(defaultDeploy);
+
+    const tester = await new EUsdDepositVault__factory(fixture.owner).deploy();
+
+    expect(await tester.vaultRole()).eq(
+      await tester.E_USD_DEPOSIT_VAULT_ADMIN_ROLE(),
     );
   });
 

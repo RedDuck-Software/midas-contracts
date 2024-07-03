@@ -7,6 +7,10 @@ import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
 import { addPaymentTokenTest } from './common/manageable-vault.helpers';
 import { redeem } from './common/redemption-vault.helpers';
+import {
+  EUsdRedemptionVaultTest__factory,
+  MBasisRedemptionVault__factory,
+} from '../typechain-types';
 
 describe('RedemptionVault', function () {
   it('deployment', async () => {
@@ -25,6 +29,30 @@ describe('RedemptionVault', function () {
 
     expect(await redemptionVault.MANUAL_FULLFILMENT_TOKEN()).eq(
       ethers.constants.AddressZero,
+    );
+  });
+
+  it('MBasisRedemptionVault', async () => {
+    const fixture = await loadFixture(defaultDeploy);
+
+    const tester = await new MBasisRedemptionVault__factory(
+      fixture.owner,
+    ).deploy();
+
+    expect(await tester.vaultRole()).eq(
+      await tester.M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE(),
+    );
+  });
+
+  it('EUsdRedemptionVault', async () => {
+    const fixture = await loadFixture(defaultDeploy);
+
+    const tester = await new EUsdRedemptionVaultTest__factory(
+      fixture.owner,
+    ).deploy();
+
+    expect(await tester.vaultRole()).eq(
+      await tester.E_USD_REDEMPTION_VAULT_ADMIN_ROLE(),
     );
   });
 
