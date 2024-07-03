@@ -54,6 +54,10 @@ describe('RedemptionVault', function () {
     expect(await tester.vaultRole()).eq(
       await tester.E_USD_REDEMPTION_VAULT_ADMIN_ROLE(),
     );
+
+    expect(await tester.greenlistedRole()).eq(
+      await tester.E_USD_GREENLISTED_ROLE(),
+    );
   });
 
   it('initialize()', async () => {
