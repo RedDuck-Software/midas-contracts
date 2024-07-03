@@ -88,6 +88,10 @@ abstract contract CustomAggregatorV3CompatibleFeed is
         __WithMidasAccessControl_init(_accessControl);
 
         require(_minAnswer < _maxAnswer, "CA: !min/max");
+        require(
+            _maxAnswerDeviation <= 100 * (10 ** decimals()),
+            "CA: !max deviation"
+        );
 
         minAnswer = _minAnswer;
         maxAnswer = _maxAnswer;
@@ -178,7 +182,9 @@ abstract contract CustomAggregatorV3CompatibleFeed is
     /**
      * @inheritdoc AggregatorV3Interface
      */
-    function getRoundData(uint80 _roundId)
+    function getRoundData(
+        uint80 _roundId
+    )
         public
         view
         returns (
@@ -216,13 +222,12 @@ abstract contract CustomAggregatorV3CompatibleFeed is
      * @dev calculates a deviation in % between `_lastPrice` and `_newPrice`
      * @return deviation in `10 ** decimals()` precision
      */
-    function _getDeviation(int256 _lastPrice, int256 _newPrice)
-        private
-        pure
-        returns (uint256)
-    {
-        if (_newPrice == 0) return 100 * 10**decimals();
-        int256 one = int256(10**decimals());
+    function _getDeviation(
+        int256 _lastPrice,
+        int256 _newPrice
+    ) internal pure returns (uint256) {
+        if (_newPrice == 0) return 100 * 10 ** decimals();
+        int256 one = int256(10 ** decimals());
         int256 deviation = ((_lastPrice * one) / _newPrice) - one;
         deviation = deviation < 0 ? deviation * -1 : deviation;
         return uint256(deviation * 100);

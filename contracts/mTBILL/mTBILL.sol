@@ -3,8 +3,8 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 
-import "./interfaces/IMTbill.sol";
-import "./access/Blacklistable.sol";
+import "../access/Blacklistable.sol";
+import "../interfaces/IMTbill.sol";
 
 /**
  * @title mTBILL
@@ -34,20 +34,20 @@ contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
     /**
      * @inheritdoc IMTbill
      */
-    function mint(address to, uint256 amount)
-        external
-        onlyRole(_minterRole(), msg.sender)
-    {
+    function mint(
+        address to,
+        uint256 amount
+    ) external onlyRole(_minterRole(), msg.sender) {
         _mint(to, amount);
     }
 
     /**
      * @inheritdoc IMTbill
      */
-    function burn(address from, uint256 amount)
-        external
-        onlyRole(_burnerRole(), msg.sender)
-    {
+    function burn(
+        address from,
+        uint256 amount
+    ) external onlyRole(_burnerRole(), msg.sender) {
         _burn(from, amount);
     }
 
@@ -68,10 +68,10 @@ contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
     /**
      * @inheritdoc IMTbill
      */
-    function setMetadata(bytes32 key, bytes memory data)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE, msg.sender)
-    {
+    function setMetadata(
+        bytes32 key,
+        bytes memory data
+    ) external onlyRole(DEFAULT_ADMIN_ROLE, msg.sender) {
         metadata[key] = data;
     }
 

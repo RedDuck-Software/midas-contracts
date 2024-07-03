@@ -14,4 +14,11 @@ contract CustomAggregatorV3CompatibleFeedTester is
     function feedAdminRole() public pure override returns (bytes32) {
         return CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE;
     }
+
+    function getDeviation(
+        int256 _lastPrice,
+        int256 _newPrice
+    ) public pure returns (uint256) {
+        return _getDeviation(_lastPrice, _newPrice);
+    }
 }
