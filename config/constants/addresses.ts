@@ -3,6 +3,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { ConfigPerNetwork } from '../types/index';
 
 type TokenAddresses = {
+  customFeed?: string;
   token?: string;
   depositVault?: string;
   redemptionVault?: string;

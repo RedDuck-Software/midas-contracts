@@ -22,6 +22,9 @@ export const MIDAS_AC_CONTRACT_NAME = 'MidasAccessControl';
 export const REDEMPTION_VAULT_DEPLOY_TAG = 'RedemptionVault';
 export const REDEMPTION_VAULT_CONTRACT_NAME = 'RedemptionVault';
 
+export const M_BASIS_CUSTOM_FEED_CONTRACT_NAME = 'MBasisCustomAggregatorFeed';
+export const M_TBILL_CUSTOM_FEED_CONTRACT_NAME = 'MTBillCustomAggregatorFeed';
+
 export const ST_USD_DEPLOY_TAG = 'mTBILL';
 export const M_TBILL_CONTRACT_NAME = 'mTBILL';
 
