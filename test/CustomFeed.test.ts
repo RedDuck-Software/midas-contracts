@@ -1,19 +1,20 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { parseUnits } from 'ethers/lib/utils';
+import { ethers } from 'hardhat';
 
 import { acErrors } from './common/ac.helpers';
 import { setRoundData, setRoundDataSafe } from './common/custom-feed.helpers';
 import { defaultDeploy } from './common/fixtures';
 
 import {
+  // eslint-disable-next-line camelcase
   CustomAggregatorV3CompatibleFeedTester__factory,
   // eslint-disable-next-line camelcase
-  ManageableVaultTester__factory,
   MBasisCustomAggregatorFeed__factory,
+  // eslint-disable-next-line camelcase
   MTBillCustomAggregatorFeed__factory,
 } from '../typechain-types';
-import { ethers } from 'hardhat';
 
 describe('CustomAggregatorV3CompatibleFeed', function () {
   it('deployment', async () => {

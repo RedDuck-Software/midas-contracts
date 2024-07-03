@@ -18,9 +18,11 @@ import {
 } from './common/manageable-vault.helpers';
 
 import {
+  // eslint-disable-next-line camelcase
   EUsdDepositVault__factory,
   // eslint-disable-next-line camelcase
   ManageableVaultTester__factory,
+  // eslint-disable-next-line camelcase
   MBasisDepositVault__factory,
 } from '../typechain-types';
 

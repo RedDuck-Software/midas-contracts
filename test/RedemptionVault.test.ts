@@ -7,8 +7,11 @@ import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
 import { addPaymentTokenTest } from './common/manageable-vault.helpers';
 import { redeem } from './common/redemption-vault.helpers';
+
 import {
+  // eslint-disable-next-line camelcase
   EUsdRedemptionVaultTest__factory,
+  // eslint-disable-next-line camelcase
   MBasisRedemptionVault__factory,
 } from '../typechain-types';
 
