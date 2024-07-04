@@ -8,6 +8,13 @@ import { defaultDeploy } from './common/fixtures';
 import { addPaymentTokenTest } from './common/manageable-vault.helpers';
 import { redeem } from './common/redemption-vault.helpers';
 
+import {
+  // eslint-disable-next-line camelcase
+  EUsdRedemptionVaultTest__factory,
+  // eslint-disable-next-line camelcase
+  MBasisRedemptionVault__factory,
+} from '../typechain-types';
+
 describe('RedemptionVault', function () {
   it('deployment', async () => {
     const { redemptionVault, mTBILL, tokensReceiver, roles } =
@@ -25,6 +32,34 @@ describe('RedemptionVault', function () {
 
     expect(await redemptionVault.MANUAL_FULLFILMENT_TOKEN()).eq(
       ethers.constants.AddressZero,
+    );
+  });
+
+  it('MBasisRedemptionVault', async () => {
+    const fixture = await loadFixture(defaultDeploy);
+
+    const tester = await new MBasisRedemptionVault__factory(
+      fixture.owner,
+    ).deploy();
+
+    expect(await tester.vaultRole()).eq(
+      await tester.M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE(),
+    );
+  });
+
+  it('EUsdRedemptionVault', async () => {
+    const fixture = await loadFixture(defaultDeploy);
+
+    const tester = await new EUsdRedemptionVaultTest__factory(
+      fixture.owner,
+    ).deploy();
+
+    expect(await tester.vaultRole()).eq(
+      await tester.E_USD_REDEMPTION_VAULT_ADMIN_ROLE(),
+    );
+
+    expect(await tester.greenlistedRole()).eq(
+      await tester.E_USD_GREENLISTED_ROLE(),
     );
   });
 

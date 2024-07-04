@@ -3,8 +3,8 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 
-import "./interfaces/IMTbill.sol";
-import "./access/Blacklistable.sol";
+import "../access/Blacklistable.sol";
+import "../interfaces/IMTbill.sol";
 
 /**
  * @title mTBILL
