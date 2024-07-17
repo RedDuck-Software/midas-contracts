@@ -3,11 +3,12 @@ import { expect } from 'chai';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
-import { acErrors, greenList, unGreenList } from './common/ac.helpers';
+import { acErrors } from './common/ac.helpers';
 import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import {
   deposit,
+  setDepositFeeTest,
   setMinAmountToDepositTest,
 } from './common/deposit-vault.helpers';
 import { defaultDeploy } from './common/fixtures';
@@ -25,17 +26,26 @@ import {
   // eslint-disable-next-line camelcase
   MBasisDepositVault__factory,
 } from '../typechain-types';
+import { BigNumber } from 'ethers';
 
 describe('DepositVault', function () {
   it('deployment', async () => {
-    const { depositVault, mTBILL, tokensReceiver, eurToUsdDataFeed, roles } =
-      await loadFixture(defaultDeploy);
+    const {
+      depositVault,
+      mTBILL,
+      tokensReceiver,
+      eurToUsdDataFeed,
+      dataFeed,
+      roles,
+    } = await loadFixture(defaultDeploy);
 
     expect(await depositVault.mTBILL()).eq(mTBILL.address);
 
     expect(await depositVault.paused()).eq(false);
 
     expect(await depositVault.tokensReceiver()).eq(tokensReceiver.address);
+
+    expect(await depositVault.tokenDataFeed()).eq(dataFeed.address);
 
     expect(await depositVault.eurUsdDataFeed()).eq(eurToUsdDataFeed.address);
 
@@ -70,10 +80,6 @@ describe('DepositVault', function () {
     expect(await tester.vaultRole()).eq(
       await tester.E_USD_DEPOSIT_VAULT_ADMIN_ROLE(),
     );
-
-    expect(await tester.greenlistedRole()).eq(
-      await tester.E_USD_GREENLISTED_ROLE(),
-    );
   });
 
   describe('initialization', () => {
@@ -85,6 +91,7 @@ describe('DepositVault', function () {
           ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
           0,
           ethers.constants.AddressZero,
         ),
@@ -92,7 +99,7 @@ describe('DepositVault', function () {
     });
 
     it('should fail: call with initializing == false', async () => {
-      const { owner, accessControl, mTBILL, tokensReceiver } =
+      const { owner, accessControl, mTBILL, tokensReceiver, dataFeed } =
         await loadFixture(defaultDeploy);
 
       const vault = await new ManageableVaultTester__factory(owner).deploy();
@@ -102,17 +109,25 @@ describe('DepositVault', function () {
           accessControl.address,
           mTBILL.address,
           tokensReceiver.address,
+          dataFeed.address,
         ),
       ).revertedWith('Initializable: contract is not initializing');
     });
 
     it('should fail: when _tokensReceiver == address(this)', async () => {
-      const { owner, accessControl, mTBILL } = await loadFixture(defaultDeploy);
+      const { owner, accessControl, mTBILL, dataFeed } = await loadFixture(
+        defaultDeploy,
+      );
 
       const vault = await new ManageableVaultTester__factory(owner).deploy();
 
       await expect(
-        vault.initialize(accessControl.address, mTBILL.address, vault.address),
+        vault.initialize(
+          accessControl.address,
+          mTBILL.address,
+          vault.address,
+          dataFeed.address,
+        ),
       ).revertedWith('invalid address');
     });
   });
@@ -190,6 +205,27 @@ describe('DepositVault', function () {
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdt,
+      );
+    });
+  });
+
+  describe('setFee()', () => {
+    it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
+      const { depositVault, regularAccounts, owner } = await loadFixture(
+        defaultDeploy,
+      );
+      await setDepositFeeTest(
+        { vault: depositVault, owner },
+        ethers.constants.Zero,
+        { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
+      );
+    });
+
+    it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
+      const { depositVault, owner } = await loadFixture(defaultDeploy);
+      await setDepositFeeTest(
+        { vault: depositVault, owner },
+        BigNumber.from(100),
       );
     });
   });
@@ -376,56 +412,48 @@ describe('DepositVault', function () {
   });
 
   describe('deposit()', async () => {
-    it('should fail: call from address without GREENLISTED_ROLE role', async () => {
-      const { depositVault, regularAccounts, owner, mTBILL, stableCoins } =
-        await loadFixture(defaultDeploy);
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 0, {
-        revertMessage: acErrors.WMAC_HASNT_ROLE,
-        from: regularAccounts[0],
-      });
-    });
-
     it('should fail: when there is no token in vault', async () => {
-      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
+      const { owner, depositVault, stableCoins, mTBILL, dataFeed } =
         await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
+
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        1,
+        {
+          revertMessage: 'MV: token not exists',
+        },
       );
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 1, {
-        revertMessage: 'MV: token not exists',
-      });
     });
 
     it('should fail: when trying to deposit 0 amount', async () => {
-      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
+      const { owner, depositVault, stableCoins, mTBILL, dataFeed } =
         await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
-      await addPaymentTokenTest(
-        { vault: depositVault, owner },
-        stableCoins.dai,
-      );
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 0, {
-        revertMessage: 'DV: invalid amount',
-      });
-    });
 
-    it('should fail: when rounding is invalid', async () => {
-      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
-        await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.dai,
       );
       await deposit(
-        { depositVault, owner, mTBILL },
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        0,
+        {
+          revertMessage: 'DV: invalid amount',
+        },
+      );
+    });
+
+    it('should fail: when rounding is invalid', async () => {
+      const { owner, depositVault, stableCoins, mTBILL, dataFeed } =
+        await loadFixture(defaultDeploy);
+
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+      );
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
         stableCoins.dai,
         0.0000000001,
         {
@@ -435,79 +463,79 @@ describe('DepositVault', function () {
     });
 
     it('should fail: call with insufficient allowance', async () => {
-      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
+      const { owner, depositVault, stableCoins, mTBILL, dataFeed } =
         await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
+
       await mintToken(stableCoins.dai, owner, 10);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 1, {
-        revertMessage: 'ERC20: insufficient allowance',
-      });
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        1,
+        {
+          revertMessage: 'ERC20: insufficient allowance',
+        },
+      );
     });
 
     it('should fail: call with insufficient balance', async () => {
-      const { owner, depositVault, accessControl, stableCoins, mTBILL } =
+      const { owner, depositVault, stableCoins, mTBILL, dataFeed } =
         await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
+
       await approveBase18(owner, stableCoins.dai, depositVault, 10);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 1, {
-        revertMessage: 'ERC20: transfer amount exceeds balance',
-      });
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        1,
+        {
+          revertMessage: 'ERC20: transfer amount exceeds balance',
+        },
+      );
     });
 
-    it('should fail: deposit 100 DAI, then remove user from green list and try to deposit again', async () => {
+    it('should fail: dataFeed rate 0 ', async () => {
       const {
         owner,
-        mockedAggregator,
         depositVault,
-        accessControl,
         stableCoins,
         mTBILL,
+        dataFeed,
+        mockedAggregator,
       } = await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
-      await mintToken(stableCoins.dai, owner, 100);
-      await approveBase18(owner, stableCoins.dai, depositVault, 100);
+
+      await approveBase18(owner, stableCoins.dai, depositVault, 10);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await setRoundData({ mockedAggregator }, 5);
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100);
-
-      await unGreenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
+      await mintToken(stableCoins.dai, owner, 100_000);
+      await setRoundData({ mockedAggregator }, 0);
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        1,
+        {
+          revertMessage: 'DF: feed is deprecated',
+        },
       );
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100, {
-        revertMessage: acErrors.WMAC_HASNT_ROLE,
-      });
     });
 
     it('should fail: call for amount < minAmountToDepositTest', async () => {
       const {
         depositVault,
-        accessControl,
         mockedAggregator,
         mockedAggregatorEur,
         owner,
         mTBILL,
         stableCoins,
+        dataFeed,
       } = await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
@@ -517,17 +545,18 @@ describe('DepositVault', function () {
 
       await mintToken(stableCoins.dai, owner, 100_000);
       await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
 
       await setRoundData({ mockedAggregator: mockedAggregatorEur }, 1);
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
 
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 99_999, {
-        revertMessage: 'DV: usd amount < min',
-      });
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        99_999,
+        {
+          revertMessage: 'DV: usd amount < min',
+        },
+      );
     });
 
     it('deposit 100 DAI, when price is 5$', async () => {
@@ -535,14 +564,11 @@ describe('DepositVault', function () {
         owner,
         mockedAggregator,
         depositVault,
-        accessControl,
         stableCoins,
         mTBILL,
+        dataFeed,
       } = await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
+
       await mintToken(stableCoins.dai, owner, 100);
       await approveBase18(owner, stableCoins.dai, depositVault, 100);
       await addPaymentTokenTest(
@@ -550,7 +576,11 @@ describe('DepositVault', function () {
         stableCoins.dai,
       );
       await setRoundData({ mockedAggregator }, 5);
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100);
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        100,
+      );
     });
 
     it('deposit 100 DAI, when price is 5$ without checking of minDepositAmount', async () => {
@@ -558,14 +588,11 @@ describe('DepositVault', function () {
         owner,
         mockedAggregator,
         depositVault,
-        accessControl,
         stableCoins,
         mTBILL,
+        dataFeed,
       } = await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
+
       await mintToken(stableCoins.dai, owner, 100);
       await approveBase18(owner, stableCoins.dai, depositVault, 100);
       await addPaymentTokenTest(
@@ -574,19 +601,23 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 5);
       await depositVault.freeFromMinDeposit(owner.address);
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100);
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        100,
+      );
     });
   });
 
   describe('deposit()', () => {
     it('should fail: when is paused', async () => {
       const {
-        accessControl,
         depositVault,
         owner,
         mTBILL,
         stableCoins,
         regularAccounts,
+        dataFeed,
       } = await loadFixture(defaultDeploy);
 
       await pauseVault(depositVault);
@@ -601,19 +632,20 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        regularAccounts[0],
-      );
 
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100, {
-        from: regularAccounts[0],
-        revertMessage: 'Pausable: paused',
-      });
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        100,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'Pausable: paused',
+        },
+      );
     });
 
     it('is on pause, but admin can use everything', async () => {
-      const { accessControl, depositVault, owner, mTBILL, stableCoins } =
+      const { depositVault, owner, mTBILL, stableCoins, dataFeed } =
         await loadFixture(defaultDeploy);
 
       await pauseVault(depositVault);
@@ -624,25 +656,26 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai,
       );
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
 
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100, {
-        revertMessage: 'Pausable: paused',
-      });
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        100,
+        {
+          revertMessage: 'Pausable: paused',
+        },
+      );
     });
 
     it('call for amount == minAmountToDepositTest', async () => {
       const {
         depositVault,
-        accessControl,
         mockedAggregator,
         mockedAggregatorEur,
         owner,
         mTBILL,
         stableCoins,
+        dataFeed,
       } = await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
@@ -652,26 +685,26 @@ describe('DepositVault', function () {
 
       await mintToken(stableCoins.dai, owner, 100_000);
       await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
 
       await setRoundData({ mockedAggregator: mockedAggregatorEur }, 1);
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
 
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100_000);
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        100_000,
+      );
     });
 
     it('call for amount == minAmountToDepositTest+1, then deposit with amount 1', async () => {
       const {
         depositVault,
-        accessControl,
         mockedAggregator,
         mockedAggregatorEur,
         owner,
         mTBILL,
         stableCoins,
+        dataFeed,
       } = await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: depositVault, owner },
@@ -681,16 +714,20 @@ describe('DepositVault', function () {
 
       await mintToken(stableCoins.dai, owner, 100_002);
       await approveBase18(owner, stableCoins.dai, depositVault, 100_002);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
 
       await setRoundData({ mockedAggregator: mockedAggregatorEur }, 1);
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
 
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100_001);
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 1);
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        100_001,
+      );
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        1,
+      );
     });
 
     it('deposit 100 DAI, when price is 5$, 25 USDC when price is 5.1$, 14 USDT when price is 5.4$', async () => {
@@ -698,14 +735,10 @@ describe('DepositVault', function () {
         owner,
         mockedAggregator,
         depositVault,
-        accessControl,
         stableCoins,
         mTBILL,
+        dataFeed,
       } = await loadFixture(defaultDeploy);
-      await greenList(
-        { accessControl, greenlistable: depositVault, owner },
-        owner,
-      );
 
       await mintToken(stableCoins.dai, owner, 100);
       await mintToken(stableCoins.usdc, owner, 25);
@@ -729,13 +762,25 @@ describe('DepositVault', function () {
       );
 
       await setRoundData({ mockedAggregator }, 5);
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.dai, 100);
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.dai,
+        100,
+      );
 
       await setRoundData({ mockedAggregator }, 5.1);
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.usdc, 25);
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.usdc,
+        25,
+      );
 
       await setRoundData({ mockedAggregator }, 5.4);
-      await deposit({ depositVault, owner, mTBILL }, stableCoins.usdt, 14);
+      await deposit(
+        { depositVault, owner, mTBILL, dataFeed },
+        stableCoins.usdt,
+        14,
+      );
     });
   });
 });

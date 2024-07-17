@@ -102,9 +102,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         totalDeposited[user] += amountUsdIn;
         _tokenTransferFromUser(tokenIn, amountUsdIn);
 
-        uint256 mintAmount = _getOutputAmountWithoutFee(amountUsdIn);   
-        require(mintAmount > 0, "DV: invalid amount out");  
-        mTBILL.mint(user, mintAmount); 
+        uint256 mintAmount = _getOutputAmountWithoutFee(amountUsdIn);
+        require(mintAmount > 0, "DV: invalid amount out");
+        mTBILL.mint(user, mintAmount);
 
         emit Deposit(user, tokenIn, amountUsdIn, mintAmount);
     }
@@ -137,7 +137,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         emit SetFee(msg.sender, newFee);
     }
 
-     /**
+    /**
      * @inheritdoc IDepositVault
      */
     function getFee() public view returns (uint256) {
@@ -181,17 +181,17 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param amountUsdIn amount of USD
      * @return outputMtBill amount of mtBill that should be minted to user
      */
-    function _getOutputAmountWithoutFee(
-        uint256 amountUsdIn
-    ) internal view returns (uint256) {
+    function _getOutputAmountWithoutFee(uint256 amountUsdIn)
+        internal
+        view
+        returns (uint256)
+    {
         if (amountUsdIn == 0) return 0;
 
         uint256 price = tokenDataFeed.getDataInBase18();
-        if(price == 0) return 0;
+        if (price == 0) return 0;
 
-        uint256 amountOut = amountUsdIn * (10 ** 18) / (price);
-        return
-            amountOut -
-            ((amountOut * getFee()) / ONE_HUNDRED_PERCENT);
+        uint256 amountOut = (amountUsdIn * (10**18)) / price;
+        return amountOut - ((amountOut * getFee()) / ONE_HUNDRED_PERCENT);
     }
 }

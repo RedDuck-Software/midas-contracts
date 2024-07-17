@@ -123,6 +123,7 @@ export const defaultDeploy = async () => {
     depositVault.initialize(
       ethers.constants.AddressZero,
       mTBILL.address,
+      dataFeed.address,
       eurToUsdDataFeed.address,
       0,
       tokensReceiver.address,
@@ -132,6 +133,7 @@ export const defaultDeploy = async () => {
     depositVault.initialize(
       accessControl.address,
       ethers.constants.AddressZero,
+      dataFeed.address,
       eurToUsdDataFeed.address,
       0,
       tokensReceiver.address,
@@ -141,6 +143,7 @@ export const defaultDeploy = async () => {
     depositVault.initialize(
       accessControl.address,
       mTBILL.address,
+      dataFeed.address,
       ethers.constants.AddressZero,
       0,
       tokensReceiver.address,
@@ -150,17 +153,34 @@ export const defaultDeploy = async () => {
     depositVault.initialize(
       accessControl.address,
       mTBILL.address,
+      dataFeed.address,
       eurToUsdDataFeed.address,
       0,
       ethers.constants.AddressZero,
+    ),
+  ).to.be.reverted;
+  await expect(
+    depositVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      ethers.constants.AddressZero,
+      eurToUsdDataFeed.address,
+      0,
+      tokensReceiver.address,
     ),
   ).to.be.reverted;
   await depositVault.initialize(
     accessControl.address,
     mTBILL.address,
+    dataFeed.address,
     eurToUsdDataFeed.address,
     0,
     tokensReceiver.address,
+  );
+
+  await accessControl.grantRole(
+    mTBILL.M_TBILL_MINT_OPERATOR_ROLE(),
+    depositVault.address,
   );
 
   const redemptionVault = await new RedemptionVaultTest__factory(
@@ -172,6 +192,7 @@ export const defaultDeploy = async () => {
       ethers.constants.AddressZero,
       mTBILL.address,
       tokensReceiver.address,
+      dataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -179,12 +200,22 @@ export const defaultDeploy = async () => {
       accessControl.address,
       ethers.constants.AddressZero,
       tokensReceiver.address,
+      dataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
     redemptionVault.initialize(
       accessControl.address,
       mTBILL.address,
+      ethers.constants.AddressZero,
+      dataFeed.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      tokensReceiver.address,
       ethers.constants.AddressZero,
     ),
   ).to.be.reverted;
@@ -193,6 +224,7 @@ export const defaultDeploy = async () => {
     accessControl.address,
     mTBILL.address,
     tokensReceiver.address,
+    dataFeed.address,
   );
 
   const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
@@ -203,6 +235,7 @@ export const defaultDeploy = async () => {
     accessControl.address,
     eUSD.address,
     tokensReceiver.address,
+    dataFeed.address,
   );
 
   await accessControl.grantRoleMult(

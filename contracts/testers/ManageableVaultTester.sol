@@ -12,7 +12,12 @@ contract ManageableVaultTester is ManageableVault {
         address _tokensReceiver,
         address _etfDataFeed
     ) external initializer {
-        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver, _etfDataFeed);
+        __ManageableVault_init(
+            _accessControl,
+            _mTbill,
+            _tokensReceiver,
+            _etfDataFeed
+        );
     }
 
     function initializeWithoutInitializer(
@@ -21,7 +26,12 @@ contract ManageableVaultTester is ManageableVault {
         address _tokensReceiver,
         address _etfDataFeed
     ) external {
-        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver, _etfDataFeed);
+        __ManageableVault_init(
+            _accessControl,
+            _mTbill,
+            _tokensReceiver,
+            _etfDataFeed
+        );
     }
 
     function vaultRole() public view virtual override returns (bytes32) {}

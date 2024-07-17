@@ -1,4 +1,6 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
+import { BigNumber, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 
 import {
@@ -9,6 +11,8 @@ import {
 import { defaultDeploy } from './fixtures';
 
 import {
+  DataFeedTest,
+  DepositVaultTest,
   ERC20,
   // eslint-disable-next-line camelcase
   ERC20__factory,
@@ -21,8 +25,33 @@ type CommonParams = Pick<
 
 type CommonParamsDeposit = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'depositVault' | 'owner' | 'mTBILL'
+  'depositVault' | 'owner' | 'mTBILL' | 'dataFeed'
 >;
+
+type CommonParamsChangePaymentToken = {
+  vault: DepositVaultTest;
+  owner: SignerWithAddress;
+};
+
+export const setDepositFeeTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  newFee: BigNumber,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(vault.connect(opt?.from ?? owner).setFee(newFee)).revertedWith(
+      opt?.revertMessage,
+    );
+    return;
+  }
+
+  await expect(vault.connect(opt?.from ?? owner).setFee(newFee))
+    .to.emit(vault, vault.interface.events['SetFee(address,uint256)'].name)
+    .withArgs((opt?.from ?? owner).address, newFee).to.not.reverted;
+
+  const fee = await vault.getFee();
+  expect(fee).eq(newFee);
+};
 
 export const setMinAmountToDepositTest = async (
   { depositVault, owner }: CommonParams,
@@ -51,7 +80,7 @@ export const setMinAmountToDepositTest = async (
 };
 
 export const deposit = async (
-  { depositVault, owner }: CommonParamsDeposit,
+  { depositVault, owner, mTBILL, dataFeed }: CommonParamsDeposit,
   tokenIn: ERC20 | string,
   amountUsdIn: number,
   opt?: OptionalCommonParams,
@@ -81,26 +110,30 @@ export const deposit = async (
     tokenContract,
     sender.address,
   );
+  const balanceMtBillBeforeUser = await balanceOfBase18(mTBILL, sender.address);
 
   const totalDepositedBefore = await depositVault.totalDeposited(
     sender.address,
   );
 
-  const lastReqId = await depositVault.lastRequestId();
+  const expectedMintAmount = await calcExpectedMintAmount(
+    dataFeed,
+    depositVault,
+    amountIn,
+  );
 
   await expect(depositVault.connect(sender).deposit(tokenIn, amountIn))
     .to.emit(
       depositVault,
-      depositVault.interface.events['Deposit(uint256,address,address,uint256)']
+      depositVault.interface.events['Deposit(address,address,uint256,uint256)']
         .name,
     )
     .withArgs(
-      lastReqId.add(1),
       sender.address,
       tokenContract.address,
       amountUsdIn,
+      expectedMintAmount,
     ).to.not.reverted;
-  const newLastReqId = await depositVault.lastRequestId();
 
   const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
 
@@ -109,9 +142,30 @@ export const deposit = async (
     tokensReceiver,
   );
   const balanceAfterUser = await balanceOfBase18(tokenContract, sender.address);
+  const balanceMtBillAfterUser = await balanceOfBase18(mTBILL, sender.address);
 
-  expect(newLastReqId).eq(lastReqId.add(1));
+  expect(balanceMtBillAfterUser.sub(balanceMtBillBeforeUser)).eq(
+    expectedMintAmount,
+  );
   expect(totalDepositedAfter).eq(totalDepositedBefore.add(amountIn));
   expect(balanceAfterContract).eq(balanceBeforeContract.add(amountIn));
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+};
+
+export const calcExpectedMintAmount = async (
+  dataFeed: DataFeedTest,
+  depositVault: DepositVaultTest,
+  amountIn: BigNumber,
+) => {
+  const currentRate = await dataFeed.getDataInBase18();
+  if (currentRate.isZero()) return constants.Zero;
+
+  const outAmountActual = amountIn.mul(constants.WeiPerEther).div(currentRate);
+
+  const feePercent = await depositVault.getFee();
+  const hundredPercent = await depositVault.ONE_HUNDRED_PERCENT();
+
+  const fee = outAmountActual.mul(feePercent).div(hundredPercent);
+
+  return outAmountActual.sub(fee);
 };
