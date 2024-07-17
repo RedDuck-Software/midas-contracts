@@ -21,7 +21,7 @@ import "../access/Pausable.sol";
  * @author RedDuck Software
  * @notice Contract with base Vault methods
  */
-abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
+abstract contract ManageableVault is Pausable, IManageableVault {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
@@ -40,6 +40,11 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
      * @notice mTBILL token
      */
     IMTbill public mTBILL;
+
+    /**
+     * @notice IBO1/USD ChainLink data feed
+     */
+    IDataFeed public tokenDataFeed;
 
     /**
      * @notice address to which USD and mTokens will be sent
@@ -74,14 +79,16 @@ abstract contract ManageableVault is Greenlistable, Pausable, IManageableVault {
     function __ManageableVault_init(
         address _ac,
         address _mTBILL,
-        address _tokensReceiver
+        address _tokensReceiver,
+        address _tokenDataFeed
     ) internal onlyInitializing {
         require(_mTBILL != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
+        require(_tokenDataFeed != address(0), "zero address");
         require(_tokensReceiver != address(this), "invalid address");
 
         mTBILL = IMTbill(_mTBILL);
-        __Greenlistable_init(_ac);
+        tokenDataFeed = IDataFeed(_tokenDataFeed);
         __Pausable_init(_ac);
 
         tokensReceiver = _tokensReceiver;

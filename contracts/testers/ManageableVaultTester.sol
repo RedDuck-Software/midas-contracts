@@ -9,17 +9,19 @@ contract ManageableVaultTester is ManageableVault {
     function initialize(
         address _accessControl,
         address _mTbill,
-        address _tokensReceiver
+        address _tokensReceiver,
+        address _etfDataFeed
     ) external initializer {
-        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver);
+        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver, _etfDataFeed);
     }
 
     function initializeWithoutInitializer(
         address _accessControl,
         address _mTbill,
-        address _tokensReceiver
+        address _tokensReceiver,
+        address _etfDataFeed
     ) external {
-        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver);
+        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver, _etfDataFeed);
     }
 
     function vaultRole() public view virtual override returns (bytes32) {}

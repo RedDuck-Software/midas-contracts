@@ -21,11 +21,4 @@ contract EUsdRedemptionVault is RedemptionVault, EUsdMidasAccessControlRoles {
     function vaultRole() public pure override returns (bytes32) {
         return E_USD_REDEMPTION_VAULT_ADMIN_ROLE;
     }
-
-    /**
-     * @inheritdoc Greenlistable
-     */
-    function greenlistedRole() public pure override returns (bytes32) {
-        return E_USD_GREENLISTED_ROLE;
-    }
 }

@@ -48,9 +48,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     function initialize(
         address _ac,
         address _mTBILL,
-        address _tokensReceiver
+        address _tokensReceiver,
+        address _tokenDataFeed
     ) external initializer {
-        __ManageableVault_init(_ac, _mTBILL, _tokensReceiver);
+        __ManageableVault_init(_ac, _mTBILL, _tokensReceiver, _tokenDataFeed);
     }
 
     /**
@@ -60,7 +61,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function redeem(address tokenOut, uint256 amountTBillIn)
         external
-        onlyGreenlisted(msg.sender)
         whenNotPaused
     {
         require(amountTBillIn > 0, "RV: 0 amount");
