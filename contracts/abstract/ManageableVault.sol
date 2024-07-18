@@ -42,19 +42,26 @@ abstract contract ManageableVault is Pausable, IManageableVault {
     IMTbill public mTBILL;
 
     /**
-     * @notice IBO1/USD ChainLink data feed
-     */
-    IDataFeed public tokenDataFeed;
-
-    /**
      * @notice address to which USD and mTokens will be sent
      */
     address public tokensReceiver;
 
     /**
+     * @dev deposit fee 1% = 100
+     */
+    uint256 public initialFee;
+
+    /**
+     * @notice address to which fees will be sent
+     */
+    address public feeReciever;
+
+    /**
      * @dev tokens that can be used as USD representation
      */
     EnumerableSet.AddressSet internal _paymentTokens;
+
+    mapping(address => TokenConfig) internal _tokensConfig;
 
     /**
      * @dev leaving a storage gap for futures updates
@@ -80,18 +87,21 @@ abstract contract ManageableVault is Pausable, IManageableVault {
         address _ac,
         address _mTBILL,
         address _tokensReceiver,
-        address _tokenDataFeed
+        address _feeReciever,
+        uint256 _initialFee
     ) internal onlyInitializing {
         require(_mTBILL != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
-        require(_tokenDataFeed != address(0), "zero address");
         require(_tokensReceiver != address(this), "invalid address");
+        require(_feeReciever != address(0), "zero address");
+        require(_feeReciever != address(this), "invalid address");
 
         mTBILL = IMTbill(_mTBILL);
-        tokenDataFeed = IDataFeed(_tokenDataFeed);
         __Pausable_init(_ac);
 
         tokensReceiver = _tokensReceiver;
+        feeReciever = _feeReciever;
+        initialFee = _initialFee;
     }
 
     /**
@@ -115,9 +125,14 @@ abstract contract ManageableVault is Pausable, IManageableVault {
      * @inheritdoc IManageableVault
      * @dev reverts if token is already added
      */
-    function addPaymentToken(address token) external onlyVaultAdmin {
+    function addPaymentToken(
+        address token,
+        address dataFeed,
+        uint256 tokenFee
+    ) external onlyVaultAdmin {
         require(_paymentTokens.add(token), "MV: already added");
-        emit AddPaymentToken(token, msg.sender);
+        _tokensConfig[token] = TokenConfig(dataFeed, tokenFee);
+        emit AddPaymentToken(token, dataFeed, tokenFee, msg.sender);
     }
 
     /**
@@ -126,7 +141,28 @@ abstract contract ManageableVault is Pausable, IManageableVault {
      */
     function removePaymentToken(address token) external onlyVaultAdmin {
         require(_paymentTokens.remove(token), "MV: not exists");
+        delete _tokensConfig[token];
         emit RemovePaymentToken(token, msg.sender);
+    }
+
+    /**
+     * @inheritdoc IManageableVault
+     * @dev reverts address zero or equal address(this)
+     */
+    function setFeeReciever(address reciever) external onlyVaultAdmin {
+        require(reciever != address(0), "zero address");
+        require(reciever != address(this), "invalid address");
+        feeReciever = reciever;
+
+        emit SetFeeReciever(msg.sender, reciever);
+    }
+
+    /**
+     * @inheritdoc IManageableVault
+     */
+    function setInitialFee(uint256 newInitialFee) external onlyVaultAdmin {
+        initialFee = newInitialFee;
+        emit SetInitialFee(msg.sender, newInitialFee);
     }
 
     /**
@@ -160,7 +196,11 @@ abstract contract ManageableVault is Pausable, IManageableVault {
      * @param token address of token
      * @param amount amount of `token` to transfer from `user`
      */
-    function _tokenTransferFromUser(address token, uint256 amount) internal {
+    function _tokenTransferFromUser(
+        address token,
+        address to,
+        uint256 amount
+    ) internal {
         uint256 tokenDecimals = _tokenDecimals(token);
         uint256 transferAmount = amount.convertFromBase18(tokenDecimals);
 
@@ -169,11 +209,7 @@ abstract contract ManageableVault is Pausable, IManageableVault {
             "MV: invalid rounding"
         );
 
-        IERC20(token).safeTransferFrom(
-            msg.sender,
-            tokensReceiver,
-            transferAmount
-        );
+        IERC20(token).safeTransferFrom(msg.sender, to, transferAmount);
     }
 
     /**

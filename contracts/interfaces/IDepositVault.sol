@@ -13,22 +13,19 @@ interface IDepositVault is IManageableVault {
      * @param newValue new min amount to deposit value
      */
     event SetMinAmountToDeposit(address indexed caller, uint256 newValue);
-    /**
-     * @param caller function caller (msg.sender)
-     * @param newFee new deposit fee value
-     */
-    event SetFee(address indexed caller, uint256 newFee);
 
     /**
      * @param user address that initiated the deposit
      * @param usdTokenIn address of usd token
      * @param amount amount of `usdTokenIn`
+     * @param fee amount of fee from `usdTokenIn`
      * @param minted amount of minted mtBill
      */
     event Deposit(
         address indexed user,
         address indexed usdTokenIn,
         uint256 amount,
+        uint256 fee,
         uint256 minted
     );
 
@@ -46,7 +43,7 @@ interface IDepositVault is IManageableVault {
      * @param tokenIn address of USD token in
      * @param amountIn amount of `tokenIn` that will be taken from user
      */
-    function deposit(address tokenIn, uint256 amountIn) external;
+    function depositInitial(address tokenIn, uint256 amountIn) external;
 
     /**
      * @notice frees given `user` from the minimal deposit
@@ -61,17 +58,4 @@ interface IDepositVault is IManageableVault {
      * @param newValue new min. deposit value
      */
     function setMinAmountToDeposit(uint256 newValue) external;
-
-    /**
-     * @notice sets deposit fee percent.
-     * can be called only from vault`s admin
-     * @param newFee new deposit fee value
-     */
-    function setFee(uint256 newFee) external;
-
-    /**
-     * @notice returns vault fee
-     * @return fee fee
-     */
-    function getFee() external view returns (uint256);
 }

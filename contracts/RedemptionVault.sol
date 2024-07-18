@@ -49,9 +49,16 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address _ac,
         address _mTBILL,
         address _tokensReceiver,
-        address _tokenDataFeed
+        address _feeReciever,
+        uint256 _initialFee
     ) external initializer {
-        __ManageableVault_init(_ac, _mTBILL, _tokensReceiver, _tokenDataFeed);
+        __ManageableVault_init(
+            _ac,
+            _mTBILL,
+            _tokensReceiver,
+            _feeReciever,
+            _initialFee
+        );
     }
 
     /**
@@ -67,11 +74,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         address user = msg.sender;
 
+        _requireTokenExists(tokenOut);
+        _tokenTransferFromUser(address(mTBILL), tokensReceiver, amountTBillIn);
+
         lastRequestId.increment();
         uint256 requestId = lastRequestId.current();
-
-        _requireTokenExists(tokenOut);
-        _tokenTransferFromUser(address(mTBILL), amountTBillIn);
 
         emit Redeem(requestId, user, tokenOut, amountTBillIn);
     }
