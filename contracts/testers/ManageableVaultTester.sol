@@ -11,14 +11,16 @@ contract ManageableVaultTester is ManageableVault {
         address _mTbill,
         address _tokensReceiver,
         address _feeReciever,
-        uint256 _initialFee
+        uint256 _initialFee,
+        uint256 _initialLimit
     ) external initializer {
         __ManageableVault_init(
             _accessControl,
             _mTbill,
             _tokensReceiver,
             _feeReciever,
-            _initialFee
+            _initialFee,
+            _initialLimit
         );
     }
 
@@ -27,14 +29,16 @@ contract ManageableVaultTester is ManageableVault {
         address _mTbill,
         address _tokensReceiver,
         address _feeReciever,
-        uint256 _initialFee
+        uint256 _initialFee,
+        uint256 _initialLimit
     ) external {
         __ManageableVault_init(
             _accessControl,
             _mTbill,
             _tokensReceiver,
             _feeReciever,
-            _initialFee
+            _initialFee,
+            _initialLimit
         );
     }
 

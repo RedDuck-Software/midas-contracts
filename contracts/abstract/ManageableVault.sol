@@ -47,14 +47,31 @@ abstract contract ManageableVault is Pausable, IManageableVault {
     address public tokensReceiver;
 
     /**
-     * @dev deposit fee 1% = 100
+     * @dev fee for initial operations 1% = 100
      */
     uint256 public initialFee;
+
+    /**
+     * @dev daily limit for initial operations
+     * if user exeed this limit he will need
+     * to create requests
+     */
+    uint256 public initialLimit;
+
+    /**
+     * @dev mapping address to operation limit data
+     */
+    mapping(address => Limit) public operationLimits;
 
     /**
      * @notice address to which fees will be sent
      */
     address public feeReciever;
+
+    /**
+     * @notice address restriction with zero fees
+     */
+    mapping(address => bool) internal _waivedFeeRestriction;
 
     /**
      * @dev tokens that can be used as USD representation
@@ -88,13 +105,15 @@ abstract contract ManageableVault is Pausable, IManageableVault {
         address _mTBILL,
         address _tokensReceiver,
         address _feeReciever,
-        uint256 _initialFee
+        uint256 _initialFee,
+        uint256 _initialLimit
     ) internal onlyInitializing {
         require(_mTBILL != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
         require(_tokensReceiver != address(this), "invalid address");
         require(_feeReciever != address(0), "zero address");
         require(_feeReciever != address(this), "invalid address");
+        require(_initialLimit > 0, "zero limit");
 
         mTBILL = IMTbill(_mTBILL);
         __Pausable_init(_ac);
@@ -102,6 +121,7 @@ abstract contract ManageableVault is Pausable, IManageableVault {
         tokensReceiver = _tokensReceiver;
         feeReciever = _feeReciever;
         initialFee = _initialFee;
+        initialLimit = _initialLimit;
     }
 
     /**
@@ -227,5 +247,50 @@ abstract contract ManageableVault is Pausable, IManageableVault {
      */
     function _requireTokenExists(address token) internal view virtual {
         require(_paymentTokens.contains(token), "MV: token not exists");
+    }
+
+    /**
+     * @dev check if user exeed daily limit and update limit data
+     * @param sender address of sender
+     * @param amount operation amount
+     */
+    function _requireAndUpdateLimit(address sender, uint256 amount) internal {
+        Limit memory opLimit = operationLimits[sender];
+
+        uint256 currentDayNumber = block.timestamp / 86400;
+        uint256 prevUpdateDayNumber = opLimit.updateTs / 86400;
+        uint256 updatedLimit = currentDayNumber > prevUpdateDayNumber
+            ? amount
+            : opLimit.limit + amount;
+
+        require(updatedLimit <= initialLimit, "MV: exeed limit");
+
+        operationLimits[sender] = Limit(block.timestamp, updatedLimit);
+    }
+
+    /**
+     * @dev returns how much mtBill user should receive from USD inputted
+     * @param sender sender address
+     * @param tokenIn token address
+     * @param amountUsdIn amount of USD
+     * @return fee amount of input token
+     */
+    function _getFeeAmount(
+        address sender,
+        address tokenIn,
+        uint256 amountUsdIn
+    ) internal view returns (uint256) {
+        if (amountUsdIn == 0) return 0;
+        if (_waivedFeeRestriction[sender]) return amountUsdIn;
+
+        TokenConfig memory tokenConfig = _tokensConfig[tokenIn];
+        require(
+            tokenConfig.dataFeed != address(0),
+            "MV: token config not exist"
+        );
+
+        uint256 feePercent = initialFee + tokenConfig.fee;
+
+        return (amountUsdIn * feePercent) / ONE_HUNDRED_PERCENT;
     }
 }

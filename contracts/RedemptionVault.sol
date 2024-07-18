@@ -50,14 +50,16 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address _mTBILL,
         address _tokensReceiver,
         address _feeReciever,
-        uint256 _initialFee
+        uint256 _initialFee,
+        uint256 _initialLimit
     ) external initializer {
         __ManageableVault_init(
             _ac,
             _mTBILL,
             _tokensReceiver,
             _feeReciever,
-            _initialFee
+            _initialFee,
+            _initialLimit
         );
     }
 

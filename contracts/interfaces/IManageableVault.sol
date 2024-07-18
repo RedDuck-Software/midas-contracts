@@ -6,6 +6,11 @@ struct TokenConfig {
     uint256 fee;
 }
 
+struct Limit {
+    uint256 updateTs;
+    uint256 limit;
+}
+
 /**
  * @title IManageableVault
  * @author RedDuck Software

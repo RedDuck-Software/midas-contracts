@@ -60,14 +60,16 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 _minAmountToDeposit,
         address _usdReceiver,
         address _feeReciever,
-        uint256 _initialFee
+        uint256 _initialFee,
+        uint256 _initialLimit
     ) external initializer {
         __ManageableVault_init(
             _ac,
             _mTBILL,
             _usdReceiver,
             _feeReciever,
-            _initialFee
+            _initialFee,
+            _initialLimit
         );
         minAmountToDeposit = _minAmountToDeposit;
     }
@@ -92,8 +94,10 @@ contract DepositVault is ManageableVault, IDepositVault {
             _validateAmountUsdIn(user, amountUsdIn);
         }
 
-        uint256 feeAmount = _getFeeAmount(tokenIn, amountUsdIn);
+        uint256 feeAmount = _getFeeAmount(user, tokenIn, amountUsdIn);
         uint256 amountUsdWithoutFee = amountUsdIn - feeAmount;
+
+        _requireAndUpdateLimit(user, amountUsdWithoutFee);
 
         uint256 mintAmount = _getConvertedAmount(tokenIn, amountUsdWithoutFee);
         require(mintAmount > 0, "DV: invalid mint amount");
@@ -147,30 +151,6 @@ contract DepositVault is ManageableVault, IDepositVault {
     {
         if (totalDeposited[user] != 0) return;
         require(amountUsdIn >= minAmountToDeposit, "DV: usd amount < min");
-    }
-
-    /**
-     * @dev returns how much mtBill user should receive from USD inputted
-     * @param tokenIn token address
-     * @param amountUsdIn amount of USD
-     * @return fee amount of input token
-     */
-    function _getFeeAmount(address tokenIn, uint256 amountUsdIn)
-        internal
-        view
-        returns (uint256)
-    {
-        if (amountUsdIn == 0) return 0;
-
-        TokenConfig memory tokenConfig = _tokensConfig[tokenIn];
-        require(
-            tokenConfig.dataFeed != address(0),
-            "DV: token config not exist"
-        );
-
-        uint256 feePercent = initialFee + tokenConfig.fee;
-
-        return (amountUsdIn * feePercent) / ONE_HUNDRED_PERCENT;
     }
 
     /**
