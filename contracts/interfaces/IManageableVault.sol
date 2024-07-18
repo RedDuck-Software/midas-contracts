@@ -48,9 +48,15 @@ interface IManageableVault {
 
     /**
      * @param caller function caller (msg.sender)
-     * @param newFee new deposit fee value
+     * @param newFee new operation fee value
      */
     event SetInitialFee(address indexed caller, uint256 newFee);
+
+    /**
+     * @param caller function caller (msg.sender)
+     * @param newLimit new operation daily limit
+     */
+    event SetInitialLimit(address indexed caller, uint256 newLimit);
 
     /**
      * @param caller function caller (msg.sender)
@@ -99,9 +105,16 @@ interface IManageableVault {
     function setFeeReciever(address reciever) external;
 
     /**
-     * @notice set deposit fee percent.
+     * @notice set operation fee percent.
      * can be called only from permissioned actor.
-     * @param newFee new deposit fee value
+     * @param newInitialFee new operation fee value
      */
-    function setInitialFee(uint256 newFee) external;
+    function setInitialFee(uint256 newInitialFee) external;
+
+    /**
+     * @notice set operation daily limit.
+     * can be called only from permissioned actor.
+     * @param newInitialLimit new operation daily limit
+     */
+    function setInitialLimit(uint256 newInitialLimit) external;
 }

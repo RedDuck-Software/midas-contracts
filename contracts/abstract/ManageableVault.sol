@@ -186,6 +186,14 @@ abstract contract ManageableVault is Pausable, IManageableVault {
     }
 
     /**
+     * @inheritdoc IManageableVault
+     */
+    function setInitialLimit(uint256 newInitialLimit) external onlyVaultAdmin {
+        initialLimit = newInitialLimit;
+        emit SetInitialLimit(msg.sender, newInitialLimit);
+    }
+
+    /**
      * @notice returns array of stablecoins supported by the vault
      * can be called only from permissioned actor.
      * @return paymentTokens array of payment tokens
