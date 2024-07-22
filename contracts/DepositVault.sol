@@ -51,7 +51,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param _mTBILL address of mTBILL token
      * @param _minAmountToDeposit initial value for minAmountToDeposit
      * @param _usdReceiver address of usd tokens receiver
-     * @param _feeReciever address of fee in usd tokens receiver
+     * @param _feeReceiver address of fee in usd tokens receiver
      * @param _initialFee fee for initial mint
      */
     function initialize(
@@ -59,7 +59,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         address _mTBILL,
         uint256 _minAmountToDeposit,
         address _usdReceiver,
-        address _feeReciever,
+        address _feeReceiver,
         uint256 _initialFee,
         uint256 _initialLimit
     ) external initializer {
@@ -67,7 +67,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             _ac,
             _mTBILL,
             _usdReceiver,
-            _feeReciever,
+            _feeReceiver,
             _initialFee,
             _initialLimit
         );
@@ -79,38 +79,41 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev transfers `tokenIn` from `msg.sender`
      * to `tokensReceiver`
      * @param tokenIn address of token to deposit.
-     * @param amountUsdIn amount of token to deposit in 10**18 decimals.
+     * @param amountToken amount of token to deposit in 10**18 decimals.
      */
-    function depositInitial(address tokenIn, uint256 amountUsdIn)
+    function depositInstant(address tokenIn, uint256 amountToken)
         external
         whenNotPaused
     {
-        require(amountUsdIn > 0, "DV: invalid amount");
+        require(amountToken > 0, "DV: invalid amount");
         address user = msg.sender;
 
         _requireTokenExists(tokenIn);
 
         if (!isFreeFromMinDeposit[user]) {
-            _validateAmountUsdIn(user, amountUsdIn);
+            _validateAmountUsdIn(user, amountToken);
         }
 
-        uint256 feeAmount = _getFeeAmount(user, tokenIn, amountUsdIn);
-        uint256 amountUsdWithoutFee = amountUsdIn - feeAmount;
+        _requireAndUpdateAllowance(tokenIn, amountToken);
 
-        _requireAndUpdateLimit(user, amountUsdWithoutFee);
+        totalDeposited[user] += amountToken;
 
-        uint256 mintAmount = _getConvertedAmount(tokenIn, amountUsdWithoutFee);
+        uint256 feeAmount = _getFeeAmount(user, tokenIn, amountToken, true);
+        uint256 amountTokenWithoutFee = amountToken - feeAmount;
+
+        uint256 mintAmount = _getConvertedAmount(tokenIn, amountTokenWithoutFee);
         require(mintAmount > 0, "DV: invalid mint amount");
 
-        totalDeposited[user] += amountUsdWithoutFee;
-        _tokenTransferFromUser(tokenIn, tokensReceiver, amountUsdWithoutFee);
+        _requireAndUpdateLimit(mintAmount);
+
+        _tokenTransferFromUser(tokenIn, tokensReceiver, amountTokenWithoutFee);
 
         mTBILL.mint(user, mintAmount);
 
         if (feeAmount > 0)
-            _tokenTransferFromUser(tokenIn, feeReciever, feeAmount);
+            _tokenTransferFromUser(tokenIn, feeReceiver, feeAmount);
 
-        emit Deposit(user, tokenIn, amountUsdIn, feeAmount, mintAmount);
+        emit Deposit(user, tokenIn, amountToken, feeAmount, mintAmount);
     }
 
     /**
@@ -166,7 +169,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     {
         if (amountUsd == 0) return 0;
 
-        TokenConfig memory tokenConfig = _tokensConfig[tokenIn];
+        TokenConfig memory tokenConfig = tokensConfig[tokenIn];
         require(
             tokenConfig.dataFeed != address(0),
             "DV: token config not exist"

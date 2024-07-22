@@ -45,7 +45,7 @@ import {
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
-  const [owner, eUsdOwner, tokensReceiver, ...regularAccounts] =
+  const [owner, eUsdOwner, tokensReceiver, feeReceiver, ...regularAccounts] =
     await ethers.getSigners();
 
   // main contracts
@@ -123,59 +123,65 @@ export const defaultDeploy = async () => {
     depositVault.initialize(
       ethers.constants.AddressZero,
       mTBILL.address,
-      dataFeed.address,
-      eurToUsdDataFeed.address,
       0,
       tokensReceiver.address,
+      feeReceiver.address,
+      100,
+      parseUnits('100000'),
     ),
   ).to.be.reverted;
   await expect(
     depositVault.initialize(
       accessControl.address,
       ethers.constants.AddressZero,
-      dataFeed.address,
-      eurToUsdDataFeed.address,
       0,
       tokensReceiver.address,
-    ),
-  ).to.be.reverted;
-  await expect(
-    depositVault.initialize(
-      accessControl.address,
-      mTBILL.address,
-      dataFeed.address,
-      ethers.constants.AddressZero,
-      0,
-      tokensReceiver.address,
+      feeReceiver.address,
+      100,
+      parseUnits('100000'),
     ),
   ).to.be.reverted;
   await expect(
     depositVault.initialize(
       accessControl.address,
       mTBILL.address,
-      dataFeed.address,
-      eurToUsdDataFeed.address,
       0,
       ethers.constants.AddressZero,
+      feeReceiver.address,
+      100,
+      parseUnits('100000'),
     ),
   ).to.be.reverted;
   await expect(
     depositVault.initialize(
       accessControl.address,
       mTBILL.address,
-      ethers.constants.AddressZero,
-      eurToUsdDataFeed.address,
       0,
       tokensReceiver.address,
+      ethers.constants.AddressZero,
+      100,
+      parseUnits('100000'),
+    ),
+  ).to.be.reverted;
+  await expect(
+    depositVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      0,
+      tokensReceiver.address,
+      feeReceiver.address,
+      100,
+      0,
     ),
   ).to.be.reverted;
   await depositVault.initialize(
     accessControl.address,
     mTBILL.address,
-    dataFeed.address,
-    eurToUsdDataFeed.address,
     0,
     tokensReceiver.address,
+    feeReceiver.address,
+    100,
+    parseUnits('100000'),
   );
 
   await accessControl.grantRole(
@@ -192,7 +198,9 @@ export const defaultDeploy = async () => {
       ethers.constants.AddressZero,
       mTBILL.address,
       tokensReceiver.address,
-      dataFeed.address,
+      feeReceiver.address,
+      100,
+      parseUnits('100000'),
     ),
   ).to.be.reverted;
   await expect(
@@ -200,7 +208,9 @@ export const defaultDeploy = async () => {
       accessControl.address,
       ethers.constants.AddressZero,
       tokensReceiver.address,
-      dataFeed.address,
+      feeReceiver.address,
+      100,
+      parseUnits('100000'),
     ),
   ).to.be.reverted;
   await expect(
@@ -208,7 +218,9 @@ export const defaultDeploy = async () => {
       accessControl.address,
       mTBILL.address,
       ethers.constants.AddressZero,
-      dataFeed.address,
+      feeReceiver.address,
+      100,
+      parseUnits('100000'),
     ),
   ).to.be.reverted;
   await expect(
@@ -217,6 +229,18 @@ export const defaultDeploy = async () => {
       mTBILL.address,
       tokensReceiver.address,
       ethers.constants.AddressZero,
+      100,
+      parseUnits('100000'),
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      tokensReceiver.address,
+      feeReceiver.address,
+      100,
+      0,
     ),
   ).to.be.reverted;
 
@@ -224,7 +248,9 @@ export const defaultDeploy = async () => {
     accessControl.address,
     mTBILL.address,
     tokensReceiver.address,
-    dataFeed.address,
+    feeReceiver.address,
+    100,
+    parseUnits('100000'),
   );
 
   const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
@@ -235,7 +261,9 @@ export const defaultDeploy = async () => {
     accessControl.address,
     eUSD.address,
     tokensReceiver.address,
-    dataFeed.address,
+    feeReceiver.address,
+    100,
+    parseUnits('100000'),
   );
 
   await accessControl.grantRoleMult(
@@ -406,6 +434,7 @@ export const defaultDeploy = async () => {
     offChainUsdToken,
     mockedAggregatorEurDecimals,
     tokensReceiver,
+    feeReceiver,
     dataFeedDeprecated,
     dataFeedUnhealthy,
   };

@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 struct TokenConfig {
     address dataFeed;
     uint256 fee;
+    uint256 allowance;
 }
 
 struct Limit {
@@ -31,6 +32,8 @@ interface IManageableVault {
 
     /**
      * @param token address of token that
+     * @param dataFeed token dataFeed address
+     * @param fee fee 1% = 100
      * @param caller function caller (msg.sender)
      */
     event AddPaymentToken(
@@ -40,11 +43,34 @@ interface IManageableVault {
         address indexed caller
     );
 
+    event ChangeTokenAllowance(
+        address indexed token,
+        uint256 allowance,
+        address indexed caller
+    );
+
     /**
      * @param token address of token that
      * @param caller function caller (msg.sender)
      */
     event RemovePaymentToken(address indexed token, address indexed caller);
+
+    /**
+     * @param account address of account
+     * @param caller function caller (msg.sender)
+     */
+    event AddWaivedFeeAccount(
+        address indexed account,
+        address indexed caller
+    );
+    /**
+     * @param account address of account
+     * @param caller function caller (msg.sender)
+     */
+    event RemoveWaivedFeeAccount(
+        address indexed account,
+        address indexed caller
+    );
 
     /**
      * @param caller function caller (msg.sender)
@@ -62,7 +88,7 @@ interface IManageableVault {
      * @param caller function caller (msg.sender)
      * @param reciever new reciever address
      */
-    event SetFeeReciever(address indexed caller, address indexed reciever);
+    event SetFeeReceiver(address indexed caller, address indexed reciever);
 
     /**
      * @notice withdraws `amount` of a given `token` from the contract.
@@ -102,7 +128,7 @@ interface IManageableVault {
      * can be called only from permissioned actor.
      * @param reciever new reciever address
      */
-    function setFeeReciever(address reciever) external;
+    function setFeeReceiver(address reciever) external;
 
     /**
      * @notice set operation fee percent.
@@ -117,4 +143,22 @@ interface IManageableVault {
      * @param newInitialLimit new operation daily limit
      */
     function setInitialLimit(uint256 newInitialLimit) external;
+
+    /**
+     * @notice adds a account to waived fee restriction.
+     * can be called only from permissioned actor.
+     * @param account address
+     */
+    function addWaivedFeeAccount(
+        address account
+    ) external;
+
+    /**
+     * @notice removes a account from waived fee restriction.
+     * can be called only from permissioned actor.
+     * @param account address
+     */
+    function removeWaivedFeeAccount(
+        address account
+    ) external;
 }

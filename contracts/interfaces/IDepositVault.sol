@@ -35,7 +35,8 @@ interface IDepositVault is IManageableVault {
     event FreeFromMinDeposit(address indexed user);
 
     /**
-     * @notice first step of the depositing proccess.
+     * @notice depositing proccess with auto mint if 
+     * account fit daily limit.
      * Transfers usd token from the user.
      * Then request should be validated off-chain and if
      * everything is okay, admin should mint necessary amount
@@ -43,7 +44,7 @@ interface IDepositVault is IManageableVault {
      * @param tokenIn address of USD token in
      * @param amountIn amount of `tokenIn` that will be taken from user
      */
-    function depositInitial(address tokenIn, uint256 amountIn) external;
+    function depositInstant(address tokenIn, uint256 amountIn) external;
 
     /**
      * @notice frees given `user` from the minimal deposit

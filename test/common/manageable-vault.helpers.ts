@@ -11,35 +11,239 @@ import {
   ERC20__factory,
   RedemptionVault,
 } from '../../typechain-types';
+import { defaultDeploy } from './fixtures';
+import { parseUnits } from 'ethers/lib/utils';
 
 type CommonParamsChangePaymentToken = {
   vault: DepositVault | RedemptionVault;
   owner: SignerWithAddress;
 };
+type CommonParams = Pick<
+  Awaited<ReturnType<typeof defaultDeploy>>,
+  'depositVault' | 'owner'
+>;
+
+export const setInstantFeeTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  newFee: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).setInitialFee(newFee),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(vault.connect(opt?.from ?? owner).setInitialFee(newFee))
+    .to.emit(
+      vault,
+      vault.interface.events['SetInitialFee(address,uint256)'].name,
+    )
+    .withArgs((opt?.from ?? owner).address, newFee).to.not.reverted;
+
+  const fee = await vault.initialFee();
+  expect(fee).eq(newFee);
+};
+
+export const addWaivedFeeAccountTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  account: string,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).addWaivedFeeAccount(account),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(vault.connect(opt?.from ?? owner).addWaivedFeeAccount(account))
+    .to.emit(
+      vault,
+      vault.interface.events['AddWaivedFeeAccount(address,address)'].name,
+    )
+    .withArgs((opt?.from ?? owner).address, account).to.not.reverted;
+
+  const isWaivedFee = await vault.waivedFeeRestriction(account);
+  expect(isWaivedFee).eq(true);
+};
+
+export const changeTokenAllowanceTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  token: string,
+  newAllowance: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault
+        .connect(opt?.from ?? owner)
+        .changeTokenAllowance(token, newAllowance),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(
+    vault.connect(opt?.from ?? owner).changeTokenAllowance(token, newAllowance),
+  )
+    .to.emit(
+      vault,
+      vault.interface.events['ChangeTokenAllowance(address,uint256,address)']
+        .name,
+    )
+    .withArgs((opt?.from ?? owner).address, token).to.not.reverted;
+
+  const allowance = (await vault.tokensConfig(token)).allowance;
+  expect(allowance).eq(newAllowance);
+};
+
+export const removeWaivedFeeAccountTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  account: string,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).removeWaivedFeeAccount(account),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(
+    vault.connect(opt?.from ?? owner).removeWaivedFeeAccount(account),
+  )
+    .to.emit(
+      vault,
+      vault.interface.events['RemoveWaivedFeeAccount(address,address)'].name,
+    )
+    .withArgs((opt?.from ?? owner).address, account).to.not.reverted;
+
+  const isWaivedFee = await vault.waivedFeeRestriction(account);
+  expect(isWaivedFee).eq(false);
+};
+
+export const setInstantLimitTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  newLimit: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).setInitialLimit(newLimit),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(vault.connect(opt?.from ?? owner).setInitialLimit(newLimit))
+    .to.emit(
+      vault,
+      vault.interface.events['SetInitialLimit(address,uint256)'].name,
+    )
+    .withArgs((opt?.from ?? owner).address, newLimit).to.not.reverted;
+
+  const limit = await vault.initialLimit();
+  expect(limit).eq(newLimit);
+};
+
+export const setFeeReceiverTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  newReceiver: string,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).setFeeReceiver(newReceiver),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(vault.connect(opt?.from ?? owner).setFeeReceiver(newReceiver))
+    .to.emit(
+      vault,
+      vault.interface.events['SetFeeReceiver(address,address)'].name,
+    )
+    .withArgs((opt?.from ?? owner).address, newReceiver).to.not.reverted;
+
+  const feeReceiver = await vault.feeReceiver();
+  expect(feeReceiver).eq(newReceiver);
+};
+
+export const addAccountWaivedFeeRestrictionTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  account: string,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).addWaivedFeeAccount(account),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(vault.connect(opt?.from ?? owner).addWaivedFeeAccount(account))
+    .to.emit(
+      vault,
+      vault.interface.events['AddWaivedFeeAccount(address,address)'].name,
+    )
+    .withArgs(account, (opt?.from ?? owner).address).to.not.reverted;
+};
+
+export const setMinAmountToDepositTest = async (
+  { depositVault, owner }: CommonParams,
+  valueN: number,
+  opt?: OptionalCommonParams,
+) => {
+  const value = parseUnits(valueN.toString());
+
+  if (opt?.revertMessage) {
+    await expect(
+      depositVault.connect(opt?.from ?? owner).setMinAmountToDeposit(value),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(
+    depositVault.connect(opt?.from ?? owner).setMinAmountToDeposit(value),
+  ).to.emit(
+    depositVault,
+    depositVault.interface.events['SetMinAmountToDeposit(address,uint256)']
+      .name,
+  ).to.not.reverted;
+
+  const newMin = await depositVault.minAmountToDeposit();
+  expect(newMin).eq(value);
+};
 
 export const addPaymentTokenTest = async (
   { vault, owner }: CommonParamsChangePaymentToken,
   token: ERC20 | string,
+  dataFeed: string,
+  fee: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
   token = (token as ERC20).address ?? (token as string);
 
   if (opt?.revertMessage) {
     await expect(
-      vault.connect(opt?.from ?? owner).addPaymentToken(token),
+      vault.connect(opt?.from ?? owner).addPaymentToken(token, dataFeed, fee),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   await expect(
-    vault.connect(opt?.from ?? owner).addPaymentToken(token),
+    vault.connect(opt?.from ?? owner).addPaymentToken(token, dataFeed, fee),
   ).to.emit(
     vault,
-    vault.interface.events['AddPaymentToken(address,address)'].name,
+    vault.interface.events['AddPaymentToken(address,address,uint256,address)']
+      .name,
   ).to.not.reverted;
 
   const paymentTokens = await vault.getPaymentTokens();
   expect(paymentTokens.find((v) => v === token)).not.eq(undefined);
+  const tokenConfig = await vault.tokensConfig(token);
+  expect(tokenConfig.dataFeed).eq(dataFeed);
+  expect(tokenConfig.fee).eq(fee);
 };
 
 export const removePaymentTokenTest = async (

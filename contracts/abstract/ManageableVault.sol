@@ -36,6 +36,9 @@ abstract contract ManageableVault is Pausable, IManageableVault {
      * @dev for example, 10% will be (10 * 100)%
      */
     uint256 public constant ONE_HUNDRED_PERCENT = 100 * 100;
+
+    uint256 public constant MAX_UINT = type(uint256).max;
+
     /**
      * @notice mTBILL token
      */
@@ -59,26 +62,26 @@ abstract contract ManageableVault is Pausable, IManageableVault {
     uint256 public initialLimit;
 
     /**
-     * @dev mapping address to operation limit data
+     * @dev mapping days number from 1970 to limit amount
      */
-    mapping(address => Limit) public operationLimits;
+    mapping(uint256 => uint256) public dailyLimits;
 
     /**
      * @notice address to which fees will be sent
      */
-    address public feeReciever;
+    address public feeReceiver;
 
     /**
      * @notice address restriction with zero fees
      */
-    mapping(address => bool) internal _waivedFeeRestriction;
+    mapping(address => bool) public waivedFeeRestriction;
 
     /**
      * @dev tokens that can be used as USD representation
      */
     EnumerableSet.AddressSet internal _paymentTokens;
 
-    mapping(address => TokenConfig) internal _tokensConfig;
+    mapping(address => TokenConfig) public tokensConfig;
 
     /**
      * @dev leaving a storage gap for futures updates
@@ -104,22 +107,22 @@ abstract contract ManageableVault is Pausable, IManageableVault {
         address _ac,
         address _mTBILL,
         address _tokensReceiver,
-        address _feeReciever,
+        address _feeReceiver,
         uint256 _initialFee,
         uint256 _initialLimit
     ) internal onlyInitializing {
         require(_mTBILL != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
         require(_tokensReceiver != address(this), "invalid address");
-        require(_feeReciever != address(0), "zero address");
-        require(_feeReciever != address(this), "invalid address");
+        require(_feeReceiver != address(0), "zero address");
+        require(_feeReceiver != address(this), "invalid address");
         require(_initialLimit > 0, "zero limit");
 
         mTBILL = IMTbill(_mTBILL);
         __Pausable_init(_ac);
 
         tokensReceiver = _tokensReceiver;
-        feeReciever = _feeReciever;
+        feeReceiver = _feeReceiver;
         initialFee = _initialFee;
         initialLimit = _initialLimit;
     }
@@ -151,7 +154,8 @@ abstract contract ManageableVault is Pausable, IManageableVault {
         uint256 tokenFee
     ) external onlyVaultAdmin {
         require(_paymentTokens.add(token), "MV: already added");
-        _tokensConfig[token] = TokenConfig(dataFeed, tokenFee);
+        require(dataFeed != address(0), "MV: dataFeed address zero");
+        tokensConfig[token] = TokenConfig(dataFeed, tokenFee, MAX_UINT);
         emit AddPaymentToken(token, dataFeed, tokenFee, msg.sender);
     }
 
@@ -161,20 +165,52 @@ abstract contract ManageableVault is Pausable, IManageableVault {
      */
     function removePaymentToken(address token) external onlyVaultAdmin {
         require(_paymentTokens.remove(token), "MV: not exists");
-        delete _tokensConfig[token];
+        delete tokensConfig[token];
         emit RemovePaymentToken(token, msg.sender);
+    }
+
+    // @dev if MAX_UINT = infinite allowance
+    function changeTokenAllowance(address token, uint256 allowance) external onlyVaultAdmin {
+        _requireTokenExists(token);
+        require(allowance > 0, "MV: zero allowance");
+        tokensConfig[token].allowance = allowance;
+        emit ChangeTokenAllowance(token, allowance, msg.sender);
+    }
+
+    /**
+     * @inheritdoc IManageableVault
+     * @dev reverts if account is already added
+     */
+    function addWaivedFeeAccount(
+        address account
+    ) external onlyVaultAdmin {
+        require(!waivedFeeRestriction[account], "MV: already added");
+        waivedFeeRestriction[account] = true;
+        emit AddWaivedFeeAccount(account, msg.sender);
+    }
+
+    /**
+     * @inheritdoc IManageableVault
+     * @dev reverts if account is already removed
+     */
+    function removeWaivedFeeAccount(
+        address account
+    ) external onlyVaultAdmin {
+        require(waivedFeeRestriction[account], "MV: not found");
+        waivedFeeRestriction[account] = false;
+        emit RemoveWaivedFeeAccount(account, msg.sender);
     }
 
     /**
      * @inheritdoc IManageableVault
      * @dev reverts address zero or equal address(this)
      */
-    function setFeeReciever(address reciever) external onlyVaultAdmin {
-        require(reciever != address(0), "zero address");
-        require(reciever != address(this), "invalid address");
-        feeReciever = reciever;
+    function setFeeReceiver(address Receiver) external onlyVaultAdmin {
+        require(Receiver != address(0), "zero address");
+        require(Receiver != address(this), "invalid address");
+        feeReceiver = Receiver;
 
-        emit SetFeeReciever(msg.sender, reciever);
+        emit SetFeeReceiver(msg.sender, Receiver);
     }
 
     /**
@@ -189,6 +225,7 @@ abstract contract ManageableVault is Pausable, IManageableVault {
      * @inheritdoc IManageableVault
      */
     function setInitialLimit(uint256 newInitialLimit) external onlyVaultAdmin {
+        require(newInitialLimit > 0, "MV: limit zero");
         initialLimit = newInitialLimit;
         emit SetInitialLimit(msg.sender, newInitialLimit);
     }
@@ -258,47 +295,50 @@ abstract contract ManageableVault is Pausable, IManageableVault {
     }
 
     /**
-     * @dev check if user exeed daily limit and update limit data
-     * @param sender address of sender
+     * @dev check if operation exeed daily limit and update limit data
      * @param amount operation amount
      */
-    function _requireAndUpdateLimit(address sender, uint256 amount) internal {
-        Limit memory opLimit = operationLimits[sender];
-
+    function _requireAndUpdateLimit(uint256 amount) internal {
         uint256 currentDayNumber = block.timestamp / 86400;
-        uint256 prevUpdateDayNumber = opLimit.updateTs / 86400;
-        uint256 updatedLimit = currentDayNumber > prevUpdateDayNumber
-            ? amount
-            : opLimit.limit + amount;
+        uint256 nextLimitAmount = dailyLimits[currentDayNumber] + amount;
 
-        require(updatedLimit <= initialLimit, "MV: exeed limit");
+        require(nextLimitAmount <= initialLimit, "MV: exeed limit");
 
-        operationLimits[sender] = Limit(block.timestamp, updatedLimit);
+        dailyLimits[currentDayNumber] = nextLimitAmount;
+    }
+
+    function _requireAndUpdateAllowance(address token, uint256 amount) internal {
+        TokenConfig storage config = tokensConfig[token];
+        if(config.allowance == MAX_UINT) return;
+
+        require(config.allowance >= amount, "MV: exeed allowance");
+
+        config.allowance -= amount;
     }
 
     /**
-     * @dev returns how much mtBill user should receive from USD inputted
+     * @dev returns how much mtBill user should receive from token inputted
      * @param sender sender address
      * @param tokenIn token address
-     * @param amountUsdIn amount of USD
+     * @param amount amount of token
      * @return fee amount of input token
      */
     function _getFeeAmount(
         address sender,
         address tokenIn,
-        uint256 amountUsdIn
+        uint256 amount,
+        bool isInstant
     ) internal view returns (uint256) {
-        if (amountUsdIn == 0) return 0;
-        if (_waivedFeeRestriction[sender]) return amountUsdIn;
+        if (amount == 0) return 0;
+        if (waivedFeeRestriction[sender]) return 0;
 
-        TokenConfig memory tokenConfig = _tokensConfig[tokenIn];
-        require(
-            tokenConfig.dataFeed != address(0),
-            "MV: token config not exist"
-        );
+        TokenConfig storage tokenConfig = tokensConfig[tokenIn];
 
-        uint256 feePercent = initialFee + tokenConfig.fee;
+        uint256 feePercent = tokenConfig.fee;
+        if(isInstant) feePercent += initialFee;
+        
+        if(feePercent > ONE_HUNDRED_PERCENT) feePercent = ONE_HUNDRED_PERCENT;
 
-        return (amountUsdIn * feePercent) / ONE_HUNDRED_PERCENT;
+        return (amount * feePercent) / ONE_HUNDRED_PERCENT;
     }
 }

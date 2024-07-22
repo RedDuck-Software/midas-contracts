@@ -101,11 +101,9 @@ export const postDeploymentTest = async (
 
   expect(await depositVault.tokensReceiver()).eq(tokensReceiver);
 
-  expect(await depositVault.eurUsdDataFeed()).eq(dataFeedEur.address);
-
   expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
-  expect(await depositVault.minAmountToDepositInEuro()).eq(minAmountToDeposit);
+  expect(await depositVault.minAmountToDeposit()).eq(minAmountToDeposit);
 
   expect(await depositVault.vaultRole()).eq(
     await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
