@@ -40,9 +40,11 @@ abstract contract ManageableVault is Pausable, IManageableVault {
     uint256 public constant MAX_UINT = type(uint256).max;
 
     /**
-     * @notice mTBILL token
+     * @notice mToken token
      */
-    IMTbill public mTBILL;
+    IMTbill public mToken;
+
+    IDataFeed public mTokenDataFeed;
 
     /**
      * @notice address to which USD and mTokens will be sent
@@ -99,32 +101,35 @@ abstract contract ManageableVault is Pausable, IManageableVault {
     /**
      * @dev upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _mTBILL address of mTBILL token
+     * @param _mToken address of mTBILL token
      * @param _tokensReceiver address to which USD and mTokens will be sent
      */
     // solhint-disable func-name-mixedcase
     function __ManageableVault_init(
         address _ac,
-        address _mTBILL,
+        address _mToken,
         address _tokensReceiver,
         address _feeReceiver,
         uint256 _initialFee,
-        uint256 _initialLimit
+        uint256 _initialLimit,
+        address _mTokenDataFeed
     ) internal onlyInitializing {
-        require(_mTBILL != address(0), "zero address");
+        require(_mToken != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
         require(_tokensReceiver != address(this), "invalid address");
         require(_feeReceiver != address(0), "zero address");
         require(_feeReceiver != address(this), "invalid address");
+        require(_mTokenDataFeed != address(0), "invalid address");
         require(_initialLimit > 0, "zero limit");
 
-        mTBILL = IMTbill(_mTBILL);
+        mToken = IMTbill(_mToken);
         __Pausable_init(_ac);
 
         tokensReceiver = _tokensReceiver;
         feeReceiver = _feeReceiver;
         initialFee = _initialFee;
         initialLimit = _initialLimit;
+        mTokenDataFeed = IDataFeed(_mTokenDataFeed);
     }
 
     /**
@@ -336,7 +341,7 @@ abstract contract ManageableVault is Pausable, IManageableVault {
 
         uint256 feePercent = tokenConfig.fee;
         if(isInstant) feePercent += initialFee;
-        
+
         if(feePercent > ONE_HUNDRED_PERCENT) feePercent = ONE_HUNDRED_PERCENT;
 
         return (amount * feePercent) / ONE_HUNDRED_PERCENT;

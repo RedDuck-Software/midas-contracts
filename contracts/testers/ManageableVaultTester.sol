@@ -12,7 +12,8 @@ contract ManageableVaultTester is ManageableVault {
         address _tokensReceiver,
         address _feeReciever,
         uint256 _initialFee,
-        uint256 _initialLimit
+        uint256 _initialLimit,
+        address _mTokenDataFeed
     ) external initializer {
         __ManageableVault_init(
             _accessControl,
@@ -20,7 +21,8 @@ contract ManageableVaultTester is ManageableVault {
             _tokensReceiver,
             _feeReciever,
             _initialFee,
-            _initialLimit
+            _initialLimit,
+            _mTokenDataFeed
         );
     }
 
@@ -30,7 +32,8 @@ contract ManageableVaultTester is ManageableVault {
         address _tokensReceiver,
         address _feeReciever,
         uint256 _initialFee,
-        uint256 _initialLimit
+        uint256 _initialLimit,
+        address _mTokenDataFeed
     ) external {
         __ManageableVault_init(
             _accessControl,
@@ -38,7 +41,8 @@ contract ManageableVaultTester is ManageableVault {
             _tokensReceiver,
             _feeReciever,
             _initialFee,
-            _initialLimit
+            _initialLimit,
+            _mTokenDataFeed
         );
     }
 

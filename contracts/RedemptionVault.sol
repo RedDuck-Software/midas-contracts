@@ -42,24 +42,26 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _mTBILL address of mTBILL token
+     * @param _mToken address of mTBILL token
      * @param _tokensReceiver address of mTBILL token receiver
      */
     function initialize(
         address _ac,
-        address _mTBILL,
+        address _mToken,
         address _tokensReceiver,
         address _feeReciever,
         uint256 _initialFee,
-        uint256 _initialLimit
+        uint256 _initialLimit,
+        address _mTokenDataFeed
     ) external initializer {
         __ManageableVault_init(
             _ac,
-            _mTBILL,
+            _mToken,
             _tokensReceiver,
             _feeReciever,
             _initialFee,
-            _initialLimit
+            _initialLimit,
+            _mTokenDataFeed
         );
     }
 
@@ -77,7 +79,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address user = msg.sender;
 
         _requireTokenExists(tokenOut);
-        _tokenTransferFromUser(address(mTBILL), tokensReceiver, amountTBillIn);
+        _tokenTransferFromUser(address(mToken), tokensReceiver, amountTBillIn);
 
         lastRequestId.increment();
         uint256 requestId = lastRequestId.current();

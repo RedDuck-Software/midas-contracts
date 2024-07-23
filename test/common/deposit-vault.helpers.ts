@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumber, constants } from 'ethers';
+import { BigNumber, BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 
 import {
@@ -11,6 +11,7 @@ import {
 import { defaultDeploy } from './fixtures';
 
 import {
+  DataFeedTest,
   // eslint-disable-next-line camelcase
   DataFeedTest__factory,
   DepositVaultTest,
@@ -21,14 +22,15 @@ import {
 
 type CommonParamsDeposit = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'depositVault' | 'owner' | 'mTBILL'
+  'depositVault' | 'owner' | 'mTBILL' | 'mTokenToUsdDataFeed'
 >;
 
-export const deposit = async (
+export const depositInstantTest = async (
   {
     depositVault,
     owner,
     mTBILL,
+    mTokenToUsdDataFeed,
     waivedFee,
   }: CommonParamsDeposit & { waivedFee?: boolean },
   tokenIn: ERC20 | string,
@@ -71,27 +73,30 @@ export const deposit = async (
     sender.address,
   );
 
-  const { fee, mintAmount, amountInWithoutFee } = await calcExpectedMintAmount(
-    sender,
-    tokenIn,
-    depositVault,
-    amountIn,
-    true,
-  );
+  const { fee, mintAmount, amountInWithoutFee, actualAmountInUsd } =
+    await calcExpectedMintAmount(
+      sender,
+      tokenIn,
+      depositVault,
+      mTokenToUsdDataFeed,
+      amountIn,
+      true,
+    );
 
   await expect(depositVault.connect(sender).depositInstant(tokenIn, amountIn))
     .to.emit(
       depositVault,
       depositVault.interface.events[
-        'Deposit(address,address,uint256,uint256,uint256)'
+        'DepositInstant(address,address,uint256,uint256,uint256,uint256)'
       ].name,
     )
     .withArgs(
       sender.address,
       tokenContract.address,
+      actualAmountInUsd,
       amountUsdIn,
       fee,
-      mintAmount,
+      0,
     ).to.not.reverted;
 
   const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
@@ -108,7 +113,7 @@ export const deposit = async (
   const balanceMtBillAfterUser = await balanceOfBase18(mTBILL, sender.address);
 
   expect(balanceMtBillAfterUser.sub(balanceMtBillBeforeUser)).eq(mintAmount);
-  expect(totalDepositedAfter).eq(totalDepositedBefore.add(amountIn));
+  expect(totalDepositedAfter).eq(totalDepositedBefore.add(actualAmountInUsd));
   expect(balanceAfterContract).eq(
     balanceBeforeContract.add(amountInWithoutFee),
   );
@@ -123,10 +128,202 @@ export const deposit = async (
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
 };
 
+export const depositRequestTest = async (
+  {
+    depositVault,
+    owner,
+    mTokenToUsdDataFeed,
+    waivedFee,
+  }: CommonParamsDeposit & { waivedFee?: boolean },
+  tokenIn: ERC20 | string,
+  amountUsdIn: number,
+  opt?: OptionalCommonParams,
+) => {
+  tokenIn = getAccount(tokenIn);
+
+  const sender = opt?.from ?? owner;
+  // eslint-disable-next-line camelcase
+  const tokenContract = ERC20__factory.connect(tokenIn, owner);
+
+  const tokensReceiver = await depositVault.tokensReceiver();
+  const feeReceiver = await depositVault.feeReceiver();
+
+  const amountIn = parseUnits(amountUsdIn.toFixed(18).replace(/\.?0+$/, ''));
+
+  if (opt?.revertMessage) {
+    await expect(
+      depositVault.connect(sender).depositRequest(tokenIn, amountIn),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  const balanceBeforeContract = await balanceOfBase18(
+    tokenContract,
+    tokensReceiver,
+  );
+  const feeReceiverBalanceBeforeContract = await balanceOfBase18(
+    tokenContract,
+    feeReceiver,
+  );
+  const balanceBeforeUser = await balanceOfBase18(
+    tokenContract,
+    sender.address,
+  );
+
+  const latestRequestIdBefore = await depositVault.lastRequestId();
+
+  const { fee, mintAmount, amountInWithoutFee, actualAmountInUsd } =
+    await calcExpectedMintAmount(
+      sender,
+      tokenIn,
+      depositVault,
+      mTokenToUsdDataFeed,
+      amountIn,
+      false,
+    );
+
+  await expect(depositVault.connect(sender).depositRequest(tokenIn, amountIn))
+    .to.emit(
+      depositVault,
+      depositVault.interface.events[
+        'DepositRequest(uint256,address,address,uint256,uint256,uint256,uint256)'
+      ].name,
+    )
+    .withArgs(
+      latestRequestIdBefore.add(1),
+      sender.address,
+      tokenContract.address,
+      actualAmountInUsd,
+      amountUsdIn,
+      fee,
+      mintAmount,
+    ).to.not.reverted;
+
+  const latestRequestIdAfter = await depositVault.lastRequestId();
+  const balanceAfterContract = await balanceOfBase18(
+    tokenContract,
+    tokensReceiver,
+  );
+  const feeReceiverBalanceAfterContract = await balanceOfBase18(
+    tokenContract,
+    feeReceiver,
+  );
+  const balanceAfterUser = await balanceOfBase18(tokenContract, sender.address);
+  const request = await depositVault.mintRequests(latestRequestIdAfter);
+
+  expect(request.depositedUsdAmount).eq(actualAmountInUsd);
+  expect(request.mintAmount).eq(mintAmount);
+  expect(request.sender).eq(sender.address);
+  expect(request.tokenIn).eq(tokenContract.address);
+
+  expect(latestRequestIdAfter).eq(latestRequestIdBefore.add(1));
+  expect(balanceAfterContract).eq(
+    balanceBeforeContract.add(amountInWithoutFee),
+  );
+  expect(feeReceiverBalanceAfterContract).eq(
+    feeReceiverBalanceBeforeContract.add(fee),
+  );
+  if (waivedFee) {
+    expect(feeReceiverBalanceAfterContract).eq(
+      feeReceiverBalanceBeforeContract,
+    );
+  }
+  expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+};
+
+export const approveRequestTest = async (
+  { depositVault, owner, mTBILL }: CommonParamsDeposit,
+  requestId: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  const sender = opt?.from ?? owner;
+
+  if (opt?.revertMessage) {
+    await expect(
+      depositVault.connect(sender).approveRequest(requestId),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+  const balanceMtBillBeforeUser = await balanceOfBase18(mTBILL, sender.address);
+
+  const totalDepositedBefore = await depositVault.totalDeposited(
+    sender.address,
+  );
+
+  const requestData = await depositVault.mintRequests(requestId);
+
+  await expect(depositVault.connect(sender).approveRequest(requestId))
+    .to.emit(
+      depositVault,
+      depositVault.interface.events['ApproveRequest(uint256,address)'].name,
+    )
+    .withArgs(requestId, requestData.sender).to.not.reverted;
+
+  const requestDataAfter = await depositVault.mintRequests(requestId);
+
+  const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
+
+  const balanceMtBillAfterUser = await balanceOfBase18(mTBILL, sender.address);
+
+  expect(balanceMtBillAfterUser.sub(balanceMtBillBeforeUser)).eq(
+    requestData.mintAmount,
+  );
+  expect(totalDepositedAfter).eq(
+    totalDepositedBefore.add(requestData.depositedUsdAmount),
+  );
+  expect(requestDataAfter.sender).eq(constants.AddressZero);
+  expect(requestDataAfter.tokenIn).eq(constants.AddressZero);
+  expect(requestDataAfter.mintAmount).eq(constants.Zero);
+  expect(requestDataAfter.depositedUsdAmount).eq(constants.Zero);
+};
+
+export const rejectRequestTest = async (
+  { depositVault, owner, mTBILL }: CommonParamsDeposit,
+  requestId: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  const sender = opt?.from ?? owner;
+
+  if (opt?.revertMessage) {
+    await expect(
+      depositVault.connect(sender).rejectRequest(requestId),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+  const balanceMtBillBeforeUser = await balanceOfBase18(mTBILL, sender.address);
+
+  const totalDepositedBefore = await depositVault.totalDeposited(
+    sender.address,
+  );
+
+  const requestData = await depositVault.mintRequests(requestId);
+
+  await expect(depositVault.connect(sender).rejectRequest(requestId))
+    .to.emit(
+      depositVault,
+      depositVault.interface.events['RejectRequest(uint256,address)'].name,
+    )
+    .withArgs(requestId, requestData.sender).to.not.reverted;
+
+  const requestDataAfter = await depositVault.mintRequests(requestId);
+
+  const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
+
+  const balanceMtBillAfterUser = await balanceOfBase18(mTBILL, sender.address);
+
+  expect(balanceMtBillAfterUser).eq(balanceMtBillBeforeUser);
+  expect(totalDepositedAfter).eq(totalDepositedBefore);
+  expect(requestDataAfter.sender).eq(constants.AddressZero);
+  expect(requestDataAfter.tokenIn).eq(constants.AddressZero);
+  expect(requestDataAfter.mintAmount).eq(constants.Zero);
+  expect(requestDataAfter.depositedUsdAmount).eq(constants.Zero);
+};
+
 export const calcExpectedMintAmount = async (
   sender: SignerWithAddress,
   token: string,
   depositVault: DepositVaultTest,
+  mTokenDataFeed: DataFeedTest,
   amountIn: BigNumber,
   isInstant: boolean,
 ) => {
@@ -136,11 +333,21 @@ export const calcExpectedMintAmount = async (
     tokenConfig.dataFeed,
     sender,
   );
-  const currentRate = await dataFeedContract.getDataInBase18();
-  if (currentRate.isZero())
+  const currentStableRate = await dataFeedContract.getDataInBase18();
+  if (currentStableRate.isZero())
     return {
       mintAmount: constants.Zero,
       amountInWithoutFee: constants.Zero,
+      actualAmountInUsd: constants.Zero,
+      fee: constants.Zero,
+    };
+
+  const currentMTokenRate = await mTokenDataFeed.getDataInBase18();
+  if (currentStableRate.isZero())
+    return {
+      mintAmount: constants.Zero,
+      amountInWithoutFee: constants.Zero,
+      actualAmountInUsd: constants.Zero,
       fee: constants.Zero,
     };
 
@@ -159,8 +366,19 @@ export const calcExpectedMintAmount = async (
 
   const amountInWithoutFee = amountIn.sub(fee);
 
+  const feeInUsd = fee.mul(currentStableRate).div(constants.WeiPerEther);
+
+  const actualAmountInUsd = amountIn
+    .mul(currentStableRate)
+    .div(constants.WeiPerEther);
+
+  const usdForMintConvertion = actualAmountInUsd.sub(feeInUsd);
+
   return {
-    mintAmount: amountInWithoutFee.mul(constants.WeiPerEther).div(currentRate),
+    mintAmount: usdForMintConvertion
+      .mul(constants.WeiPerEther)
+      .div(currentMTokenRate),
+    actualAmountInUsd,
     amountInWithoutFee,
     fee,
   };

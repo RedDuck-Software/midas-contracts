@@ -87,17 +87,18 @@ export const defaultDeploy = async () => {
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
   const mockedAggregatorDecimals = await mockedAggregator.decimals();
 
-  const mockedAggregatorEur = await new AggregatorV3Mock__factory(
+  const mockedAggregatorMToken = await new AggregatorV3Mock__factory(
     owner,
   ).deploy();
-  const mockedAggregatorEurDecimals = await mockedAggregatorEur.decimals();
+  const mockedAggregatorMTokenDecimals =
+    await mockedAggregatorMToken.decimals();
 
   await mockedAggregator.setRoundData(
-    parseUnits('5', mockedAggregatorDecimals),
+    parseUnits('1.02', mockedAggregatorDecimals),
   );
 
-  await mockedAggregatorEur.setRoundData(
-    parseUnits('1.07778', mockedAggregatorEurDecimals),
+  await mockedAggregatorMToken.setRoundData(
+    parseUnits('5', mockedAggregatorMTokenDecimals),
   );
 
   const dataFeed = await new DataFeedTest__factory(owner).deploy();
@@ -109,13 +110,13 @@ export const defaultDeploy = async () => {
     parseUnits('10000', mockedAggregatorDecimals),
   );
 
-  const eurToUsdDataFeed = await new DataFeedTest__factory(owner).deploy();
-  await eurToUsdDataFeed.initialize(
+  const mTokenToUsdDataFeed = await new DataFeedTest__factory(owner).deploy();
+  await mTokenToUsdDataFeed.initialize(
     accessControl.address,
-    mockedAggregatorEur.address,
+    mockedAggregatorMToken.address,
     3 * 24 * 3600,
-    parseUnits('0.1', mockedAggregatorEurDecimals),
-    parseUnits('10000', mockedAggregatorEurDecimals),
+    parseUnits('0.1', mockedAggregatorMTokenDecimals),
+    parseUnits('10000', mockedAggregatorMTokenDecimals),
   );
 
   const depositVault = await new DepositVaultTest__factory(owner).deploy();
@@ -128,6 +129,7 @@ export const defaultDeploy = async () => {
       feeReceiver.address,
       100,
       parseUnits('100000'),
+      mTokenToUsdDataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -139,6 +141,7 @@ export const defaultDeploy = async () => {
       feeReceiver.address,
       100,
       parseUnits('100000'),
+      mTokenToUsdDataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -150,6 +153,7 @@ export const defaultDeploy = async () => {
       feeReceiver.address,
       100,
       parseUnits('100000'),
+      mTokenToUsdDataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -161,6 +165,7 @@ export const defaultDeploy = async () => {
       ethers.constants.AddressZero,
       100,
       parseUnits('100000'),
+      mTokenToUsdDataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -172,6 +177,19 @@ export const defaultDeploy = async () => {
       feeReceiver.address,
       100,
       0,
+      mTokenToUsdDataFeed.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    depositVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      0,
+      tokensReceiver.address,
+      feeReceiver.address,
+      100,
+      0,
+      ethers.constants.AddressZero,
     ),
   ).to.be.reverted;
   await depositVault.initialize(
@@ -182,6 +200,7 @@ export const defaultDeploy = async () => {
     feeReceiver.address,
     100,
     parseUnits('100000'),
+    mTokenToUsdDataFeed.address,
   );
 
   await accessControl.grantRole(
@@ -201,6 +220,7 @@ export const defaultDeploy = async () => {
       feeReceiver.address,
       100,
       parseUnits('100000'),
+      mTokenToUsdDataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -211,6 +231,7 @@ export const defaultDeploy = async () => {
       feeReceiver.address,
       100,
       parseUnits('100000'),
+      mTokenToUsdDataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -221,6 +242,7 @@ export const defaultDeploy = async () => {
       feeReceiver.address,
       100,
       parseUnits('100000'),
+      mTokenToUsdDataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -231,6 +253,7 @@ export const defaultDeploy = async () => {
       ethers.constants.AddressZero,
       100,
       parseUnits('100000'),
+      mTokenToUsdDataFeed.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -241,6 +264,18 @@ export const defaultDeploy = async () => {
       feeReceiver.address,
       100,
       0,
+      mTokenToUsdDataFeed.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      mTBILL.address,
+      tokensReceiver.address,
+      feeReceiver.address,
+      100,
+      0,
+      ethers.constants.AddressZero,
     ),
   ).to.be.reverted;
 
@@ -251,6 +286,7 @@ export const defaultDeploy = async () => {
     feeReceiver.address,
     100,
     parseUnits('100000'),
+    mTokenToUsdDataFeed.address,
   );
 
   const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
@@ -264,6 +300,7 @@ export const defaultDeploy = async () => {
     feeReceiver.address,
     100,
     parseUnits('100000'),
+    mTokenToUsdDataFeed.address,
   );
 
   await accessControl.grantRoleMult(
@@ -358,8 +395,8 @@ export const defaultDeploy = async () => {
     depositVault,
     owner,
     redemptionVault,
-    aggregatorEur: mockedAggregatorEur,
-    dataFeedEur: eurToUsdDataFeed,
+    aggregatorMToken: mockedAggregatorMToken,
+    dataFeedMToken: mTokenToUsdDataFeed,
     mTBILL,
     minAmountToDeposit: '0',
     tokensReceiver: tokensReceiver.address,
@@ -375,7 +412,7 @@ export const defaultDeploy = async () => {
   );
 
   await mockedDeprecatedAggregator.setRoundData(
-    parseUnits('1.07778', mockedAggregatorEurDecimals),
+    parseUnits('1.07778', mockedAggregatorMTokenDecimals),
   );
   const dataFeedDeprecated = await new DataFeedTest__factory(owner).deploy();
   await dataFeedDeprecated.initialize(
@@ -396,7 +433,7 @@ export const defaultDeploy = async () => {
   );
 
   await mockedUnhealthyAggregator.setRoundData(
-    parseUnits('1.07778', mockedAggregatorEurDecimals),
+    parseUnits('1.07778', mockedAggregatorMTokenDecimals),
   );
   const dataFeedUnhealthy = await new DataFeedTest__factory(owner).deploy();
   await dataFeedUnhealthy.initialize(
@@ -429,10 +466,10 @@ export const defaultDeploy = async () => {
     redemptionVault,
     stableCoins,
     manualFulfillmentToken,
-    eurToUsdDataFeed,
-    mockedAggregatorEur,
+    mTokenToUsdDataFeed,
+    mockedAggregatorMToken,
     offChainUsdToken,
-    mockedAggregatorEurDecimals,
+    mockedAggregatorMTokenDecimals,
     tokensReceiver,
     feeReceiver,
     dataFeedDeprecated,

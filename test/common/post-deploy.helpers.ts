@@ -18,10 +18,10 @@ type Params = {
   accessControl: MidasAccessControl;
   mTBILL: MTBILL;
   dataFeed: DataFeed;
-  dataFeedEur: DataFeed;
+  dataFeedMToken: DataFeed;
   aggregator: AggregatorV3Interface;
   depositVault: DepositVault;
-  aggregatorEur: AggregatorV3Interface;
+  aggregatorMToken: AggregatorV3Interface;
   redemptionVault: RedemptionVault;
   owner: SignerWithAddress;
   tokensReceiver: string;
@@ -43,8 +43,8 @@ export const initGrantRoles = async (
     Params,
     | 'aggregator'
     | 'dataFeed'
-    | 'dataFeedEur'
-    | 'aggregatorEur'
+    | 'dataFeedMToken'
+    | 'aggregatorMToken'
     | 'minAmountToDeposit'
     | 'tokensReceiver'
   >,
@@ -73,8 +73,8 @@ export const postDeploymentTest = async (
     depositVault,
     redemptionVault,
     mTBILL,
-    dataFeedEur,
-    aggregatorEur,
+    dataFeedMToken,
+    aggregatorMToken,
     owner,
     tokensReceiver,
     minAmountToDeposit = '0',
@@ -91,13 +91,13 @@ export const postDeploymentTest = async (
 
   /** DataFeed tests start */
 
-  expect(await dataFeedEur.aggregator()).eq(aggregatorEur.address);
+  expect(await dataFeedMToken.aggregator()).eq(aggregatorMToken.address);
 
   /** DataFeed tests end */
 
   /** DepositVault tests start */
 
-  expect(await depositVault.mTBILL()).eq(mTBILL.address);
+  expect(await depositVault.mToken()).eq(mTBILL.address);
 
   expect(await depositVault.tokensReceiver()).eq(tokensReceiver);
 
@@ -117,7 +117,7 @@ export const postDeploymentTest = async (
 
   /** RedemptionVault tests start */
 
-  expect(await redemptionVault.mTBILL()).eq(mTBILL.address);
+  expect(await redemptionVault.mToken()).eq(mTBILL.address);
 
   expect(await redemptionVault.tokensReceiver()).eq(tokensReceiver);
 

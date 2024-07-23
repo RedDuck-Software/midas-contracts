@@ -3,6 +3,13 @@ pragma solidity 0.8.9;
 
 import "./IManageableVault.sol";
 
+struct Request {
+    address sender; 
+    address tokenIn;
+    uint256 depositedUsdAmount;
+    uint256 mintAmount;
+}
+
 /**
  * @title IDepositVault
  * @author RedDuck Software
@@ -14,19 +21,34 @@ interface IDepositVault is IManageableVault {
      */
     event SetMinAmountToDeposit(address indexed caller, uint256 newValue);
 
-    /**
-     * @param user address that initiated the deposit
-     * @param usdTokenIn address of usd token
-     * @param amount amount of `usdTokenIn`
-     * @param fee amount of fee from `usdTokenIn`
-     * @param minted amount of minted mtBill
-     */
-    event Deposit(
+    
+    event DepositInstant(
         address indexed user,
-        address indexed usdTokenIn,
-        uint256 amount,
+        address indexed tokenIn,
+        uint256 amountUsd,
+        uint256 amountToken,
         uint256 fee,
         uint256 minted
+    );
+
+    event DepositRequest(
+        uint256 indexed requestId,
+        address indexed user,
+        address indexed tokenIn,
+        uint256 amountUsd,
+        uint256 amountToken,
+        uint256 fee,
+        uint256 mintAmount
+    );
+    
+    event ApproveRequest(
+        uint256 indexed requestId,
+        address indexed user
+    );
+
+    event RejectRequest(
+        uint256 indexed requestId,
+        address indexed user
     );
 
     /**
