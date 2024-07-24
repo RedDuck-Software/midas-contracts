@@ -4,7 +4,7 @@ import { constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
-import { acErrors } from './common/ac.helpers';
+import { acErrors, greenList } from './common/ac.helpers';
 import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import {
@@ -34,6 +34,7 @@ import {
   // eslint-disable-next-line camelcase
   MBasisDepositVault__factory,
 } from '../typechain-types';
+import { greenListEnable } from './common/greenlist.helpers';
 
 describe('DepositVault', function () {
   it('deployment', async () => {
@@ -1078,6 +1079,69 @@ describe('DepositVault', function () {
       );
     });
 
+    it('should fail: greenlist enabled and user not in greenlist ', async () => {
+      const { owner, depositVault, stableCoins, mTBILL, mTokenToUsdDataFeed } =
+        await loadFixture(defaultDeploy);
+
+      await depositVault.setGreenlistEnable(true);
+
+      await depositInstantTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        1,
+        {
+          revertMessage: 'WMAC: hasnt role',
+        },
+      );
+    });
+
+    it('deposit 100 DAI, greenlist enabled and user in greenlist ', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        greenListableTester,
+        mTokenToUsdDataFeed,
+        accessControl,
+        regularAccounts,
+        dataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await greenListEnable(
+        { greenlistable: greenListableTester, owner },
+        true,
+      );
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
+
+      await mintToken(stableCoins.dai, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        depositVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+
+      await depositInstantTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        1,
+        {
+          from: regularAccounts[0],
+        },
+      );
+    });
+
     it('deposit 100 DAI, when price of stable is 1.03$ and mToken price is 5$', async () => {
       const {
         owner,
@@ -1444,6 +1508,69 @@ describe('DepositVault', function () {
         100,
         {
           revertMessage: 'DV: invalid mint amount',
+        },
+      );
+    });
+
+    it('should fail: greenlist enabled and user not in greenlist ', async () => {
+      const { owner, depositVault, stableCoins, mTBILL, mTokenToUsdDataFeed } =
+        await loadFixture(defaultDeploy);
+
+      await depositVault.setGreenlistEnable(true);
+
+      await depositRequestTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        1,
+        {
+          revertMessage: 'WMAC: hasnt role',
+        },
+      );
+    });
+
+    it('deposit 100 DAI, greenlist enabled and user in greenlist ', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        greenListableTester,
+        mTokenToUsdDataFeed,
+        accessControl,
+        regularAccounts,
+        dataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await greenListEnable(
+        { greenlistable: greenListableTester, owner },
+        true,
+      );
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
+
+      await mintToken(stableCoins.dai, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        depositVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+
+      await depositRequestTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        1,
+        {
+          from: regularAccounts[0],
         },
       );
     });

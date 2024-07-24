@@ -126,6 +126,7 @@ abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, 
         mToken = IMTbill(_mToken);
         __Pausable_init(_ac);
         __Greenlistable_init(_ac);
+        __Blacklistable_init(_ac);
 
         tokensReceiver = _tokensReceiver;
         feeReceiver = _feeReceiver;

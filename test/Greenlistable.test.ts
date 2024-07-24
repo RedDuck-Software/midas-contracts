@@ -8,12 +8,12 @@ import {
   unGreenList,
 } from './common/ac.helpers';
 import { defaultDeploy } from './common/fixtures';
+import { greenListEnable } from './common/greenlist.helpers';
 
 import {
   // eslint-disable-next-line camelcase
   GreenlistableTester__factory,
 } from '../typechain-types';
-import { greenListEnable } from './common/greenlist.helpers';
 
 describe('Greenlistable', function () {
   it('deployment', async () => {
@@ -43,8 +43,13 @@ describe('Greenlistable', function () {
 
   describe('modifier onlyGreenlisted', () => {
     it('should fail: call from greenlisted user', async () => {
-      const { greenListableTester, regularAccounts } = await loadFixture(
+      const { greenListableTester, regularAccounts, owner } = await loadFixture(
         defaultDeploy,
+      );
+
+      await greenListEnable(
+        { greenlistable: greenListableTester, owner },
+        true,
       );
 
       await expect(
@@ -103,7 +108,7 @@ describe('Greenlistable', function () {
 
       await greenListEnable(
         { greenlistable: greenListableTester, owner },
-        false,
+        true,
         {
           from: regularAccounts[0],
           revertMessage: `WMAC: hasnt role`,
@@ -116,7 +121,7 @@ describe('Greenlistable', function () {
 
       await greenListEnable(
         { greenlistable: greenListableTester, owner },
-        true,
+        false,
         {
           revertMessage: `GL: same enable status`,
         },
@@ -127,7 +132,7 @@ describe('Greenlistable', function () {
       const { greenListableTester, owner } = await loadFixture(defaultDeploy);
       await greenListEnable(
         { greenlistable: greenListableTester, owner },
-        false,
+        true,
       );
     });
   });

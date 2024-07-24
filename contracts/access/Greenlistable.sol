@@ -44,7 +44,6 @@ abstract contract Greenlistable is WithMidasAccessControl {
         onlyInitializing
     {
         __WithMidasAccessControl_init(_accessControl);
-        greenlistEnabled = true;
     }
 
     function setGreenlistEnable(bool enable) external onlyGreenlistToggler(msg.sender) {
