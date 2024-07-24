@@ -12,6 +12,7 @@ import "../interfaces/IMTbill.sol";
 import "../interfaces/IDataFeed.sol";
 
 import "../access/Greenlistable.sol";
+import "../access/Blacklistable.sol";
 
 import "../libraries/DecimalsCorrectionLibrary.sol";
 import "../access/Pausable.sol";
@@ -21,7 +22,7 @@ import "../access/Pausable.sol";
  * @author RedDuck Software
  * @notice Contract with base Vault methods
  */
-abstract contract ManageableVault is Pausable, IManageableVault {
+abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, Greenlistable {
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
@@ -124,6 +125,7 @@ abstract contract ManageableVault is Pausable, IManageableVault {
 
         mToken = IMTbill(_mToken);
         __Pausable_init(_ac);
+        __Greenlistable_init(_ac);
 
         tokensReceiver = _tokensReceiver;
         feeReceiver = _feeReceiver;

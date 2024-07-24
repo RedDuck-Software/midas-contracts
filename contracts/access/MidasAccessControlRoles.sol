@@ -14,6 +14,12 @@ abstract contract MidasAccessControlRoles {
         keccak256("GREENLIST_OPERATOR_ROLE");
 
     /**
+     * @notice actor that can change green list enable
+     */
+    bytes32 public constant GREENLIST_TOGGLER_ROLE =
+        keccak256("GREENLIST_TOGGLER_ROLE");
+
+    /**
      * @notice actor that can change black list statuses of addresses
      */
     bytes32 public constant BLACKLIST_OPERATOR_ROLE =

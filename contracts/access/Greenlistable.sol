@@ -10,12 +10,27 @@ import "./WithMidasAccessControl.sol";
  * @author RedDuck Software
  */
 abstract contract Greenlistable is WithMidasAccessControl {
+    bool public greenlistEnabled; 
+
+    event SetGreenlistEnable (
+        address indexed sender,
+        bool enable
+    );
+
     /**
      * @dev checks that a given `account`
      * have `greenlistedRole()`
      */
     modifier onlyGreenlisted(address account) {
-        _onlyGreenlisted(account);
+        if(greenlistEnabled) _onlyGreenlisted(account);
+        _;
+    }
+    /**
+     * @dev checks that a given `account`
+     * have `greenlistTogglerRole()`
+     */
+    modifier onlyGreenlistToggler(address account) {
+        _onlyGreenlistToggler(account);
         _;
     }
 
@@ -29,6 +44,13 @@ abstract contract Greenlistable is WithMidasAccessControl {
         onlyInitializing
     {
         __WithMidasAccessControl_init(_accessControl);
+        greenlistEnabled = true;
+    }
+
+    function setGreenlistEnable(bool enable) external onlyGreenlistToggler(msg.sender) {
+        require(greenlistEnabled != enable, "GL: same enable status");
+        greenlistEnabled = enable;
+        emit SetGreenlistEnable(msg.sender, enable);
     }
 
     /**
@@ -40,6 +62,14 @@ abstract contract Greenlistable is WithMidasAccessControl {
     }
 
     /**
+     * @notice AC role of a greenlist
+     * @return role bytes32 role
+     */
+    function greenlistTogglerRole() public view virtual returns (bytes32) {
+        return GREENLIST_TOGGLER_ROLE;
+    }
+
+    /**
      * @dev checks that a given `account`
      * have a `greenlistedRole()`
      */
@@ -47,5 +77,15 @@ abstract contract Greenlistable is WithMidasAccessControl {
         private
         view
         onlyRole(greenlistedRole(), account)
+    {}
+
+    /**
+     * @dev checks that a given `account`
+     * have a `greenlistTogglerRole()`
+     */
+    function _onlyGreenlistToggler(address account)
+        private
+        view
+        onlyRole(greenlistTogglerRole(), account)
     {}
 }

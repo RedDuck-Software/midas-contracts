@@ -387,6 +387,7 @@ export const defaultDeploy = async () => {
     roles.greenlistedOperator,
     greenListableTester.address,
   );
+  await accessControl.grantRole(roles.greenlistToggler, owner.address);
 
   await postDeploymentTest(hre, {
     accessControl,

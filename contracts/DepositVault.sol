@@ -92,6 +92,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      */
     function depositInstant(address tokenIn, uint256 amountToken)
         external
+        onlyGreenlisted(msg.sender)
         whenNotPaused
     {
         address user = msg.sender;
@@ -115,6 +116,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function depositRequest(address tokenIn, uint256 amountToken)
         external
         whenNotPaused
+        onlyGreenlisted(msg.sender)
         returns(uint256 requestId)
     {
         address user = msg.sender;

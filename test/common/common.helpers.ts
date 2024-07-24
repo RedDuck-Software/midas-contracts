@@ -36,6 +36,7 @@ export const getAllRoles = async (accessControl: MidasAccessControl) => {
     burner: await accessControl.M_TBILL_BURN_OPERATOR_ROLE(),
     pauser: await accessControl.M_TBILL_PAUSE_OPERATOR_ROLE(),
     greenlistedOperator: await accessControl.GREENLIST_OPERATOR_ROLE(),
+    greenlistToggler: await accessControl.GREENLIST_TOGGLER_ROLE(),
     blacklistedOperator: await accessControl.BLACKLIST_OPERATOR_ROLE(),
     defaultAdmin: await accessControl.DEFAULT_ADMIN_ROLE(),
     depositVaultAdmin: await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),
