@@ -4,7 +4,7 @@ import { constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
-import { acErrors, greenList } from './common/ac.helpers';
+import { acErrors, blackList, greenList } from './common/ac.helpers';
 import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import {
@@ -14,6 +14,7 @@ import {
   rejectRequestTest,
 } from './common/deposit-vault.helpers';
 import { defaultDeploy } from './common/fixtures';
+import { greenListEnable } from './common/greenlist.helpers';
 import {
   addPaymentTokenTest,
   addWaivedFeeAccountTest,
@@ -34,7 +35,6 @@ import {
   // eslint-disable-next-line camelcase
   MBasisDepositVault__factory,
 } from '../typechain-types';
-import { greenListEnable } from './common/greenlist.helpers';
 
 describe('DepositVault', function () {
   it('deployment', async () => {
@@ -1095,6 +1095,34 @@ describe('DepositVault', function () {
       );
     });
 
+    it('should fail: user in blacklist ', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        blackListableTester,
+        accessControl,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+
+      await blackList(
+        { blacklistable: blackListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
+
+      await depositInstantTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        1,
+        {
+          from: regularAccounts[0],
+          revertMessage: acErrors.WMAC_HAS_ROLE,
+        },
+      );
+    });
+
     it('deposit 100 DAI, greenlist enabled and user in greenlist ', async () => {
       const {
         owner,
@@ -1524,6 +1552,34 @@ describe('DepositVault', function () {
         1,
         {
           revertMessage: 'WMAC: hasnt role',
+        },
+      );
+    });
+
+    it('should fail: user in blacklist ', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        blackListableTester,
+        accessControl,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+
+      await blackList(
+        { blacklistable: blackListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
+
+      await depositRequestTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        1,
+        {
+          from: regularAccounts[0],
+          revertMessage: acErrors.WMAC_HAS_ROLE,
         },
       );
     });
