@@ -42,6 +42,8 @@ import {
   EUsdRedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
   CustomAggregatorV3CompatibleFeedTester__factory,
+  SanctionsListMock__factory,
+  WithSanctionsListTester__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -53,6 +55,19 @@ export const defaultDeploy = async () => {
     owner,
   ).deploy();
   await accessControl.initialize();
+
+  const mockedSanctionsList = await new SanctionsListMock__factory(
+    owner,
+  ).deploy();
+
+  const withSanctionsListTester = await new WithSanctionsListTester__factory(
+    owner,
+  ).deploy();
+
+  await withSanctionsListTester.initialize(
+    accessControl.address,
+    mockedSanctionsList.address,
+  );
 
   const mTBILL = await new MTBILLTest__factory(owner).deploy();
   await expect(mTBILL.initialize(ethers.constants.AddressZero)).to.be.reverted;
@@ -475,5 +490,7 @@ export const defaultDeploy = async () => {
     feeReceiver,
     dataFeedDeprecated,
     dataFeedUnhealthy,
+    withSanctionsListTester,
+    mockedSanctionsList,
   };
 };

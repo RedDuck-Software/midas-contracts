@@ -12,6 +12,13 @@ contract WithSanctionsListTester is WithSanctionsList {
         __WithSanctionsList_init(_accessControl, _sanctionsList);
     }
 
+    function initializeWithoutInitializer(
+        address _accessControl,
+        address _sanctionsList
+    ) external {
+        __WithSanctionsList_init(_accessControl, _sanctionsList);
+    }
+
     function onlyNotSanctionedTester(
         address user
     ) public onlyNotSanctioned(user) {}
@@ -19,4 +26,6 @@ contract WithSanctionsListTester is WithSanctionsList {
     function sanctionsListAdminRole() public pure override returns (bytes32) {
         return keccak256("TESTER_SANCTIONS_LIST_ADMIN_ROLE");
     }
+
+    function _disableInitializers() internal override {}
 }
