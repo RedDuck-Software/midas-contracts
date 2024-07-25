@@ -5,10 +5,22 @@ import "../interfaces/ISanctionsList.sol";
 import "../access/WithMidasAccessControl.sol";
 import "./MidasInitializable.sol";
 
-// TODO: add natspec
+/**
+ * @title WithSanctionsList
+ * @notice Base contract that uses sanctions oracle from
+ * Chainalysis to check that user is not sanctioned
+ * @author RedDuck Software
+ */
 abstract contract WithSanctionsList is WithMidasAccessControl {
+    /**
+     * @notice address of Chainalysis sanctions oracle
+     */
     address public sanctionsList;
 
+    /**
+     * @param caller function caller (msg.sender)
+     * @param newSanctionsList new address of `sanctionsList`
+     */
     event SetSanctionsList(
         address indexed caller,
         address indexed newSanctionsList
@@ -51,6 +63,12 @@ abstract contract WithSanctionsList is WithMidasAccessControl {
         sanctionsList = _sanctionsList;
     }
 
+    /**
+     * @notice updates `sanctionsList` address.
+     * can be called only from permissioned actor that have
+     * `sanctionsListAdminRole()` role
+     * @param newSanctionsList new sanctions list address
+     */
     function setSanctionsList(address newSanctionsList) external {
         _onlyRole(sanctionsListAdminRole(), msg.sender);
 
@@ -58,5 +76,10 @@ abstract contract WithSanctionsList is WithMidasAccessControl {
         emit SetSanctionsList(msg.sender, newSanctionsList);
     }
 
+    /**
+     * @notice AC role of sanctions list admin
+     * @dev address that have this role can use `setSanctionsList`
+     * @return role bytes32 role
+     */
     function sanctionsListAdminRole() public view virtual returns (bytes32);
 }

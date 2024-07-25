@@ -261,6 +261,9 @@ abstract contract ManageableVault is
      */
     function vaultRole() public view virtual returns (bytes32);
 
+    /**
+     * @inheritdoc WithSanctionsList
+     */
     function sanctionsListAdminRole()
         public
         view
@@ -272,8 +275,7 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @notice AC role of vault`s pauser
-     * @return role bytes32 role
+     * @inheritdoc Pausable
      */
     function pauseAdminRole() public view override returns (bytes32) {
         return vaultRole();
