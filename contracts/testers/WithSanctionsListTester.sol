@@ -5,10 +5,10 @@ import "../abstract/WithSanctionsList.sol";
 
 // TODO: add natspec
 contract WithSanctionsListTester is WithSanctionsList {
-    function initialize(
-        address _accessControl,
-        address _sanctionsList
-    ) external initializer {
+    function initialize(address _accessControl, address _sanctionsList)
+        external
+        initializer
+    {
         __WithSanctionsList_init(_accessControl, _sanctionsList);
     }
 
@@ -19,9 +19,10 @@ contract WithSanctionsListTester is WithSanctionsList {
         __WithSanctionsList_init(_accessControl, _sanctionsList);
     }
 
-    function onlyNotSanctionedTester(
-        address user
-    ) public onlyNotSanctioned(user) {}
+    function onlyNotSanctionedTester(address user)
+        public
+        onlyNotSanctioned(user)
+    {}
 
     function sanctionsListAdminRole() public pure override returns (bytes32) {
         return keccak256("TESTER_SANCTIONS_LIST_ADMIN_ROLE");

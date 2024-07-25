@@ -1,8 +1,10 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumberish } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils';
 
 import { Account, OptionalCommonParams, getAccount } from './common.helpers';
+import { defaultDeploy } from './fixtures';
 
 import {
   DepositVault,
@@ -11,8 +13,6 @@ import {
   ERC20__factory,
   RedemptionVault,
 } from '../../typechain-types';
-import { defaultDeploy } from './fixtures';
-import { parseUnits } from 'ethers/lib/utils';
 
 type CommonParamsChangePaymentToken = {
   vault: DepositVault | RedemptionVault;

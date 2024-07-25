@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 import "./IManageableVault.sol";
 
 struct Request {
-    address sender; 
+    address sender;
     address tokenIn;
     uint256 depositedUsdAmount;
     uint256 mintAmount;
@@ -21,7 +21,6 @@ interface IDepositVault is IManageableVault {
      */
     event SetMinAmountToDeposit(address indexed caller, uint256 newValue);
 
-    
     event DepositInstant(
         address indexed user,
         address indexed tokenIn,
@@ -40,16 +39,10 @@ interface IDepositVault is IManageableVault {
         uint256 fee,
         uint256 mintAmount
     );
-    
-    event ApproveRequest(
-        uint256 indexed requestId,
-        address indexed user
-    );
 
-    event RejectRequest(
-        uint256 indexed requestId,
-        address indexed user
-    );
+    event ApproveRequest(uint256 indexed requestId, address indexed user);
+
+    event RejectRequest(uint256 indexed requestId, address indexed user);
 
     /**
      * @param user address that was freed from min deposit check
@@ -57,7 +50,7 @@ interface IDepositVault is IManageableVault {
     event FreeFromMinDeposit(address indexed user);
 
     /**
-     * @notice depositing proccess with auto mint if 
+     * @notice depositing proccess with auto mint if
      * account fit daily limit.
      * Transfers usd token from the user.
      * Then request should be validated off-chain and if

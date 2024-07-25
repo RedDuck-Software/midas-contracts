@@ -13,6 +13,7 @@ import "../interfaces/IDataFeed.sol";
 
 import "../access/Greenlistable.sol";
 import "../access/Blacklistable.sol";
+import "../abstract/WithSanctionsList.sol";
 
 import "../libraries/DecimalsCorrectionLibrary.sol";
 import "../access/Pausable.sol";
@@ -22,7 +23,13 @@ import "../access/Pausable.sol";
  * @author RedDuck Software
  * @notice Contract with base Vault methods
  */
-abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, Greenlistable {
+abstract contract ManageableVault is
+    Pausable,
+    IManageableVault,
+    Blacklistable,
+    Greenlistable,
+    WithSanctionsList
+{
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
@@ -178,7 +185,10 @@ abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, 
     }
 
     // @dev if MAX_UINT = infinite allowance
-    function changeTokenAllowance(address token, uint256 allowance) external onlyVaultAdmin {
+    function changeTokenAllowance(address token, uint256 allowance)
+        external
+        onlyVaultAdmin
+    {
         _requireTokenExists(token);
         require(allowance > 0, "MV: zero allowance");
         tokensConfig[token].allowance = allowance;
@@ -189,9 +199,7 @@ abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, 
      * @inheritdoc IManageableVault
      * @dev reverts if account is already added
      */
-    function addWaivedFeeAccount(
-        address account
-    ) external onlyVaultAdmin {
+    function addWaivedFeeAccount(address account) external onlyVaultAdmin {
         require(!waivedFeeRestriction[account], "MV: already added");
         waivedFeeRestriction[account] = true;
         emit AddWaivedFeeAccount(account, msg.sender);
@@ -201,9 +209,7 @@ abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, 
      * @inheritdoc IManageableVault
      * @dev reverts if account is already removed
      */
-    function removeWaivedFeeAccount(
-        address account
-    ) external onlyVaultAdmin {
+    function removeWaivedFeeAccount(address account) external onlyVaultAdmin {
         require(waivedFeeRestriction[account], "MV: not found");
         waivedFeeRestriction[account] = false;
         emit RemoveWaivedFeeAccount(account, msg.sender);
@@ -213,12 +219,12 @@ abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, 
      * @inheritdoc IManageableVault
      * @dev reverts address zero or equal address(this)
      */
-    function setFeeReceiver(address Receiver) external onlyVaultAdmin {
-        require(Receiver != address(0), "zero address");
-        require(Receiver != address(this), "invalid address");
-        feeReceiver = Receiver;
+    function setFeeReceiver(address receiver) external onlyVaultAdmin {
+        require(receiver != address(0), "zero address");
+        require(receiver != address(this), "invalid address");
+        feeReceiver = receiver;
 
-        emit SetFeeReceiver(msg.sender, Receiver);
+        emit SetFeeReceiver(msg.sender, receiver);
     }
 
     /**
@@ -252,6 +258,16 @@ abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, 
      * @return role bytes32 role
      */
     function vaultRole() public view virtual returns (bytes32);
+
+    function sanctionsListAdminRole()
+        public
+        view
+        virtual
+        override
+        returns (bytes32)
+    {
+        return vaultRole();
+    }
 
     /**
      * @notice AC role of vault`s pauser
@@ -315,9 +331,11 @@ abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, 
         dailyLimits[currentDayNumber] = nextLimitAmount;
     }
 
-    function _requireAndUpdateAllowance(address token, uint256 amount) internal {
+    function _requireAndUpdateAllowance(address token, uint256 amount)
+        internal
+    {
         TokenConfig storage config = tokensConfig[token];
-        if(config.allowance == MAX_UINT) return;
+        if (config.allowance == MAX_UINT) return;
 
         require(config.allowance >= amount, "MV: exeed allowance");
 
@@ -343,9 +361,9 @@ abstract contract ManageableVault is Pausable, IManageableVault, Blacklistable, 
         TokenConfig storage tokenConfig = tokensConfig[tokenIn];
 
         uint256 feePercent = tokenConfig.fee;
-        if(isInstant) feePercent += initialFee;
+        if (isInstant) feePercent += initialFee;
 
-        if(feePercent > ONE_HUNDRED_PERCENT) feePercent = ONE_HUNDRED_PERCENT;
+        if (feePercent > ONE_HUNDRED_PERCENT) feePercent = ONE_HUNDRED_PERCENT;
 
         return (amount * feePercent) / ONE_HUNDRED_PERCENT;
     }

@@ -54,10 +54,7 @@ interface IManageableVault {
      * @param account address of account
      * @param caller function caller (msg.sender)
      */
-    event AddWaivedFeeAccount(
-        address indexed account,
-        address indexed caller
-    );
+    event AddWaivedFeeAccount(address indexed account, address indexed caller);
     /**
      * @param account address of account
      * @param caller function caller (msg.sender)
@@ -144,16 +141,12 @@ interface IManageableVault {
      * can be called only from permissioned actor.
      * @param account address
      */
-    function addWaivedFeeAccount(
-        address account
-    ) external;
+    function addWaivedFeeAccount(address account) external;
 
     /**
      * @notice removes a account from waived fee restriction.
      * can be called only from permissioned actor.
      * @param account address
      */
-    function removeWaivedFeeAccount(
-        address account
-    ) external;
+    function removeWaivedFeeAccount(address account) external;
 }

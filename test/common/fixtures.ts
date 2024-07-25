@@ -42,7 +42,9 @@ import {
   EUsdRedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
   CustomAggregatorV3CompatibleFeedTester__factory,
+  // eslint-disable-next-line camelcase
   SanctionsListMock__factory,
+  // eslint-disable-next-line camelcase
   WithSanctionsListTester__factory,
 } from '../../typechain-types';
 
