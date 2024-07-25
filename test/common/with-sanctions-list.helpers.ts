@@ -3,11 +3,28 @@ import { expect } from 'chai';
 
 import { Account, OptionalCommonParams, getAccount } from './common.helpers';
 
-import { WithSanctionsList } from '../../typechain-types';
+import {
+  ISanctionsList,
+  SanctionsListMock,
+  WithSanctionsList,
+} from '../../typechain-types';
 
 type CommonParamsSetSanctionsList = {
   owner: SignerWithAddress;
   withSanctionsList: WithSanctionsList;
+};
+
+type CommonParamsSanctionUser = {
+  sanctionsList: SanctionsListMock;
+};
+
+export const sanctionUser = async (
+  { sanctionsList }: CommonParamsSanctionUser,
+  user: Account,
+) => {
+  user = getAccount(user);
+
+  await expect(sanctionsList.setSunctioned(user, true)).to.not.reverted;
 };
 
 export const setSanctionsList = async (

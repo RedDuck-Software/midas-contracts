@@ -120,7 +120,8 @@ abstract contract ManageableVault is
         address _feeReceiver,
         uint256 _initialFee,
         uint256 _initialLimit,
-        address _mTokenDataFeed
+        address _mTokenDataFeed,
+        address _sanctionsList
     ) internal onlyInitializing {
         require(_mToken != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
@@ -134,6 +135,7 @@ abstract contract ManageableVault is
         __Pausable_init(_ac);
         __Greenlistable_init(_ac);
         __Blacklistable_init(_ac);
+        __WithSanctionsList_init_unchained(_sanctionsList);
 
         tokensReceiver = _tokensReceiver;
         feeReceiver = _feeReceiver;

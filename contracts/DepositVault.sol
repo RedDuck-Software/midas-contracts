@@ -69,7 +69,8 @@ contract DepositVault is ManageableVault, IDepositVault {
         address _feeReceiver,
         uint256 _initialFee,
         uint256 _initialLimit,
-        address _mTokenDataFeed
+        address _mTokenDataFeed,
+        address _sanctionsList
     ) external initializer {
         __ManageableVault_init(
             _ac,
@@ -78,7 +79,8 @@ contract DepositVault is ManageableVault, IDepositVault {
             _feeReceiver,
             _initialFee,
             _initialLimit,
-            _mTokenDataFeed
+            _mTokenDataFeed,
+            _sanctionsList
         );
         minAmountToDeposit = _minAmountToDeposit;
     }

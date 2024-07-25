@@ -4,14 +4,17 @@ import { constants } from 'ethers';
 
 import { acErrors } from './common/ac.helpers';
 import { defaultDeploy } from './common/fixtures';
-import { setSanctionsList } from './common/with-sanctions-list.helpers';
+import {
+  sanctionUser,
+  setSanctionsList,
+} from './common/with-sanctions-list.helpers';
 
 import {
   // eslint-disable-next-line camelcase
   WithSanctionsListTester__factory,
 } from '../typechain-types';
 
-describe('WithSanctionsList', function () {
+describe.only('WithSanctionsList', function () {
   it('deployment', async () => {
     const { accessControl, withSanctionsListTester } = await loadFixture(
       defaultDeploy,
@@ -42,7 +45,11 @@ describe('WithSanctionsList', function () {
       const { withSanctionsListTester, mockedSanctionsList, regularAccounts } =
         await loadFixture(defaultDeploy);
 
-      await mockedSanctionsList.setSunctioned(regularAccounts[0].address, true);
+      await sanctionUser(
+        { sanctionsList: mockedSanctionsList },
+        regularAccounts[0],
+      );
+
       await expect(
         withSanctionsListTester.onlyNotSanctionedTester(
           regularAccounts[0].address,

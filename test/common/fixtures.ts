@@ -147,6 +147,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -159,6 +160,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -171,6 +173,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -183,6 +186,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -195,6 +199,7 @@ export const defaultDeploy = async () => {
       100,
       0,
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -207,6 +212,7 @@ export const defaultDeploy = async () => {
       100,
       0,
       ethers.constants.AddressZero,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await depositVault.initialize(
@@ -218,6 +224,7 @@ export const defaultDeploy = async () => {
     100,
     parseUnits('100000'),
     mTokenToUsdDataFeed.address,
+    mockedSanctionsList.address,
   );
 
   await accessControl.grantRole(
@@ -238,6 +245,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -249,6 +257,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -260,6 +269,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -271,6 +281,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -282,6 +293,7 @@ export const defaultDeploy = async () => {
       100,
       0,
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -293,6 +305,7 @@ export const defaultDeploy = async () => {
       100,
       0,
       ethers.constants.AddressZero,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
 
@@ -304,6 +317,7 @@ export const defaultDeploy = async () => {
     100,
     parseUnits('100000'),
     mTokenToUsdDataFeed.address,
+    mockedSanctionsList.address,
   );
 
   const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
@@ -318,6 +332,7 @@ export const defaultDeploy = async () => {
     100,
     parseUnits('100000'),
     mTokenToUsdDataFeed.address,
+    mockedSanctionsList.address,
   );
 
   await accessControl.grantRoleMult(
