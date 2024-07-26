@@ -3,11 +3,18 @@ pragma solidity 0.8.9;
 
 import "./IManageableVault.sol";
 
+enum RequestStatus {
+    Pending,
+    Processed,
+    Canceled
+}
+
 struct Request {
     address sender;
     address tokenIn;
+    RequestStatus status;
     uint256 depositedUsdAmount;
-    uint256 mintAmount;
+    uint256 tokenOutRate;
 }
 
 /**
@@ -37,7 +44,7 @@ interface IDepositVault is IManageableVault {
         uint256 amountUsd,
         uint256 amountToken,
         uint256 fee,
-        uint256 mintAmount
+        uint256 tokenOutRate
     );
 
     event ApproveRequest(uint256 indexed requestId, address indexed user);

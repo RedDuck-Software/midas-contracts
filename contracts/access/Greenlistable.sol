@@ -10,6 +10,12 @@ import "./WithMidasAccessControl.sol";
  * @author RedDuck Software
  */
 abstract contract Greenlistable is WithMidasAccessControl {
+    /**
+     * @notice actor that can change green list enable
+     */
+    bytes32 public constant GREENLIST_TOGGLER_ROLE =
+        keccak256("GREENLIST_TOGGLER_ROLE");
+
     bool public greenlistEnabled;
 
     event SetGreenlistEnable(address indexed sender, bool enable);

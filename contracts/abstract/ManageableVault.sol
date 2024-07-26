@@ -82,6 +82,11 @@ abstract contract ManageableVault is
     address public feeReceiver;
 
     /**
+     * @notice variation tolerance of tokenOut rates for "safe" requests approve
+     */
+    uint256 public variationTolerance;
+
+    /**
      * @notice address restriction with zero fees
      */
     mapping(address => bool) public waivedFeeRestriction;
@@ -121,7 +126,8 @@ abstract contract ManageableVault is
         uint256 _initialFee,
         uint256 _initialLimit,
         address _mTokenDataFeed,
-        address _sanctionsList
+        address _sanctionsList,
+        uint256 _variationTolerance
     ) internal onlyInitializing {
         require(_mToken != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
@@ -130,6 +136,7 @@ abstract contract ManageableVault is
         require(_feeReceiver != address(this), "invalid address");
         require(_mTokenDataFeed != address(0), "invalid address");
         require(_initialLimit > 0, "zero limit");
+        require(_variationTolerance > 0, "zero tolerance");
 
         mToken = IMTbill(_mToken);
         __Pausable_init(_ac);
@@ -141,6 +148,7 @@ abstract contract ManageableVault is
         feeReceiver = _feeReceiver;
         initialFee = _initialFee;
         initialLimit = _initialLimit;
+        variationTolerance = _variationTolerance;
         mTokenDataFeed = IDataFeed(_mTokenDataFeed);
     }
 
@@ -195,6 +203,15 @@ abstract contract ManageableVault is
         require(allowance > 0, "MV: zero allowance");
         tokensConfig[token].allowance = allowance;
         emit ChangeTokenAllowance(token, allowance, msg.sender);
+    }
+
+    function setVariationTolerance(uint256 tolerance)
+        external
+        onlyVaultAdmin
+    {
+        require(tolerance > 0, "MV: zero tolerance");
+        variationTolerance = tolerance;
+        emit SetVariationTolerance(msg.sender, tolerance);
     }
 
     /**
@@ -349,20 +366,20 @@ abstract contract ManageableVault is
     /**
      * @dev returns how much mtBill user should receive from token inputted
      * @param sender sender address
-     * @param tokenIn token address
+     * @param token token address
      * @param amount amount of token
      * @return fee amount of input token
      */
     function _getFeeAmount(
         address sender,
-        address tokenIn,
+        address token,
         uint256 amount,
         bool isInstant
     ) internal view returns (uint256) {
         if (amount == 0) return 0;
         if (waivedFeeRestriction[sender]) return 0;
 
-        TokenConfig storage tokenConfig = tokensConfig[tokenIn];
+        TokenConfig storage tokenConfig = tokensConfig[token];
 
         uint256 feePercent = tokenConfig.fee;
         if (isInstant) feePercent += initialFee;
@@ -370,5 +387,13 @@ abstract contract ManageableVault is
         if (feePercent > ONE_HUNDRED_PERCENT) feePercent = ONE_HUNDRED_PERCENT;
 
         return (amount * feePercent) / ONE_HUNDRED_PERCENT;
+    }
+
+    function _requireVariationTolerance(uint256 prevPrice, uint256 newPrice) internal view {
+        uint256 priceDif = newPrice >= prevPrice ? newPrice - prevPrice : prevPrice - newPrice;
+
+        uint256 priceDifPercent = priceDif * ONE_HUNDRED_PERCENT / prevPrice;
+        
+        require(priceDifPercent <= variationTolerance, "MV: price diviation");
     }
 }

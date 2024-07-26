@@ -76,6 +76,8 @@ interface IManageableVault {
      */
     event SetInitialLimit(address indexed caller, uint256 newLimit);
 
+    event SetVariationTolerance(address indexed caller, uint256 newTolerance);
+
     /**
      * @param caller function caller (msg.sender)
      * @param reciever new reciever address

@@ -25,34 +25,6 @@ contract MidasAccessControl is
     }
 
     /**
-     * @notice Sets `adminRole` as ``role``'s admin role.
-     * @param role role to set `adminRole` for
-     * @param adminRole role that can manage `role`
-     */
-    function setRoleAdmin(bytes32 role, bytes32 adminRole) external {
-        _checkRole(getRoleAdmin(role), msg.sender);
-        _setRoleAdmin(role, adminRole);
-    }
-
-    /**
-     * @notice Sets `adminRole` as ``role``'s admin role.
-     * @dev length`s of 2 arays should match
-     * @param roles roles to set `adminRoles[i]` for
-     * @param adminRoles roles that can manage `roles[i]`
-     */
-    function setRoleAdminMult(
-        bytes32[] memory roles,
-        bytes32[] memory adminRoles
-    ) external {
-        require(roles.length == adminRoles.length, "MAC: mismatch arrays");
-
-        for (uint256 i = 0; i < roles.length; i++) {
-            _checkRole(getRoleAdmin(roles[i]), msg.sender);
-            _setRoleAdmin(roles[i], adminRoles[i]);
-        }
-    }
-
-    /**
      * @notice grant multiple roles to multiple users
      * in one transaction
      * @dev length`s of 2 arays should match

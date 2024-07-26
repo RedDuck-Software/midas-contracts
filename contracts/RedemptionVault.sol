@@ -34,6 +34,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     Counters.Counter public lastRequestId;
 
+    uint256 public minRedeemAmount;
+
     /**
      * @dev leaving a storage gap for futures updates
      */
@@ -53,7 +55,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         uint256 _initialFee,
         uint256 _initialLimit,
         address _mTokenDataFeed,
-        address _sanctionsList
+        address _sanctionsList,
+        uint256 _minRedeemAmount,
+        uint256 _variationTolerance
     ) external initializer {
         __ManageableVault_init(
             _ac,
@@ -63,30 +67,37 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _initialFee,
             _initialLimit,
             _mTokenDataFeed,
-            _sanctionsList
+            _sanctionsList,
+            _variationTolerance
         );
+        minRedeemAmount = _minRedeemAmount;
     }
 
-    /**
-     * @inheritdoc IRedemptionVault
-     * @dev transfers 'amountTBillIn' amount from user
-     * to `tokensReceiver`
-     */
-    function redeem(address tokenOut, uint256 amountTBillIn)
+    function redeemInstant(address tokenOut, uint256 amountMTokenIn)
         external
+        onlyGreenlisted(msg.sender)
+        onlyNotBlacklisted(msg.sender)
+        onlyNotSanctioned(msg.sender)
         whenNotPaused
     {
-        require(amountTBillIn > 0, "RV: 0 amount");
+        require(amountMTokenIn > 0, "RV: 0 amount");
 
         address user = msg.sender;
 
         _requireTokenExists(tokenOut);
-        _tokenTransferFromUser(address(mToken), tokensReceiver, amountTBillIn);
 
-        lastRequestId.increment();
-        uint256 requestId = lastRequestId.current();
+        _requireAndUpdateLimit(amountMTokenIn);
 
-        emit Redeem(requestId, user, tokenOut, amountTBillIn);
+        uint256 feeAmount = _getFeeAmount(user, tokenOut, amountMTokenIn, true);
+        uint256 amountMTokenWithoutFee = amountMTokenIn - feeAmount;
+
+        mToken.burn(user, amountMTokenWithoutFee);
+        if (feeAmount > 0)
+            _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount);
+
+
+
+        // emit Redeem(requestId, user, tokenOut, amountTBillIn);
     }
 
     /**
