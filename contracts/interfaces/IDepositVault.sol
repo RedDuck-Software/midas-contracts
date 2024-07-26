@@ -48,6 +48,7 @@ interface IDepositVault is IManageableVault {
     );
 
     event ApproveRequest(uint256 indexed requestId, address indexed user);
+    event SafeApproveRequest(uint256 indexed requestId, address indexed user, uint256 newOutRate);
 
     event RejectRequest(uint256 indexed requestId, address indexed user);
 

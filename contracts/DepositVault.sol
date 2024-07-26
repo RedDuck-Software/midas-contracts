@@ -185,7 +185,9 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         _approveRequest(request.sender, request.tokenIn, requestId, request.depositedUsdAmount, newOutRate);
 
-        emit ApproveRequest(requestId, request.sender);
+        mintRequests[requestId].tokenOutRate = newOutRate;
+
+        emit SafeApproveRequest(requestId, request.sender, newOutRate);
     }
 
     function approveRequest(uint256 requestId) external onlyVaultAdmin {

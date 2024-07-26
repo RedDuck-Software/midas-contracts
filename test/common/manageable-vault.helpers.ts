@@ -46,6 +46,31 @@ export const setInstantFeeTest = async (
   expect(fee).eq(newFee);
 };
 
+export const setVariabilityToleranceTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  newTolerance: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).setVariationTolerance(newTolerance),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(
+    vault.connect(opt?.from ?? owner).setVariationTolerance(newTolerance),
+  )
+    .to.emit(
+      vault,
+      vault.interface.events['SetVariationTolerance(address,uint256)'].name,
+    )
+    .withArgs((opt?.from ?? owner).address, newTolerance).to.not.reverted;
+
+  const tolerance = await vault.variationTolerance();
+  expect(tolerance).eq(newTolerance);
+};
+
 export const addWaivedFeeAccountTest = async (
   { vault, owner }: CommonParamsChangePaymentToken,
   account: string,

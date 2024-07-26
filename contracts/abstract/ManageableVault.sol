@@ -394,6 +394,6 @@ abstract contract ManageableVault is
 
         uint256 priceDifPercent = priceDif * ONE_HUNDRED_PERCENT / prevPrice;
         
-        require(priceDifPercent <= variationTolerance, "MV: price diviation");
+        require(priceDifPercent <= variationTolerance, "MV: exceed price diviation");
     }
 }
