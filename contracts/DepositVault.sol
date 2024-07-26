@@ -69,7 +69,8 @@ contract DepositVault is ManageableVault, IDepositVault {
         address _feeReceiver,
         uint256 _initialFee,
         uint256 _initialLimit,
-        address _mTokenDataFeed
+        address _mTokenDataFeed,
+        address _sanctionsList
     ) external initializer {
         __ManageableVault_init(
             _ac,
@@ -78,7 +79,8 @@ contract DepositVault is ManageableVault, IDepositVault {
             _feeReceiver,
             _initialFee,
             _initialLimit,
-            _mTokenDataFeed
+            _mTokenDataFeed,
+            _sanctionsList
         );
         minAmountToDeposit = _minAmountToDeposit;
     }
@@ -94,11 +96,17 @@ contract DepositVault is ManageableVault, IDepositVault {
         external
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
+        onlyNotSanctioned(msg.sender)
         whenNotPaused
     {
         address user = msg.sender;
 
-        (uint256 tokenAmountInUsd, uint256 feeTokenAmount, uint256 amountTokenWithoutFee, uint256 mintAmount) = _calcAndValidateDeposit(user, tokenIn, amountToken, true);
+        (
+            uint256 tokenAmountInUsd,
+            uint256 feeTokenAmount,
+            uint256 amountTokenWithoutFee,
+            uint256 mintAmount
+        ) = _calcAndValidateDeposit(user, tokenIn, amountToken, true);
 
         totalDeposited[user] += tokenAmountInUsd;
 
@@ -111,7 +119,14 @@ contract DepositVault is ManageableVault, IDepositVault {
         if (feeTokenAmount > 0)
             _tokenTransferFromUser(tokenIn, feeReceiver, feeTokenAmount);
 
-        emit DepositInstant(user, tokenIn, tokenAmountInUsd, amountToken, feeTokenAmount, mintAmount);
+        emit DepositInstant(
+            user,
+            tokenIn,
+            tokenAmountInUsd,
+            amountToken,
+            feeTokenAmount,
+            mintAmount
+        );
     }
 
     function depositRequest(address tokenIn, uint256 amountToken)
@@ -119,11 +134,17 @@ contract DepositVault is ManageableVault, IDepositVault {
         whenNotPaused
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
-        returns(uint256 requestId)
+        onlyNotSanctioned(msg.sender)
+        returns (uint256 requestId)
     {
         address user = msg.sender;
 
-        (uint256 tokenAmountInUsd, uint256 feeAmount, uint256 amountTokenWithoutFee, uint256 mintAmount) = _calcAndValidateDeposit(user, tokenIn, amountToken, false);
+        (
+            uint256 tokenAmountInUsd,
+            uint256 feeAmount,
+            uint256 amountTokenWithoutFee,
+            uint256 mintAmount
+        ) = _calcAndValidateDeposit(user, tokenIn, amountToken, false);
 
         _tokenTransferFromUser(tokenIn, tokensReceiver, amountTokenWithoutFee);
 
@@ -133,9 +154,22 @@ contract DepositVault is ManageableVault, IDepositVault {
         lastRequestId.increment();
         requestId = lastRequestId.current();
 
-        mintRequests[requestId] = Request(user, tokenIn, tokenAmountInUsd, mintAmount);
+        mintRequests[requestId] = Request(
+            user,
+            tokenIn,
+            tokenAmountInUsd,
+            mintAmount
+        );
 
-        emit DepositRequest(requestId, user, tokenIn, tokenAmountInUsd, amountToken, feeAmount, mintAmount);
+        emit DepositRequest(
+            requestId,
+            user,
+            tokenIn,
+            tokenAmountInUsd,
+            amountToken,
+            feeAmount,
+            mintAmount
+        );
     }
 
     function approveRequest(uint256 requestId) external onlyVaultAdmin {
@@ -202,12 +236,28 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(amountUsdIn >= minAmountToDeposit, "DV: usd amount < min");
     }
 
-    function _calcAndValidateDeposit(address user, address tokenIn, uint256 amountToken, bool isInstant) internal returns(uint256 tokenAmountInUsd, uint256 feeTokenAmount, uint256 amountTokenWithoutFee, uint256 mintAmount) {
+    function _calcAndValidateDeposit(
+        address user,
+        address tokenIn,
+        uint256 amountToken,
+        bool isInstant
+    )
+        internal
+        returns (
+            uint256 tokenAmountInUsd,
+            uint256 feeTokenAmount,
+            uint256 amountTokenWithoutFee,
+            uint256 mintAmount
+        )
+    {
         require(amountToken > 0, "DV: invalid amount");
 
         _requireTokenExists(tokenIn);
 
-        (uint256 amountInUsd, uint256 tokenRate) = _convertTokenToUsd(tokenIn, amountToken);
+        (uint256 amountInUsd, uint256 tokenRate) = _convertTokenToUsd(
+            tokenIn,
+            amountToken
+        );
         tokenAmountInUsd = amountInUsd;
 
         if (!isFreeFromMinDeposit[user]) {
@@ -219,7 +269,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         feeTokenAmount = _getFeeAmount(user, tokenIn, amountToken, isInstant);
         amountTokenWithoutFee = amountToken - feeTokenAmount;
 
-        uint256 feeInUsd = feeTokenAmount * tokenRate / 10**18;
+        uint256 feeInUsd = (feeTokenAmount * tokenRate) / 10**18;
 
         mintAmount = _convertUsdToMToken(tokenAmountInUsd - feeInUsd);
         require(mintAmount > 0, "DV: invalid mint amount");
@@ -237,9 +287,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         rate = IDataFeed(tokenConfig.dataFeed).getDataInBase18();
         require(rate > 0, "DV: rate zero");
 
-        amountInUsd = amount * rate / (10**18);
+        amountInUsd = (amount * rate) / (10**18);
     }
-    
+
     function _convertUsdToMToken(uint256 amountUsd)
         internal
         view
@@ -250,6 +300,6 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 mTokenRate = mTokenDataFeed.getDataInBase18();
         if (mTokenRate == 0) return 0;
 
-        return amountUsd * (10**18) / mTokenRate;
+        return (amountUsd * (10**18)) / mTokenRate;
     }
 }

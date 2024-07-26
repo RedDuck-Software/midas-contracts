@@ -10,19 +10,16 @@ import "./WithMidasAccessControl.sol";
  * @author RedDuck Software
  */
 abstract contract Greenlistable is WithMidasAccessControl {
-    bool public greenlistEnabled; 
+    bool public greenlistEnabled;
 
-    event SetGreenlistEnable (
-        address indexed sender,
-        bool enable
-    );
+    event SetGreenlistEnable(address indexed sender, bool enable);
 
     /**
      * @dev checks that a given `account`
      * have `greenlistedRole()`
      */
     modifier onlyGreenlisted(address account) {
-        if(greenlistEnabled) _onlyGreenlisted(account);
+        if (greenlistEnabled) _onlyGreenlisted(account);
         _;
     }
     /**
@@ -46,7 +43,10 @@ abstract contract Greenlistable is WithMidasAccessControl {
         __WithMidasAccessControl_init(_accessControl);
     }
 
-    function setGreenlistEnable(bool enable) external onlyGreenlistToggler(msg.sender) {
+    function setGreenlistEnable(bool enable)
+        external
+        onlyGreenlistToggler(msg.sender)
+    {
         require(greenlistEnabled != enable, "GL: same enable status");
         greenlistEnabled = enable;
         emit SetGreenlistEnable(msg.sender, enable);

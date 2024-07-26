@@ -42,6 +42,10 @@ import {
   EUsdRedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
   CustomAggregatorV3CompatibleFeedTester__factory,
+  // eslint-disable-next-line camelcase
+  SanctionsListMock__factory,
+  // eslint-disable-next-line camelcase
+  WithSanctionsListTester__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -53,6 +57,19 @@ export const defaultDeploy = async () => {
     owner,
   ).deploy();
   await accessControl.initialize();
+
+  const mockedSanctionsList = await new SanctionsListMock__factory(
+    owner,
+  ).deploy();
+
+  const withSanctionsListTester = await new WithSanctionsListTester__factory(
+    owner,
+  ).deploy();
+
+  await withSanctionsListTester.initialize(
+    accessControl.address,
+    mockedSanctionsList.address,
+  );
 
   const mTBILL = await new MTBILLTest__factory(owner).deploy();
   await expect(mTBILL.initialize(ethers.constants.AddressZero)).to.be.reverted;
@@ -130,6 +147,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -142,6 +160,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -154,6 +173,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -166,6 +186,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -178,6 +199,7 @@ export const defaultDeploy = async () => {
       100,
       0,
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -190,6 +212,7 @@ export const defaultDeploy = async () => {
       100,
       0,
       ethers.constants.AddressZero,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await depositVault.initialize(
@@ -201,6 +224,7 @@ export const defaultDeploy = async () => {
     100,
     parseUnits('100000'),
     mTokenToUsdDataFeed.address,
+    mockedSanctionsList.address,
   );
 
   await accessControl.grantRole(
@@ -221,6 +245,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -232,6 +257,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -243,6 +269,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -254,6 +281,7 @@ export const defaultDeploy = async () => {
       100,
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -265,6 +293,7 @@ export const defaultDeploy = async () => {
       100,
       0,
       mTokenToUsdDataFeed.address,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -276,6 +305,7 @@ export const defaultDeploy = async () => {
       100,
       0,
       ethers.constants.AddressZero,
+      mockedSanctionsList.address,
     ),
   ).to.be.reverted;
 
@@ -287,6 +317,7 @@ export const defaultDeploy = async () => {
     100,
     parseUnits('100000'),
     mTokenToUsdDataFeed.address,
+    mockedSanctionsList.address,
   );
 
   const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
@@ -301,6 +332,7 @@ export const defaultDeploy = async () => {
     100,
     parseUnits('100000'),
     mTokenToUsdDataFeed.address,
+    mockedSanctionsList.address,
   );
 
   await accessControl.grantRoleMult(
@@ -475,5 +507,7 @@ export const defaultDeploy = async () => {
     feeReceiver,
     dataFeedDeprecated,
     dataFeedUnhealthy,
+    withSanctionsListTester,
+    mockedSanctionsList,
   };
 };

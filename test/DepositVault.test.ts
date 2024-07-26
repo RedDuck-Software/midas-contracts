@@ -26,6 +26,7 @@ import {
   setMinAmountToDepositTest,
   withdrawTest,
 } from './common/manageable-vault.helpers';
+import { sanctionUser } from './common/with-sanctions-list.helpers';
 
 import {
   // eslint-disable-next-line camelcase
@@ -99,6 +100,7 @@ describe('DepositVault', function () {
           0,
           0,
           ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
         ),
       ).revertedWith('Initializable: contract is already initialized');
     });
@@ -111,6 +113,7 @@ describe('DepositVault', function () {
         tokensReceiver,
         feeReceiver,
         mTokenToUsdDataFeed,
+        mockedSanctionsList,
       } = await loadFixture(defaultDeploy);
 
       const vault = await new ManageableVaultTester__factory(owner).deploy();
@@ -124,13 +127,20 @@ describe('DepositVault', function () {
           100,
           10000,
           mTokenToUsdDataFeed.address,
+          mockedSanctionsList.address,
         ),
       ).revertedWith('Initializable: contract is not initializing');
     });
 
     it('should fail: when _tokensReceiver == address(this)', async () => {
-      const { owner, accessControl, mTBILL, feeReceiver, mTokenToUsdDataFeed } =
-        await loadFixture(defaultDeploy);
+      const {
+        owner,
+        accessControl,
+        mTBILL,
+        feeReceiver,
+        mTokenToUsdDataFeed,
+        mockedSanctionsList,
+      } = await loadFixture(defaultDeploy);
 
       const vault = await new ManageableVaultTester__factory(owner).deploy();
 
@@ -143,6 +153,7 @@ describe('DepositVault', function () {
           100,
           100000,
           mTokenToUsdDataFeed.address,
+          mockedSanctionsList.address,
         ),
       ).revertedWith('invalid address');
     });
@@ -153,6 +164,7 @@ describe('DepositVault', function () {
         mTBILL,
         tokensReceiver,
         mTokenToUsdDataFeed,
+        mockedSanctionsList,
       } = await loadFixture(defaultDeploy);
 
       const vault = await new ManageableVaultTester__factory(owner).deploy();
@@ -166,6 +178,7 @@ describe('DepositVault', function () {
           100,
           100000,
           mTokenToUsdDataFeed.address,
+          mockedSanctionsList.address,
         ),
       ).revertedWith('invalid address');
     });
@@ -177,6 +190,7 @@ describe('DepositVault', function () {
         tokensReceiver,
         feeReceiver,
         mTokenToUsdDataFeed,
+        mockedSanctionsList,
       } = await loadFixture(defaultDeploy);
 
       const vault = await new ManageableVaultTester__factory(owner).deploy();
@@ -190,12 +204,19 @@ describe('DepositVault', function () {
           100,
           0,
           mTokenToUsdDataFeed.address,
+          mockedSanctionsList.address,
         ),
       ).revertedWith('zero limit');
     });
     it('should fail: when mToken dataFeed address zero', async () => {
-      const { owner, accessControl, mTBILL, tokensReceiver, feeReceiver } =
-        await loadFixture(defaultDeploy);
+      const {
+        owner,
+        accessControl,
+        mTBILL,
+        tokensReceiver,
+        feeReceiver,
+        mockedSanctionsList,
+      } = await loadFixture(defaultDeploy);
 
       const vault = await new ManageableVaultTester__factory(owner).deploy();
 
@@ -208,6 +229,7 @@ describe('DepositVault', function () {
           100,
           0,
           constants.AddressZero,
+          mockedSanctionsList.address,
         ),
       ).revertedWith('invalid address');
     });
@@ -1119,6 +1141,33 @@ describe('DepositVault', function () {
         {
           from: regularAccounts[0],
           revertMessage: acErrors.WMAC_HAS_ROLE,
+        },
+      );
+    });
+
+    it('should fail: user in sanctions list', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        regularAccounts,
+        mockedSanctionsList,
+      } = await loadFixture(defaultDeploy);
+
+      await sanctionUser(
+        { sanctionsList: mockedSanctionsList },
+        regularAccounts[0],
+      );
+
+      await depositInstantTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        1,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'WSL: sanctioned',
         },
       );
     });
