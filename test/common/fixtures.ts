@@ -278,6 +278,7 @@ export const defaultDeploy = async () => {
       1000,
       1000,
       1,
+      100,
     ),
   ).to.be.reverted;
   await expect(
@@ -293,6 +294,7 @@ export const defaultDeploy = async () => {
       1000,
       1000,
       1,
+      100,
     ),
   ).to.be.reverted;
   await expect(
@@ -308,6 +310,7 @@ export const defaultDeploy = async () => {
       1000,
       1000,
       1,
+      100,
     ),
   ).to.be.reverted;
   await expect(
@@ -323,6 +326,7 @@ export const defaultDeploy = async () => {
       1000,
       1000,
       1,
+      100,
     ),
   ).to.be.reverted;
   await expect(
@@ -338,6 +342,7 @@ export const defaultDeploy = async () => {
       1000,
       1000,
       1,
+      100,
     ),
   ).to.be.reverted;
   await expect(
@@ -353,6 +358,7 @@ export const defaultDeploy = async () => {
       1000,
       1000,
       1,
+      100,
     ),
   ).to.be.reverted;
   await expect(
@@ -368,6 +374,7 @@ export const defaultDeploy = async () => {
       1000,
       1000,
       0,
+      100,
     ),
   ).to.be.reverted;
 
@@ -383,6 +390,7 @@ export const defaultDeploy = async () => {
     1000,
     1000,
     1,
+    100,
   );
 
   await accessControl.grantRole(
@@ -406,6 +414,7 @@ export const defaultDeploy = async () => {
     1000,
     1000,
     1,
+    100,
   );
 
   await accessControl.grantRoleMult(

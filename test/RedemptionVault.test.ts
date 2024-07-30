@@ -20,8 +20,10 @@ import {
   withdrawTest,
 } from './common/manageable-vault.helpers';
 import {
+  redeemFiatRequestTest,
   redeemInstantTest,
   redeemRequestTest,
+  setFiatAdditionalFeeTest,
   setMinFiatRedeemAmountTest,
 } from './common/redemption-vault.helpers';
 
@@ -117,6 +119,7 @@ describe.only('RedemptionVault', function () {
           0,
           constants.AddressZero,
           constants.AddressZero,
+          0,
           0,
           0,
           0,
@@ -325,6 +328,24 @@ describe.only('RedemptionVault', function () {
     it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
       const { owner, redemptionVault } = await loadFixture(defaultDeploy);
       await setMinFiatRedeemAmountTest({ redemptionVault, owner }, 1.1);
+    });
+  });
+
+  describe('setFiatAdditionalFee()', () => {
+    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await setFiatAdditionalFeeTest({ redemptionVault, owner }, 100, {
+        from: regularAccounts[0],
+        revertMessage: acErrors.WMAC_HASNT_ROLE,
+      });
+    });
+
+    it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVault } = await loadFixture(defaultDeploy);
+      await setFiatAdditionalFeeTest({ redemptionVault, owner }, 100);
     });
   });
 
@@ -1757,6 +1778,36 @@ describe.only('RedemptionVault', function () {
       );
     });
 
+    it('should fail: user try to redeem fiat in basic request', async () => {
+      const {
+        owner,
+        redemptionVault,
+        stableCoins,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        dataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100);
+      await approveBase18(owner, mTBILL, redemptionVault, 100);
+
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        100,
+      );
+
+      await redeemRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        await redemptionVault.MANUAL_FULLFILMENT_TOKEN(),
+        100,
+        {
+          revertMessage: 'RV: tokenOut == MANUAL_FULLFILMENT_TOKEN',
+        },
+      );
+    });
+
     it('redeem request 100 mTBILL, greenlist enabled and user in greenlist ', async () => {
       const {
         owner,
@@ -1925,6 +1976,296 @@ describe.only('RedemptionVault', function () {
           waivedFee: true,
         },
         stableCoins.dai,
+        100,
+      );
+    });
+  });
+
+  describe('redeemFiatRequest()', () => {
+    it('should fail: when trying to redeem 0 amount', async () => {
+      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
+        await loadFixture(defaultDeploy);
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        0,
+        {
+          revertMessage: 'RV: invalid amount',
+        },
+      );
+    });
+
+    it('should fail: call with insufficient allowance', async () => {
+      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
+        await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100);
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        100,
+        {
+          revertMessage: 'ERC20: insufficient allowance',
+        },
+      );
+    });
+
+    it('should fail: call with insufficient balance', async () => {
+      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
+        await loadFixture(defaultDeploy);
+
+      await approveBase18(owner, mTBILL, redemptionVault, 100);
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+
+        100,
+        {
+          revertMessage: 'ERC20: transfer amount exceeds balance',
+        },
+      );
+    });
+
+    it('should fail: dataFeed rate 0 ', async () => {
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        mockedAggregatorMToken,
+        mTokenToUsdDataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100_000);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 0);
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        1,
+        {
+          revertMessage: 'DF: feed is deprecated',
+        },
+      );
+    });
+
+    it('should fail: call for amount < minFiatRedeemAmount', async () => {
+      const { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed } =
+        await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100_000);
+      await approveBase18(owner, mTBILL, redemptionVault, 100_000);
+
+      await setMinFiatRedeemAmountTest({ redemptionVault, owner }, 100_000);
+
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        99_999,
+        {
+          revertMessage: 'RV: amount < min',
+        },
+      );
+    });
+
+    it('should fail: if some fee = 100%', async () => {
+      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
+        await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100);
+      await approveBase18(owner, mTBILL, redemptionVault, 100);
+      await setFiatAdditionalFeeTest({ redemptionVault, owner }, 10000);
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        100,
+        {
+          revertMessage: 'RV: tokenOut amount zero',
+        },
+      );
+    });
+
+    it('should fail: greenlist enabled and user not in greenlist ', async () => {
+      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
+        await loadFixture(defaultDeploy);
+
+      await redemptionVault.setGreenlistEnable(true);
+
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        1,
+        {
+          revertMessage: 'WMAC: hasnt role',
+        },
+      );
+    });
+
+    it('should fail: user in blacklist ', async () => {
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        blackListableTester,
+        accessControl,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+
+      await blackList(
+        { blacklistable: blackListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
+
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        1,
+        {
+          from: regularAccounts[0],
+          revertMessage: acErrors.WMAC_HAS_ROLE,
+        },
+      );
+    });
+
+    it('should fail: user in sanctions list', async () => {
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        regularAccounts,
+        mockedSanctionsList,
+      } = await loadFixture(defaultDeploy);
+
+      await sanctionUser(
+        { sanctionsList: mockedSanctionsList },
+        regularAccounts[0],
+      );
+
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        1,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'WSL: sanctioned',
+        },
+      );
+    });
+
+    it('redeem fiat request 100 mTBILL, greenlist enabled and user in greenlist ', async () => {
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        greenListableTester,
+        mTokenToUsdDataFeed,
+        accessControl,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+
+      await redemptionVault.setGreenlistEnable(true);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
+
+      await mintToken(mTBILL, regularAccounts[0], 100);
+      await approveBase18(regularAccounts[0], mTBILL, redemptionVault, 100);
+
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        100,
+        {
+          from: regularAccounts[0],
+        },
+      );
+    });
+
+    it('redeem fiat request 100 mTBILL, when price of stable is 1.03$ and mToken price is 5$', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        mockedAggregatorMToken,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100);
+      await approveBase18(owner, mTBILL, redemptionVault, 100);
+
+      await setRoundData({ mockedAggregator }, 1.03);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        100,
+      );
+    });
+
+    it('redeem fiat request 100 mTBILL, when price of stable is 1.03$ and mToken price is 5$ and token fee 1%', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        mockedAggregatorMToken,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100);
+      await approveBase18(owner, mTBILL, redemptionVault, 100);
+
+      await setRoundData({ mockedAggregator }, 1.03);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        100,
+      );
+    });
+
+    it('redeem fiat request 100 mTBILL, when price of stable is 1.03$ and mToken price is 5$ without checking of minDepositAmount', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        mockedAggregatorMToken,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100);
+      await approveBase18(owner, mTBILL, redemptionVault, 100);
+
+      await setRoundData({ mockedAggregator }, 1.03);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await redemptionVault.freeFromMinAmount(owner.address, true);
+
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        100,
+      );
+    });
+
+    it('redeem fiat request 100 mTBILL, when price of stable is 1.03$ and mToken price is 5$ and user in waivedFeeRestriction', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        mockedAggregatorMToken,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100);
+      await approveBase18(owner, mTBILL, redemptionVault, 100);
+
+      await setRoundData({ mockedAggregator }, 1.03);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await addWaivedFeeAccountTest(
+        { vault: redemptionVault, owner },
+        owner.address,
+      );
+      await redeemFiatRequestTest(
+        {
+          redemptionVault,
+          owner,
+          mTBILL,
+          mTokenToUsdDataFeed,
+          waivedFee: true,
+        },
         100,
       );
     });

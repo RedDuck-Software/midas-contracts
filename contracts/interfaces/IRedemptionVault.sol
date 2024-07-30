@@ -43,6 +43,11 @@ interface IRedemptionVault is IManageableVault {
         uint256 newMinAmount
     );
 
+    event SetFiatAdditionalFee(
+        address indexed caller,
+        uint256 newfee
+    );
+
     /**
      * @notice Transfers mTBILL from the user to the admin.
      * After that admin should validate the redemption and transfer

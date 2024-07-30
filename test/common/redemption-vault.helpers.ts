@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumber, constants } from 'ethers';
+import { BigNumber, BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 
 import { OptionalCommonParams, getAccount } from './common.helpers';
@@ -200,6 +200,93 @@ export const redeemRequestTest = async (
   }
 };
 
+export const redeemFiatRequestTest = async (
+  {
+    redemptionVault,
+    owner,
+    mTBILL,
+    mTokenToUsdDataFeed,
+    waivedFee,
+  }: CommonParamsRedeem & { waivedFee?: boolean },
+  amountTBillIn: number,
+  opt?: OptionalCommonParams,
+) => {
+  const sender = opt?.from ?? owner;
+
+  const amountIn = parseUnits(amountTBillIn.toString());
+  const tokensReceiver = await redemptionVault.tokensReceiver();
+  const feeReceiver = await redemptionVault.feeReceiver();
+
+  if (opt?.revertMessage) {
+    await expect(
+      redemptionVault.connect(sender).redeemFiatRequest(amountIn),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  const balanceBeforeUser = await mTBILL.balanceOf(sender.address);
+  const balanceBeforeContract = await mTBILL.balanceOf(redemptionVault.address);
+  const balanceBeforeReceiver = await mTBILL.balanceOf(tokensReceiver);
+  const balanceBeforeFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+
+  const supplyBefore = await mTBILL.totalSupply();
+
+  const latestRequestIdBefore = await redemptionVault.lastRequestId();
+  const manualToken = await redemptionVault.MANUAL_FULLFILMENT_TOKEN();
+  const fiatAdditionalFee = await redemptionVault.fiatAdditionalFee();
+  const hundredPercent = await redemptionVault.ONE_HUNDRED_PERCENT();
+
+  const mTokenRate = await mTokenToUsdDataFeed.getDataInBase18();
+
+  const feePercent = await getFeePercent(
+    sender.address,
+    manualToken,
+    redemptionVault,
+    false,
+    fiatAdditionalFee,
+  );
+  const fee = amountIn.mul(feePercent).div(hundredPercent);
+  const amountInWithoutFee = amountIn.sub(fee);
+
+  await expect(redemptionVault.connect(sender).redeemFiatRequest(amountIn))
+    .to.emit(
+      redemptionVault,
+      redemptionVault.interface.events[
+        'RedeemRequest(uint256,address,address,uint256)'
+      ].name,
+    )
+    .withArgs(latestRequestIdBefore.add(1), sender, manualToken, amountTBillIn)
+    .to.not.reverted;
+
+  const latestRequestIdAfter = await redemptionVault.lastRequestId();
+  const request = await redemptionVault.redeemRequests(latestRequestIdAfter);
+
+  expect(request.sender).eq(sender.address);
+  expect(request.tokenOut).eq(manualToken);
+  expect(request.amountMToken).eq(amountInWithoutFee);
+  expect(request.mTokenRate).eq(mTokenRate);
+  expect(request.tokenOutRate).eq(0);
+
+  const balanceAfterUser = await mTBILL.balanceOf(sender.address);
+  const balanceAfterReceiver = await mTBILL.balanceOf(tokensReceiver);
+  const balanceAfterFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+  const balanceAfterContract = await mTBILL.balanceOf(redemptionVault.address);
+
+  const supplyAfter = await mTBILL.totalSupply();
+
+  expect(supplyAfter).eq(supplyBefore);
+  expect(latestRequestIdAfter).eq(latestRequestIdBefore.add(1));
+  expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+  expect(balanceAfterContract).eq(
+    balanceBeforeContract.add(amountInWithoutFee),
+  );
+  expect(balanceAfterReceiver).eq(balanceBeforeReceiver);
+  expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver.add(fee));
+  if (waivedFee) {
+    expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
+  }
+};
+
 export const setMinFiatRedeemAmountTest = async (
   { redemptionVault, owner }: CommonParams,
   valueN: number,
@@ -226,17 +313,44 @@ export const setMinFiatRedeemAmountTest = async (
   expect(newMin).eq(value);
 };
 
+export const setFiatAdditionalFeeTest = async (
+  { redemptionVault, owner }: CommonParams,
+  valueN: number,
+  opt?: OptionalCommonParams,
+) => {
+  const value = parseUnits(valueN.toString());
+
+  if (opt?.revertMessage) {
+    await expect(
+      redemptionVault.connect(opt?.from ?? owner).setFiatAdditionalFee(value),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(
+    redemptionVault.connect(opt?.from ?? owner).setFiatAdditionalFee(value),
+  ).to.emit(
+    redemptionVault,
+    redemptionVault.interface.events['SetFiatAdditionalFee(address,uint256)']
+      .name,
+  ).to.not.reverted;
+
+  const newfee = await redemptionVault.fiatAdditionalFee();
+  expect(newfee).eq(value);
+};
+
 const getFeePercent = async (
   sender: string,
   token: string,
   redemptionVault: RedemptionVault,
   isInstant: boolean,
+  additionalFee?: BigNumber,
 ) => {
   const tokenConfig = await redemptionVault.tokensConfig(token);
   let feePercent = constants.Zero;
   const isWaived = await redemptionVault.waivedFeeRestriction(sender);
   if (!isWaived) {
-    feePercent = tokenConfig.fee;
+    feePercent = additionalFee ?? tokenConfig.fee;
     if (isInstant) {
       const instantFee = await redemptionVault.initialFee();
       feePercent = feePercent.add(instantFee);

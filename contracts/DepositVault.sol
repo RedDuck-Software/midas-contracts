@@ -245,7 +245,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function _approveRequest(address user, address tokenIn, uint256 requestId, uint256 usdAmount, uint256 tokenRate) private {
         totalDeposited[user] += usdAmount;
 
-        uint256 feeUsdAmount = _getFeeAmount(user, tokenIn, usdAmount, false);
+        uint256 feeUsdAmount = _getFeeAmount(user, tokenIn, usdAmount, false, 0);
 
         uint256 amountMToken = ((usdAmount - feeUsdAmount) * (10**18)) / tokenRate;
 
@@ -290,7 +290,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         _requireAndUpdateAllowance(tokenIn, amountToken);
 
-        feeTokenAmount = _truncate(_getFeeAmount(user, tokenIn, amountToken, isInstant), tokenDecimals);
+        feeTokenAmount = _truncate(_getFeeAmount(user, tokenIn, amountToken, isInstant, 0), tokenDecimals);
         amountTokenWithoutFee = amountToken - feeTokenAmount;
 
         uint256 feeInUsd = (feeTokenAmount * tokenInRate) / 10**18;

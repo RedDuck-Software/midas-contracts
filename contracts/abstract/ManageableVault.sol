@@ -412,14 +412,20 @@ abstract contract ManageableVault is
         address sender,
         address token,
         uint256 amount,
-        bool isInstant
+        bool isInstant,
+        uint256 additionalFee
     ) internal view returns (uint256) {
         if (amount == 0) return 0;
         if (waivedFeeRestriction[sender]) return 0;
 
-        TokenConfig storage tokenConfig = tokensConfig[token];
+        uint256 feePercent;
+        if(additionalFee == 0){
+            TokenConfig storage tokenConfig = tokensConfig[token];
+            feePercent = tokenConfig.fee;
+        }else{
+            feePercent = additionalFee;
+        }
 
-        uint256 feePercent = tokenConfig.fee;
         if (isInstant) feePercent += initialFee;
 
         if (feePercent > ONE_HUNDRED_PERCENT) feePercent = ONE_HUNDRED_PERCENT;
