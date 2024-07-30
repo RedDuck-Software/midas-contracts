@@ -3,12 +3,6 @@ pragma solidity 0.8.9;
 
 import "./IManageableVault.sol";
 
-enum RequestStatus {
-    Pending,
-    Processed,
-    Canceled
-}
-
 struct Request {
     address sender;
     address tokenIn;
@@ -26,7 +20,7 @@ interface IDepositVault is IManageableVault {
      * @param caller function caller (msg.sender)
      * @param newValue new min amount to deposit value
      */
-    event SetMinAmountToDeposit(address indexed caller, uint256 newValue);
+    event SetMinAmountToFirstDeposit(address indexed caller, uint256 newValue);
 
     event DepositInstant(
         address indexed user,
@@ -42,7 +36,6 @@ interface IDepositVault is IManageableVault {
         address indexed user,
         address indexed tokenIn,
         uint256 amountUsd,
-        uint256 amountToken,
         uint256 fee,
         uint256 tokenOutRate
     );
@@ -70,16 +63,9 @@ interface IDepositVault is IManageableVault {
     function depositInstant(address tokenIn, uint256 amountIn) external;
 
     /**
-     * @notice frees given `user` from the minimal deposit
-     * amount validation in `initiateDepositRequest`
-     * @param user address of user
-     */
-    function freeFromMinDeposit(address user) external;
-
-    /**
      * @notice sets new minimal amount to deposit in EUR.
      * can be called only from vault`s admin
      * @param newValue new min. deposit value
      */
-    function setMinAmountToDeposit(uint256 newValue) external;
+    function setMinAmountToFirstDeposit(uint256 newValue) external;
 }

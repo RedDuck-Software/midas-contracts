@@ -14,7 +14,7 @@ import {
   WithSanctionsListTester__factory,
 } from '../typechain-types';
 
-describe.only('WithSanctionsList', function () {
+describe('WithSanctionsList', function () {
   it('deployment', async () => {
     const { accessControl, withSanctionsListTester } = await loadFixture(
       defaultDeploy,

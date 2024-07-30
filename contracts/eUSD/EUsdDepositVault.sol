@@ -21,4 +21,8 @@ contract EUsdDepositVault is DepositVault, EUsdMidasAccessControlRoles {
     function vaultRole() public pure override returns (bytes32) {
         return E_USD_DEPOSIT_VAULT_ADMIN_ROLE;
     }
+
+    function greenlistedRole() public pure override returns (bytes32) {
+        return E_USD_GREENLISTED_ROLE;
+    }
 }

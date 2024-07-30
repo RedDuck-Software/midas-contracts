@@ -25,7 +25,8 @@ type Params = {
   redemptionVault: RedemptionVault;
   owner: SignerWithAddress;
   tokensReceiver: string;
-  minAmountToDeposit: BigNumberish;
+  minAmountToFirstDeposit: BigNumberish;
+  minAmount: BigNumberish;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   execute?: (role: string, address: string) => Promise<any>;
 };
@@ -77,7 +78,8 @@ export const postDeploymentTest = async (
     aggregatorMToken,
     owner,
     tokensReceiver,
-    minAmountToDeposit = '0',
+    minAmountToFirstDeposit = '0',
+    minAmount,
   }: Params,
 ) => {
   const roles = await getAllRoles(accessControl);
@@ -103,7 +105,10 @@ export const postDeploymentTest = async (
 
   expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
-  expect(await depositVault.minAmountToDeposit()).eq(minAmountToDeposit);
+  expect(await depositVault.minAmountToFirstDeposit()).eq(
+    minAmountToFirstDeposit,
+  );
+  expect(await depositVault.minAmount()).eq(minAmount);
 
   expect(await depositVault.vaultRole()).eq(
     await accessControl.DEPOSIT_VAULT_ADMIN_ROLE(),

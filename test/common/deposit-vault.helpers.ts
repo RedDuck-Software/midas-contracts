@@ -188,7 +188,7 @@ export const depositRequestTest = async (
     .to.emit(
       depositVault,
       depositVault.interface.events[
-        'DepositRequest(uint256,address,address,uint256,uint256,uint256,uint256)'
+        'DepositRequest(uint256,address,address,uint256,uint256,uint256)'
       ].name,
     )
     .withArgs(
@@ -196,7 +196,6 @@ export const depositRequestTest = async (
       sender.address,
       tokenContract.address,
       actualAmountInUsd,
-      amountUsdIn,
       fee,
       mintAmount,
     ).to.not.reverted;

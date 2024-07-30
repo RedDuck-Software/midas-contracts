@@ -34,12 +34,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     Counters.Counter public lastRequestId;
 
-    uint256 public minRedeemAmount;
+    uint256 public minFiatRedeemAmount;
 
     /**
      * @dev leaving a storage gap for futures updates
      */
     uint256[50] private __gap;
+
+    mapping(uint256 => Request) public redeemRequests;
 
     /**
      * @notice upgradeable pattern contract`s initializer
@@ -56,7 +58,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         uint256 _initialLimit,
         address _mTokenDataFeed,
         address _sanctionsList,
-        uint256 _minRedeemAmount,
+        uint256 _minCryptoRedeemAmount,
+        uint256 _minFiatRedeemAmount,
         uint256 _variationTolerance
     ) external initializer {
         __ManageableVault_init(
@@ -68,9 +71,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _initialLimit,
             _mTokenDataFeed,
             _sanctionsList,
-            _variationTolerance
+            _variationTolerance,
+            _minCryptoRedeemAmount
         );
-        minRedeemAmount = _minRedeemAmount;
+        minFiatRedeemAmount = _minFiatRedeemAmount;
     }
 
     function redeemInstant(address tokenOut, uint256 amountMTokenIn)
@@ -80,24 +84,59 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         onlyNotSanctioned(msg.sender)
         whenNotPaused
     {
-        require(amountMTokenIn > 0, "RV: 0 amount");
-
         address user = msg.sender;
 
-        _requireTokenExists(tokenOut);
+        (uint256 feeAmount, uint256 amountMTokenWithoutFee) = _calcAndValidateRedeem(user, tokenOut, amountMTokenIn, true, false);
 
         _requireAndUpdateLimit(amountMTokenIn);
 
-        uint256 feeAmount = _getFeeAmount(user, tokenOut, amountMTokenIn, true);
-        uint256 amountMTokenWithoutFee = amountMTokenIn - feeAmount;
+        uint256 tokenDecimals = _tokenDecimals(tokenOut);
+
+        (uint256 amountMTokenInUsd, uint256 mTokenRate) = _convertMTokenToUsd(amountMTokenIn);
+        (uint256 amountTokenOut, uint256 tokenOutRate) = _convertUsdToToken(amountMTokenInUsd, tokenOut);
+
+        _requireAndUpdateAllowance(tokenOut, amountTokenOut);
+
+        uint256 amountMTokenInCopy = amountMTokenIn;
+        address tokenOutCopy = tokenOut;
 
         mToken.burn(user, amountMTokenWithoutFee);
         if (feeAmount > 0)
-            _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount);
+            _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
 
+        uint256 amountTokenOutWithoutFee = _truncate((amountMTokenWithoutFee * mTokenRate) / tokenOutRate, tokenDecimals);
 
+        _tokenTransferToUser(tokenOutCopy, user, amountTokenOutWithoutFee, tokenDecimals);
 
-        // emit Redeem(requestId, user, tokenOut, amountTBillIn);
+        emit RedeemInstant(user, tokenOutCopy, amountMTokenInCopy, feeAmount, amountTokenOutWithoutFee);
+    }
+
+    function redeemRequest(address tokenOut, uint256 amountMTokenIn)
+        external
+        whenNotPaused
+        onlyGreenlisted(msg.sender)
+        onlyNotBlacklisted(msg.sender)
+        onlyNotSanctioned(msg.sender)
+        returns (uint256 requestId)
+    {
+        return _redeemRequest(tokenOut, amountMTokenIn);
+    }
+
+    function redeemFiatRequest(uint256 amountMTokenIn)
+        external
+        whenNotPaused
+        onlyGreenlisted(msg.sender)
+        onlyNotBlacklisted(msg.sender)
+        onlyNotSanctioned(msg.sender)
+        returns (uint256 requestId)
+    {
+        return _redeemRequest(MANUAL_FULLFILMENT_TOKEN, amountMTokenIn);
+    }
+
+    function setMinFiatRedeemAmount(uint256 newValue) external onlyVaultAdmin {
+        minFiatRedeemAmount = newValue;
+
+        emit SetMinFiatRedeemAmount(msg.sender, newValue);
     }
 
     /**
@@ -107,12 +146,84 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         return REDEMPTION_VAULT_ADMIN_ROLE;
     }
 
-    /**
-     * @dev checks that provided `token` is supported by the vault
-     * @param token token address
-     */
-    function _requireTokenExists(address token) internal view override {
-        if (token == MANUAL_FULLFILMENT_TOKEN) return;
-        super._requireTokenExists(token);
+    function _redeemRequest(address tokenOut, uint256 amountMTokenIn)
+        internal
+        returns (uint256 requestId)
+    {
+        address user = msg.sender;
+
+        bool isFiat = tokenOut == MANUAL_FULLFILMENT_TOKEN;
+
+        (uint256 feeAmount, uint256 amountMTokenWithoutFee) = _calcAndValidateRedeem(user, tokenOut, amountMTokenIn, false, isFiat);
+
+        TokenConfig storage config = tokensConfig[tokenOut];
+
+        uint256 tokenOutRate = IDataFeed(config.dataFeed).getDataInBase18();
+        uint256 mTokenRate = mTokenDataFeed.getDataInBase18();
+
+        _tokenTransferFromUser(address(mToken), address(this), amountMTokenWithoutFee, 18);
+        if (feeAmount > 0)
+            _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
+
+        lastRequestId.increment();
+        requestId = lastRequestId.current();
+
+        redeemRequests[requestId] = Request(
+            user,
+            tokenOut,
+            RequestStatus.Pending,
+            amountMTokenWithoutFee,
+            mTokenRate,
+            tokenOutRate
+        );
+
+        emit RedeemRequest(requestId, user, tokenOut, amountMTokenIn);
+    }
+
+    function _convertUsdToToken(uint256 amountUsd, address tokenOut)
+        internal
+        view
+        returns (uint256 amountToken, uint256 tokenRate)
+    {
+        require(amountUsd > 0, "RV: amount zero");
+
+        TokenConfig storage tokenConfig = tokensConfig[tokenOut];
+
+        tokenRate = IDataFeed(tokenConfig.dataFeed).getDataInBase18();
+        require(tokenRate > 0, "RV: rate zero");
+
+        amountToken = (amountUsd * (10**18)) / tokenRate;
+    }
+
+    function _convertMTokenToUsd(uint256 amountMToken)
+        internal
+        view
+        returns (uint256 amountUsd, uint256 mTokenRate)
+    {
+        require(amountMToken > 0, "RV: amount zero");
+
+        mTokenRate = mTokenDataFeed.getDataInBase18();
+        require(mTokenRate > 0, "RV: rate zero");
+
+        amountUsd = (amountMToken * mTokenRate) / (10**18);
+    }
+
+    function _calcAndValidateRedeem(address user, address tokenOut, uint256 amountMTokenIn, bool isInstant, bool isFiat) internal view returns(uint256 feeAmount, uint256 amountMTokenWithoutFee) {
+        require(amountMTokenIn > 0, "RV: invalid amount");
+
+        if(!isFreeFromMinAmount[user]){
+            uint256 minRedeemAmount = isFiat ? minFiatRedeemAmount : minAmount;
+            require(minRedeemAmount <= amountMTokenIn, "RV: amount < min");
+        }
+
+        if(isFiat){
+            require(tokenOut == MANUAL_FULLFILMENT_TOKEN, "RV: tokenOut != fiat");
+        }else{
+            _requireTokenExists(tokenOut);
+        }
+
+        feeAmount = _getFeeAmount(user, tokenOut, amountMTokenIn, isInstant);
+        amountMTokenWithoutFee = amountMTokenIn - feeAmount;
+        require(amountMTokenWithoutFee > 0, "RV: tokenOut amount zero");
     }
 }

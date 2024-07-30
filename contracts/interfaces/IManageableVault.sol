@@ -7,6 +7,12 @@ struct TokenConfig {
     uint256 allowance;
 }
 
+enum RequestStatus {
+    Pending,
+    Processed,
+    Canceled
+}
+
 /**
  * @title IManageableVault
  * @author RedDuck Software
@@ -70,6 +76,8 @@ interface IManageableVault {
      */
     event SetInitialFee(address indexed caller, uint256 newFee);
 
+    event SetMinAmount(address indexed caller, uint256 newAmount);
+
     /**
      * @param caller function caller (msg.sender)
      * @param newLimit new operation daily limit
@@ -83,6 +91,8 @@ interface IManageableVault {
      * @param reciever new reciever address
      */
     event SetFeeReceiver(address indexed caller, address indexed reciever);
+
+    event FreeFromMinAmount(address indexed user, bool enable);
 
     /**
      * @notice withdraws `amount` of a given `token` from the contract.
@@ -130,6 +140,13 @@ interface IManageableVault {
      * @param newInitialFee new operation fee value
      */
     function setInitialFee(uint256 newInitialFee) external;
+
+    /**
+     * @notice frees given `user` from the minimal deposit
+     * amount validation in `initiateDepositRequest`
+     * @param user address of user
+     */
+    function freeFromMinAmount(address user, bool enable) external;
 
     /**
      * @notice set operation daily limit.

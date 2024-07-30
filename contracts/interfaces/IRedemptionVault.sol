@@ -3,23 +3,44 @@ pragma solidity 0.8.9;
 
 import "./IManageableVault.sol";
 
+struct Request {
+    address sender;
+    address tokenOut;
+    RequestStatus status;
+    uint256 amountMToken;
+    uint256 mTokenRate;
+    uint256 tokenOutRate;
+}
+
 /**
  * @title IRedemptionVault
  * @author RedDuck Software
  */
 interface IRedemptionVault is IManageableVault {
-    /**
-     * @param id unique id of a redemption
-     * @param user address that initiated the redeem
-     * @param usdTokenOut address of usd token that user
-     * wants to receive after redeem
-     * @param amount amount of `usdTokenOut`
-     */
-    event Redeem(
-        uint256 indexed id,
+    
+    event RedeemInstant(
         address indexed user,
         address indexed usdTokenOut,
-        uint256 amount
+        uint256 amount,
+        uint256 feeAmount,
+        uint256 amountTokenOut
+    );
+
+    event RedeemRequest(
+        uint256 indexed requestId,
+        address indexed user,
+        address indexed usdTokenOut,
+        uint256 amountMTokenIn
+    );
+
+    event SetMinCryptoRedeemAmount(
+        address indexed caller,
+        uint256 newMinAmount
+    );
+
+    event SetMinFiatRedeemAmount(
+        address indexed caller,
+        uint256 newMinAmount
     );
 
     /**

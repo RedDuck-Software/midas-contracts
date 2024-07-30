@@ -15,7 +15,8 @@ contract ManageableVaultTester is ManageableVault {
         uint256 _initialLimit,
         address _mTokenDataFeed,
         address _sanctionsList,
-        uint256 _variationTolerance
+        uint256 _variationTolerance,
+        uint256 _minAmount
     ) external initializer {
         __ManageableVault_init(
             _accessControl,
@@ -26,7 +27,8 @@ contract ManageableVaultTester is ManageableVault {
             _initialLimit,
             _mTokenDataFeed,
             _sanctionsList,
-            _variationTolerance
+            _variationTolerance,
+            _minAmount
         );
     }
 
@@ -39,7 +41,8 @@ contract ManageableVaultTester is ManageableVault {
         uint256 _initialLimit,
         address _mTokenDataFeed,
         address _sanctionsList,
-        uint256 _variationTolerance
+        uint256 _variationTolerance,
+        uint256 _minAmount
     ) external {
         __ManageableVault_init(
             _accessControl,
@@ -50,7 +53,8 @@ contract ManageableVaultTester is ManageableVault {
             _initialLimit,
             _mTokenDataFeed,
             _sanctionsList,
-            _variationTolerance
+            _variationTolerance,
+            _minAmount
         );
     }
 

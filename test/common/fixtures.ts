@@ -5,7 +5,7 @@ import { ethers } from 'hardhat';
 import * as hre from 'hardhat';
 
 import { getAllRoles } from './common.helpers';
-import { initGrantRoles, postDeploymentTest } from './post-deploy.helpers';
+import { postDeploymentTest } from './post-deploy.helpers';
 
 import {
   // eslint-disable-next-line camelcase
@@ -149,6 +149,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       1,
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
@@ -163,6 +164,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       1,
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
@@ -177,6 +179,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       1,
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
@@ -191,6 +194,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       1,
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
@@ -205,6 +209,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       1,
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
@@ -219,6 +224,7 @@ export const defaultDeploy = async () => {
       ethers.constants.AddressZero,
       mockedSanctionsList.address,
       1,
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
@@ -233,6 +239,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       0,
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await depositVault.initialize(
@@ -246,6 +253,7 @@ export const defaultDeploy = async () => {
     mTokenToUsdDataFeed.address,
     mockedSanctionsList.address,
     1,
+    parseUnits('100'),
   );
 
   await accessControl.grantRole(
@@ -268,6 +276,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       1000,
+      1000,
       1,
     ),
   ).to.be.reverted;
@@ -281,6 +290,7 @@ export const defaultDeploy = async () => {
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
+      1000,
       1000,
       1,
     ),
@@ -296,6 +306,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       1000,
+      1000,
       1,
     ),
   ).to.be.reverted;
@@ -309,6 +320,7 @@ export const defaultDeploy = async () => {
       parseUnits('100000'),
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
+      1000,
       1000,
       1,
     ),
@@ -324,6 +336,7 @@ export const defaultDeploy = async () => {
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
       1000,
+      1000,
       1,
     ),
   ).to.be.reverted;
@@ -338,6 +351,7 @@ export const defaultDeploy = async () => {
       ethers.constants.AddressZero,
       mockedSanctionsList.address,
       1000,
+      1000,
       1,
     ),
   ).to.be.reverted;
@@ -351,6 +365,7 @@ export const defaultDeploy = async () => {
       0,
       mTokenToUsdDataFeed.address,
       mockedSanctionsList.address,
+      1000,
       1000,
       0,
     ),
@@ -366,7 +381,13 @@ export const defaultDeploy = async () => {
     mTokenToUsdDataFeed.address,
     mockedSanctionsList.address,
     1000,
+    1000,
     1,
+  );
+
+  await accessControl.grantRole(
+    mTBILL.M_TBILL_BURN_OPERATOR_ROLE(),
+    redemptionVault.address,
   );
 
   const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
@@ -382,6 +403,7 @@ export const defaultDeploy = async () => {
     parseUnits('100000'),
     mTokenToUsdDataFeed.address,
     mockedSanctionsList.address,
+    1000,
     1000,
     1,
   );
@@ -453,13 +475,13 @@ export const defaultDeploy = async () => {
   const offChainUsdToken = constants.AddressZero;
 
   // role granting main
-  await initGrantRoles({
-    accessControl,
-    depositVault,
-    owner,
-    redemptionVault,
-    mTBILL,
-  });
+  // await initGrantRoles({
+  //   accessControl,
+  //   depositVault,
+  //   owner,
+  //   redemptionVault,
+  //   mTBILL,
+  // });
 
   // role granting testers
   await accessControl.grantRole(
@@ -483,7 +505,8 @@ export const defaultDeploy = async () => {
     aggregatorMToken: mockedAggregatorMToken,
     dataFeedMToken: mTokenToUsdDataFeed,
     mTBILL,
-    minAmountToDeposit: '0',
+    minAmountToFirstDeposit: '0',
+    minAmount: parseUnits('100'),
     tokensReceiver: tokensReceiver.address,
   });
 

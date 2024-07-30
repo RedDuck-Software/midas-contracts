@@ -31,7 +31,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @notice minimal USD amount for first user`s deposit
      */
-    uint256 public minAmountToDeposit;
+    uint256 public minAmountToFirstDeposit;
 
     Counters.Counter public lastRequestId;
 
@@ -43,11 +43,6 @@ contract DepositVault is ManageableVault, IDepositVault {
     mapping(address => uint256) public totalDeposited;
 
     /**
-     * @notice users restricted from depositin minDepositAmountInEuro
-     */
-    mapping(address => bool) public isFreeFromMinDeposit;
-
-    /**
      * @dev leaving a storage gap for futures updates
      */
     uint256[50] private __gap;
@@ -56,7 +51,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _mToken address of mTBILL token
-     * @param _minAmountToDeposit initial value for minAmountToDeposit
+     * @param _minAmountToFirstDeposit initial value for minAmountToDeposit
      * @param _usdReceiver address of usd tokens receiver
      * @param _feeReceiver address of fee in usd tokens receiver
      * @param _initialFee fee for initial mint
@@ -64,14 +59,15 @@ contract DepositVault is ManageableVault, IDepositVault {
     function initialize(
         address _ac,
         address _mToken,
-        uint256 _minAmountToDeposit,
+        uint256 _minAmountToFirstDeposit,
         address _usdReceiver,
         address _feeReceiver,
         uint256 _initialFee,
         uint256 _initialLimit,
         address _mTokenDataFeed,
         address _sanctionsList,
-        uint256 _variationTolerance
+        uint256 _variationTolerance,
+        uint256 _minAmount
     ) external initializer {
         __ManageableVault_init(
             _ac,
@@ -82,9 +78,10 @@ contract DepositVault is ManageableVault, IDepositVault {
             _initialLimit,
             _mTokenDataFeed,
             _sanctionsList,
-            _variationTolerance
+            _variationTolerance,
+            _minAmount
         );
-        minAmountToDeposit = _minAmountToDeposit;
+        minAmountToFirstDeposit = _minAmountToFirstDeposit;
     }
 
     /**
@@ -107,19 +104,20 @@ contract DepositVault is ManageableVault, IDepositVault {
             uint256 tokenAmountInUsd,
             uint256 feeTokenAmount,
             uint256 amountTokenWithoutFee,
-            uint256 mintAmount,,
+            uint256 mintAmount,,,
+            uint256 tokenDecimals
         ) = _calcAndValidateDeposit(user, tokenIn, amountToken, true);
 
         totalDeposited[user] += tokenAmountInUsd;
 
         _requireAndUpdateLimit(mintAmount);
 
-        _tokenTransferFromUser(tokenIn, tokensReceiver, amountTokenWithoutFee);
+        _tokenTransferFromUser(tokenIn, tokensReceiver, amountTokenWithoutFee, tokenDecimals);
 
         mToken.mint(user, mintAmount);
 
         if (feeTokenAmount > 0)
-            _tokenTransferFromUser(tokenIn, feeReceiver, feeTokenAmount);
+            _tokenTransferFromUser(tokenIn, feeReceiver, feeTokenAmount, tokenDecimals);
 
         emit DepositInstant(
             user,
@@ -145,13 +143,14 @@ contract DepositVault is ManageableVault, IDepositVault {
             uint256 tokenAmountInUsd,
             uint256 feeAmount,
             uint256 amountTokenWithoutFee, , ,
-            uint256 tokenOutRate
+            uint256 tokenOutRate,
+            uint256 tokenDecimals
         ) = _calcAndValidateDeposit(user, tokenIn, amountToken, false);
 
-        _tokenTransferFromUser(tokenIn, tokensReceiver, amountTokenWithoutFee);
+        _tokenTransferFromUser(tokenIn, tokensReceiver, amountTokenWithoutFee, tokenDecimals);
 
         if (feeAmount > 0)
-            _tokenTransferFromUser(tokenIn, feeReceiver, feeAmount);
+            _tokenTransferFromUser(tokenIn, feeReceiver, feeAmount, tokenDecimals);
 
         lastRequestId.increment();
         requestId = lastRequestId.current();
@@ -169,7 +168,6 @@ contract DepositVault is ManageableVault, IDepositVault {
             user,
             tokenIn,
             tokenAmountInUsd,
-            amountToken,
             feeAmount,
             tokenOutRate
         );
@@ -215,21 +213,10 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      */
-    function freeFromMinDeposit(address user) external onlyVaultAdmin {
-        require(!isFreeFromMinDeposit[user], "DV: already free");
+    function setMinAmountToFirstDeposit(uint256 newValue) external onlyVaultAdmin {
+        minAmountToFirstDeposit = newValue;
 
-        isFreeFromMinDeposit[user] = true;
-
-        emit FreeFromMinDeposit(user);
-    }
-
-    /**
-     * @inheritdoc IDepositVault
-     */
-    function setMinAmountToDeposit(uint256 newValue) external onlyVaultAdmin {
-        minAmountToDeposit = newValue;
-
-        emit SetMinAmountToDeposit(msg.sender, newValue);
+        emit SetMinAmountToFirstDeposit(msg.sender, newValue);
     }
 
     /**
@@ -248,8 +235,11 @@ contract DepositVault is ManageableVault, IDepositVault {
         internal
         view
     {
+        require(amountUsdIn >= minAmount, "DV: usd amount < min");
+
         if (totalDeposited[user] != 0) return;
-        require(amountUsdIn >= minAmountToDeposit, "DV: usd amount < min");
+
+        require(amountUsdIn >= minAmountToFirstDeposit, "DV: usd amount < min");
     }
 
     function _approveRequest(address user, address tokenIn, uint256 requestId, uint256 usdAmount, uint256 tokenRate) private {
@@ -277,10 +267,13 @@ contract DepositVault is ManageableVault, IDepositVault {
             uint256 amountTokenWithoutFee,
             uint256 mintAmount,
             uint256 tokenInRate,
-            uint256 tokenOutRate
+            uint256 tokenOutRate,
+            uint256 tokenDecimals
         )
     {
         require(amountToken > 0, "DV: invalid amount");
+
+        tokenDecimals = _tokenDecimals(tokenIn);
 
         _requireTokenExists(tokenIn);
 
@@ -291,13 +284,13 @@ contract DepositVault is ManageableVault, IDepositVault {
         tokenAmountInUsd = amountInUsd;
         tokenInRate = tokenInUSDRate;
 
-        if (!isFreeFromMinDeposit[user]) {
+        if (!isFreeFromMinAmount[user]) {
             _validateAmountUsdIn(user, tokenAmountInUsd);
         }
 
         _requireAndUpdateAllowance(tokenIn, amountToken);
 
-        feeTokenAmount = _getFeeAmount(user, tokenIn, amountToken, isInstant);
+        feeTokenAmount = _truncate(_getFeeAmount(user, tokenIn, amountToken, isInstant), tokenDecimals);
         amountTokenWithoutFee = amountToken - feeTokenAmount;
 
         uint256 feeInUsd = (feeTokenAmount * tokenInRate) / 10**18;

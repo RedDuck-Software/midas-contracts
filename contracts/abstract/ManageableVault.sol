@@ -66,7 +66,7 @@ abstract contract ManageableVault is
 
     /**
      * @dev daily limit for initial operations
-     * if user exeed this limit he will need
+     * if user exceed this limit he will need
      * to create requests
      */
     uint256 public initialLimit;
@@ -98,6 +98,10 @@ abstract contract ManageableVault is
 
     mapping(address => TokenConfig) public tokensConfig;
 
+    uint256 public minAmount;
+
+    mapping(address => bool) public isFreeFromMinAmount;
+
     /**
      * @dev leaving a storage gap for futures updates
      */
@@ -127,7 +131,8 @@ abstract contract ManageableVault is
         uint256 _initialLimit,
         address _mTokenDataFeed,
         address _sanctionsList,
-        uint256 _variationTolerance
+        uint256 _variationTolerance,
+        uint256 _minAmount
     ) internal onlyInitializing {
         require(_mToken != address(0), "zero address");
         require(_tokensReceiver != address(0), "zero address");
@@ -148,6 +153,7 @@ abstract contract ManageableVault is
         feeReceiver = _feeReceiver;
         initialFee = _initialFee;
         initialLimit = _initialLimit;
+        minAmount = _minAmount;
         variationTolerance = _variationTolerance;
         mTokenDataFeed = IDataFeed(_mTokenDataFeed);
     }
@@ -214,6 +220,14 @@ abstract contract ManageableVault is
         emit SetVariationTolerance(msg.sender, tolerance);
     }
 
+    function setMinAmount(uint256 newAmount)
+        external
+        onlyVaultAdmin
+    {
+        minAmount = newAmount;
+        emit SetMinAmount(msg.sender, newAmount);
+    }
+
     /**
      * @inheritdoc IManageableVault
      * @dev reverts if account is already added
@@ -263,6 +277,14 @@ abstract contract ManageableVault is
         emit SetInitialLimit(msg.sender, newInitialLimit);
     }
 
+    function freeFromMinAmount(address user, bool enable) external onlyVaultAdmin {
+        require(isFreeFromMinAmount[user] != enable, "DV: already free");
+
+        isFreeFromMinAmount[user] = enable;
+
+        emit FreeFromMinAmount(user, enable);
+    }
+
     /**
      * @notice returns array of stablecoins supported by the vault
      * can be called only from permissioned actor.
@@ -309,9 +331,9 @@ abstract contract ManageableVault is
     function _tokenTransferFromUser(
         address token,
         address to,
-        uint256 amount
+        uint256 amount,
+        uint256 tokenDecimals
     ) internal {
-        uint256 tokenDecimals = _tokenDecimals(token);
         uint256 transferAmount = amount.convertFromBase18(tokenDecimals);
 
         require(
@@ -320,6 +342,22 @@ abstract contract ManageableVault is
         );
 
         IERC20(token).safeTransferFrom(msg.sender, to, transferAmount);
+    }
+
+    function _tokenTransferToUser(
+        address token,
+        address to,
+        uint256 amount,
+        uint256 tokenDecimals
+    ) internal {
+        uint256 transferAmount = amount.convertFromBase18(tokenDecimals);
+
+        require(
+            amount == transferAmount.convertToBase18(tokenDecimals),
+            "MV: invalid rounding"
+        );
+
+        IERC20(token).safeTransfer(to, transferAmount);
     }
 
     /**
@@ -340,14 +378,14 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @dev check if operation exeed daily limit and update limit data
+     * @dev check if operation exceed daily limit and update limit data
      * @param amount operation amount
      */
     function _requireAndUpdateLimit(uint256 amount) internal {
         uint256 currentDayNumber = block.timestamp / 86400;
         uint256 nextLimitAmount = dailyLimits[currentDayNumber] + amount;
 
-        require(nextLimitAmount <= initialLimit, "MV: exeed limit");
+        require(nextLimitAmount <= initialLimit, "MV: exceed limit");
 
         dailyLimits[currentDayNumber] = nextLimitAmount;
     }
@@ -358,7 +396,7 @@ abstract contract ManageableVault is
         TokenConfig storage config = tokensConfig[token];
         if (config.allowance == MAX_UINT) return;
 
-        require(config.allowance >= amount, "MV: exeed allowance");
+        require(config.allowance >= amount, "MV: exceed allowance");
 
         config.allowance -= amount;
     }
@@ -395,5 +433,9 @@ abstract contract ManageableVault is
         uint256 priceDifPercent = priceDif * ONE_HUNDRED_PERCENT / prevPrice;
         
         require(priceDifPercent <= variationTolerance, "MV: exceed price diviation");
+    }
+
+    function _truncate(uint256 value, uint256 decimals) internal pure returns(uint256) {
+        return value.convertFromBase18(decimals).convertToBase18(decimals);
     }
 }

@@ -223,20 +223,45 @@ export const setMinAmountToDepositTest = async (
 
   if (opt?.revertMessage) {
     await expect(
-      depositVault.connect(opt?.from ?? owner).setMinAmountToDeposit(value),
+      depositVault
+        .connect(opt?.from ?? owner)
+        .setMinAmountToFirstDeposit(value),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   await expect(
-    depositVault.connect(opt?.from ?? owner).setMinAmountToDeposit(value),
+    depositVault.connect(opt?.from ?? owner).setMinAmountToFirstDeposit(value),
   ).to.emit(
     depositVault,
-    depositVault.interface.events['SetMinAmountToDeposit(address,uint256)']
+    depositVault.interface.events['SetMinAmountToFirstDeposit(address,uint256)']
       .name,
   ).to.not.reverted;
 
-  const newMin = await depositVault.minAmountToDeposit();
+  const newMin = await depositVault.minAmountToFirstDeposit();
+  expect(newMin).eq(value);
+};
+
+export const setMinAmountTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  valueN: number,
+  opt?: OptionalCommonParams,
+) => {
+  const value = parseUnits(valueN.toString());
+
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).setMinAmount(value),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(vault.connect(opt?.from ?? owner).setMinAmount(value)).to.emit(
+    vault,
+    vault.interface.events['SetMinAmount(address,uint256)'].name,
+  ).to.not.reverted;
+
+  const newMin = await vault.minAmount();
   expect(newMin).eq(value);
 };
 
