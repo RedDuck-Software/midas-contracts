@@ -16,6 +16,9 @@ abstract contract Greenlistable is WithMidasAccessControl {
     bytes32 public constant GREENLIST_TOGGLER_ROLE =
         keccak256("GREENLIST_TOGGLER_ROLE");
 
+    /**
+     * @notice is greenlist enabled
+     */
     bool public greenlistEnabled;
 
     event SetGreenlistEnable(address indexed sender, bool enable);
@@ -49,6 +52,11 @@ abstract contract Greenlistable is WithMidasAccessControl {
         __WithMidasAccessControl_init(_accessControl);
     }
 
+    /**
+     * @notice enable or disable greenlist.
+     * can be called only from permissioned actor.
+     * @param enable enable
+     */
     function setGreenlistEnable(bool enable)
         external
         onlyGreenlistToggler(msg.sender)
