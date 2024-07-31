@@ -3036,7 +3036,7 @@ describe.only('RedemptionVault', function () {
       await setRoundData({ mockedAggregator }, 1);
 
       await mintToken(mTBILL, owner, 100_000);
-      await mintToken(stableCoins.dai, redemptionVault, 100_000);
+      await mintToken(stableCoins.dai, redemptionVault, 100_100);
       await approveBase18(owner, mTBILL, redemptionVault, 100_000);
 
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
