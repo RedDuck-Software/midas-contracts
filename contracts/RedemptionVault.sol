@@ -34,8 +34,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     Counters.Counter public lastRequestId;
 
+    /**
+     * @notice min amount for fiat requests
+     */
     uint256 public minFiatRedeemAmount;
 
+    /**
+     * @notice fee percent for fiat requests
+     */
     uint256 public fiatAdditionalFee;
 
     /**
@@ -43,24 +49,36 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     uint256[50] private __gap;
 
+    /**
+     * @notice mapping, requestId to request data
+     */
     mapping(uint256 => Request) public redeemRequests;
 
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _mToken address of mTBILL token
-     * @param _tokensReceiver address of mTBILL token receiver
+     * @param _tokensReceiver address to which USD and mTokens will be sent
+     * @param _feeReceiver address to which all fees will be sent
+     * @param _instantFee fee for instant operations
+     * @param _instantDailyLimit daily limit for instant operations
+     * @param _mTokenDataFeed address of mToken dataFeed contract
+     * @param _sanctionsList address of sanctionsList contract
+     * @param _variationTolerance percent of prices diviation 1% = 100
+     * @param _minAmount basic min amount for operations
+     * @param _minFiatRedeemAmount min amount for fiat requests
+     * @param _fiatAdditionalFee fee percent for fiat requests
      */
     function initialize(
         address _ac,
         address _mToken,
         address _tokensReceiver,
-        address _feeReciever,
+        address _feeReceiver,
         uint256 _instantFee,
         uint256 _instantDailyLimit,
         address _mTokenDataFeed,
         address _sanctionsList,
-        uint256 _minCryptoRedeemAmount,
+        uint256 _minAmount,
         uint256 _minFiatRedeemAmount,
         uint256 _variationTolerance,
         uint256 _fiatAdditionalFee
@@ -69,18 +87,21 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _ac,
             _mToken,
             _tokensReceiver,
-            _feeReciever,
+            _feeReceiver,
             _instantFee,
             _instantDailyLimit,
             _mTokenDataFeed,
             _sanctionsList,
             _variationTolerance,
-            _minCryptoRedeemAmount
+            _minAmount
         );
         minFiatRedeemAmount = _minFiatRedeemAmount;
         fiatAdditionalFee = _fiatAdditionalFee;
     }
 
+    /**
+     * @inheritdoc IRedemptionVault
+     */
     function redeemInstant(address tokenOut, uint256 amountMTokenIn)
         external
         onlyGreenlisted(msg.sender)
@@ -137,6 +158,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         );
     }
 
+    /**
+     * @inheritdoc IRedemptionVault
+     */
     function redeemRequest(address tokenOut, uint256 amountMTokenIn)
         external
         whenNotPaused
@@ -152,6 +176,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         return _redeemRequest(tokenOut, amountMTokenIn);
     }
 
+    /**
+     * @inheritdoc IRedemptionVault
+     */
     function redeemFiatRequest(uint256 amountMTokenIn)
         external
         whenNotPaused
@@ -163,6 +190,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         return _redeemRequest(MANUAL_FULLFILMENT_TOKEN, amountMTokenIn);
     }
 
+    /**
+     * @inheritdoc IRedemptionVault
+     */
     function approveRequest(uint256 requestId) external onlyVaultAdmin {
         Request memory request = _burnAndValidateApprove(requestId);
 
@@ -186,6 +216,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         emit ApproveRequest(requestId, request.sender, request.tokenOut);
     }
 
+    /**
+     * @inheritdoc IRedemptionVault
+     * @dev revert if tokenOut is fiat
+     */
     function safeApproveRequest(uint256 requestId, uint256 newMTokenRate)
         external
         onlyVaultAdmin
@@ -221,6 +255,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         );
     }
 
+    /**
+     * @inheritdoc IRedemptionVault
+     */
     function rejectRequest(uint256 requestId) external onlyVaultAdmin {
         Request memory request = redeemRequests[requestId];
 
@@ -231,12 +268,18 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         emit RejectRequest(requestId, request.sender);
     }
 
+    /**
+     * @inheritdoc IRedemptionVault
+     */
     function setMinFiatRedeemAmount(uint256 newValue) external onlyVaultAdmin {
         minFiatRedeemAmount = newValue;
 
         emit SetMinFiatRedeemAmount(msg.sender, newValue);
     }
 
+    /**
+     * @inheritdoc IRedemptionVault
+     */
     function setFiatAdditionalFee(uint256 newFee) external onlyVaultAdmin {
         fiatAdditionalFee = newFee;
 
@@ -250,6 +293,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         return REDEMPTION_VAULT_ADMIN_ROLE;
     }
 
+    /**
+     * @notice validates approve
+     * burns amount from contract
+     * sets flag Processed
+     * @param requestId request id
+     * 
+     * @return request request data
+     */
     function _burnAndValidateApprove(uint256 requestId)
         internal
         returns (Request memory request)
@@ -263,6 +314,13 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         redeemRequests[requestId].status = RequestStatus.Processed;
     }
 
+    /**
+     * @notice validates request
+     * if exist
+     * if not processed
+     * @param sender sender address
+     * @param status request status
+     */
     function _validateRequest(address sender, RequestStatus status)
         internal
         pure
@@ -271,6 +329,13 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         require(status == RequestStatus.Pending, "RV: request not pending");
     }
 
+    /**
+     * @notice Creating request depends on tokenOut
+     * @param tokenOut tokenOut address
+     * @param amountMTokenIn request status
+     * 
+     * @return requestId request id
+     */
     function _redeemRequest(address tokenOut, uint256 amountMTokenIn)
         internal
         returns (uint256 requestId)
@@ -322,6 +387,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         emit RedeemRequest(requestId, user, tokenOut, amountMTokenIn);
     }
 
+    /**
+     * @dev calculates tokenOut amount from USD amount
+     * @param amountUsd amount of USD
+     * @param tokenOut tokenOut address
+     * 
+     * @return amountToken converted USD to tokenOut
+     * @return tokenRate conversion rate
+     */
     function _convertUsdToToken(uint256 amountUsd, address tokenOut)
         internal
         view
@@ -337,6 +410,13 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         amountToken = (amountUsd * (10**18)) / tokenRate;
     }
 
+    /**
+     * @dev calculates USD amount from mToken amount
+     * @param amountMToken amount of mToken
+     * 
+     * @return amountUsd converted amount to USD
+     * @return mTokenRate conversion rate
+     */
     function _convertMTokenToUsd(uint256 amountMToken)
         internal
         view
@@ -350,6 +430,17 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         amountUsd = (amountMToken * mTokenRate) / (10**18);
     }
 
+    /**
+     * @dev validate redeem and calculate fee
+     * @param user user address
+     * @param tokenOut tokenOut address
+     * @param amountMTokenIn mToken amount
+     * @param isInstant is instant operation
+     * @param isFiat is fiat operation
+     * 
+     * @return feeAmount fee amount in mToken
+     * @return amountMTokenWithoutFee mToken amount without fee
+     */
     function _calcAndValidateRedeem(
         address user,
         address tokenOut,
