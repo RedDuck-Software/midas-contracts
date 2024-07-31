@@ -33,8 +33,14 @@ contract DepositVault is ManageableVault, IDepositVault {
      */
     uint256 public minAmountToFirstDeposit;
 
+    /**
+     * @notice last request id
+     */
     Counters.Counter public lastRequestId;
 
+    /**
+     * @notice mapping, requestId => request data
+     */
     mapping(uint256 => Request) public mintRequests;
 
     /**
@@ -52,18 +58,23 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param _ac address of MidasAccessControll contract
      * @param _mToken address of mTBILL token
      * @param _minAmountToFirstDeposit initial value for minAmountToDeposit
-     * @param _usdReceiver address of usd tokens receiver
-     * @param _feeReceiver address of fee in usd tokens receiver
-     * @param _initialFee fee for initial mint
+     * @param _tokensReceiver address to which USD and mTokens will be sent
+     * @param _feeReceiver address to which all fees will be sent
+     * @param _instantFee fee for instant operations
+     * @param _instantDailyLimit daily limit for instant operations
+     * @param _mTokenDataFeed address of mToken dataFeed contract
+     * @param _sanctionsList address of sanctionsList contract
+     * @param _variationTolerance percent of prices diviation 1% = 100
+     * @param _minAmount basic min amount for operations
      */
     function initialize(
         address _ac,
         address _mToken,
         uint256 _minAmountToFirstDeposit,
-        address _usdReceiver,
+        address _tokensReceiver,
         address _feeReceiver,
-        uint256 _initialFee,
-        uint256 _initialLimit,
+        uint256 _instantFee,
+        uint256 _instantDailyLimit,
         address _mTokenDataFeed,
         address _sanctionsList,
         uint256 _variationTolerance,
@@ -72,10 +83,10 @@ contract DepositVault is ManageableVault, IDepositVault {
         __ManageableVault_init(
             _ac,
             _mToken,
-            _usdReceiver,
+            _tokensReceiver,
             _feeReceiver,
-            _initialFee,
-            _initialLimit,
+            _instantFee,
+            _instantDailyLimit,
             _mTokenDataFeed,
             _sanctionsList,
             _variationTolerance,
@@ -86,10 +97,6 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @inheritdoc IDepositVault
-     * @dev transfers `tokenIn` from `msg.sender`
-     * to `tokensReceiver`
-     * @param tokenIn address of token to deposit.
-     * @param amountToken amount of token to deposit in 10**18 decimals.
      */
     function depositInstant(address tokenIn, uint256 amountToken)
         external
@@ -129,6 +136,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         );
     }
 
+    /**
+     * @inheritdoc IDepositVault
+     */
     function depositRequest(address tokenIn, uint256 amountToken)
         external
         whenNotPaused
@@ -173,6 +183,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         );
     }
 
+    /**
+     * @inheritdoc IDepositVault
+     */
     function safeApproveRequest(uint256 requestId, uint256 newOutRate) external onlyVaultAdmin {
         Request memory request = mintRequests[requestId];
 
@@ -188,6 +201,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         emit SafeApproveRequest(requestId, request.sender, newOutRate);
     }
 
+    /**
+     * @inheritdoc IDepositVault
+     */
     function approveRequest(uint256 requestId) external onlyVaultAdmin {
         Request memory request = mintRequests[requestId];
 
@@ -199,6 +215,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         emit ApproveRequest(requestId, request.sender);
     }
 
+    /**
+     * @inheritdoc IDepositVault
+     */
     function rejectRequest(uint256 requestId) external onlyVaultAdmin {
         Request memory request = mintRequests[requestId];
 
@@ -228,6 +247,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @dev validates that inputted USD amount >= minAmountToDepositInUsd()
+     * and amount >= minAmount()
      * @param user user address
      * @param amountUsdIn amount of USD
      */
@@ -242,6 +262,14 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(amountUsdIn >= minAmountToFirstDeposit, "DV: usd amount < min");
     }
 
+    /**
+     * @dev calculates mToken amount, mints to user and sets Processed flag
+     * @param user user address
+     * @param tokenIn tokenIn address
+     * @param requestId requestId
+     * @param usdAmount amount of USD, tokenIn -> USD
+     * @param tokenRate mToken rate
+     */
     function _approveRequest(address user, address tokenIn, uint256 requestId, uint256 usdAmount, uint256 tokenRate) private {
         totalDeposited[user] += usdAmount;
 
@@ -254,6 +282,21 @@ contract DepositVault is ManageableVault, IDepositVault {
         mintRequests[requestId].status = RequestStatus.Processed;
     }
 
+    /**
+     * @dev validate deposit and calculate mint amount
+     * @param user user address
+     * @param tokenIn tokenIn address
+     * @param amountToken tokenIn amount
+     * @param isInstant is instant operation
+     * 
+     * @return tokenAmountInUsd tokenIn amount converted to USD
+     * @return feeTokenAmount fee amount in tokenIn
+     * @return amountTokenWithoutFee tokenIn amount without fee
+     * @return mintAmount mToken amount for mint
+     * @return tokenInRate tokenIn rate
+     * @return tokenOutRate mToken rate
+     * @return tokenDecimals tokenIn decimals
+     */
     function _calcAndValidateDeposit(
         address user,
         address tokenIn,
@@ -301,6 +344,14 @@ contract DepositVault is ManageableVault, IDepositVault {
         require(mintAmount > 0, "DV: invalid mint amount");
     }
 
+    /**
+     * @dev calculates USD amount from tokenIn amount
+     * @param tokenIn tokenIn address
+     * @param amount amount of tokenIn
+     * 
+     * @return amountInUsd converted amount to USD
+     * @return rate conversion rate
+     */
     function _convertTokenToUsd(address tokenIn, uint256 amount)
         internal
         view
@@ -316,6 +367,13 @@ contract DepositVault is ManageableVault, IDepositVault {
         amountInUsd = (amount * rate) / (10**18);
     }
 
+    /**
+     * @dev calculates mToken amount from USD amount
+     * @param amountUsd amount of USD
+     * 
+     * @return amountMToken converted USD to mToken
+     * @return mTokenRate conversion rate
+     */
     function _convertUsdToMToken(uint256 amountUsd)
         internal
         view

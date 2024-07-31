@@ -65,14 +65,14 @@ abstract contract ManageableVault is
     /**
      * @dev fee for initial operations 1% = 100
      */
-    uint256 public initialFee;
+    uint256 public instantFee;
 
     /**
      * @dev daily limit for initial operations
      * if user exceed this limit he will need
      * to create requests
      */
-    uint256 public initialLimit;
+    uint256 public instantDailyLimit;
 
     /**
      * @dev mapping days (number from 1970) to limit amount
@@ -132,6 +132,13 @@ abstract contract ManageableVault is
      * @param _ac address of MidasAccessControll contract
      * @param _mToken address of mTBILL token
      * @param _tokensReceiver address to which USD and mTokens will be sent
+     * @param _feeReceiver address to which all fees will be sent
+     * @param _instantFee fee for instant operations
+     * @param _instantDailyLimit daily limit for instant operations
+     * @param _mTokenDataFeed address of mToken dataFeed contract
+     * @param _sanctionsList address of sanctionsList contract
+     * @param _variationTolerance percent of prices diviation 1% = 100
+     * @param _minAmount basic min amount for operations
      */
     // solhint-disable func-name-mixedcase
     function __ManageableVault_init(
@@ -139,8 +146,8 @@ abstract contract ManageableVault is
         address _mToken,
         address _tokensReceiver,
         address _feeReceiver,
-        uint256 _initialFee,
-        uint256 _initialLimit,
+        uint256 _instantFee,
+        uint256 _instantDailyLimit,
         address _mTokenDataFeed,
         address _sanctionsList,
         uint256 _variationTolerance,
@@ -152,7 +159,7 @@ abstract contract ManageableVault is
         require(_feeReceiver != address(0), "zero address");
         require(_feeReceiver != address(this), "invalid address");
         require(_mTokenDataFeed != address(0), "invalid address");
-        require(_initialLimit > 0, "zero limit");
+        require(_instantDailyLimit > 0, "zero limit");
         require(_variationTolerance > 0, "zero tolerance");
 
         mToken = IMTbill(_mToken);
@@ -163,8 +170,8 @@ abstract contract ManageableVault is
 
         tokensReceiver = _tokensReceiver;
         feeReceiver = _feeReceiver;
-        initialFee = _initialFee;
-        initialLimit = _initialLimit;
+        instantFee = _instantFee;
+        instantDailyLimit = _instantDailyLimit;
         minAmount = _minAmount;
         variationTolerance = _variationTolerance;
         mTokenDataFeed = IDataFeed(_mTokenDataFeed);
@@ -281,18 +288,18 @@ abstract contract ManageableVault is
     /**
      * @inheritdoc IManageableVault
      */
-    function setInitialFee(uint256 newInitialFee) external onlyVaultAdmin {
-        initialFee = newInitialFee;
-        emit SetInitialFee(msg.sender, newInitialFee);
+    function setInstantFee(uint256 newInstantFee) external onlyVaultAdmin {
+        instantFee = newInstantFee;
+        emit SetInstantFee(msg.sender, newInstantFee);
     }
 
     /**
      * @inheritdoc IManageableVault
      */
-    function setInitialLimit(uint256 newInitialLimit) external onlyVaultAdmin {
-        require(newInitialLimit > 0, "MV: limit zero");
-        initialLimit = newInitialLimit;
-        emit SetInitialLimit(msg.sender, newInitialLimit);
+    function setInstantDailyLimit(uint256 newInstantDailyLimit) external onlyVaultAdmin {
+        require(newInstantDailyLimit > 0, "MV: limit zero");
+        instantDailyLimit = newInstantDailyLimit;
+        emit SetInstantDailyLimit(msg.sender, newInstantDailyLimit);
     }
 
     function freeFromMinAmount(address user, bool enable) external onlyVaultAdmin {
@@ -415,7 +422,7 @@ abstract contract ManageableVault is
         uint256 currentDayNumber = block.timestamp / 86400;
         uint256 nextLimitAmount = dailyLimits[currentDayNumber] + amount;
 
-        require(nextLimitAmount <= initialLimit, "MV: exceed limit");
+        require(nextLimitAmount <= instantDailyLimit, "MV: exceed limit");
 
         dailyLimits[currentDayNumber] = nextLimitAmount;
     }
@@ -464,7 +471,7 @@ abstract contract ManageableVault is
             feePercent = additionalFee;
         }
 
-        if (isInstant) feePercent += initialFee;
+        if (isInstant) feePercent += instantFee;
 
         if (feePercent > ONE_HUNDRED_PERCENT) feePercent = ONE_HUNDRED_PERCENT;
 

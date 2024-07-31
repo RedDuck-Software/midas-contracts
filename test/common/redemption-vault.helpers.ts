@@ -595,7 +595,7 @@ const getFeePercent = async (
   if (!isWaived) {
     feePercent = additionalFee ?? tokenConfig.fee;
     if (isInstant) {
-      const instantFee = await redemptionVault.initialFee();
+      const instantFee = await redemptionVault.instantFee();
       feePercent = feePercent.add(instantFee);
     }
   }

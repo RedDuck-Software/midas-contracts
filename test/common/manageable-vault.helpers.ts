@@ -30,19 +30,19 @@ export const setInstantFeeTest = async (
 ) => {
   if (opt?.revertMessage) {
     await expect(
-      vault.connect(opt?.from ?? owner).setInitialFee(newFee),
+      vault.connect(opt?.from ?? owner).setInstantFee(newFee),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  await expect(vault.connect(opt?.from ?? owner).setInitialFee(newFee))
+  await expect(vault.connect(opt?.from ?? owner).setInstantFee(newFee))
     .to.emit(
       vault,
-      vault.interface.events['SetInitialFee(address,uint256)'].name,
+      vault.interface.events['SetInstantFee(address,uint256)'].name,
     )
     .withArgs((opt?.from ?? owner).address, newFee).to.not.reverted;
 
-  const fee = await vault.initialFee();
+  const fee = await vault.instantFee();
   expect(fee).eq(newFee);
 };
 
@@ -148,26 +148,26 @@ export const removeWaivedFeeAccountTest = async (
   expect(isWaivedFee).eq(false);
 };
 
-export const setInstantLimitTest = async (
+export const setInstantDailyLimitTest = async (
   { vault, owner }: CommonParamsChangePaymentToken,
   newLimit: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
   if (opt?.revertMessage) {
     await expect(
-      vault.connect(opt?.from ?? owner).setInitialLimit(newLimit),
+      vault.connect(opt?.from ?? owner).setInstantDailyLimit(newLimit),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  await expect(vault.connect(opt?.from ?? owner).setInitialLimit(newLimit))
+  await expect(vault.connect(opt?.from ?? owner).setInstantDailyLimit(newLimit))
     .to.emit(
       vault,
-      vault.interface.events['SetInitialLimit(address,uint256)'].name,
+      vault.interface.events['SetInstantDailyLimit(address,uint256)'].name,
     )
     .withArgs((opt?.from ?? owner).address, newLimit).to.not.reverted;
 
-  const limit = await vault.initialLimit();
+  const limit = await vault.instantDailyLimit();
   expect(limit).eq(newLimit);
 };
 

@@ -417,7 +417,7 @@ const getFeePercent = async (
   if (!isWaived) {
     feePercent = tokenConfig.fee;
     if (isInstant) {
-      const instantFee = await depositVault.initialFee();
+      const instantFee = await depositVault.instantFee();
       feePercent = feePercent.add(instantFee);
     }
   }

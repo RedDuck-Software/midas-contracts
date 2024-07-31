@@ -15,7 +15,7 @@ import {
   removePaymentTokenTest,
   removeWaivedFeeAccountTest,
   setInstantFeeTest,
-  setInstantLimitTest,
+  setInstantDailyLimitTest,
   setMinAmountTest,
   setVariabilityToleranceTest,
   withdrawTest,
@@ -65,9 +65,9 @@ describe.only('RedemptionVault', function () {
     expect(await redemptionVault.minAmount()).eq(1000);
     expect(await redemptionVault.minFiatRedeemAmount()).eq(1000);
 
-    expect(await redemptionVault.initialFee()).eq('100');
+    expect(await redemptionVault.instantFee()).eq('100');
 
-    expect(await redemptionVault.initialLimit()).eq(parseUnits('100000'));
+    expect(await redemptionVault.instantDailyLimit()).eq(parseUnits('100000'));
 
     expect(await redemptionVault.mTokenDataFeed()).eq(
       mTokenToUsdDataFeed.address,
@@ -353,13 +353,13 @@ describe.only('RedemptionVault', function () {
     });
   });
 
-  describe('setInitialLimit()', () => {
+  describe('setInstantDailyLimit()', () => {
     it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
       const { owner, redemptionVault, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
 
-      await setInstantLimitTest(
+      await setInstantDailyLimitTest(
         { vault: redemptionVault, owner },
         parseUnits('1000'),
         {
@@ -372,7 +372,7 @@ describe.only('RedemptionVault', function () {
     it('should fail: try to set 0 limit', async () => {
       const { owner, redemptionVault } = await loadFixture(defaultDeploy);
 
-      await setInstantLimitTest(
+      await setInstantDailyLimitTest(
         { vault: redemptionVault, owner },
         constants.Zero,
         {
@@ -383,7 +383,7 @@ describe.only('RedemptionVault', function () {
 
     it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
       const { owner, redemptionVault } = await loadFixture(defaultDeploy);
-      await setInstantLimitTest(
+      await setInstantDailyLimitTest(
         { vault: redemptionVault, owner },
         parseUnits('1000'),
       );
@@ -1166,7 +1166,7 @@ describe.only('RedemptionVault', function () {
       await setRoundData({ mockedAggregator }, 4);
 
       await mintToken(mTBILL, owner, 100_000);
-      await setInstantLimitTest({ vault: redemptionVault, owner }, 1000);
+      await setInstantDailyLimitTest({ vault: redemptionVault, owner }, 1000);
 
       await approveBase18(owner, mTBILL, redemptionVault, 100_000);
 

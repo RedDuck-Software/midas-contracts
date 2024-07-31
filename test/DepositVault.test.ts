@@ -23,7 +23,7 @@ import {
   removePaymentTokenTest,
   removeWaivedFeeAccountTest,
   setInstantFeeTest,
-  setInstantLimitTest,
+  setInstantDailyLimitTest,
   setMinAmountTest,
   setMinAmountToDepositTest,
   setVariabilityToleranceTest,
@@ -63,9 +63,9 @@ describe('DepositVault', function () {
     expect(await depositVault.minAmountToFirstDeposit()).eq('0');
     expect(await depositVault.minAmount()).eq(parseUnits('100'));
 
-    expect(await depositVault.initialFee()).eq('100');
+    expect(await depositVault.instantFee()).eq('100');
 
-    expect(await depositVault.initialLimit()).eq(parseUnits('100000'));
+    expect(await depositVault.instantDailyLimit()).eq(parseUnits('100000'));
 
     expect(await depositVault.mTokenDataFeed()).eq(mTokenToUsdDataFeed.address);
     expect(await depositVault.variationTolerance()).eq(1);
@@ -324,13 +324,13 @@ describe('DepositVault', function () {
     });
   });
 
-  describe('setInitialLimit()', () => {
+  describe('setInstantDailyLimit()', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { owner, depositVault, regularAccounts } = await loadFixture(
         defaultDeploy,
       );
 
-      await setInstantLimitTest(
+      await setInstantDailyLimitTest(
         { vault: depositVault, owner },
         parseUnits('1000'),
         {
@@ -343,7 +343,7 @@ describe('DepositVault', function () {
     it('should fail: try to set 0 limit', async () => {
       const { owner, depositVault } = await loadFixture(defaultDeploy);
 
-      await setInstantLimitTest(
+      await setInstantDailyLimitTest(
         { vault: depositVault, owner },
         constants.Zero,
         {
@@ -354,7 +354,7 @@ describe('DepositVault', function () {
 
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { owner, depositVault } = await loadFixture(defaultDeploy);
-      await setInstantLimitTest(
+      await setInstantDailyLimitTest(
         { vault: depositVault, owner },
         parseUnits('1000'),
       );
@@ -1173,7 +1173,7 @@ describe('DepositVault', function () {
       await setRoundData({ mockedAggregator }, 4);
 
       await mintToken(stableCoins.dai, owner, 100_000);
-      await setInstantLimitTest({ vault: depositVault, owner }, 1000);
+      await setInstantDailyLimitTest({ vault: depositVault, owner }, 1000);
 
       await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
 
