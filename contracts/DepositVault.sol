@@ -200,12 +200,12 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     function rejectRequest(uint256 requestId) external onlyVaultAdmin {
-        Request storage request = mintRequests[requestId];
+        Request memory request = mintRequests[requestId];
 
         require(request.sender != address(0), "DV: request not exist");
         require(request.status == RequestStatus.Pending, "DV: request not pending");
 
-        request.status = RequestStatus.Canceled;
+        mintRequests[requestId].status = RequestStatus.Canceled;
 
         emit RejectRequest(requestId, request.sender);
     }

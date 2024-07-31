@@ -33,6 +33,11 @@ interface IRedemptionVault is IManageableVault {
         uint256 amountMTokenIn
     );
 
+    event ApproveRequest(uint256 indexed requestId, address indexed user, address indexed tokenOut);
+    event SafeApproveRequest(uint256 indexed requestId, address indexed user, address indexed tokenOut, uint256 newMTokenRate);
+
+    event RejectRequest(uint256 indexed requestId, address indexed user);
+
     event SetMinCryptoRedeemAmount(
         address indexed caller,
         uint256 newMinAmount

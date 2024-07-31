@@ -287,6 +287,249 @@ export const redeemFiatRequestTest = async (
   }
 };
 
+export const approveRedeemRequestTest = async (
+  {
+    redemptionVault,
+    owner,
+    mTBILL,
+    mTokenToUsdDataFeed,
+    waivedFee,
+  }: CommonParamsRedeem & { waivedFee?: boolean },
+  requestId: number,
+  opt?: OptionalCommonParams,
+) => {
+  const sender = opt?.from ?? owner;
+
+  const tokensReceiver = await redemptionVault.tokensReceiver();
+  const feeReceiver = await redemptionVault.feeReceiver();
+
+  if (opt?.revertMessage) {
+    await expect(
+      redemptionVault.connect(sender).approveRequest(requestId),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  const requestDataBefore = await redemptionVault.redeemRequests(requestId);
+
+  const manualToken = await redemptionVault.MANUAL_FULLFILMENT_TOKEN();
+
+  let tokenContract;
+  if (requestDataBefore.tokenOut !== manualToken) {
+    // eslint-disable-next-line camelcase
+    tokenContract = ERC20__factory.connect(requestDataBefore.tokenOut, owner);
+  }
+
+  const balanceBeforeUser = await mTBILL.balanceOf(sender.address);
+  const balanceBeforeContract = await mTBILL.balanceOf(redemptionVault.address);
+  const balanceBeforeReceiver = await mTBILL.balanceOf(tokensReceiver);
+  const balanceBeforeFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+
+  const supplyBefore = await mTBILL.totalSupply();
+
+  const balanceUserTokenOutBefore =
+    tokenContract && (await tokenContract.balanceOf(sender.address));
+
+  await expect(redemptionVault.connect(sender).approveRequest(requestId))
+    .to.emit(
+      redemptionVault,
+      redemptionVault.interface.events[
+        'ApproveRequest(uint256,address,address)'
+      ].name,
+    )
+    .withArgs(requestId, sender, requestDataBefore.tokenOut).to.not.reverted;
+
+  const requestDataAfter = await redemptionVault.redeemRequests(requestId);
+
+  expect(requestDataBefore.status).not.eq(requestDataAfter.status);
+  expect(requestDataAfter.status).eq(1);
+
+  const balanceAfterUser = await mTBILL.balanceOf(sender.address);
+  const balanceAfterReceiver = await mTBILL.balanceOf(tokensReceiver);
+  const balanceAfterFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+  const balanceAfterContract = await mTBILL.balanceOf(redemptionVault.address);
+  const balanceUserTokenOutAfter =
+    tokenContract && (await tokenContract.balanceOf(sender.address));
+
+  const supplyAfter = await mTBILL.totalSupply();
+
+  if (requestDataBefore.tokenOut !== manualToken) {
+    const tokenDecimals = !tokenContract ? 18 : await tokenContract.decimals();
+
+    const mTokenRate = await mTokenToUsdDataFeed.getDataInBase18();
+
+    const amountOut = requestDataBefore.amountMToken
+      .mul(mTokenRate)
+      .div(requestDataBefore.tokenOutRate)
+      .div(10 ** (18 - tokenDecimals));
+
+    expect(balanceUserTokenOutAfter).eq(
+      balanceUserTokenOutBefore?.add(amountOut),
+    );
+  }
+  expect(supplyAfter).eq(supplyBefore.sub(requestDataBefore.amountMToken));
+
+  expect(balanceAfterUser).eq(balanceBeforeUser);
+
+  expect(balanceAfterContract).eq(
+    balanceBeforeContract.sub(requestDataBefore.amountMToken),
+  );
+
+  expect(balanceAfterReceiver).eq(balanceBeforeReceiver);
+  expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
+  if (waivedFee) {
+    expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
+  }
+};
+
+export const safeApproveRedeemRequestTest = async (
+  {
+    redemptionVault,
+    owner,
+    mTBILL,
+    mTokenToUsdDataFeed,
+    waivedFee,
+  }: CommonParamsRedeem & { waivedFee?: boolean },
+  requestId: BigNumberish,
+  newTokenRate: BigNumber,
+  opt?: OptionalCommonParams,
+) => {
+  const sender = opt?.from ?? owner;
+
+  const tokensReceiver = await redemptionVault.tokensReceiver();
+  const feeReceiver = await redemptionVault.feeReceiver();
+
+  if (opt?.revertMessage) {
+    await expect(
+      redemptionVault
+        .connect(sender)
+        .safeApproveRequest(requestId, newTokenRate),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  const requestDataBefore = await redemptionVault.redeemRequests(requestId);
+
+  // eslint-disable-next-line camelcase
+  const tokenContract = ERC20__factory.connect(
+    requestDataBefore.tokenOut,
+    owner,
+  );
+
+  const balanceBeforeUser = await mTBILL.balanceOf(sender.address);
+  const balanceBeforeContract = await mTBILL.balanceOf(redemptionVault.address);
+  const balanceBeforeReceiver = await mTBILL.balanceOf(tokensReceiver);
+  const balanceBeforeFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+
+  const supplyBefore = await mTBILL.totalSupply();
+
+  const balanceUserTokenOutBefore = await tokenContract.balanceOf(
+    sender.address,
+  );
+
+  await expect(
+    redemptionVault.connect(sender).safeApproveRequest(requestId, newTokenRate),
+  )
+    .to.emit(
+      redemptionVault,
+      redemptionVault.interface.events[
+        'SafeApproveRequest(uint256,address,address,uint256)'
+      ].name,
+    )
+    .withArgs(requestId, sender, requestDataBefore.tokenOut).to.not.reverted;
+
+  const requestDataAfter = await redemptionVault.redeemRequests(requestId);
+
+  expect(requestDataBefore.status).not.eq(requestDataAfter.status);
+  expect(requestDataAfter.status).eq(1);
+
+  const balanceAfterUser = await mTBILL.balanceOf(sender.address);
+  const balanceAfterReceiver = await mTBILL.balanceOf(tokensReceiver);
+  const balanceAfterFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+  const balanceAfterContract = await mTBILL.balanceOf(redemptionVault.address);
+  const balanceUserTokenOutAfter = await tokenContract.balanceOf(
+    sender.address,
+  );
+
+  const supplyAfter = await mTBILL.totalSupply();
+
+  const tokenDecimals = await tokenContract.decimals();
+
+  const amountOut = requestDataBefore.amountMToken
+    .mul(newTokenRate)
+    .div(requestDataBefore.tokenOutRate)
+    .div(10 ** (18 - tokenDecimals));
+
+  expect(balanceUserTokenOutAfter).eq(
+    balanceUserTokenOutBefore?.add(amountOut),
+  );
+  expect(supplyAfter).eq(supplyBefore.sub(requestDataBefore.amountMToken));
+
+  expect(balanceAfterUser).eq(balanceBeforeUser);
+
+  expect(balanceAfterContract).eq(
+    balanceBeforeContract.sub(requestDataBefore.amountMToken),
+  );
+
+  expect(balanceAfterReceiver).eq(balanceBeforeReceiver);
+  expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
+  if (waivedFee) {
+    expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
+  }
+};
+
+export const rejectRedeemRequestTest = async (
+  { redemptionVault, owner, mTBILL }: CommonParamsRedeem,
+  requestId: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  const sender = opt?.from ?? owner;
+
+  const tokensReceiver = await redemptionVault.tokensReceiver();
+  const feeReceiver = await redemptionVault.feeReceiver();
+
+  if (opt?.revertMessage) {
+    await expect(
+      redemptionVault.connect(sender).rejectRequest(requestId),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  const requestDataBefore = await redemptionVault.redeemRequests(requestId);
+
+  const balanceBeforeUser = await mTBILL.balanceOf(sender.address);
+  const balanceBeforeContract = await mTBILL.balanceOf(redemptionVault.address);
+  const balanceBeforeReceiver = await mTBILL.balanceOf(tokensReceiver);
+  const balanceBeforeFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+
+  const supplyBefore = await mTBILL.totalSupply();
+
+  await expect(redemptionVault.connect(sender).rejectRequest(requestId))
+    .to.emit(
+      redemptionVault,
+      redemptionVault.interface.events['RejectRequest(uint256,address)'].name,
+    )
+    .withArgs(requestId, sender).to.not.reverted;
+
+  const requestDataAfter = await redemptionVault.redeemRequests(requestId);
+
+  expect(requestDataBefore.status).not.eq(requestDataAfter.status);
+  expect(requestDataAfter.status).eq(2);
+
+  const balanceAfterUser = await mTBILL.balanceOf(sender.address);
+  const balanceAfterReceiver = await mTBILL.balanceOf(tokensReceiver);
+  const balanceAfterFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+  const balanceAfterContract = await mTBILL.balanceOf(redemptionVault.address);
+
+  const supplyAfter = await mTBILL.totalSupply();
+
+  expect(supplyAfter).eq(supplyBefore);
+  expect(balanceAfterUser).eq(balanceBeforeUser);
+  expect(balanceAfterContract).eq(balanceBeforeContract);
+  expect(balanceAfterReceiver).eq(balanceBeforeReceiver);
+  expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
+};
+
 export const setMinFiatRedeemAmountTest = async (
   { redemptionVault, owner }: CommonParams,
   valueN: number,

@@ -146,9 +146,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         returns (uint256 requestId)
     {
         require(
-                tokenOut != MANUAL_FULLFILMENT_TOKEN,
-                "RV: tokenOut == MANUAL_FULLFILMENT_TOKEN"
-            );
+            tokenOut != MANUAL_FULLFILMENT_TOKEN,
+            "RV: tokenOut == MANUAL_FULLFILMENT_TOKEN"
+        );
         return _redeemRequest(tokenOut, amountMTokenIn);
     }
 
@@ -161,6 +161,74 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         returns (uint256 requestId)
     {
         return _redeemRequest(MANUAL_FULLFILMENT_TOKEN, amountMTokenIn);
+    }
+
+    function approveRequest(uint256 requestId) external onlyVaultAdmin {
+        Request memory request = _burnAndValidateApprove(requestId);
+
+        if (request.tokenOut != MANUAL_FULLFILMENT_TOKEN) {
+            uint256 tokenDecimals = _tokenDecimals(request.tokenOut);
+
+            uint256 amountTokenOutWithoutFee = _truncate(
+                (request.amountMToken * request.mTokenRate) /
+                    request.tokenOutRate,
+                tokenDecimals
+            );
+
+            _tokenTransferToUser(
+                request.tokenOut,
+                request.sender,
+                amountTokenOutWithoutFee,
+                tokenDecimals
+            );
+        }
+
+        emit ApproveRequest(requestId, request.sender, request.tokenOut);
+    }
+
+    function safeApproveRequest(uint256 requestId, uint256 newMTokenRate)
+        external
+        onlyVaultAdmin
+    {
+        Request memory request = _burnAndValidateApprove(requestId);
+
+        require(
+            request.tokenOut != MANUAL_FULLFILMENT_TOKEN,
+            "RV: tokenOut = MANUAL_FULLFILMENT_TOKEN"
+        );
+
+        _requireVariationTolerance(request.mTokenRate, newMTokenRate);
+
+        uint256 tokenDecimals = _tokenDecimals(request.tokenOut);
+
+        uint256 amountTokenOutWithoutFee = _truncate(
+            (request.amountMToken * newMTokenRate) / request.tokenOutRate,
+            tokenDecimals
+        );
+
+        _tokenTransferToUser(
+            request.tokenOut,
+            request.sender,
+            amountTokenOutWithoutFee,
+            tokenDecimals
+        );
+
+        emit SafeApproveRequest(
+            requestId,
+            request.sender,
+            request.tokenOut,
+            newMTokenRate
+        );
+    }
+
+    function rejectRequest(uint256 requestId) external onlyVaultAdmin {
+        Request memory request = redeemRequests[requestId];
+
+        _validateRequest(request.sender, request.status);
+
+        redeemRequests[requestId].status = RequestStatus.Canceled;
+
+        emit RejectRequest(requestId, request.sender);
     }
 
     function setMinFiatRedeemAmount(uint256 newValue) external onlyVaultAdmin {
@@ -180,6 +248,27 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function vaultRole() public pure virtual override returns (bytes32) {
         return REDEMPTION_VAULT_ADMIN_ROLE;
+    }
+
+    function _burnAndValidateApprove(uint256 requestId)
+        internal
+        returns (Request memory request)
+    {
+        request = redeemRequests[requestId];
+
+        _validateRequest(request.sender, request.status);
+
+        mToken.burn(address(this), request.amountMToken);
+
+        redeemRequests[requestId].status = RequestStatus.Processed;
+    }
+
+    function _validateRequest(address sender, RequestStatus status)
+        internal
+        pure
+    {
+        require(sender != address(0), "RV: request not exist");
+        require(status == RequestStatus.Pending, "RV: request not pending");
     }
 
     function _redeemRequest(address tokenOut, uint256 amountMTokenIn)
@@ -213,7 +302,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             address(mToken),
             address(this),
             amountMTokenWithoutFee,
-            18
+            18 // mToken always have 18 decimals
         );
         if (feeAmount > 0)
             _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
@@ -288,7 +377,13 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _requireTokenExists(tokenOut);
         }
 
-        feeAmount = _getFeeAmount(user, tokenOut, amountMTokenIn, isInstant, isFiat ? fiatAdditionalFee : 0);
+        feeAmount = _getFeeAmount(
+            user,
+            tokenOut,
+            amountMTokenIn,
+            isInstant,
+            isFiat ? fiatAdditionalFee : 0
+        );
         amountMTokenWithoutFee = amountMTokenIn - feeAmount;
         require(amountMTokenWithoutFee > 0, "RV: tokenOut amount zero");
     }
