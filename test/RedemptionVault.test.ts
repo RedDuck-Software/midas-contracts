@@ -40,9 +40,8 @@ import {
   // eslint-disable-next-line camelcase
   MBasisRedemptionVault__factory,
 } from '../typechain-types';
-import { mTbill } from '../typechain-types/contracts';
 
-describe.only('RedemptionVault', function () {
+describe('RedemptionVault', function () {
   it('deployment', async () => {
     const {
       redemptionVault,

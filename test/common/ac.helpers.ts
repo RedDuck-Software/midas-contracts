@@ -126,7 +126,7 @@ export const greenListToggler = async (
 
   expect(
     await accessControl.hasRole(
-      role ?? (await accessControl.GREENLIST_TOGGLER_ROLE()),
+      role ?? (await greenlistable.GREENLIST_TOGGLER_ROLE()),
       account,
     ),
   ).eq(true);

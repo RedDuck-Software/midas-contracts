@@ -114,7 +114,7 @@ export const changeTokenAllowanceTest = async (
   )
     .to.emit(
       vault,
-      vault.interface.events['ChangeTokenAllowance(address,uint256,address)']
+      vault.interface.events['ChangeTokenAllowance(address,address,uint256)']
         .name,
     )
     .withArgs((opt?.from ?? owner).address, token).to.not.reverted;
