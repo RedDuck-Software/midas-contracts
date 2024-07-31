@@ -52,10 +52,13 @@ abstract contract ManageableVault is
      */
     IMTbill public mToken;
 
+    /**
+     * @notice mToken data feed contract
+     */
     IDataFeed public mTokenDataFeed;
 
     /**
-     * @notice address to which USD and mTokens will be sent
+     * @notice address to which tokens and mTokens will be sent
      */
     address public tokensReceiver;
 
@@ -72,7 +75,7 @@ abstract contract ManageableVault is
     uint256 public initialLimit;
 
     /**
-     * @dev mapping days number from 1970 to limit amount
+     * @dev mapping days (number from 1970) to limit amount
      */
     mapping(uint256 => uint256) public dailyLimits;
 
@@ -96,10 +99,19 @@ abstract contract ManageableVault is
      */
     EnumerableSet.AddressSet internal _paymentTokens;
 
+    /**
+     * @notice mapping, token address to token config
+     */
     mapping(address => TokenConfig) public tokensConfig;
 
+    /**
+     * @notice basic min operations amount
+     */
     uint256 public minAmount;
 
+    /**
+     * @notice mapping, user address => is free frmo min amounts
+     */
     mapping(address => bool) public isFreeFromMinAmount;
 
     /**
@@ -159,11 +171,7 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @notice withdraws `amount` of a given `token` from the contract.
-     * can be called only from permissioned actor.
-     * @param token token address
-     * @param amount token amount
-     * @param withdrawTo withdraw destination address
+     * @inheritdoc IManageableVault
      */
     function withdrawToken(
         address token,
@@ -200,7 +208,10 @@ abstract contract ManageableVault is
         emit RemovePaymentToken(token, msg.sender);
     }
 
-    // @dev if MAX_UINT = infinite allowance
+    /**
+     * @inheritdoc IManageableVault
+     * @dev reverts if new allowance zero
+     */
     function changeTokenAllowance(address token, uint256 allowance)
         external
         onlyVaultAdmin
@@ -208,9 +219,13 @@ abstract contract ManageableVault is
         _requireTokenExists(token);
         require(allowance > 0, "MV: zero allowance");
         tokensConfig[token].allowance = allowance;
-        emit ChangeTokenAllowance(token, allowance, msg.sender);
+        emit ChangeTokenAllowance(token, msg.sender, allowance);
     }
 
+    /**
+     * @inheritdoc IManageableVault
+     * @dev reverts if new tolerance zero
+     */
     function setVariationTolerance(uint256 tolerance)
         external
         onlyVaultAdmin
@@ -220,6 +235,9 @@ abstract contract ManageableVault is
         emit SetVariationTolerance(msg.sender, tolerance);
     }
 
+    /**
+     * @inheritdoc IManageableVault
+     */
     function setMinAmount(uint256 newAmount)
         external
         onlyVaultAdmin
@@ -326,7 +344,9 @@ abstract contract ManageableVault is
      * to amount with a correct precision. Sends tokens
      * from `msg.sender` to `tokensReceiver`
      * @param token address of token
+     * @param to address of user
      * @param amount amount of `token` to transfer from `user`
+     * @param tokenDecimals token decimals
      */
     function _tokenTransferFromUser(
         address token,
@@ -344,6 +364,16 @@ abstract contract ManageableVault is
         IERC20(token).safeTransferFrom(msg.sender, to, transferAmount);
     }
 
+    /**
+     * @dev do safeTransfer on a given token
+     * and converts `amount` from base18
+     * to amount with a correct precision. Sends tokens
+     * from `contract` to `user`
+     * @param token address of token
+     * @param to address of user
+     * @param amount amount of `token` to transfer from `user`
+     * @param tokenDecimals token decimals
+     */
     function _tokenTransferToUser(
         address token,
         address to,
@@ -390,6 +420,11 @@ abstract contract ManageableVault is
         dailyLimits[currentDayNumber] = nextLimitAmount;
     }
 
+    /**
+     * @dev check if operation exceed token allowance and update allowance
+     * @param token address of token
+     * @param amount operation amount
+     */
     function _requireAndUpdateAllowance(address token, uint256 amount)
         internal
     {
@@ -402,10 +437,13 @@ abstract contract ManageableVault is
     }
 
     /**
-     * @dev returns how much mtBill user should receive from token inputted
+     * @dev returns calculated fee amount depends on parameters
+     * if additionalFee not zero, token fee replaced with additionalFee
      * @param sender sender address
      * @param token token address
      * @param amount amount of token
+     * @param isInstant is instant operation
+     * @param additionalFee fee for fiat operations
      * @return fee amount of input token
      */
     function _getFeeAmount(
@@ -433,6 +471,11 @@ abstract contract ManageableVault is
         return (amount * feePercent) / ONE_HUNDRED_PERCENT;
     }
 
+    /**
+     * @dev check if prev and new prices diviation fit variationTolerance
+     * @param prevPrice previous rate
+     * @param newPrice new rate
+     */
     function _requireVariationTolerance(uint256 prevPrice, uint256 newPrice) internal view {
         uint256 priceDif = newPrice >= prevPrice ? newPrice - prevPrice : prevPrice - newPrice;
 
@@ -441,6 +484,12 @@ abstract contract ManageableVault is
         require(priceDifPercent <= variationTolerance, "MV: exceed price diviation");
     }
 
+    /**
+     * @dev convert value to inputted decimals precision
+     * @param value value for format
+     * @param decimals decimals
+     * @return converted amount
+     */
     function _truncate(uint256 value, uint256 decimals) internal pure returns(uint256) {
         return value.convertFromBase18(decimals).convertToBase18(decimals);
     }
