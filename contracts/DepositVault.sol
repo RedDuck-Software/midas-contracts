@@ -23,7 +23,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @notice minimal USD amount for first user`s deposit
      */
-    uint256 public minAmountToFirstDeposit;
+    uint256 public minAmountForFirstDeposit;
 
     /**
      * @notice mapping, requestId => request data
@@ -44,7 +44,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _mToken address of mTBILL token
-     * @param _minAmountToFirstDeposit initial value for minAmountToDeposit
+     * @param _minAmountForFirstDeposit initial value for minAmountToDeposit
      * @param _tokensReceiver address to which USD and mTokens will be sent
      * @param _feeReceiver address to which all fees will be sent
      * @param _instantFee fee for instant operations
@@ -57,7 +57,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function initialize(
         address _ac,
         address _mToken,
-        uint256 _minAmountToFirstDeposit,
+        uint256 _minAmountForFirstDeposit,
         address _tokensReceiver,
         address _feeReceiver,
         uint256 _instantFee,
@@ -79,7 +79,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             _variationTolerance,
             _minAmount
         );
-        minAmountToFirstDeposit = _minAmountToFirstDeposit;
+        minAmountForFirstDeposit = _minAmountForFirstDeposit;
     }
 
     /**
@@ -257,7 +257,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         external
         onlyVaultAdmin
     {
-        minAmountToFirstDeposit = newValue;
+        minAmountForFirstDeposit = newValue;
 
         emit SetMinAmountToFirstDeposit(msg.sender, newValue);
     }
@@ -283,7 +283,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         if (totalDeposited[user] != 0) return;
 
-        require(amountUsdIn >= minAmountToFirstDeposit, "DV: usd amount < min");
+        require(amountUsdIn >= minAmountForFirstDeposit, "DV: usd amount < min");
     }
 
     /**

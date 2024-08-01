@@ -514,7 +514,7 @@ export const defaultDeploy = async () => {
     aggregatorMToken: mockedAggregatorMToken,
     dataFeedMToken: mTokenToUsdDataFeed,
     mTBILL,
-    minAmountToFirstDeposit: '0',
+    minAmountForFirstDeposit: '0',
     minAmount: parseUnits('100'),
     tokensReceiver: tokensReceiver.address,
   });

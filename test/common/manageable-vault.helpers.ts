@@ -238,7 +238,7 @@ export const setMinAmountToDepositTest = async (
       .name,
   ).to.not.reverted;
 
-  const newMin = await depositVault.minAmountToFirstDeposit();
+  const newMin = await depositVault.minAmountForFirstDeposit();
   expect(newMin).eq(value);
 };
 

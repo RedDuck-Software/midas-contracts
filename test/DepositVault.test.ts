@@ -65,7 +65,7 @@ describe('DepositVault', function () {
 
     expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
-    expect(await depositVault.minAmountToFirstDeposit()).eq('0');
+    expect(await depositVault.minAmountForFirstDeposit()).eq('0');
     expect(await depositVault.minAmount()).eq(parseUnits('100'));
 
     expect(await depositVault.instantFee()).eq('100');
