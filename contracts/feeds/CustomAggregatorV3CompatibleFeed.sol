@@ -227,7 +227,8 @@ abstract contract CustomAggregatorV3CompatibleFeed is
     {
         if (_newPrice == 0) return 100 * 10**decimals();
         int256 one = int256(10**decimals());
-        int256 deviation = ((_lastPrice * one) / _newPrice) - one;
+        int256 priceDif = _newPrice - _lastPrice;
+        int256 deviation = (priceDif * one) / _lastPrice;
         deviation = deviation < 0 ? deviation * -1 : deviation;
         return uint256(deviation * 100);
     }

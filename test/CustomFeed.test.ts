@@ -4,7 +4,7 @@ import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 import { acErrors } from './common/ac.helpers';
-import { setRoundData, setRoundDataSafe } from './common/custom-feed.helpers';
+import { calculatePriceDiviation, setRoundData, setRoundDataSafe } from './common/custom-feed.helpers';
 import { defaultDeploy } from './common/fixtures';
 
 import {
@@ -176,7 +176,7 @@ describe('CustomAggregatorV3CompatibleFeed', function () {
           parseUnits('100', 8),
           parseUnits('105', 8),
         ),
-      ).eq(parseUnits('4.761905', 8));
+      ).eq(parseUnits(calculatePriceDiviation(100, 105).toString(), 8));
     });
 
     it('when price changes from 100 to 105', async () => {
@@ -187,10 +187,10 @@ describe('CustomAggregatorV3CompatibleFeed', function () {
           parseUnits('100', 8),
           parseUnits('95', 8),
         ),
-      ).eq(parseUnits('5.263157', 8));
+      ).eq(parseUnits(calculatePriceDiviation(100, 95).toString(), 8));
     });
 
-    it('when price changes from 1 to 1000', async () => {
+    it('when price changes from 1 to 1000000', async () => {
       const fixture = await loadFixture(defaultDeploy);
 
       expect(
@@ -198,7 +198,7 @@ describe('CustomAggregatorV3CompatibleFeed', function () {
           parseUnits('1', 8),
           parseUnits('1000000', 8),
         ),
-      ).eq(parseUnits('99.9999', 8));
+      ).eq(parseUnits(calculatePriceDiviation(1, 1000000).toString(), 8));
     });
   });
 });

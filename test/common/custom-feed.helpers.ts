@@ -130,3 +130,6 @@ export const setRoundDataSafe = async (
   expect(await customFeed.lastTimestamp()).eq(lastRoundDataAfter.updatedAt);
   expect(await customFeed.lastAnswer()).eq(lastRoundDataAfter.answer);
 };
+
+export const calculatePriceDiviation = (last: number, next: number) =>
+  Math.abs(((next - last) * 100) / last);
