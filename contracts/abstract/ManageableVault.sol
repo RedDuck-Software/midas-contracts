@@ -7,6 +7,8 @@ import {IERC20MetadataUpgradeable as IERC20Metadata} from "@openzeppelin/contrac
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {EnumerableSetUpgradeable as EnumerableSet} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+
 import "../interfaces/IManageableVault.sol";
 import "../interfaces/IMTbill.sol";
 import "../interfaces/IDataFeed.sol";
@@ -33,11 +35,17 @@ abstract contract ManageableVault is
     using EnumerableSet for EnumerableSet.AddressSet;
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
+    using Counters for Counters.Counter;
 
     /**
      * @notice address that represents off-chain USD bank transfer
      */
     address public constant MANUAL_FULLFILMENT_TOKEN = address(0x0);
+
+    /**
+     * @notice last request id
+     */
+    Counters.Counter public lastRequestId;
 
     /**
      * @notice 100 percent with base 100
@@ -423,7 +431,7 @@ abstract contract ManageableVault is
      * @param amount operation amount
      */
     function _requireAndUpdateLimit(uint256 amount) internal {
-        uint256 currentDayNumber = block.timestamp / 86400;
+        uint256 currentDayNumber = block.timestamp / 1 days;
         uint256 nextLimitAmount = dailyLimits[currentDayNumber] + amount;
 
         require(nextLimitAmount <= instantDailyLimit, "MV: exceed limit");
@@ -439,12 +447,12 @@ abstract contract ManageableVault is
     function _requireAndUpdateAllowance(address token, uint256 amount)
         internal
     {
-        TokenConfig storage config = tokensConfig[token];
+        TokenConfig memory config = tokensConfig[token];
         if (config.allowance == MAX_UINT) return;
 
         require(config.allowance >= amount, "MV: exceed allowance");
 
-        config.allowance -= amount;
+        tokensConfig[token].allowance -= amount;
     }
 
     /**
