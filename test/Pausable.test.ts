@@ -14,7 +14,7 @@ import {
   PausableTester__factory,
 } from '../typechain-types';
 
-describe.only('Pausable', () => {
+describe('Pausable', () => {
   it('deployment', async () => {
     const { pausableTester, roles } = await loadFixture(defaultDeploy);
 

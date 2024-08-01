@@ -206,13 +206,13 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 newRequestId = lastRequestId.current();
         requestId = newRequestId;
 
-        mintRequests[newRequestId] = Request(
-            user,
-            tokenInCopy,
-            RequestStatus.Pending,
-            tokenAmountInUsd,
-            tokenOutRate
-        );
+        mintRequests[newRequestId] = Request({
+            sender: user,
+            tokenIn: tokenInCopy,
+            status: RequestStatus.Pending,
+            depositedUsdAmount: tokenAmountInUsd,
+            tokenOutRate: tokenOutRate
+        });
 
         emit DepositRequest(
             newRequestId,

@@ -372,14 +372,14 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         lastRequestId.increment();
         requestId = lastRequestId.current();
 
-        redeemRequests[requestId] = Request(
-            user,
-            tokenOut,
-            RequestStatus.Pending,
-            amountMTokenWithoutFee,
-            mTokenRate,
-            tokenOutRate
-        );
+        redeemRequests[requestId] = Request({
+            sender: user,
+            tokenOut: tokenOut,
+            status: RequestStatus.Pending,
+            amountMToken: amountMTokenWithoutFee,
+            mTokenRate: mTokenRate,
+            tokenOutRate: tokenOutRate
+        });
 
         emit RedeemRequest(requestId, user, tokenOut, amountMTokenIn);
     }

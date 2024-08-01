@@ -201,7 +201,11 @@ abstract contract ManageableVault is
     ) external onlyVaultAdmin {
         require(_paymentTokens.add(token), "MV: already added");
         require(dataFeed != address(0), "MV: dataFeed address zero");
-        tokensConfig[token] = TokenConfig(dataFeed, tokenFee, MAX_UINT);
+        tokensConfig[token] = TokenConfig({
+            dataFeed: dataFeed,
+            fee: tokenFee,
+            allowance: MAX_UINT
+        });
         emit AddPaymentToken(token, dataFeed, tokenFee, msg.sender);
     }
 
