@@ -37,6 +37,7 @@ interface IDepositVault is IManageableVault {
      * @param amountToken amount of tokenIn
      * @param fee fee amount in tokenIn
      * @param minted amount of minted mTokens
+     * @param referrerId referrer id
      */
     event DepositInstant(
         address indexed user,
@@ -44,7 +45,8 @@ interface IDepositVault is IManageableVault {
         uint256 amountUsd,
         uint256 amountToken,
         uint256 fee,
-        uint256 minted
+        uint256 minted,
+        bytes32 referrerId
     );
 
     /**
@@ -54,6 +56,7 @@ interface IDepositVault is IManageableVault {
      * @param amountUsd amount of tokenIn converted to USD
      * @param fee fee amount in tokenIn
      * @param tokenOutRate mToken rate
+     * @param referrerId referrer id
      */
     event DepositRequest(
         uint256 indexed requestId,
@@ -61,7 +64,8 @@ interface IDepositVault is IManageableVault {
         address indexed tokenIn,
         uint256 amountUsd,
         uint256 fee,
-        uint256 tokenOutRate
+        uint256 tokenOutRate,
+        bytes32 referrerId
     );
 
     /**
@@ -100,8 +104,13 @@ interface IDepositVault is IManageableVault {
      * Mints mToken to user.
      * @param tokenIn address of tokenIn
      * @param amountToken amount of `tokenIn` that will be taken from user
+     * @param referrerId referrer id
      */
-    function depositInstant(address tokenIn, uint256 amountToken) external;
+    function depositInstant(
+        address tokenIn,
+        uint256 amountToken,
+        bytes32 referrerId
+    ) external;
 
     /**
      * @notice depositing proccess with mint request creating if
@@ -111,11 +120,14 @@ interface IDepositVault is IManageableVault {
      * Creates mint request.
      * @param tokenIn address of tokenIn
      * @param amountToken amount of `tokenIn` that will be taken from user
+     * @param referrerId referrer id
      * @return request id
      */
-    function depositRequest(address tokenIn, uint256 amountToken)
-        external
-        returns (uint256);
+    function depositRequest(
+        address tokenIn,
+        uint256 amountToken,
+        bytes32 referrerId
+    ) external returns (uint256);
 
     /**
      * @notice approving request if inputted token rate fit price diviation percent

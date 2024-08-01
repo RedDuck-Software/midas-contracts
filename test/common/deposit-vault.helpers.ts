@@ -49,7 +49,9 @@ export const depositInstantTest = async (
 
   if (opt?.revertMessage) {
     await expect(
-      depositVault.connect(sender).depositInstant(tokenIn, amountIn),
+      depositVault
+        .connect(sender)
+        .depositInstant(tokenIn, amountIn, constants.HashZero),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -84,11 +86,15 @@ export const depositInstantTest = async (
       true,
     );
 
-  await expect(depositVault.connect(sender).depositInstant(tokenIn, amountIn))
+  await expect(
+    depositVault
+      .connect(sender)
+      .depositInstant(tokenIn, amountIn, constants.HashZero),
+  )
     .to.emit(
       depositVault,
       depositVault.interface.events[
-        'DepositInstant(address,address,uint256,uint256,uint256,uint256)'
+        'DepositInstant(address,address,uint256,uint256,uint256,uint256,bytes32)'
       ].name,
     )
     .withArgs(
@@ -98,6 +104,7 @@ export const depositInstantTest = async (
       amountUsdIn,
       fee,
       0,
+      constants.HashZero,
     ).to.not.reverted;
 
   const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
@@ -153,7 +160,9 @@ export const depositRequestTest = async (
 
   if (opt?.revertMessage) {
     await expect(
-      depositVault.connect(sender).depositRequest(tokenIn, amountIn),
+      depositVault
+        .connect(sender)
+        .depositRequest(tokenIn, amountIn, constants.HashZero),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -184,11 +193,15 @@ export const depositRequestTest = async (
       false,
     );
 
-  await expect(depositVault.connect(sender).depositRequest(tokenIn, amountIn))
+  await expect(
+    depositVault
+      .connect(sender)
+      .depositRequest(tokenIn, amountIn, constants.HashZero),
+  )
     .to.emit(
       depositVault,
       depositVault.interface.events[
-        'DepositRequest(uint256,address,address,uint256,uint256,uint256)'
+        'DepositRequest(uint256,address,address,uint256,uint256,uint256,bytes32)'
       ].name,
     )
     .withArgs(
@@ -198,6 +211,7 @@ export const depositRequestTest = async (
       actualAmountInUsd,
       fee,
       mintAmount,
+      constants.HashZero,
     ).to.not.reverted;
 
   const latestRequestIdAfter = await depositVault.lastRequestId();

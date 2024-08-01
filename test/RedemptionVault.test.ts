@@ -1806,7 +1806,7 @@ describe('RedemptionVault', function () {
         await redemptionVault.MANUAL_FULLFILMENT_TOKEN(),
         100,
         {
-          revertMessage: 'RV: tokenOut == MANUAL_FULLFILMENT_TOKEN',
+          revertMessage: 'RV: tokenOut == fiat',
         },
       );
     });
@@ -2484,7 +2484,7 @@ describe('RedemptionVault', function () {
         requestId,
         parseUnits('1'),
         {
-          revertMessage: 'RV: tokenOut = MANUAL_FULLFILMENT_TOKEN',
+          revertMessage: 'RV: tokenOut = fiat',
         },
       );
     });

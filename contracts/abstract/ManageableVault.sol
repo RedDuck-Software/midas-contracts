@@ -233,10 +233,7 @@ abstract contract ManageableVault is
      * @inheritdoc IManageableVault
      * @dev reverts if new tolerance zero
      */
-    function setVariationTolerance(uint256 tolerance)
-        external
-        onlyVaultAdmin
-    {
+    function setVariationTolerance(uint256 tolerance) external onlyVaultAdmin {
         require(tolerance > 0, "MV: zero tolerance");
         variationTolerance = tolerance;
         emit SetVariationTolerance(msg.sender, tolerance);
@@ -245,10 +242,7 @@ abstract contract ManageableVault is
     /**
      * @inheritdoc IManageableVault
      */
-    function setMinAmount(uint256 newAmount)
-        external
-        onlyVaultAdmin
-    {
+    function setMinAmount(uint256 newAmount) external onlyVaultAdmin {
         minAmount = newAmount;
         emit SetMinAmount(msg.sender, newAmount);
     }
@@ -296,13 +290,19 @@ abstract contract ManageableVault is
     /**
      * @inheritdoc IManageableVault
      */
-    function setInstantDailyLimit(uint256 newInstantDailyLimit) external onlyVaultAdmin {
+    function setInstantDailyLimit(uint256 newInstantDailyLimit)
+        external
+        onlyVaultAdmin
+    {
         require(newInstantDailyLimit > 0, "MV: limit zero");
         instantDailyLimit = newInstantDailyLimit;
         emit SetInstantDailyLimit(msg.sender, newInstantDailyLimit);
     }
 
-    function freeFromMinAmount(address user, bool enable) external onlyVaultAdmin {
+    function freeFromMinAmount(address user, bool enable)
+        external
+        onlyVaultAdmin
+    {
         require(isFreeFromMinAmount[user] != enable, "DV: already free");
 
         isFreeFromMinAmount[user] = enable;
@@ -464,10 +464,10 @@ abstract contract ManageableVault is
         if (waivedFeeRestriction[sender]) return 0;
 
         uint256 feePercent;
-        if(additionalFee == 0){
+        if (additionalFee == 0) {
             TokenConfig storage tokenConfig = tokensConfig[token];
             feePercent = tokenConfig.fee;
-        }else{
+        } else {
             feePercent = additionalFee;
         }
 
@@ -483,12 +483,20 @@ abstract contract ManageableVault is
      * @param prevPrice previous rate
      * @param newPrice new rate
      */
-    function _requireVariationTolerance(uint256 prevPrice, uint256 newPrice) internal view {
-        uint256 priceDif = newPrice >= prevPrice ? newPrice - prevPrice : prevPrice - newPrice;
+    function _requireVariationTolerance(uint256 prevPrice, uint256 newPrice)
+        internal
+        view
+    {
+        uint256 priceDif = newPrice >= prevPrice
+            ? newPrice - prevPrice
+            : prevPrice - newPrice;
 
-        uint256 priceDifPercent = priceDif * ONE_HUNDRED_PERCENT / prevPrice;
-        
-        require(priceDifPercent <= variationTolerance, "MV: exceed price diviation");
+        uint256 priceDifPercent = (priceDif * ONE_HUNDRED_PERCENT) / prevPrice;
+
+        require(
+            priceDifPercent <= variationTolerance,
+            "MV: exceed price diviation"
+        );
     }
 
     /**
@@ -497,7 +505,11 @@ abstract contract ManageableVault is
      * @param decimals decimals
      * @return converted amount
      */
-    function _truncate(uint256 value, uint256 decimals) internal pure returns(uint256) {
+    function _truncate(uint256 value, uint256 decimals)
+        internal
+        pure
+        returns (uint256)
+    {
         return value.convertFromBase18(decimals).convertToBase18(decimals);
     }
 }

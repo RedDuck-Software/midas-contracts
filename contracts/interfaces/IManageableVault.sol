@@ -89,7 +89,7 @@ interface IManageableVault {
 
     /**
      * @param caller function caller (msg.sender)
-     * @param newAmount new min amount for operation 
+     * @param newAmount new min amount for operation
      */
     event SetMinAmount(address indexed caller, uint256 newAmount);
 

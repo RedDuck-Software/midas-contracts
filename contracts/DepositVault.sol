@@ -98,7 +98,11 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      */
-    function depositInstant(address tokenIn, uint256 amountToken)
+    function depositInstant(
+        address tokenIn,
+        uint256 amountToken,
+        bytes32 referrerId
+    )
         external
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
@@ -111,7 +115,9 @@ contract DepositVault is ManageableVault, IDepositVault {
             uint256 tokenAmountInUsd,
             uint256 feeTokenAmount,
             uint256 amountTokenWithoutFee,
-            uint256 mintAmount,,,
+            uint256 mintAmount,
+            ,
+            ,
             uint256 tokenDecimals
         ) = _calcAndValidateDeposit(user, tokenIn, amountToken, true);
 
@@ -119,27 +125,45 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         _requireAndUpdateLimit(mintAmount);
 
-        _tokenTransferFromUser(tokenIn, tokensReceiver, amountTokenWithoutFee, tokenDecimals);
+        _tokenTransferFromUser(
+            tokenIn,
+            tokensReceiver,
+            amountTokenWithoutFee,
+            tokenDecimals
+        );
 
         mToken.mint(user, mintAmount);
 
         if (feeTokenAmount > 0)
-            _tokenTransferFromUser(tokenIn, feeReceiver, feeTokenAmount, tokenDecimals);
+            _tokenTransferFromUser(
+                tokenIn,
+                feeReceiver,
+                feeTokenAmount,
+                tokenDecimals
+            );
+
+        bytes32 referrerIdCopy = referrerId;
+        uint256 amountTokenCopy = amountToken;
 
         emit DepositInstant(
             user,
             tokenIn,
             tokenAmountInUsd,
-            amountToken,
+            amountTokenCopy,
             feeTokenAmount,
-            mintAmount
+            mintAmount,
+            referrerIdCopy
         );
     }
 
     /**
      * @inheritdoc IDepositVault
      */
-    function depositRequest(address tokenIn, uint256 amountToken)
+    function depositRequest(
+        address tokenIn,
+        uint256 amountToken,
+        bytes32 referrerId
+    )
         external
         whenNotPaused
         onlyGreenlisted(msg.sender)
@@ -152,15 +176,27 @@ contract DepositVault is ManageableVault, IDepositVault {
         (
             uint256 tokenAmountInUsd,
             uint256 feeAmount,
-            uint256 amountTokenWithoutFee, , ,
+            uint256 amountTokenWithoutFee,
+            ,
+            ,
             uint256 tokenOutRate,
             uint256 tokenDecimals
         ) = _calcAndValidateDeposit(user, tokenIn, amountToken, false);
 
-        _tokenTransferFromUser(tokenIn, tokensReceiver, amountTokenWithoutFee, tokenDecimals);
+        _tokenTransferFromUser(
+            tokenIn,
+            tokensReceiver,
+            amountTokenWithoutFee,
+            tokenDecimals
+        );
 
         if (feeAmount > 0)
-            _tokenTransferFromUser(tokenIn, feeReceiver, feeAmount, tokenDecimals);
+            _tokenTransferFromUser(
+                tokenIn,
+                feeReceiver,
+                feeAmount,
+                tokenDecimals
+            );
 
         lastRequestId.increment();
         requestId = lastRequestId.current();
@@ -173,28 +209,43 @@ contract DepositVault is ManageableVault, IDepositVault {
             tokenOutRate
         );
 
+        bytes32 referrerIdCopy = referrerId;
+
         emit DepositRequest(
             requestId,
             user,
             tokenIn,
             tokenAmountInUsd,
             feeAmount,
-            tokenOutRate
+            tokenOutRate,
+            referrerIdCopy
         );
     }
 
     /**
      * @inheritdoc IDepositVault
      */
-    function safeApproveRequest(uint256 requestId, uint256 newOutRate) external onlyVaultAdmin {
+    function safeApproveRequest(uint256 requestId, uint256 newOutRate)
+        external
+        onlyVaultAdmin
+    {
         Request memory request = mintRequests[requestId];
 
         require(request.sender != address(0), "DV: request not exist");
-        require(request.status == RequestStatus.Pending, "DV: request not pending");
+        require(
+            request.status == RequestStatus.Pending,
+            "DV: request not pending"
+        );
 
         _requireVariationTolerance(request.tokenOutRate, newOutRate);
 
-        _approveRequest(request.sender, request.tokenIn, requestId, request.depositedUsdAmount, newOutRate);
+        _approveRequest(
+            request.sender,
+            request.tokenIn,
+            requestId,
+            request.depositedUsdAmount,
+            newOutRate
+        );
 
         mintRequests[requestId].tokenOutRate = newOutRate;
 
@@ -208,9 +259,18 @@ contract DepositVault is ManageableVault, IDepositVault {
         Request memory request = mintRequests[requestId];
 
         require(request.sender != address(0), "DV: request not exist");
-        require(request.status == RequestStatus.Pending, "DV: request not pending");
+        require(
+            request.status == RequestStatus.Pending,
+            "DV: request not pending"
+        );
 
-        _approveRequest(request.sender, request.tokenIn, requestId, request.depositedUsdAmount, request.tokenOutRate);
+        _approveRequest(
+            request.sender,
+            request.tokenIn,
+            requestId,
+            request.depositedUsdAmount,
+            request.tokenOutRate
+        );
 
         emit ApproveRequest(requestId, request.sender);
     }
@@ -222,7 +282,10 @@ contract DepositVault is ManageableVault, IDepositVault {
         Request memory request = mintRequests[requestId];
 
         require(request.sender != address(0), "DV: request not exist");
-        require(request.status == RequestStatus.Pending, "DV: request not pending");
+        require(
+            request.status == RequestStatus.Pending,
+            "DV: request not pending"
+        );
 
         mintRequests[requestId].status = RequestStatus.Canceled;
 
@@ -232,7 +295,10 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      */
-    function setMinAmountToFirstDeposit(uint256 newValue) external onlyVaultAdmin {
+    function setMinAmountToFirstDeposit(uint256 newValue)
+        external
+        onlyVaultAdmin
+    {
         minAmountToFirstDeposit = newValue;
 
         emit SetMinAmountToFirstDeposit(msg.sender, newValue);
@@ -270,12 +336,25 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param usdAmount amount of USD, tokenIn -> USD
      * @param tokenRate mToken rate
      */
-    function _approveRequest(address user, address tokenIn, uint256 requestId, uint256 usdAmount, uint256 tokenRate) private {
+    function _approveRequest(
+        address user,
+        address tokenIn,
+        uint256 requestId,
+        uint256 usdAmount,
+        uint256 tokenRate
+    ) private {
         totalDeposited[user] += usdAmount;
 
-        uint256 feeUsdAmount = _getFeeAmount(user, tokenIn, usdAmount, false, 0);
+        uint256 feeUsdAmount = _getFeeAmount(
+            user,
+            tokenIn,
+            usdAmount,
+            false,
+            0
+        );
 
-        uint256 amountMToken = ((usdAmount - feeUsdAmount) * (10**18)) / tokenRate;
+        uint256 amountMToken = ((usdAmount - feeUsdAmount) * (10**18)) /
+            tokenRate;
 
         mToken.mint(user, amountMToken);
 
@@ -288,7 +367,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param tokenIn tokenIn address
      * @param amountToken tokenIn amount
      * @param isInstant is instant operation
-     * 
+     *
      * @return tokenAmountInUsd tokenIn amount converted to USD
      * @return feeTokenAmount fee amount in tokenIn
      * @return amountTokenWithoutFee tokenIn amount without fee
@@ -333,12 +412,17 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         _requireAndUpdateAllowance(tokenIn, amountToken);
 
-        feeTokenAmount = _truncate(_getFeeAmount(user, tokenIn, amountToken, isInstant, 0), tokenDecimals);
+        feeTokenAmount = _truncate(
+            _getFeeAmount(user, tokenIn, amountToken, isInstant, 0),
+            tokenDecimals
+        );
         amountTokenWithoutFee = amountToken - feeTokenAmount;
 
         uint256 feeInUsd = (feeTokenAmount * tokenInRate) / 10**18;
 
-        (uint256 mTokenAmount, uint256 mTokenRate) = _convertUsdToMToken(tokenAmountInUsd - feeInUsd);
+        (uint256 mTokenAmount, uint256 mTokenRate) = _convertUsdToMToken(
+            tokenAmountInUsd - feeInUsd
+        );
         mintAmount = mTokenAmount;
         tokenOutRate = mTokenRate;
         require(mintAmount > 0, "DV: invalid mint amount");
@@ -348,7 +432,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev calculates USD amount from tokenIn amount
      * @param tokenIn tokenIn address
      * @param amount amount of tokenIn
-     * 
+     *
      * @return amountInUsd converted amount to USD
      * @return rate conversion rate
      */
@@ -370,7 +454,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @dev calculates mToken amount from USD amount
      * @param amountUsd amount of USD
-     * 
+     *
      * @return amountMToken converted USD to mToken
      * @return mTokenRate conversion rate
      */

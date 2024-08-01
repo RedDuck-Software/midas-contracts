@@ -169,10 +169,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         onlyNotSanctioned(msg.sender)
         returns (uint256 requestId)
     {
-        require(
-            tokenOut != MANUAL_FULLFILMENT_TOKEN,
-            "RV: tokenOut == MANUAL_FULLFILMENT_TOKEN"
-        );
+        require(tokenOut != MANUAL_FULLFILMENT_TOKEN, "RV: tokenOut == fiat");
         return _redeemRequest(tokenOut, amountMTokenIn);
     }
 
@@ -228,7 +225,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         require(
             request.tokenOut != MANUAL_FULLFILMENT_TOKEN,
-            "RV: tokenOut = MANUAL_FULLFILMENT_TOKEN"
+            "RV: tokenOut = fiat"
         );
 
         _requireVariationTolerance(request.mTokenRate, newMTokenRate);
@@ -298,7 +295,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * burns amount from contract
      * sets flag Processed
      * @param requestId request id
-     * 
+     *
      * @return request request data
      */
     function _burnAndValidateApprove(uint256 requestId)
@@ -333,7 +330,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @notice Creating request depends on tokenOut
      * @param tokenOut tokenOut address
      * @param amountMTokenIn request status
-     * 
+     *
      * @return requestId request id
      */
     function _redeemRequest(address tokenOut, uint256 amountMTokenIn)
@@ -391,7 +388,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @dev calculates tokenOut amount from USD amount
      * @param amountUsd amount of USD
      * @param tokenOut tokenOut address
-     * 
+     *
      * @return amountToken converted USD to tokenOut
      * @return tokenRate conversion rate
      */
@@ -413,7 +410,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @dev calculates USD amount from mToken amount
      * @param amountMToken amount of mToken
-     * 
+     *
      * @return amountUsd converted amount to USD
      * @return mTokenRate conversion rate
      */
@@ -437,7 +434,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @param amountMTokenIn mToken amount
      * @param isInstant is instant operation
      * @param isFiat is fiat operation
-     * 
+     *
      * @return feeAmount fee amount in mToken
      * @return amountMTokenWithoutFee mToken amount without fee
      */
@@ -462,7 +459,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         if (isFiat) {
             require(
                 tokenOut == MANUAL_FULLFILMENT_TOKEN,
-                "RV: tokenOut != MANUAL_FULLFILMENT_TOKEN"
+                "RV: tokenOut != fiat"
             );
         } else {
             _requireTokenExists(tokenOut);
