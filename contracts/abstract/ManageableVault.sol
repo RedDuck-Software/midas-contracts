@@ -330,6 +330,9 @@ abstract contract ManageableVault is
         emit SetInstantDailyLimit(msg.sender, newInstantDailyLimit);
     }
 
+    /**
+     * @inheritdoc IManageableVault
+     */
     function freeFromMinAmount(address user, bool enable)
         external
         onlyVaultAdmin

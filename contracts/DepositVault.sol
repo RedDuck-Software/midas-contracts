@@ -44,7 +44,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _mToken address of mTBILL token
-     * @param _minAmountForFirstDeposit initial value for minAmountToDeposit
+     * @param _minAmountForFirstDeposit initial value for minAmountForFirstDeposit
      * @param _tokensReceiver address to which USD and mTokens will be sent
      * @param _feeReceiver address to which all fees will be sent
      * @param _instantFee fee for instant operations
