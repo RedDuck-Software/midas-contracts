@@ -33,7 +33,7 @@ interface IDepositVault is IManageableVault {
      * @param caller function caller (msg.sender)
      * @param newValue new min amount to deposit value
      */
-    event SetMinAmountToFirstDeposit(address indexed caller, uint256 newValue);
+    event SetMinAmountForFirstDeposit(address indexed caller, uint256 newValue);
 
     /**
      * @param user function caller (msg.sender)
@@ -162,5 +162,5 @@ interface IDepositVault is IManageableVault {
      * can be called only from vault`s admin
      * @param newValue new min. deposit value
      */
-    function setMinAmountToFirstDeposit(uint256 newValue) external;
+    function setMinAmountForFirstDeposit(uint256 newValue) external;
 }

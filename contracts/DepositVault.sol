@@ -253,13 +253,13 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      */
-    function setMinAmountToFirstDeposit(uint256 newValue)
+    function setMinAmountForFirstDeposit(uint256 newValue)
         external
         onlyVaultAdmin
     {
         minAmountForFirstDeposit = newValue;
 
-        emit SetMinAmountToFirstDeposit(msg.sender, newValue);
+        emit SetMinAmountForFirstDeposit(msg.sender, newValue);
     }
 
     /**

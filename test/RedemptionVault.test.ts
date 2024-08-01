@@ -5,7 +5,12 @@ import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 import { acErrors, blackList, greenList } from './common/ac.helpers';
-import { approveBase18, mintToken, pauseVault, pauseVaultFn } from './common/common.helpers';
+import {
+  approveBase18,
+  mintToken,
+  pauseVault,
+  pauseVaultFn,
+} from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import { defaultDeploy } from './common/fixtures';
 import {
@@ -552,6 +557,13 @@ describe('RedemptionVault', function () {
       );
     });
 
+    it('should fail: if new value greater then 100%', async () => {
+      const { redemptionVault, owner } = await loadFixture(defaultDeploy);
+      await setInstantFeeTest({ vault: redemptionVault, owner }, 10001, {
+        revertMessage: 'MV: instantFee > 100%',
+      });
+    });
+
     it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
       const { redemptionVault, owner } = await loadFixture(defaultDeploy);
       await setInstantFeeTest({ vault: redemptionVault, owner }, 100);
@@ -575,6 +587,15 @@ describe('RedemptionVault', function () {
         { vault: redemptionVault, owner },
         ethers.constants.Zero,
         { revertMessage: 'MV: zero tolerance' },
+      );
+    });
+
+    it('should fail: if new value greater then 100%', async () => {
+      const { redemptionVault, owner } = await loadFixture(defaultDeploy);
+      await setVariabilityToleranceTest(
+        { vault: redemptionVault, owner },
+        10001,
+        { revertMessage: 'MV: tolerance > 100%' },
       );
     });
 

@@ -559,17 +559,15 @@ export const setFiatAdditionalFeeTest = async (
   valueN: number,
   opt?: OptionalCommonParams,
 ) => {
-  const value = parseUnits(valueN.toString());
-
   if (opt?.revertMessage) {
     await expect(
-      redemptionVault.connect(opt?.from ?? owner).setFiatAdditionalFee(value),
+      redemptionVault.connect(opt?.from ?? owner).setFiatAdditionalFee(valueN),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   await expect(
-    redemptionVault.connect(opt?.from ?? owner).setFiatAdditionalFee(value),
+    redemptionVault.connect(opt?.from ?? owner).setFiatAdditionalFee(valueN),
   ).to.emit(
     redemptionVault,
     redemptionVault.interface.events['SetFiatAdditionalFee(address,uint256)']
@@ -577,7 +575,7 @@ export const setFiatAdditionalFeeTest = async (
   ).to.not.reverted;
 
   const newfee = await redemptionVault.fiatAdditionalFee();
-  expect(newfee).eq(value);
+  expect(newfee).eq(valueN);
 };
 
 const getFeePercent = async (

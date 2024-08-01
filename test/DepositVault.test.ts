@@ -293,7 +293,7 @@ describe('DepositVault', function () {
     });
   });
 
-  describe('setMinAmountToFirstDeposit()', () => {
+  describe('setMinAmountForFirstDeposit()', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { owner, depositVault, regularAccounts } = await loadFixture(
         defaultDeploy,
@@ -530,6 +530,13 @@ describe('DepositVault', function () {
         ethers.constants.Zero,
         { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
       );
+    });
+
+    it('should fail: if new value greater then 100%', async () => {
+      const { depositVault, owner } = await loadFixture(defaultDeploy);
+      await setInstantFeeTest({ vault: depositVault, owner }, 10001, {
+        revertMessage: 'MV: instantFee > 100%',
+      });
     });
 
     it('call from address with DEPOSIT_VAULT_ADMIN_ROLE role', async () => {

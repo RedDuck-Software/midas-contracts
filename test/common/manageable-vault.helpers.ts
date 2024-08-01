@@ -225,16 +225,16 @@ export const setMinAmountToDepositTest = async (
     await expect(
       depositVault
         .connect(opt?.from ?? owner)
-        .setMinAmountToFirstDeposit(value),
+        .setMinAmountForFirstDeposit(value),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   await expect(
-    depositVault.connect(opt?.from ?? owner).setMinAmountToFirstDeposit(value),
+    depositVault.connect(opt?.from ?? owner).setMinAmountForFirstDeposit(value),
   ).to.emit(
     depositVault,
-    depositVault.interface.events['SetMinAmountToFirstDeposit(address,uint256)']
+    depositVault.interface.events['SetMinAmountForFirstDeposit(address,uint256)']
       .name,
   ).to.not.reverted;
 

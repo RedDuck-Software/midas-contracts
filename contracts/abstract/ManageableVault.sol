@@ -169,6 +169,8 @@ abstract contract ManageableVault is
         require(_mTokenDataFeed != address(0), "invalid address");
         require(_instantDailyLimit > 0, "zero limit");
         require(_variationTolerance > 0, "zero tolerance");
+        require(_variationTolerance <= ONE_HUNDRED_PERCENT, "tolerance > 100%");
+        require(instantFee <= ONE_HUNDRED_PERCENT, "instantFee > 100%");
 
         mToken = IMTbill(_mToken);
         __Pausable_init(_ac);
@@ -209,6 +211,7 @@ abstract contract ManageableVault is
     ) external onlyVaultAdmin {
         require(_paymentTokens.add(token), "MV: already added");
         require(dataFeed != address(0), "MV: dataFeed address zero");
+        require(tokenFee <= ONE_HUNDRED_PERCENT, "MV: tokenFee > 100%");
         tokensConfig[token] = TokenConfig({
             dataFeed: dataFeed,
             fee: tokenFee,
@@ -247,6 +250,7 @@ abstract contract ManageableVault is
      */
     function setVariationTolerance(uint256 tolerance) external onlyVaultAdmin {
         require(tolerance > 0, "MV: zero tolerance");
+        require(tolerance <= ONE_HUNDRED_PERCENT, "MV: tolerance > 100%");
         variationTolerance = tolerance;
         emit SetVariationTolerance(msg.sender, tolerance);
     }
@@ -295,6 +299,7 @@ abstract contract ManageableVault is
      * @inheritdoc IManageableVault
      */
     function setInstantFee(uint256 newInstantFee) external onlyVaultAdmin {
+        require(newInstantFee <= ONE_HUNDRED_PERCENT, "MV: instantFee > 100%");
         instantFee = newInstantFee;
         emit SetInstantFee(msg.sender, newInstantFee);
     }
