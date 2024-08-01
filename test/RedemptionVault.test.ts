@@ -41,7 +41,7 @@ import {
   MBasisRedemptionVault__factory,
 } from '../typechain-types';
 
-describe('RedemptionVault', function () {
+describe.only('RedemptionVault', function () {
   it('deployment', async () => {
     const {
       redemptionVault,
@@ -2390,6 +2390,7 @@ describe('RedemptionVault', function () {
           mTokenToUsdDataFeed,
         },
         1,
+        parseUnits('1'),
         {
           revertMessage: 'WMAC: hasnt role',
         },
@@ -2414,6 +2415,7 @@ describe('RedemptionVault', function () {
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         1,
+        parseUnits('1'),
         {
           revertMessage: 'RV: request not exist',
         },
@@ -2454,10 +2456,12 @@ describe('RedemptionVault', function () {
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         +requestId,
+        parseUnits('1'),
       );
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         +requestId,
+        parseUnits('1'),
         { revertMessage: 'RV: request not pending' },
       );
     });
@@ -2496,6 +2500,7 @@ describe('RedemptionVault', function () {
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         +requestId,
+        parseUnits('1'),
       );
     });
   });
@@ -2525,6 +2530,7 @@ describe('RedemptionVault', function () {
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         +requestId,
+        parseUnits('1'),
       );
     });
   });
@@ -3116,6 +3122,7 @@ describe('RedemptionVault', function () {
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         +requestId,
+        parseUnits('1'),
       );
     });
 

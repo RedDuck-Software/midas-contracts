@@ -190,27 +190,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @inheritdoc IRedemptionVault
      */
-    function approveRequest(uint256 requestId) external onlyVaultAdmin {
-        Request memory request = _burnAndValidateApprove(requestId);
+    function approveRequest(uint256 requestId, uint256 newMTokenRate) external onlyVaultAdmin {
+        _approveRequest(requestId, newMTokenRate, false);
 
-        if (request.tokenOut != MANUAL_FULLFILMENT_TOKEN) {
-            uint256 tokenDecimals = _tokenDecimals(request.tokenOut);
-
-            uint256 amountTokenOutWithoutFee = _truncate(
-                (request.amountMToken * request.mTokenRate) /
-                    request.tokenOutRate,
-                tokenDecimals
-            );
-
-            _tokenTransferToUser(
-                request.tokenOut,
-                request.sender,
-                amountTokenOutWithoutFee,
-                tokenDecimals
-            );
-        }
-
-        emit ApproveRequest(requestId, request.sender, request.tokenOut);
+        emit ApproveRequest(requestId, newMTokenRate);
     }
 
     /**
@@ -221,33 +204,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         external
         onlyVaultAdmin
     {
-        Request memory request = _burnAndValidateApprove(requestId);
-
-        require(
-            request.tokenOut != MANUAL_FULLFILMENT_TOKEN,
-            "RV: tokenOut = fiat"
-        );
-
-        _requireVariationTolerance(request.mTokenRate, newMTokenRate);
-
-        uint256 tokenDecimals = _tokenDecimals(request.tokenOut);
-
-        uint256 amountTokenOutWithoutFee = _truncate(
-            (request.amountMToken * newMTokenRate) / request.tokenOutRate,
-            tokenDecimals
-        );
-
-        _tokenTransferToUser(
-            request.tokenOut,
-            request.sender,
-            amountTokenOutWithoutFee,
-            tokenDecimals
-        );
+        _approveRequest(requestId, newMTokenRate, true);
 
         emit SafeApproveRequest(
             requestId,
-            request.sender,
-            request.tokenOut,
             newMTokenRate
         );
     }
@@ -293,22 +253,52 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @notice validates approve
      * burns amount from contract
+     * transfer tokenOut to user if not fiat
      * sets flag Processed
      * @param requestId request id
-     *
-     * @return request request data
+     * @param newMTokenRate new mToken rate
+     * @param isSafe new mToken rate
      */
-    function _burnAndValidateApprove(uint256 requestId)
-        internal
-        returns (Request memory request)
-    {
-        request = redeemRequests[requestId];
+    function _approveRequest(
+        uint256 requestId,
+        uint256 newMTokenRate,
+        bool isSafe
+    ) internal {
+        Request memory request = redeemRequests[requestId];
 
         _validateRequest(request.sender, request.status);
 
+        if (isSafe) {
+            require(
+                request.tokenOut != MANUAL_FULLFILMENT_TOKEN,
+                "RV: tokenOut = fiat"
+            );
+        }
+
+        if (isSafe)
+            _requireVariationTolerance(request.mTokenRate, newMTokenRate);
+
         mToken.burn(address(this), request.amountMToken);
 
-        redeemRequests[requestId].status = RequestStatus.Processed;
+        if (request.tokenOut != MANUAL_FULLFILMENT_TOKEN) {
+            uint256 tokenDecimals = _tokenDecimals(request.tokenOut);
+
+            uint256 amountTokenOutWithoutFee = _truncate(
+                (request.amountMToken * newMTokenRate) / request.tokenOutRate,
+                tokenDecimals
+            );
+
+            _tokenTransferToUser(
+                request.tokenOut,
+                request.sender,
+                amountTokenOutWithoutFee,
+                tokenDecimals
+            );
+        }
+
+        request.status = RequestStatus.Processed;
+        request.mTokenRate = newMTokenRate;
+        redeemRequests[requestId] = request;
     }
 
     /**

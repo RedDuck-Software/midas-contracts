@@ -232,50 +232,18 @@ contract DepositVault is ManageableVault, IDepositVault {
         external
         onlyVaultAdmin
     {
-        Request memory request = mintRequests[requestId];
+        _approveRequest(requestId, newOutRate, true);
 
-        require(request.sender != address(0), "DV: request not exist");
-        require(
-            request.status == RequestStatus.Pending,
-            "DV: request not pending"
-        );
-
-        _requireVariationTolerance(request.tokenOutRate, newOutRate);
-
-        _approveRequest(
-            request.sender,
-            request.tokenIn,
-            requestId,
-            request.depositedUsdAmount,
-            newOutRate
-        );
-
-        mintRequests[requestId].tokenOutRate = newOutRate;
-
-        emit SafeApproveRequest(requestId, request.sender, newOutRate);
+        emit SafeApproveRequest(requestId, newOutRate);
     }
 
     /**
      * @inheritdoc IDepositVault
      */
-    function approveRequest(uint256 requestId) external onlyVaultAdmin {
-        Request memory request = mintRequests[requestId];
+    function approveRequest(uint256 requestId, uint256 newOutRate) external onlyVaultAdmin {
+        _approveRequest(requestId, newOutRate, false);
 
-        require(request.sender != address(0), "DV: request not exist");
-        require(
-            request.status == RequestStatus.Pending,
-            "DV: request not pending"
-        );
-
-        _approveRequest(
-            request.sender,
-            request.tokenIn,
-            requestId,
-            request.depositedUsdAmount,
-            request.tokenOutRate
-        );
-
-        emit ApproveRequest(requestId, request.sender);
+        emit ApproveRequest(requestId, newOutRate);
     }
 
     /**
@@ -332,36 +300,43 @@ contract DepositVault is ManageableVault, IDepositVault {
     }
 
     /**
-     * @dev calculates mToken amount, mints to user and sets Processed flag
-     * @param user user address
-     * @param tokenIn tokenIn address
-     * @param requestId requestId
-     * @param usdAmount amount of USD, tokenIn -> USD
-     * @param tokenRate mToken rate
+     * @dev approving request
+     * Checks price diviation if safe
+     * Mints mTokens to user
+     * @param requestId request id
+     * @param newOutRate mToken rate
      */
     function _approveRequest(
-        address user,
-        address tokenIn,
-        uint256 requestId,
-        uint256 usdAmount,
-        uint256 tokenRate
+        uint256 requestId, uint256 newOutRate, bool isSafe
     ) private {
-        totalDeposited[user] += usdAmount;
+        Request memory request = mintRequests[requestId];
+
+        require(request.sender != address(0), "DV: request not exist");
+        require(
+            request.status == RequestStatus.Pending,
+            "DV: request not pending"
+        );
+
+        if(isSafe) _requireVariationTolerance(request.tokenOutRate, newOutRate);
+
+        totalDeposited[request.sender] += request.depositedUsdAmount;
 
         uint256 feeUsdAmount = _getFeeAmount(
-            user,
-            tokenIn,
-            usdAmount,
+            request.sender,
+            request.tokenIn,
+            request.depositedUsdAmount,
             false,
             0
         );
 
-        uint256 amountMToken = ((usdAmount - feeUsdAmount) * (10**18)) /
-            tokenRate;
+        uint256 amountMToken = ((request.depositedUsdAmount - feeUsdAmount) * (10**18)) /
+            newOutRate;
 
-        mToken.mint(user, amountMToken);
+        mToken.mint(request.sender, amountMToken);
 
-        mintRequests[requestId].status = RequestStatus.Processed;
+        request.status = RequestStatus.Processed;
+        request.tokenOutRate = newOutRate;
+        mintRequests[requestId] = request;
     }
 
     /**

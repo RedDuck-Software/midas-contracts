@@ -296,6 +296,7 @@ export const approveRedeemRequestTest = async (
     waivedFee,
   }: CommonParamsRedeem & { waivedFee?: boolean },
   requestId: number,
+  newTokenRate: BigNumber,
   opt?: OptionalCommonParams,
 ) => {
   const sender = opt?.from ?? owner;
@@ -305,7 +306,7 @@ export const approveRedeemRequestTest = async (
 
   if (opt?.revertMessage) {
     await expect(
-      redemptionVault.connect(sender).approveRequest(requestId),
+      redemptionVault.connect(sender).approveRequest(requestId, newTokenRate),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -330,14 +331,14 @@ export const approveRedeemRequestTest = async (
   const balanceUserTokenOutBefore =
     tokenContract && (await tokenContract.balanceOf(sender.address));
 
-  await expect(redemptionVault.connect(sender).approveRequest(requestId))
+  await expect(
+    redemptionVault.connect(sender).approveRequest(requestId, newTokenRate),
+  )
     .to.emit(
       redemptionVault,
-      redemptionVault.interface.events[
-        'ApproveRequest(uint256,address,address)'
-      ].name,
+      redemptionVault.interface.events['ApproveRequest(uint256,uint256)'].name,
     )
-    .withArgs(requestId, sender, requestDataBefore.tokenOut).to.not.reverted;
+    .withArgs(requestId, newTokenRate).to.not.reverted;
 
   const requestDataAfter = await redemptionVault.redeemRequests(requestId);
 
@@ -356,10 +357,8 @@ export const approveRedeemRequestTest = async (
   if (requestDataBefore.tokenOut !== manualToken) {
     const tokenDecimals = !tokenContract ? 18 : await tokenContract.decimals();
 
-    const mTokenRate = await mTokenToUsdDataFeed.getDataInBase18();
-
     const amountOut = requestDataBefore.amountMToken
-      .mul(mTokenRate)
+      .mul(newTokenRate)
       .div(requestDataBefore.tokenOutRate)
       .div(10 ** (18 - tokenDecimals));
 
@@ -432,11 +431,10 @@ export const safeApproveRedeemRequestTest = async (
   )
     .to.emit(
       redemptionVault,
-      redemptionVault.interface.events[
-        'SafeApproveRequest(uint256,address,address,uint256)'
-      ].name,
+      redemptionVault.interface.events['SafeApproveRequest(uint256,uint256)']
+        .name,
     )
-    .withArgs(requestId, sender, requestDataBefore.tokenOut).to.not.reverted;
+    .withArgs(requestId, newTokenRate).to.not.reverted;
 
   const requestDataAfter = await redemptionVault.redeemRequests(requestId);
 

@@ -250,13 +250,14 @@ export const depositRequestTest = async (
 export const approveRequestTest = async (
   { depositVault, owner, mTBILL }: CommonParamsDeposit,
   requestId: BigNumberish,
+  newRate: BigNumberish,
   opt?: OptionalCommonParams,
 ) => {
   const sender = opt?.from ?? owner;
 
   if (opt?.revertMessage) {
     await expect(
-      depositVault.connect(sender).approveRequest(requestId),
+      depositVault.connect(sender).approveRequest(requestId, newRate),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -278,14 +279,14 @@ export const approveRequestTest = async (
   const expectedMintAmount = requestData.depositedUsdAmount
     .sub(requestData.depositedUsdAmount.mul(feePercent).div(10000))
     .mul(constants.WeiPerEther)
-    .div(requestData.tokenOutRate);
+    .div(newRate);
 
-  await expect(depositVault.connect(sender).approveRequest(requestId))
+  await expect(depositVault.connect(sender).approveRequest(requestId, newRate))
     .to.emit(
       depositVault,
-      depositVault.interface.events['ApproveRequest(uint256,address)'].name,
+      depositVault.interface.events['ApproveRequest(uint256,uint256)'].name,
     )
-    .withArgs(requestId, requestData.sender).to.not.reverted;
+    .withArgs(requestId, newRate).to.not.reverted;
 
   const requestDataAfter = await depositVault.mintRequests(requestId);
 
@@ -301,7 +302,7 @@ export const approveRequestTest = async (
   );
   expect(requestDataAfter.sender).eq(requestData.sender);
   expect(requestDataAfter.tokenIn).eq(requestData.tokenIn);
-  expect(requestDataAfter.tokenOutRate).eq(requestData.tokenOutRate);
+  expect(requestDataAfter.tokenOutRate).eq(newRate);
   expect(requestDataAfter.depositedUsdAmount).eq(
     requestData.depositedUsdAmount,
   );
@@ -347,11 +348,9 @@ export const safeApproveRequestTest = async (
   )
     .to.emit(
       depositVault,
-      depositVault.interface.events[
-        'SafeApproveRequest(uint256,address,uint256)'
-      ].name,
+      depositVault.interface.events['SafeApproveRequest(uint256,uint256)'].name,
     )
-    .withArgs(requestId, requestData.sender, newRate).to.not.reverted;
+    .withArgs(requestId, newRate).to.not.reverted;
 
   const requestDataAfter = await depositVault.mintRequests(requestId);
 

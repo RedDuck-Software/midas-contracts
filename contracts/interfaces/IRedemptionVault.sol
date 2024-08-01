@@ -62,25 +62,19 @@ interface IRedemptionVault is IManageableVault {
 
     /**
      * @param requestId mint request id
-     * @param user address of user
-     * @param tokenOut address of tokenOut
+     * @param newMTokenRate net mToken rate
      */
     event ApproveRequest(
         uint256 indexed requestId,
-        address indexed user,
-        address indexed tokenOut
+        uint256 newMTokenRate
     );
 
     /**
      * @param requestId mint request id
-     * @param user address of user
-     * @param tokenOut address of tokenOut
      * @param newMTokenRate net mToken rate
      */
     event SafeApproveRequest(
         uint256 indexed requestId,
-        address indexed user,
-        address indexed tokenOut,
         uint256 newMTokenRate
     );
 
@@ -141,8 +135,9 @@ interface IRedemptionVault is IManageableVault {
      * Transfers tokenOut to user
      * Sets flag Processed
      * @param requestId request id
+     * @param newMTokenRate new mToken rate
      */
-    function approveRequest(uint256 requestId) external;
+    function approveRequest(uint256 requestId, uint256 newMTokenRate) external;
 
     /**
      * @notice approving request if inputted token rate fit price diviation percent

@@ -2019,6 +2019,7 @@ describe('DepositVault', function () {
           mTokenToUsdDataFeed,
         },
         1,
+        parseUnits('5'),
         {
           revertMessage: 'WMAC: hasnt role',
         },
@@ -2043,6 +2044,7 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         1,
+        parseUnits('5'),
         {
           revertMessage: 'DV: request not exist',
         },
@@ -2082,10 +2084,12 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
       );
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
         { revertMessage: 'DV: request not pending' },
       );
     });
@@ -2123,6 +2127,7 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
       );
     });
   });
@@ -2682,6 +2687,7 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
       );
     });
 
@@ -2720,6 +2726,7 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
       );
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2731,6 +2738,7 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
       );
     });
 
@@ -2783,6 +2791,7 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
       );
 
       await setRoundData({ mockedAggregator }, 1);
@@ -2796,6 +2805,7 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
       );
 
       await setRoundData({ mockedAggregator }, 1.01);
@@ -2809,6 +2819,7 @@ describe('DepositVault', function () {
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
+        parseUnits('5'),
       );
     });
   });

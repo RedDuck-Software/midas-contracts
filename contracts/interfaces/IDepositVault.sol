@@ -75,18 +75,16 @@ interface IDepositVault is IManageableVault {
 
     /**
      * @param requestId mint request id
-     * @param user address of user
+     * @param newOutRate mToken rate inputted by admin
      */
-    event ApproveRequest(uint256 indexed requestId, address indexed user);
+    event ApproveRequest(uint256 indexed requestId, uint256 newOutRate);
 
     /**
      * @param requestId mint request id
-     * @param user address of user
      * @param newOutRate mToken rate inputted by admin
      */
     event SafeApproveRequest(
         uint256 indexed requestId,
-        address indexed user,
         uint256 newOutRate
     );
 
@@ -144,12 +142,13 @@ interface IDepositVault is IManageableVault {
     function safeApproveRequest(uint256 requestId, uint256 newOutRate) external;
 
     /**
-     * @notice approving request
+     * @notice approving request without price diviation check
      * Mints mToken to user.
      * Sets request flag to Processed.
      * @param requestId request id
+     * @param newOutRate mToken rate
      */
-    function approveRequest(uint256 requestId) external;
+    function approveRequest(uint256 requestId, uint256 newOutRate) external;
 
     /**
      * @notice rejecting request
