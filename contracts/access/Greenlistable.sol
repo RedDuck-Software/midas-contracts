@@ -31,12 +31,14 @@ abstract contract Greenlistable is WithMidasAccessControl {
         if (greenlistEnabled) _onlyGreenlisted(account);
         _;
     }
+
     /**
      * @dev checks that a given `account`
-     * have `greenlistTogglerRole()`
+     * have `greenlistedRole()`
+     * if greenlist disabled too
      */
-    modifier onlyGreenlistToggler(address account) {
-        _onlyGreenlistToggler(account);
+    modifier onlyAlwaysGreenlisted(address account) {
+        _onlyGreenlisted(account);
         _;
     }
 
@@ -59,8 +61,8 @@ abstract contract Greenlistable is WithMidasAccessControl {
      */
     function setGreenlistEnable(bool enable)
         external
-        onlyGreenlistToggler(msg.sender)
-    {
+    {   
+        _onlyGreenlistToggler(msg.sender);
         require(greenlistEnabled != enable, "GL: same enable status");
         greenlistEnabled = enable;
         emit SetGreenlistEnable(msg.sender, enable);
@@ -97,7 +99,7 @@ abstract contract Greenlistable is WithMidasAccessControl {
      * have a `greenlistTogglerRole()`
      */
     function _onlyGreenlistToggler(address account)
-        private
+        internal
         view
         onlyRole(greenlistTogglerRole(), account)
     {}

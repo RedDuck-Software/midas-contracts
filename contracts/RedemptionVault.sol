@@ -168,7 +168,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     function redeemFiatRequest(uint256 amountMTokenIn)
         external
         whenFnNotPaused(uint8(RedemptionVaultFunctions.FIAT_REDEEM_REQUEST))
-        onlyGreenlisted(msg.sender)
+        onlyAlwaysGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
         returns (uint256 requestId)
@@ -263,10 +263,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
                 request.tokenOut != MANUAL_FULLFILMENT_TOKEN,
                 "RV: tokenOut = fiat"
             );
-        }
-
-        if (isSafe)
             _requireVariationTolerance(request.mTokenRate, newMTokenRate);
+        }            
 
         mToken.burn(address(this), request.amountMToken);
 

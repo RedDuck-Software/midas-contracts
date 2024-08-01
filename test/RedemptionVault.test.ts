@@ -47,7 +47,7 @@ import {
   MBasisRedemptionVault__factory,
 } from '../typechain-types';
 
-describe('RedemptionVault', function () {
+describe.only('RedemptionVault', function () {
   it('deployment', async () => {
     const {
       redemptionVault,
@@ -2133,20 +2133,43 @@ describe('RedemptionVault', function () {
 
   describe('redeemFiatRequest()', () => {
     it('should fail: when trying to redeem 0 amount', async () => {
-      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
-        await loadFixture(defaultDeploy);
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        regularAccounts,
+        greenListableTester,
+        accessControl,
+      } = await loadFixture(defaultDeploy);
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
       await redeemFiatRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         0,
         {
+          from: regularAccounts[0],
           revertMessage: 'RV: invalid amount',
         },
       );
     });
 
     it('should fail: call with insufficient allowance', async () => {
-      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
-        await loadFixture(defaultDeploy);
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
+      } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100);
       await redeemFiatRequestTest(
@@ -2193,8 +2216,19 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: call with insufficient balance', async () => {
-      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
-        await loadFixture(defaultDeploy);
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
+      } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await approveBase18(owner, mTBILL, redemptionVault, 100);
       await redeemFiatRequestTest(
@@ -2214,7 +2248,14 @@ describe('RedemptionVault', function () {
         mTBILL,
         mockedAggregatorMToken,
         mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100_000);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 0);
@@ -2228,8 +2269,19 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: call for amount < minFiatRedeemAmount', async () => {
-      const { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed } =
-        await loadFixture(defaultDeploy);
+      const {
+        redemptionVault,
+        owner,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
+      } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100_000);
       await approveBase18(owner, mTBILL, redemptionVault, 100_000);
@@ -2246,8 +2298,19 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: if some fee = 100%', async () => {
-      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
-        await loadFixture(defaultDeploy);
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
+      } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
@@ -2283,9 +2346,15 @@ describe('RedemptionVault', function () {
         mTBILL,
         mTokenToUsdDataFeed,
         blackListableTester,
-        accessControl,
         regularAccounts,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
 
       await blackList(
         { blacklistable: blackListableTester, accessControl, owner },
@@ -2310,7 +2379,14 @@ describe('RedemptionVault', function () {
         mTokenToUsdDataFeed,
         regularAccounts,
         mockedSanctionsList,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
 
       await sanctionUser(
         { sanctionsList: mockedSanctionsList },
@@ -2332,11 +2408,16 @@ describe('RedemptionVault', function () {
         owner,
         redemptionVault,
         mTBILL,
-        greenListableTester,
         mTokenToUsdDataFeed,
-        accessControl,
         regularAccounts,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await redemptionVault.setGreenlistEnable(true);
 
@@ -2365,7 +2446,14 @@ describe('RedemptionVault', function () {
         redemptionVault,
         mTBILL,
         mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
@@ -2387,7 +2475,14 @@ describe('RedemptionVault', function () {
         redemptionVault,
         mTBILL,
         mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
@@ -2408,7 +2503,14 @@ describe('RedemptionVault', function () {
         redemptionVault,
         mTBILL,
         mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
@@ -2431,7 +2533,14 @@ describe('RedemptionVault', function () {
         redemptionVault,
         mTBILL,
         mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
@@ -2591,7 +2700,14 @@ describe('RedemptionVault', function () {
         redemptionVault,
         mTBILL,
         mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
       } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
 
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
@@ -2657,8 +2773,19 @@ describe('RedemptionVault', function () {
     });
 
     it('should fail: request tokenOut is fiat', async () => {
-      const { owner, redemptionVault, mTBILL, mTokenToUsdDataFeed } =
-        await loadFixture(defaultDeploy);
+      const {
+        owner,
+        redemptionVault,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        greenListableTester,
+        accessControl,
+      } = await loadFixture(defaultDeploy);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        owner,
+      );
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
       await redeemFiatRequestTest(

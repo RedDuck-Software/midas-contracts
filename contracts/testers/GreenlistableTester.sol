@@ -19,8 +19,10 @@ contract GreenlistableTester is Greenlistable {
 
     function onlyGreenlistTogglerTester(address account)
         external
-        onlyGreenlistToggler(account)
-    {}
+        view
+    {
+        _onlyGreenlistToggler(account);
+    }
 
     function _disableInitializers() internal override {}
 }
