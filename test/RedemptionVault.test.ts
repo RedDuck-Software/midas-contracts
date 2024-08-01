@@ -24,6 +24,7 @@ import {
   setMinAmountTest,
   setVariabilityToleranceTest,
   withdrawTest,
+  changeTokenFeeTest,
 } from './common/manageable-vault.helpers';
 import {
   approveRedeemRequestTest,
@@ -848,17 +849,16 @@ describe('RedemptionVault', function () {
       );
     });
     it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
-      const { depositVault, owner, stableCoins, dataFeed } = await loadFixture(
-        defaultDeploy,
-      );
+      const { redemptionVault, owner, stableCoins, dataFeed } =
+        await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
-        { vault: depositVault, owner },
+        { vault: redemptionVault, owner },
         stableCoins.dai,
         dataFeed.address,
         0,
       );
       await changeTokenAllowanceTest(
-        { vault: depositVault, owner },
+        { vault: redemptionVault, owner },
         stableCoins.dai.address,
         100000000,
       );
@@ -955,6 +955,62 @@ describe('RedemptionVault', function () {
       );
 
       expect(tokenConfigBefore.allowance).eq(tokenConfigAfter.allowance);
+    });
+  });
+
+  describe('changeTokenFee()', () => {
+    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { redemptionVault, regularAccounts, owner } = await loadFixture(
+        defaultDeploy,
+      );
+      await changeTokenFeeTest(
+        { vault: redemptionVault, owner },
+        ethers.constants.AddressZero,
+        0,
+        { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
+      );
+    });
+    it('should fail: token not exist', async () => {
+      const { redemptionVault, owner, stableCoins } = await loadFixture(
+        defaultDeploy,
+      );
+      await changeTokenFeeTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai.address,
+        0,
+        { revertMessage: 'MV: token not exists' },
+      );
+    });
+    it('should fail: fee > 100%', async () => {
+      const { redemptionVault, owner, stableCoins, dataFeed } =
+        await loadFixture(defaultDeploy);
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await changeTokenFeeTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai.address,
+        10001,
+        { revertMessage: 'MV: fee > 100%' },
+      );
+    });
+    it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { redemptionVault, owner, stableCoins, dataFeed } =
+        await loadFixture(defaultDeploy);
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await changeTokenFeeTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai.address,
+        100,
+      );
     });
   });
 

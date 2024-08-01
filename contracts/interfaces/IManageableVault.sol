@@ -63,6 +63,17 @@ interface IManageableVault {
     /**
      * @param token address of token that
      * @param caller function caller (msg.sender)
+     * @param fee new fee
+     */
+    event ChangeTokenFee(
+        address indexed token,
+        address indexed caller,
+        uint256 fee
+    );
+
+    /**
+     * @param token address of token that
+     * @param caller function caller (msg.sender)
      */
     event RemovePaymentToken(address indexed token, address indexed caller);
 
@@ -159,6 +170,15 @@ interface IManageableVault {
      * @param allowance new allowance
      */
     function changeTokenAllowance(address token, uint256 allowance) external;
+
+    /**
+     * @notice set new token fee.
+     * can be called only from permissioned actor.
+     * @param token token address
+     * @param fee new fee
+     */
+    function changeTokenFee(address token, uint256 fee)
+        external;
 
     /**
      * @notice set new prices diviation percent.

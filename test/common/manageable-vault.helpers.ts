@@ -123,6 +123,30 @@ export const changeTokenAllowanceTest = async (
   expect(allowance).eq(newAllowance);
 };
 
+export const changeTokenFeeTest = async (
+  { vault, owner }: CommonParamsChangePaymentToken,
+  token: string,
+  newFee: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).changeTokenFee(token, newFee),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(vault.connect(opt?.from ?? owner).changeTokenFee(token, newFee))
+    .to.emit(
+      vault,
+      vault.interface.events['ChangeTokenFee(address,address,uint256)'].name,
+    )
+    .withArgs((opt?.from ?? owner).address, token, newFee).to.not.reverted;
+
+  const fee = (await vault.tokensConfig(token)).fee;
+  expect(fee).eq(newFee);
+};
+
 export const removeWaivedFeeAccountTest = async (
   { vault, owner }: CommonParamsChangePaymentToken,
   account: string,
@@ -234,8 +258,9 @@ export const setMinAmountToDepositTest = async (
     depositVault.connect(opt?.from ?? owner).setMinAmountForFirstDeposit(value),
   ).to.emit(
     depositVault,
-    depositVault.interface.events['SetMinAmountForFirstDeposit(address,uint256)']
-      .name,
+    depositVault.interface.events[
+      'SetMinAmountForFirstDeposit(address,uint256)'
+    ].name,
   ).to.not.reverted;
 
   const newMin = await depositVault.minAmountForFirstDeposit();

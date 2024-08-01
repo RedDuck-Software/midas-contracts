@@ -246,6 +246,20 @@ abstract contract ManageableVault is
 
     /**
      * @inheritdoc IManageableVault
+     * @dev reverts if new fee > 100%
+     */
+    function changeTokenFee(address token, uint256 fee)
+        external
+        onlyVaultAdmin
+    {
+        _requireTokenExists(token);
+        require(fee <= ONE_HUNDRED_PERCENT, "MV: fee > 100%");
+        tokensConfig[token].fee = fee;
+        emit ChangeTokenFee(token, msg.sender, fee);
+    }
+
+    /**
+     * @inheritdoc IManageableVault
      * @dev reverts if new tolerance zero
      */
     function setVariationTolerance(uint256 tolerance) external onlyVaultAdmin {

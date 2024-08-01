@@ -33,6 +33,7 @@ import {
   setMinAmountToDepositTest,
   setVariabilityToleranceTest,
   withdrawTest,
+  changeTokenFeeTest,
 } from './common/manageable-vault.helpers';
 import { sanctionUser } from './common/with-sanctions-list.helpers';
 
@@ -911,6 +912,64 @@ describe('DepositVault', function () {
       );
 
       expect(tokenConfigBefore.allowance).eq(tokenConfigAfter.allowance);
+    });
+  });
+
+  describe('changeTokenFee()', () => {
+    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { depositVault, regularAccounts, owner } = await loadFixture(
+        defaultDeploy,
+      );
+      await changeTokenFeeTest(
+        { vault: depositVault, owner },
+        ethers.constants.AddressZero,
+        0,
+        { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
+      );
+    });
+    it('should fail: token not exist', async () => {
+      const { depositVault, owner, stableCoins } = await loadFixture(
+        defaultDeploy,
+      );
+      await changeTokenFeeTest(
+        { vault: depositVault, owner },
+        stableCoins.dai.address,
+        0,
+        { revertMessage: 'MV: token not exists' },
+      );
+    });
+    it('should fail: fee > 100%', async () => {
+      const { depositVault, owner, stableCoins, dataFeed } = await loadFixture(
+        defaultDeploy,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await changeTokenFeeTest(
+        { vault: depositVault, owner },
+        stableCoins.dai.address,
+        10001,
+        { revertMessage: 'MV: fee > 100%' },
+      );
+    });
+    it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { depositVault, owner, stableCoins, dataFeed } = await loadFixture(
+        defaultDeploy,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await changeTokenFeeTest(
+        { vault: depositVault, owner },
+        stableCoins.dai.address,
+        100,
+      );
     });
   });
 
