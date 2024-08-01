@@ -5,7 +5,12 @@ import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 import { acErrors, blackList, greenList } from './common/ac.helpers';
-import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
+import {
+  approveBase18,
+  mintToken,
+  pauseVault,
+  pauseVaultFn,
+} from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import {
   approveRequestTest,
@@ -942,6 +947,41 @@ describe('DepositVault', function () {
       );
     });
 
+    it('should fail: when function paused', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+      await mintToken(stableCoins.dai, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        depositVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await pauseVaultFn(depositVault, 0);
+      await depositInstantTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        100,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'Pause: fn paused',
+        },
+      );
+    });
+
     it('should fail: when rounding is invalid', async () => {
       const {
         owner,
@@ -1507,6 +1547,41 @@ describe('DepositVault', function () {
         0,
         {
           revertMessage: 'DV: invalid amount',
+        },
+      );
+    });
+
+    it('should fail: when function paused', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+      await mintToken(stableCoins.dai, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        depositVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await pauseVaultFn(depositVault, 1);
+      await depositRequestTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        100,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'Pause: fn paused',
         },
       );
     });

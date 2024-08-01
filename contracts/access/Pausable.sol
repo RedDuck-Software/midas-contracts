@@ -11,6 +11,26 @@ import "../access/WithMidasAccessControl.sol";
  * @author RedDuck Software
  */
 abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
+
+     /**
+     * @param caller caller address (msg.sender)
+     * @param fn function id
+     */
+    event PauseFn(address indexed caller, uint8 fn);
+
+    /**
+     * @param caller caller address (msg.sender)
+     * @param fn function id
+     */
+    event UnpauseFn(address indexed caller, uint8 fn);
+
+    mapping(uint8 => bool) public fnPaused;
+
+    modifier whenFnNotPaused(uint8 fn) {
+        _requireNotPaused();
+        require(!fnPaused[fn], "Pause: fn paused");
+        _;
+    }
     /**
      * @dev checks that a given `account`
      * has a determinedPauseAdminRole
@@ -36,6 +56,26 @@ abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
 
     function unpause() external onlyPauseAdmin {
         _unpause();
+    }
+
+    /**
+     * @dev pause specific function
+     * @param fn function id
+     */
+    function pauseFn(uint8 fn) external onlyPauseAdmin {
+        require(!fnPaused[fn], "Pause: fn paused");
+        fnPaused[fn] = true;
+        emit PauseFn(msg.sender, fn);
+    }
+
+    /**
+     * @dev unpause specific function
+     * @param fn function id
+     */
+    function unpauseFn(uint8 fn) external onlyPauseAdmin {
+        require(fnPaused[fn], "Pause: fn unpaused");
+        fnPaused[fn] = false;
+        emit UnpauseFn(msg.sender, fn);
     }
 
     /**

@@ -104,10 +104,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function redeemInstant(address tokenOut, uint256 amountMTokenIn)
         external
+        whenFnNotPaused(uint8(RedemptionVaultFunctions.INSTANT_REDEEM))
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
-        whenNotPaused
     {
         address user = msg.sender;
 
@@ -120,18 +120,18 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         uint256 tokenDecimals = _tokenDecimals(tokenOut);
 
+        uint256 amountMTokenInCopy = amountMTokenIn;
+        address tokenOutCopy = tokenOut;
+
         (uint256 amountMTokenInUsd, uint256 mTokenRate) = _convertMTokenToUsd(
-            amountMTokenIn
+            amountMTokenInCopy
         );
         (uint256 amountTokenOut, uint256 tokenOutRate) = _convertUsdToToken(
             amountMTokenInUsd,
-            tokenOut
+            tokenOutCopy
         );
 
-        _requireAndUpdateAllowance(tokenOut, amountTokenOut);
-
-        uint256 amountMTokenInCopy = amountMTokenIn;
-        address tokenOutCopy = tokenOut;
+        _requireAndUpdateAllowance(tokenOutCopy, amountTokenOut);
 
         mToken.burn(user, amountMTokenWithoutFee);
         if (feeAmount > 0)
@@ -163,7 +163,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function redeemRequest(address tokenOut, uint256 amountMTokenIn)
         external
-        whenNotPaused
+        whenFnNotPaused(uint8(RedemptionVaultFunctions.REDEEM_REQUEST))
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
@@ -178,7 +178,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function redeemFiatRequest(uint256 amountMTokenIn)
         external
-        whenNotPaused
+        whenFnNotPaused(uint8(RedemptionVaultFunctions.FIAT_REDEEM_REQUEST))
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)

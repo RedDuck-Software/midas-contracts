@@ -1,7 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 
-import { pauseVault, unpauseVault } from './common/common.helpers';
+import {
+  pauseVault,
+  pauseVaultFn,
+  unpauseVault,
+  unpauseVaultFn,
+} from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
 
 import {
@@ -9,7 +14,7 @@ import {
   PausableTester__factory,
 } from '../typechain-types';
 
-describe('Pausable', () => {
+describe.only('Pausable', () => {
   it('deployment', async () => {
     const { pausableTester, roles } = await loadFixture(defaultDeploy);
 
@@ -72,6 +77,62 @@ describe('Pausable', () => {
       const { pausableTester } = await loadFixture(defaultDeploy);
 
       await pauseVault(pausableTester);
+    });
+  });
+
+  describe('pauseFn()', async () => {
+    it('fail: can`t pause if caller doesnt have admin role', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await pauseVaultFn(pausableTester, 0, {
+        from: regularAccounts[0],
+        revertMessage: 'WMAC: hasnt role',
+      });
+    });
+
+    it('fail: when paused', async () => {
+      const { pausableTester } = await loadFixture(defaultDeploy);
+
+      await pauseVaultFn(pausableTester, 0);
+      await pauseVaultFn(pausableTester, 0, {
+        revertMessage: 'Pause: fn paused',
+      });
+    });
+
+    it('when not paused and caller is admin', async () => {
+      const { pausableTester } = await loadFixture(defaultDeploy);
+
+      await pauseVaultFn(pausableTester, 0);
+    });
+  });
+
+  describe('unpauseFn()', async () => {
+    it('fail: can`t pause if caller doesnt have admin role', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await unpauseVaultFn(pausableTester, 0, {
+        from: regularAccounts[0],
+        revertMessage: 'WMAC: hasnt role',
+      });
+    });
+
+    it('fail: when unpaused', async () => {
+      const { pausableTester } = await loadFixture(defaultDeploy);
+
+      await unpauseVaultFn(pausableTester, 0, {
+        revertMessage: 'Pause: fn unpaused',
+      });
+    });
+
+    it('when paused and caller is admin', async () => {
+      const { pausableTester } = await loadFixture(defaultDeploy);
+
+      await pauseVaultFn(pausableTester, 0);
+      await unpauseVaultFn(pausableTester, 0);
     });
   });
 

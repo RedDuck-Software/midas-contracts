@@ -5,7 +5,7 @@ import { parseUnits } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 import { acErrors, blackList, greenList } from './common/ac.helpers';
-import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
+import { approveBase18, mintToken, pauseVault, pauseVaultFn } from './common/common.helpers';
 import { setRoundData } from './common/data-feed.helpers';
 import { defaultDeploy } from './common/fixtures';
 import {
@@ -982,6 +982,41 @@ describe('RedemptionVault', function () {
       );
     });
 
+    it('should fail: when function paused', async () => {
+      const {
+        owner,
+        redemptionVault,
+        stableCoins,
+        mTBILL,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+      await mintToken(mTBILL, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        redemptionVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await pauseVaultFn(redemptionVault, 0);
+      await redeemInstantTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        100,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'Pause: fn paused',
+        },
+      );
+    });
+
     it('should fail: call with insufficient allowance', async () => {
       const {
         owner,
@@ -1549,6 +1584,41 @@ describe('RedemptionVault', function () {
       );
     });
 
+    it('should fail: when function paused', async () => {
+      const {
+        owner,
+        redemptionVault,
+        stableCoins,
+        mTBILL,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+      await mintToken(mTBILL, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        redemptionVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await pauseVaultFn(redemptionVault, 1);
+      await redeemRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        100,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'Pause: fn paused',
+        },
+      );
+    });
+
     it('should fail: call with insufficient allowance', async () => {
       const {
         owner,
@@ -2007,6 +2077,40 @@ describe('RedemptionVault', function () {
         100,
         {
           revertMessage: 'ERC20: insufficient allowance',
+        },
+      );
+    });
+
+    it('should fail: when function paused', async () => {
+      const {
+        owner,
+        redemptionVault,
+        stableCoins,
+        mTBILL,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        regularAccounts,
+      } = await loadFixture(defaultDeploy);
+      await mintToken(mTBILL, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        redemptionVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+      );
+      await pauseVaultFn(redemptionVault, 2);
+      await redeemFiatRequestTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        100,
+        {
+          from: regularAccounts[0],
+          revertMessage: 'Pause: fn paused',
         },
       );
     });

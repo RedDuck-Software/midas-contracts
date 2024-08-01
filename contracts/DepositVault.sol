@@ -104,10 +104,10 @@ contract DepositVault is ManageableVault, IDepositVault {
         bytes32 referrerId
     )
         external
+        whenFnNotPaused(uint8(DepositVaultFunctions.INSTANT_MINT))
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
-        whenNotPaused
     {
         address user = msg.sender;
 
@@ -165,13 +165,17 @@ contract DepositVault is ManageableVault, IDepositVault {
         bytes32 referrerId
     )
         external
-        whenNotPaused
+        whenFnNotPaused(uint8(DepositVaultFunctions.MINT_REQUEST))
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
         returns (uint256 requestId)
     {
         address user = msg.sender;
+
+        address tokenInCopy = tokenIn;
+        uint256 amountTokenCopy = amountToken;
+        bytes32 referrerIdCopy = referrerId;
 
         (
             uint256 tokenAmountInUsd,
@@ -181,10 +185,10 @@ contract DepositVault is ManageableVault, IDepositVault {
             ,
             uint256 tokenOutRate,
             uint256 tokenDecimals
-        ) = _calcAndValidateDeposit(user, tokenIn, amountToken, false);
+        ) = _calcAndValidateDeposit(user, tokenInCopy, amountTokenCopy, false);
 
         _tokenTransferFromUser(
-            tokenIn,
+            tokenInCopy,
             tokensReceiver,
             amountTokenWithoutFee,
             tokenDecimals
@@ -192,29 +196,28 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         if (feeAmount > 0)
             _tokenTransferFromUser(
-                tokenIn,
+                tokenInCopy,
                 feeReceiver,
                 feeAmount,
                 tokenDecimals
             );
 
         lastRequestId.increment();
-        requestId = lastRequestId.current();
+        uint256 newRequestId = lastRequestId.current();
+        requestId = newRequestId;
 
-        mintRequests[requestId] = Request(
+        mintRequests[newRequestId] = Request(
             user,
-            tokenIn,
+            tokenInCopy,
             RequestStatus.Pending,
             tokenAmountInUsd,
             tokenOutRate
         );
 
-        bytes32 referrerIdCopy = referrerId;
-
         emit DepositRequest(
-            requestId,
+            newRequestId,
             user,
-            tokenIn,
+            tokenInCopy,
             tokenAmountInUsd,
             feeAmount,
             tokenOutRate,

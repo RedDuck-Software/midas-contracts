@@ -64,6 +64,46 @@ export const pauseVault = async (
   expect(await vault.paused()).eq(true);
 };
 
+export const pauseVaultFn = async (
+  vault: Pausable,
+  fnId: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  const [defaultSigner] = await ethers.getSigners();
+
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? defaultSigner).pauseFn(fnId),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(await vault.connect(opt?.from ?? defaultSigner).pauseFn(fnId))
+    .not.reverted;
+
+  expect(await vault.fnPaused(fnId)).eq(true);
+};
+
+export const unpauseVaultFn = async (
+  vault: Pausable,
+  fnId: BigNumberish,
+  opt?: OptionalCommonParams,
+) => {
+  const [defaultSigner] = await ethers.getSigners();
+
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? defaultSigner).unpauseFn(fnId),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(await vault.connect(opt?.from ?? defaultSigner).unpauseFn(fnId))
+    .not.reverted;
+
+  expect(await vault.fnPaused(fnId)).eq(false);
+};
+
 export const unpauseVault = async (
   vault: Pausable,
   opt?: OptionalCommonParams,
