@@ -561,7 +561,7 @@ describe('RedemptionVault', function () {
     it('should fail: if new value greater then 100%', async () => {
       const { redemptionVault, owner } = await loadFixture(defaultDeploy);
       await setInstantFeeTest({ vault: redemptionVault, owner }, 10001, {
-        revertMessage: 'MV: instantFee > 100%',
+        revertMessage: 'fee > 100%',
       });
     });
 
@@ -587,7 +587,7 @@ describe('RedemptionVault', function () {
       await setVariabilityToleranceTest(
         { vault: redemptionVault, owner },
         ethers.constants.Zero,
-        { revertMessage: 'MV: zero tolerance' },
+        { revertMessage: 'fee == 0' },
       );
     });
 
@@ -596,7 +596,7 @@ describe('RedemptionVault', function () {
       await setVariabilityToleranceTest(
         { vault: redemptionVault, owner },
         10001,
-        { revertMessage: 'MV: tolerance > 100%' },
+        { revertMessage: 'fee > 100%' },
       );
     });
 
@@ -994,7 +994,7 @@ describe('RedemptionVault', function () {
         { vault: redemptionVault, owner },
         stableCoins.dai.address,
         10001,
-        { revertMessage: 'MV: fee > 100%' },
+        { revertMessage: 'fee > 100%' },
       );
     });
     it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {

@@ -88,10 +88,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _variationTolerance,
             _minAmount
         );
-        require(
-            _fiatRedemptionInitParams.fiatAdditionalFee <= ONE_HUNDRED_PERCENT,
-            "fiatAdditionalFee > 100%"
-        );
+        _validateFee(_fiatRedemptionInitParams.fiatAdditionalFee, false);
+       
         minFiatRedeemAmount = _minFiatRedeemAmount;
         fiatAdditionalFee = _fiatRedemptionInitParams.fiatAdditionalFee;
         fiatFlatFee = _fiatRedemptionInitParams.fiatFlatFee;
@@ -245,7 +243,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @inheritdoc IRedemptionVault
      */
     function setFiatAdditionalFee(uint256 newFee) external onlyVaultAdmin {
-        require(newFee <= ONE_HUNDRED_PERCENT, "RV: fiatAdditionalFee > 100%");
+        _validateFee(newFee, false);
+
         fiatAdditionalFee = newFee;
 
         emit SetFiatAdditionalFee(msg.sender, newFee);

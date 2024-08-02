@@ -536,7 +536,7 @@ describe('DepositVault', function () {
     it('should fail: if new value greater then 100%', async () => {
       const { depositVault, owner } = await loadFixture(defaultDeploy);
       await setInstantFeeTest({ vault: depositVault, owner }, 10001, {
-        revertMessage: 'MV: instantFee > 100%',
+        revertMessage: 'fee > 100%',
       });
     });
 
@@ -562,7 +562,7 @@ describe('DepositVault', function () {
       await setVariabilityToleranceTest(
         { vault: depositVault, owner },
         ethers.constants.Zero,
-        { revertMessage: 'MV: zero tolerance' },
+        { revertMessage: 'fee == 0' },
       );
     });
 
@@ -952,7 +952,7 @@ describe('DepositVault', function () {
         { vault: depositVault, owner },
         stableCoins.dai.address,
         10001,
-        { revertMessage: 'MV: fee > 100%' },
+        { revertMessage: 'fee > 100%' },
       );
     });
     it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
@@ -2188,7 +2188,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = 0
+      const requestId = 0;
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2274,7 +2274,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = 0
+      const requestId = 0;
       await safeApproveRequestTest(
         {
           depositVault,
@@ -2318,7 +2318,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = 0
+      const requestId = 0;
 
       await safeApproveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2361,7 +2361,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = 0
+      const requestId = 0;
 
       await safeApproveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2441,7 +2441,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = 0
+      const requestId = 0;
 
       await rejectRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2748,7 +2748,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100_000,
       );
-      const requestId = 0
+      const requestId = 0;
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
