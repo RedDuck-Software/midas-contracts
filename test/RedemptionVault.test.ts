@@ -300,7 +300,7 @@ describe('RedemptionVault', function () {
           0,
           0,
         ),
-      ).revertedWith('zero tolerance');
+      ).revertedWith('fee == 0');
     });
   });
 

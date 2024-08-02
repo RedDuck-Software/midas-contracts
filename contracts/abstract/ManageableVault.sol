@@ -166,8 +166,7 @@ abstract contract ManageableVault is
         _validateAddress(_feeReceiver, true);
         _validateAddress(_mTokenDataFeed, false);
         require(_instantDailyLimit > 0, "zero limit");
-        require(_variationTolerance > 0, "zero tolerance");
-        _validateFee(_variationTolerance, false);
+        _validateFee(_variationTolerance, true);
         _validateFee(instantFee, false);
 
         mToken = IMTbill(_mToken);

@@ -290,7 +290,7 @@ describe('DepositVault', function () {
           0,
           parseUnits('100'),
         ),
-      ).revertedWith('zero tolerance');
+      ).revertedWith('fee == 0');
     });
   });
 
