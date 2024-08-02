@@ -471,12 +471,12 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
                 "RV: tokenOut != fiat"
             );
             feeAmount += fiatFlatFee;
-            require(amountMTokenIn > feeAmount, "RV: amountMTokenIn < fee");
         } else {
             _requireTokenExists(tokenOut);
         }
         
+        require(amountMTokenIn > feeAmount, "RV: amountMTokenIn < fee");
+
         amountMTokenWithoutFee = amountMTokenIn - feeAmount;
-        require(amountMTokenWithoutFee > 0, "RV: tokenOut amount zero");
     }
 }

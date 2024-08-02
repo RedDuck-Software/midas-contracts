@@ -1314,7 +1314,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         100,
         {
-          revertMessage: 'RV: tokenOut amount zero',
+          revertMessage: 'RV: amountMTokenIn < fee',
         },
       );
 
@@ -1847,7 +1847,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         100,
         {
-          revertMessage: 'RV: tokenOut amount zero',
+          revertMessage: 'RV: amountMTokenIn < fee',
         },
       );
     });
