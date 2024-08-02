@@ -246,7 +246,10 @@ export const redeemFiatRequestTest = async (
     false,
     fiatAdditionalFee,
   );
-  const fee = amountIn.mul(feePercent).div(hundredPercent).add(flatFee);
+  const fee = amountIn
+    .mul(feePercent)
+    .div(hundredPercent)
+    .add(waivedFee ? 0 : flatFee);
   const amountInWithoutFee = amountIn.sub(fee);
 
   await expect(redemptionVault.connect(sender).redeemFiatRequest(amountIn))
@@ -284,7 +287,7 @@ export const redeemFiatRequestTest = async (
   expect(balanceAfterReceiver).eq(balanceBeforeReceiver);
   expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver.add(fee));
   if (waivedFee) {
-    expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver.add(flatFee));
+    expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
   }
 };
 

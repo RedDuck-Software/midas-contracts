@@ -47,7 +47,7 @@ import {
   MBasisDepositVault__factory,
 } from '../typechain-types';
 
-describe.only('DepositVault', function () {
+describe('DepositVault', function () {
   it('deployment', async () => {
     const {
       depositVault,

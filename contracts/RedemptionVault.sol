@@ -470,7 +470,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
                 tokenOut == MANUAL_FULLFILMENT_TOKEN,
                 "RV: tokenOut != fiat"
             );
-            feeAmount += fiatFlatFee;
+            if(!waivedFeeRestriction[user]) feeAmount += fiatFlatFee;
         } else {
             _requireTokenExists(tokenOut);
         }
