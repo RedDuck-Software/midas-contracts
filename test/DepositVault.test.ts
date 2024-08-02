@@ -47,7 +47,7 @@ import {
   MBasisDepositVault__factory,
 } from '../typechain-types';
 
-describe('DepositVault', function () {
+describe.only('DepositVault', function () {
   it('deployment', async () => {
     const {
       depositVault,
@@ -1184,13 +1184,14 @@ describe('DepositVault', function () {
       await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
 
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+      await setInstantDailyLimitTest({ vault: depositVault, owner }, 150_000);
 
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
         99_999,
         {
-          revertMessage: 'DV: usd amount < min',
+          revertMessage: 'DV: mint amount < min',
         },
       );
     });
@@ -1217,6 +1218,7 @@ describe('DepositVault', function () {
       await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
 
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+      await setInstantDailyLimitTest({ vault: depositVault, owner }, 150_000);
 
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1797,7 +1799,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         99_999,
         {
-          revertMessage: 'DV: usd amount < min',
+          revertMessage: 'DV: mint amount < min',
         },
       );
     });
@@ -2545,16 +2547,20 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1);
 
-      await mintToken(stableCoins.dai, owner, 100_000);
-      await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
+      await mintToken(stableCoins.dai, owner, 102_000);
+      await approveBase18(owner, stableCoins.dai, depositVault, 102_000);
 
-      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 4);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+      await setInstantDailyLimitTest(
+        { vault: depositVault, owner },
+        parseUnits('150000'),
+      );
 
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
-        100_000,
+        102_000,
       );
     });
 
@@ -2577,16 +2583,20 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1);
 
-      await mintToken(stableCoins.dai, owner, 100_101);
-      await approveBase18(owner, stableCoins.dai, depositVault, 100_101);
+      await mintToken(stableCoins.dai, owner, 103_101);
+      await approveBase18(owner, stableCoins.dai, depositVault, 103_101);
 
-      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 63);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+      await setInstantDailyLimitTest(
+        { vault: depositVault, owner },
+        parseUnits('150000'),
+      );
 
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
-        100_001,
+        103_001,
       );
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2744,16 +2754,17 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1);
 
-      await mintToken(stableCoins.dai, owner, 100_000);
-      await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
+      await mintToken(stableCoins.dai, owner, 105_000);
+      await approveBase18(owner, stableCoins.dai, depositVault, 105_000);
 
-      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 4);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+      await setInstantDailyLimitTest({ vault: depositVault, owner }, 150_000);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
-        100_000,
+        102_000,
       );
       const requestId = 0;
 
@@ -2783,16 +2794,17 @@ describe('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1);
 
-      await mintToken(stableCoins.dai, owner, 100_101);
-      await approveBase18(owner, stableCoins.dai, depositVault, 100_101);
+      await mintToken(stableCoins.dai, owner, 105_101);
+      await approveBase18(owner, stableCoins.dai, depositVault, 105_101);
 
-      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 63);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
       await setMinAmountToDepositTest({ depositVault, owner }, 100_000);
+      await setInstantDailyLimitTest({ vault: depositVault, owner }, 150_000);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
-        100_001,
+        102_001,
       );
       let requestId = 0;
 

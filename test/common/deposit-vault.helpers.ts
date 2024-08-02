@@ -70,9 +70,7 @@ export const depositInstantTest = async (
   );
   const balanceMtBillBeforeUser = await balanceOfBase18(mTBILL, sender.address);
 
-  const totalDepositedBefore = await depositVault.totalDeposited(
-    sender.address,
-  );
+  const totalMintedBefore = await depositVault.totalMinted(sender.address);
 
   const mTokenRate = await mTokenToUsdDataFeed.getDataInBase18();
 
@@ -107,7 +105,7 @@ export const depositInstantTest = async (
       constants.HashZero,
     ).to.not.reverted;
 
-  const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
+  const totalMintedAfter = await depositVault.totalMinted(sender.address);
 
   const balanceAfterContract = await balanceOfBase18(
     tokenContract,
@@ -121,7 +119,7 @@ export const depositInstantTest = async (
   const balanceMtBillAfterUser = await balanceOfBase18(mTBILL, sender.address);
 
   expect(balanceMtBillAfterUser.sub(balanceMtBillBeforeUser)).eq(mintAmount);
-  expect(totalDepositedAfter).eq(totalDepositedBefore.add(actualAmountInUsd));
+  expect(totalMintedAfter).eq(totalMintedBefore.add(mintAmount));
   expect(balanceAfterContract).eq(
     balanceBeforeContract.add(amountInWithoutFee),
   );
@@ -263,9 +261,7 @@ export const approveRequestTest = async (
   }
   const balanceMtBillBeforeUser = await balanceOfBase18(mTBILL, sender.address);
 
-  const totalDepositedBefore = await depositVault.totalDeposited(
-    sender.address,
-  );
+  const totalDepositedBefore = await depositVault.totalMinted(sender.address);
 
   const requestData = await depositVault.mintRequests(requestId);
 
@@ -290,16 +286,14 @@ export const approveRequestTest = async (
 
   const requestDataAfter = await depositVault.mintRequests(requestId);
 
-  const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
+  const totalDepositedAfter = await depositVault.totalMinted(sender.address);
 
   const balanceMtBillAfterUser = await balanceOfBase18(mTBILL, sender.address);
 
   expect(balanceMtBillAfterUser.sub(balanceMtBillBeforeUser)).eq(
     expectedMintAmount,
   );
-  expect(totalDepositedAfter).eq(
-    totalDepositedBefore.add(requestData.depositedUsdAmount),
-  );
+  expect(totalDepositedAfter).eq(totalDepositedBefore.add(expectedMintAmount));
   expect(requestDataAfter.sender).eq(requestData.sender);
   expect(requestDataAfter.tokenIn).eq(requestData.tokenIn);
   expect(requestDataAfter.tokenOutRate).eq(newRate);
@@ -325,9 +319,7 @@ export const safeApproveRequestTest = async (
   }
   const balanceMtBillBeforeUser = await balanceOfBase18(mTBILL, sender.address);
 
-  const totalDepositedBefore = await depositVault.totalDeposited(
-    sender.address,
-  );
+  const totalDepositedBefore = await depositVault.totalMinted(sender.address);
 
   const requestData = await depositVault.mintRequests(requestId);
 
@@ -354,16 +346,14 @@ export const safeApproveRequestTest = async (
 
   const requestDataAfter = await depositVault.mintRequests(requestId);
 
-  const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
+  const totalDepositedAfter = await depositVault.totalMinted(sender.address);
 
   const balanceMtBillAfterUser = await balanceOfBase18(mTBILL, sender.address);
 
   expect(balanceMtBillAfterUser.sub(balanceMtBillBeforeUser)).eq(
     expectedMintAmount,
   );
-  expect(totalDepositedAfter).eq(
-    totalDepositedBefore.add(requestData.depositedUsdAmount),
-  );
+  expect(totalDepositedAfter).eq(totalDepositedBefore.add(expectedMintAmount));
   expect(requestDataAfter.sender).eq(requestData.sender);
   expect(requestDataAfter.tokenIn).eq(requestData.tokenIn);
   expect(requestDataAfter.tokenOutRate).eq(newRate);
@@ -388,9 +378,7 @@ export const rejectRequestTest = async (
   }
   const balanceMtBillBeforeUser = await balanceOfBase18(mTBILL, sender.address);
 
-  const totalDepositedBefore = await depositVault.totalDeposited(
-    sender.address,
-  );
+  const totalDepositedBefore = await depositVault.totalMinted(sender.address);
 
   const requestData = await depositVault.mintRequests(requestId);
 
@@ -403,7 +391,7 @@ export const rejectRequestTest = async (
 
   const requestDataAfter = await depositVault.mintRequests(requestId);
 
-  const totalDepositedAfter = await depositVault.totalDeposited(sender.address);
+  const totalDepositedAfter = await depositVault.totalMinted(sender.address);
 
   const balanceMtBillAfterUser = await balanceOfBase18(mTBILL, sender.address);
 

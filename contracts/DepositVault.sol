@@ -31,9 +31,9 @@ contract DepositVault is ManageableVault, IDepositVault {
     mapping(uint256 => Request) public mintRequests;
 
     /**
-     * @dev depositor address => amount deposited
+     * @dev depositor address => amount minted
      */
-    mapping(address => uint256) public totalDeposited;
+    mapping(address => uint256) public totalMinted;
 
     /**
      * @dev leaving a storage gap for futures updates
@@ -108,7 +108,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             uint256 tokenDecimals
         ) = _calcAndValidateDeposit(user, tokenIn, amountToken, true);
 
-        totalDeposited[user] += tokenAmountInUsd;
+        totalMinted[user] += mintAmount;
 
         _requireAndUpdateLimit(mintAmount);
 
@@ -276,15 +276,15 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param user user address
      * @param amountUsdIn amount of USD
      */
-    function _validateAmountUsdIn(address user, uint256 amountUsdIn)
+    function _validateMinAmount(address user, uint256 amountUsdIn, uint256 amountMTokenWithoutFee)
         internal
         view
     {
         require(amountUsdIn >= minAmount, "DV: usd amount < min");
 
-        if (totalDeposited[user] != 0) return;
+        if (totalMinted[user] != 0) return;
 
-        require(amountUsdIn >= minMTokenAmountForFirstDeposit, "DV: usd amount < min");
+        require(amountMTokenWithoutFee >= minMTokenAmountForFirstDeposit, "DV: mint amount < min");
     }
 
     /**
@@ -307,8 +307,6 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         if(isSafe) _requireVariationTolerance(request.tokenOutRate, newOutRate);
 
-        totalDeposited[request.sender] += request.depositedUsdAmount;
-
         uint256 feeUsdAmount = _getFeeAmount(
             request.sender,
             request.tokenIn,
@@ -321,6 +319,8 @@ contract DepositVault is ManageableVault, IDepositVault {
             newOutRate;
 
         mToken.mint(request.sender, amountMToken);
+
+        totalMinted[request.sender] += amountMToken;
 
         request.status = RequestStatus.Processed;
         request.tokenOutRate = newOutRate;
@@ -371,15 +371,12 @@ contract DepositVault is ManageableVault, IDepositVault {
         );
         tokenAmountInUsd = amountInUsd;
         tokenInRate = tokenInUSDRate;
-
-        if (!isFreeFromMinAmount[user]) {
-            _validateAmountUsdIn(user, tokenAmountInUsd);
-        }
+        address userCopy = user;
 
         _requireAndUpdateAllowance(tokenIn, amountToken);
 
         feeTokenAmount = _truncate(
-            _getFeeAmount(user, tokenIn, amountToken, isInstant, 0),
+            _getFeeAmount(userCopy, tokenIn, amountToken, isInstant, 0),
             tokenDecimals
         );
         amountTokenWithoutFee = amountToken - feeTokenAmount;
@@ -391,6 +388,10 @@ contract DepositVault is ManageableVault, IDepositVault {
         );
         mintAmount = mTokenAmount;
         tokenOutRate = mTokenRate;
+
+        if (!isFreeFromMinAmount[userCopy]) {
+            _validateMinAmount(userCopy, tokenAmountInUsd, mintAmount);
+        }
         require(mintAmount > 0, "DV: invalid mint amount");
     }
 
