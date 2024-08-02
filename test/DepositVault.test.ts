@@ -1068,6 +1068,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1095,6 +1096,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1122,6 +1124,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1225,7 +1228,7 @@ describe.only('DepositVault', function () {
         stableCoins.dai,
         99,
         {
-          revertMessage: 'DV: usd amount < min',
+          revertMessage: 'DV: mToken amount < min',
         },
       );
     });
@@ -1449,6 +1452,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1482,6 +1486,7 @@ describe.only('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1512,6 +1517,7 @@ describe.only('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1575,6 +1581,7 @@ describe.only('DepositVault', function () {
         { vault: depositVault, owner },
         owner.address,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed, waivedFee: true },
         stableCoins.dai,
@@ -1677,6 +1684,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1704,6 +1712,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1731,6 +1740,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1948,6 +1958,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1979,6 +1990,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
 
@@ -2009,6 +2021,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         100,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
       await depositRequestTest(
@@ -2068,6 +2081,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         100,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
       await addWaivedFeeAccountTest(
@@ -2148,6 +2162,7 @@ describe.only('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2191,6 +2206,7 @@ describe.only('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2277,6 +2293,7 @@ describe.only('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2321,6 +2338,7 @@ describe.only('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2364,6 +2382,7 @@ describe.only('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2444,6 +2463,7 @@ describe.only('DepositVault', function () {
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2592,6 +2612,7 @@ describe.only('DepositVault', function () {
         { vault: depositVault, owner },
         parseUnits('150000'),
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2623,6 +2644,7 @@ describe.only('DepositVault', function () {
       await approveBase18(owner, stableCoins.dai, depositVault, 100);
       await approveBase18(owner, stableCoins.usdc, depositVault, 125);
       await approveBase18(owner, stableCoins.usdt, depositVault, 114);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await addPaymentTokenTest(
         { vault: depositVault, owner },
@@ -2864,6 +2886,7 @@ describe.only('DepositVault', function () {
         dataFeed.address,
         0,
       );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
 
       await setRoundData({ mockedAggregator }, 1.04);
       await depositRequestTest(

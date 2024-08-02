@@ -274,13 +274,13 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev validates that inputted USD amount >= minAmountToDepositInUsd()
      * and amount >= minAmount()
      * @param user user address
-     * @param amountUsdIn amount of USD
+     * @param amountMTokenWithoutFee amount of mToken without fee
      */
-    function _validateMinAmount(address user, uint256 amountUsdIn, uint256 amountMTokenWithoutFee)
+    function _validateMinAmount(address user, uint256 amountMTokenWithoutFee)
         internal
         view
     {
-        require(amountUsdIn >= minAmount, "DV: usd amount < min");
+        require(amountMTokenWithoutFee >= minAmount, "DV: mToken amount < min");
 
         if (totalMinted[user] != 0) return;
 
@@ -390,7 +390,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         tokenOutRate = mTokenRate;
 
         if (!isFreeFromMinAmount[userCopy]) {
-            _validateMinAmount(userCopy, tokenAmountInUsd, mintAmount);
+            _validateMinAmount(userCopy, mintAmount);
         }
         require(mintAmount > 0, "DV: invalid mint amount");
     }
