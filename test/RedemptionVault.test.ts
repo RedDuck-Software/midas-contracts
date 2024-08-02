@@ -1333,7 +1333,7 @@ describe('RedemptionVault', function () {
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
         100,
-        { revertMessage: 'RV: tokenOut amount zero' },
+        { revertMessage: 'RV: amountMTokenIn < fee' },
       );
     });
 
