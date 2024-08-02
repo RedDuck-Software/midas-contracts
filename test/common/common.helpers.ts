@@ -66,42 +66,44 @@ export const pauseVault = async (
 
 export const pauseVaultFn = async (
   vault: Pausable,
-  fnId: BigNumberish,
+  fnSelector: string,
   opt?: OptionalCommonParams,
 ) => {
   const [defaultSigner] = await ethers.getSigners();
 
   if (opt?.revertMessage) {
     await expect(
-      vault.connect(opt?.from ?? defaultSigner).pauseFn(fnId),
+      vault.connect(opt?.from ?? defaultSigner).pauseFn(fnSelector),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  await expect(await vault.connect(opt?.from ?? defaultSigner).pauseFn(fnId))
-    .not.reverted;
+  await expect(
+    await vault.connect(opt?.from ?? defaultSigner).pauseFn(fnSelector),
+  ).not.reverted;
 
-  expect(await vault.fnPaused(fnId)).eq(true);
+  expect(await vault.fnPaused(fnSelector)).eq(true);
 };
 
 export const unpauseVaultFn = async (
   vault: Pausable,
-  fnId: BigNumberish,
+  fnSelector: string,
   opt?: OptionalCommonParams,
 ) => {
   const [defaultSigner] = await ethers.getSigners();
 
   if (opt?.revertMessage) {
     await expect(
-      vault.connect(opt?.from ?? defaultSigner).unpauseFn(fnId),
+      vault.connect(opt?.from ?? defaultSigner).unpauseFn(fnSelector),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
-  await expect(await vault.connect(opt?.from ?? defaultSigner).unpauseFn(fnId))
-    .not.reverted;
+  await expect(
+    await vault.connect(opt?.from ?? defaultSigner).unpauseFn(fnSelector),
+  ).not.reverted;
 
-  expect(await vault.fnPaused(fnId)).eq(false);
+  expect(await vault.fnPaused(fnSelector)).eq(false);
 };
 
 export const unpauseVault = async (

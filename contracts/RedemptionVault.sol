@@ -100,7 +100,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function redeemInstant(address tokenOut, uint256 amountMTokenIn)
         external
-        whenFnNotPaused(uint8(RedemptionVaultFunctions.INSTANT_REDEEM))
+        whenFnNotPaused(this.redeemInstant.selector)
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
@@ -159,7 +159,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function redeemRequest(address tokenOut, uint256 amountMTokenIn)
         external
-        whenFnNotPaused(uint8(RedemptionVaultFunctions.REDEEM_REQUEST))
+        whenFnNotPaused(this.redeemRequest.selector)
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
@@ -174,7 +174,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function redeemFiatRequest(uint256 amountMTokenIn)
         external
-        whenFnNotPaused(uint8(RedemptionVaultFunctions.FIAT_REDEEM_REQUEST))
+        whenFnNotPaused(this.redeemFiatRequest.selector)
         onlyAlwaysGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)

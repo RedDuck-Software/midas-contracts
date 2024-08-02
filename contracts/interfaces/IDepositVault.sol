@@ -19,11 +19,6 @@ struct Request {
     uint256 tokenOutRate;
 }
 
-enum DepositVaultFunctions {
-    INSTANT_MINT,
-    MINT_REQUEST
-}
-
 /**
  * @title IDepositVault
  * @author RedDuck Software

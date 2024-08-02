@@ -37,6 +37,7 @@ import {
 } from './common/manageable-vault.helpers';
 import { sanctionUser } from './common/with-sanctions-list.helpers';
 
+import { encodeFnSelector } from '../helpers/utils';
 import {
   // eslint-disable-next-line camelcase
   EUsdDepositVault__factory,
@@ -1036,7 +1037,10 @@ describe('DepositVault', function () {
         dataFeed.address,
         0,
       );
-      await pauseVaultFn(depositVault, 0);
+      const selector = encodeFnSelector(
+        'depositInstant(address,uint256,bytes32)',
+      );
+      await pauseVaultFn(depositVault, selector);
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1640,7 +1644,10 @@ describe('DepositVault', function () {
         dataFeed.address,
         0,
       );
-      await pauseVaultFn(depositVault, 1);
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+      await pauseVaultFn(depositVault, selector);
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,

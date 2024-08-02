@@ -91,7 +91,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         bytes32 referrerId
     )
         external
-        whenFnNotPaused(uint8(DepositVaultFunctions.INSTANT_MINT))
+        whenFnNotPaused(this.depositInstant.selector)
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
@@ -152,7 +152,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         bytes32 referrerId
     )
         external
-        whenFnNotPaused(uint8(DepositVaultFunctions.MINT_REQUEST))
+        whenFnNotPaused(this.depositRequest.selector)
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)

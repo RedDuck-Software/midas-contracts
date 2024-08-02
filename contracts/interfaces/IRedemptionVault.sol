@@ -26,12 +26,6 @@ struct FiatRedeptionInitParams{
     uint256 fiatFlatFee;
 }
 
-enum RedemptionVaultFunctions {
-    INSTANT_REDEEM,
-    REDEEM_REQUEST,
-    FIAT_REDEEM_REQUEST
-}
-
 /**
  * @title IRedemptionVault
  * @author RedDuck Software

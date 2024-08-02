@@ -12,21 +12,21 @@ import "../access/WithMidasAccessControl.sol";
  */
 abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
 
-    mapping(uint8 => bool) public fnPaused;
+    mapping(bytes4 => bool) public fnPaused;
 
     /**
      * @param caller caller address (msg.sender)
      * @param fn function id
      */
-    event PauseFn(address indexed caller, uint8 fn);
+    event PauseFn(address indexed caller, bytes4 fn);
 
     /**
      * @param caller caller address (msg.sender)
      * @param fn function id
      */
-    event UnpauseFn(address indexed caller, uint8 fn);
+    event UnpauseFn(address indexed caller, bytes4 fn);
 
-    modifier whenFnNotPaused(uint8 fn) {
+    modifier whenFnNotPaused(bytes4 fn) {
         _requireNotPaused();
         require(!fnPaused[fn], "Pausable: fn paused");
         _;
@@ -62,7 +62,7 @@ abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
      * @dev pause specific function
      * @param fn function id
      */
-    function pauseFn(uint8 fn) external onlyPauseAdmin {
+    function pauseFn(bytes4 fn) external onlyPauseAdmin {
         require(!fnPaused[fn], "Pausable: fn paused");
         fnPaused[fn] = true;
         emit PauseFn(msg.sender, fn);
@@ -72,7 +72,7 @@ abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
      * @dev unpause specific function
      * @param fn function id
      */
-    function unpauseFn(uint8 fn) external onlyPauseAdmin {
+    function unpauseFn(bytes4 fn) external onlyPauseAdmin {
         require(fnPaused[fn], "Pausable: fn unpaused");
         fnPaused[fn] = false;
         emit UnpauseFn(msg.sender, fn);

@@ -9,6 +9,7 @@ import {
 } from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
 
+import { encodeFnSelector } from '../helpers/utils';
 import {
   // eslint-disable-next-line camelcase
   PausableTester__factory,
@@ -86,7 +87,11 @@ describe('Pausable', () => {
         defaultDeploy,
       );
 
-      await pauseVaultFn(pausableTester, 0, {
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await pauseVaultFn(pausableTester, selector, {
         from: regularAccounts[0],
         revertMessage: 'WMAC: hasnt role',
       });
@@ -95,8 +100,12 @@ describe('Pausable', () => {
     it('fail: when paused', async () => {
       const { pausableTester } = await loadFixture(defaultDeploy);
 
-      await pauseVaultFn(pausableTester, 0);
-      await pauseVaultFn(pausableTester, 0, {
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await pauseVaultFn(pausableTester, selector);
+      await pauseVaultFn(pausableTester, selector, {
         revertMessage: 'Pausable: fn paused',
       });
     });
@@ -104,7 +113,11 @@ describe('Pausable', () => {
     it('when not paused and caller is admin', async () => {
       const { pausableTester } = await loadFixture(defaultDeploy);
 
-      await pauseVaultFn(pausableTester, 0);
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await pauseVaultFn(pausableTester, selector);
     });
   });
 
@@ -114,7 +127,11 @@ describe('Pausable', () => {
         defaultDeploy,
       );
 
-      await unpauseVaultFn(pausableTester, 0, {
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await unpauseVaultFn(pausableTester, selector, {
         from: regularAccounts[0],
         revertMessage: 'WMAC: hasnt role',
       });
@@ -123,7 +140,11 @@ describe('Pausable', () => {
     it('fail: when unpaused', async () => {
       const { pausableTester } = await loadFixture(defaultDeploy);
 
-      await unpauseVaultFn(pausableTester, 0, {
+      const selector = encodeFnSelector(
+        'function depositRequest(address,uint256,bytes32)',
+      );
+
+      await unpauseVaultFn(pausableTester, selector, {
         revertMessage: 'Pausable: fn unpaused',
       });
     });
@@ -131,8 +152,12 @@ describe('Pausable', () => {
     it('when paused and caller is admin', async () => {
       const { pausableTester } = await loadFixture(defaultDeploy);
 
-      await pauseVaultFn(pausableTester, 0);
-      await unpauseVaultFn(pausableTester, 0);
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await pauseVaultFn(pausableTester, selector);
+      await unpauseVaultFn(pausableTester, selector);
     });
   });
 

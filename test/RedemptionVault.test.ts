@@ -38,6 +38,7 @@ import {
 } from './common/redemption-vault.helpers';
 import { sanctionUser } from './common/with-sanctions-list.helpers';
 
+import { encodeFnSelector } from '../helpers/utils';
 import {
   // eslint-disable-next-line camelcase
   EUsdRedemptionVaultTest__factory,
@@ -1082,7 +1083,8 @@ describe('RedemptionVault', function () {
         dataFeed.address,
         0,
       );
-      await pauseVaultFn(redemptionVault, 0);
+      const selector = encodeFnSelector('redeemInstant(address,uint256)');
+      await pauseVaultFn(redemptionVault, selector);
       await redeemInstantTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -1684,7 +1686,8 @@ describe('RedemptionVault', function () {
         dataFeed.address,
         0,
       );
-      await pauseVaultFn(redemptionVault, 1);
+      const selector = encodeFnSelector('redeemRequest(address,uint256)');
+      await pauseVaultFn(redemptionVault, selector);
       await redeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         stableCoins.dai,
@@ -2204,7 +2207,8 @@ describe('RedemptionVault', function () {
         dataFeed.address,
         0,
       );
-      await pauseVaultFn(redemptionVault, 2);
+      const selector = encodeFnSelector('redeemFiatRequest(uint256)');
+      await pauseVaultFn(redemptionVault, selector);
       await redeemFiatRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         100,
