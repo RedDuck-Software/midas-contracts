@@ -48,7 +48,7 @@ import {
   MBasisRedemptionVault__factory,
 } from '../typechain-types';
 
-describe.only('RedemptionVault', function () {
+describe('RedemptionVault', function () {
   it('deployment', async () => {
     const {
       redemptionVault,
