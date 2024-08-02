@@ -23,7 +23,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @notice minimal USD amount for first user`s deposit
      */
-    uint256 public minAmountForFirstDeposit;
+    uint256 public minMTokenAmountForFirstDeposit;
 
     /**
      * @notice mapping, requestId => request data
@@ -44,7 +44,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _mToken address of mTBILL token
-     * @param _minAmountForFirstDeposit initial value for minAmountForFirstDeposit
+     * @param _minMTokenAmountForFirstDeposit initial value for minMTokenAmountForFirstDeposit
      * @param _tokensReceiver address to which USD and mTokens will be sent
      * @param _feeReceiver address to which all fees will be sent
      * @param _instantFee fee for instant operations
@@ -57,7 +57,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function initialize(
         address _ac,
         address _mToken,
-        uint256 _minAmountForFirstDeposit,
+        uint256 _minMTokenAmountForFirstDeposit,
         address _tokensReceiver,
         address _feeReceiver,
         uint256 _instantFee,
@@ -79,7 +79,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             _variationTolerance,
             _minAmount
         );
-        minAmountForFirstDeposit = _minAmountForFirstDeposit;
+        minMTokenAmountForFirstDeposit = _minMTokenAmountForFirstDeposit;
     }
 
     /**
@@ -254,13 +254,13 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      */
-    function setMinAmountForFirstDeposit(uint256 newValue)
+    function setMinMTokenAmountForFirstDeposit(uint256 newValue)
         external
         onlyVaultAdmin
     {
-        minAmountForFirstDeposit = newValue;
+        minMTokenAmountForFirstDeposit = newValue;
 
-        emit SetMinAmountForFirstDeposit(msg.sender, newValue);
+        emit SetMinMTokenAmountForFirstDeposit(msg.sender, newValue);
     }
 
     /**
@@ -284,7 +284,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         if (totalDeposited[user] != 0) return;
 
-        require(amountUsdIn >= minAmountForFirstDeposit, "DV: usd amount < min");
+        require(amountUsdIn >= minMTokenAmountForFirstDeposit, "DV: usd amount < min");
     }
 
     /**

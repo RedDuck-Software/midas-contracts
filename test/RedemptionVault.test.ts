@@ -272,7 +272,7 @@ describe('RedemptionVault', function () {
           1,
           0,
         ),
-      ).revertedWith('invalid address');
+      ).revertedWith('zero address');
     });
     it('should fail: when variationTolarance zero', async () => {
       const {
@@ -439,7 +439,7 @@ describe('RedemptionVault', function () {
         constants.AddressZero,
         0,
         {
-          revertMessage: 'MV: dataFeed address zero',
+          revertMessage: 'zero address',
         },
       );
     });
@@ -1089,7 +1089,7 @@ describe('RedemptionVault', function () {
         100,
         {
           from: regularAccounts[0],
-          revertMessage: 'Pause: fn paused',
+          revertMessage: 'Pausable: fn paused',
         },
       );
     });
@@ -1691,7 +1691,7 @@ describe('RedemptionVault', function () {
         100,
         {
           from: regularAccounts[0],
-          revertMessage: 'Pause: fn paused',
+          revertMessage: 'Pausable: fn paused',
         },
       );
     });
@@ -2210,7 +2210,7 @@ describe('RedemptionVault', function () {
         100,
         {
           from: regularAccounts[0],
-          revertMessage: 'Pause: fn paused',
+          revertMessage: 'Pausable: fn paused',
         },
       );
     });
@@ -2319,7 +2319,7 @@ describe('RedemptionVault', function () {
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         100,
         {
-          revertMessage: 'RV: tokenOut amount zero',
+          revertMessage: 'RV: amountMTokenIn < fee',
         },
       );
     });

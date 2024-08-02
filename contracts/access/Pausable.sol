@@ -12,7 +12,9 @@ import "../access/WithMidasAccessControl.sol";
  */
 abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
 
-     /**
+    mapping(uint8 => bool) public fnPaused;
+
+    /**
      * @param caller caller address (msg.sender)
      * @param fn function id
      */
@@ -24,11 +26,9 @@ abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
      */
     event UnpauseFn(address indexed caller, uint8 fn);
 
-    mapping(uint8 => bool) public fnPaused;
-
     modifier whenFnNotPaused(uint8 fn) {
         _requireNotPaused();
-        require(!fnPaused[fn], "Pause: fn paused");
+        require(!fnPaused[fn], "Pausable: fn paused");
         _;
     }
     /**
@@ -63,7 +63,7 @@ abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
      * @param fn function id
      */
     function pauseFn(uint8 fn) external onlyPauseAdmin {
-        require(!fnPaused[fn], "Pause: fn paused");
+        require(!fnPaused[fn], "Pausable: fn paused");
         fnPaused[fn] = true;
         emit PauseFn(msg.sender, fn);
     }
@@ -73,7 +73,7 @@ abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
      * @param fn function id
      */
     function unpauseFn(uint8 fn) external onlyPauseAdmin {
-        require(fnPaused[fn], "Pause: fn unpaused");
+        require(fnPaused[fn], "Pausable: fn unpaused");
         fnPaused[fn] = false;
         emit UnpauseFn(msg.sender, fn);
     }

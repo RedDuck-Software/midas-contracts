@@ -66,7 +66,7 @@ describe('DepositVault', function () {
 
     expect(await depositVault.ONE_HUNDRED_PERCENT()).eq('10000');
 
-    expect(await depositVault.minAmountForFirstDeposit()).eq('0');
+    expect(await depositVault.minMTokenAmountForFirstDeposit()).eq('0');
     expect(await depositVault.minAmount()).eq(parseUnits('100'));
 
     expect(await depositVault.instantFee()).eq('100');
@@ -262,7 +262,7 @@ describe('DepositVault', function () {
           1,
           parseUnits('100'),
         ),
-      ).revertedWith('invalid address');
+      ).revertedWith('zero address');
     });
     it('should fail: when variationTolarance zero', async () => {
       const {
@@ -294,7 +294,7 @@ describe('DepositVault', function () {
     });
   });
 
-  describe('setMinAmountForFirstDeposit()', () => {
+  describe('setMinMTokenAmountForFirstDeposit()', () => {
     it('should fail: call from address without DEPOSIT_VAULT_ADMIN_ROLE role', async () => {
       const { owner, depositVault, regularAccounts } = await loadFixture(
         defaultDeploy,
@@ -412,7 +412,7 @@ describe('DepositVault', function () {
         constants.AddressZero,
         0,
         {
-          revertMessage: 'MV: dataFeed address zero',
+          revertMessage: 'zero address',
         },
       );
     });
@@ -1043,7 +1043,7 @@ describe('DepositVault', function () {
         100,
         {
           from: regularAccounts[0],
-          revertMessage: 'Pause: fn paused',
+          revertMessage: 'Pausable: fn paused',
         },
       );
     });
@@ -1647,7 +1647,7 @@ describe('DepositVault', function () {
         100,
         {
           from: regularAccounts[0],
-          revertMessage: 'Pause: fn paused',
+          revertMessage: 'Pausable: fn paused',
         },
       );
     });

@@ -35,7 +35,7 @@ abstract contract Greenlistable is WithMidasAccessControl {
     /**
      * @dev checks that a given `account`
      * have `greenlistedRole()`
-     * if greenlist disabled too
+     * do the check even if greenlist check is off
      */
     modifier onlyAlwaysGreenlisted(address account) {
         _onlyGreenlisted(account);

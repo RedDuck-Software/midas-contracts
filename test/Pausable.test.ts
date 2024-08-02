@@ -97,7 +97,7 @@ describe('Pausable', () => {
 
       await pauseVaultFn(pausableTester, 0);
       await pauseVaultFn(pausableTester, 0, {
-        revertMessage: 'Pause: fn paused',
+        revertMessage: 'Pausable: fn paused',
       });
     });
 
@@ -124,7 +124,7 @@ describe('Pausable', () => {
       const { pausableTester } = await loadFixture(defaultDeploy);
 
       await unpauseVaultFn(pausableTester, 0, {
-        revertMessage: 'Pause: fn unpaused',
+        revertMessage: 'Pausable: fn unpaused',
       });
     });
 

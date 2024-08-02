@@ -350,11 +350,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address tokenOutCopy = tokenOut;
 
         uint256 tokenOutRate;
-        if (isFiat) {
-            feeAmount += fiatFlatFee;
-            require(amountMTokenWithoutFee > fiatFlatFee, "RV: fiatFlatFee > mTokenAmount");
-            amountMTokenWithoutFee -= fiatFlatFee;
-        } else {
+        if (!isFiat) {
             TokenConfig storage config = tokensConfig[tokenOutCopy];
             tokenOutRate = IDataFeed(config.dataFeed).getDataInBase18();
         }
@@ -461,15 +457,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             require(minRedeemAmount <= amountMTokenIn, "RV: amount < min");
         }
 
-        if (isFiat) {
-            require(
-                tokenOut == MANUAL_FULLFILMENT_TOKEN,
-                "RV: tokenOut != fiat"
-            );
-        } else {
-            _requireTokenExists(tokenOut);
-        }
-
         feeAmount = _getFeeAmount(
             user,
             tokenOut,
@@ -477,6 +464,18 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             isInstant,
             isFiat ? fiatAdditionalFee : 0
         );
+
+        if (isFiat) {
+            require(
+                tokenOut == MANUAL_FULLFILMENT_TOKEN,
+                "RV: tokenOut != fiat"
+            );
+            feeAmount += fiatFlatFee;
+            require(amountMTokenIn > feeAmount, "RV: amountMTokenIn < fee");
+        } else {
+            _requireTokenExists(tokenOut);
+        }
+        
         amountMTokenWithoutFee = amountMTokenIn - feeAmount;
         require(amountMTokenWithoutFee > 0, "RV: tokenOut amount zero");
     }

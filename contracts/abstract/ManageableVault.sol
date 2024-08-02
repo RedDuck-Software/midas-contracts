@@ -161,12 +161,10 @@ abstract contract ManageableVault is
         uint256 _variationTolerance,
         uint256 _minAmount
     ) internal onlyInitializing {
-        require(_mToken != address(0), "zero address");
-        require(_tokensReceiver != address(0), "zero address");
-        require(_tokensReceiver != address(this), "invalid address");
-        require(_feeReceiver != address(0), "zero address");
-        require(_feeReceiver != address(this), "invalid address");
-        require(_mTokenDataFeed != address(0), "invalid address");
+        _validateAddress(_mToken, false);
+        _validateAddress(_tokensReceiver, true);
+        _validateAddress(_feeReceiver, true);
+        _validateAddress(_mTokenDataFeed, false);
         require(_instantDailyLimit > 0, "zero limit");
         require(_variationTolerance > 0, "zero tolerance");
         _validateFee(_variationTolerance, false);
@@ -210,7 +208,7 @@ abstract contract ManageableVault is
         uint256 tokenFee
     ) external onlyVaultAdmin {
         require(_paymentTokens.add(token), "MV: already added");
-        require(dataFeed != address(0), "MV: dataFeed address zero");
+        _validateAddress(dataFeed, false);
         _validateFee(tokenFee, false);
 
         tokensConfig[token] = TokenConfig({
@@ -304,8 +302,8 @@ abstract contract ManageableVault is
      * @dev reverts address zero or equal address(this)
      */
     function setFeeReceiver(address receiver) external onlyVaultAdmin {
-        require(receiver != address(0), "zero address");
-        require(receiver != address(this), "invalid address");
+        _validateAddress(receiver, true);
+
         feeReceiver = receiver;
 
         emit SetFeeReceiver(msg.sender, receiver);
@@ -472,10 +470,10 @@ abstract contract ManageableVault is
     function _requireAndUpdateAllowance(address token, uint256 amount)
         internal
     {
-        TokenConfig memory config = tokensConfig[token];
-        if (config.allowance == MAX_UINT) return;
+       uint256 prevAllowance = tokensConfig[token].allowance;
+        if (prevAllowance == MAX_UINT) return;
 
-        require(config.allowance >= amount, "MV: exceed allowance");
+        require(prevAllowance >= amount, "MV: exceed allowance");
 
         tokensConfig[token].allowance -= amount;
     }
@@ -558,5 +556,15 @@ abstract contract ManageableVault is
     function _validateFee(uint256 fee, bool checkMin) internal pure {
         require(fee <= ONE_HUNDRED_PERCENT, "fee > 100%");
         if(checkMin) require(fee > 0, "fee == 0");
+    }
+
+    /**
+     * @dev check if address not zero and not address(this)
+     * @param addr address to check
+     * @param selfCheck check if address not address(this)
+     */
+    function _validateAddress(address addr, bool selfCheck) internal view {
+        require(addr != address(0), "zero address");
+        if(selfCheck) require(addr != address(this), "invalid address");
     }
 }
