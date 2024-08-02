@@ -21,6 +21,11 @@ struct Request {
     uint256 tokenOutRate;
 }
 
+struct FiatRedeptionInitParams{
+    uint256 fiatAdditionalFee;
+    uint256 fiatFlatFee;
+}
+
 enum RedemptionVaultFunctions {
     INSTANT_REDEEM,
     REDEEM_REQUEST,
@@ -89,6 +94,12 @@ interface IRedemptionVault is IManageableVault {
      * @param newMinAmount new min amount for fiat requests
      */
     event SetMinFiatRedeemAmount(address indexed caller, uint256 newMinAmount);
+
+    /**
+     * @param caller function caller (msg.sender)
+     * @param feeInMToken fee amount in mToken
+     */
+    event SetFiatFlatFee(address indexed caller, uint256 feeInMToken);
 
     /**
      * @param caller function caller (msg.sender)
@@ -162,6 +173,12 @@ interface IRedemptionVault is IManageableVault {
      * @param newValue new min amount
      */
     function setMinFiatRedeemAmount(uint256 newValue) external;
+
+    /**
+     * @notice set fee amount in mToken for fiat requests
+     * @param feeInMToken fee amount in mToken
+     */
+    function setFiatFlatFee(uint256 feeInMToken) external;
 
     /**
      * @notice set new fee percent for fiat requests

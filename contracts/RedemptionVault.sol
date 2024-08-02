@@ -33,6 +33,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     uint256 public fiatAdditionalFee;
 
     /**
+     * @notice static fee in mToken for fiat requests
+     */
+    uint256 public fiatFlatFee;
+
+    /**
      * @dev leaving a storage gap for futures updates
      */
     uint256[50] private __gap;
@@ -55,7 +60,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @param _variationTolerance percent of prices diviation 1% = 100
      * @param _minAmount basic min amount for operations
      * @param _minFiatRedeemAmount min amount for fiat requests
-     * @param _fiatAdditionalFee fee percent for fiat requests
+     * @param _fiatRedemptionInitParams params fiatAdditionalFee, fiatFlatFee
      */
     function initialize(
         address _ac,
@@ -69,7 +74,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         uint256 _minAmount,
         uint256 _minFiatRedeemAmount,
         uint256 _variationTolerance,
-        uint256 _fiatAdditionalFee
+        FiatRedeptionInitParams calldata _fiatRedemptionInitParams
     ) external initializer {
         __ManageableVault_init(
             _ac,
@@ -83,9 +88,13 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _variationTolerance,
             _minAmount
         );
-        require(_fiatAdditionalFee <= ONE_HUNDRED_PERCENT, "fiatAdditionalFee > 100%");
+        require(
+            _fiatRedemptionInitParams.fiatAdditionalFee <= ONE_HUNDRED_PERCENT,
+            "fiatAdditionalFee > 100%"
+        );
         minFiatRedeemAmount = _minFiatRedeemAmount;
-        fiatAdditionalFee = _fiatAdditionalFee;
+        fiatAdditionalFee = _fiatRedemptionInitParams.fiatAdditionalFee;
+        fiatFlatFee = _fiatRedemptionInitParams.fiatFlatFee;
     }
 
     /**
@@ -179,7 +188,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @inheritdoc IRedemptionVault
      */
-    function approveRequest(uint256 requestId, uint256 newMTokenRate) external onlyVaultAdmin {
+    function approveRequest(uint256 requestId, uint256 newMTokenRate)
+        external
+        onlyVaultAdmin
+    {
         _approveRequest(requestId, newMTokenRate, false);
 
         emit ApproveRequest(requestId, newMTokenRate);
@@ -195,10 +207,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     {
         _approveRequest(requestId, newMTokenRate, true);
 
-        emit SafeApproveRequest(
-            requestId,
-            newMTokenRate
-        );
+        emit SafeApproveRequest(requestId, newMTokenRate);
     }
 
     /**
@@ -221,6 +230,15 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         minFiatRedeemAmount = newValue;
 
         emit SetMinFiatRedeemAmount(msg.sender, newValue);
+    }
+
+    /**
+     * @inheritdoc IRedemptionVault
+     */
+    function setFiatFlatFee(uint256 feeInMToken) external onlyVaultAdmin {
+        fiatFlatFee = feeInMToken;
+
+        emit SetFiatFlatFee(msg.sender, feeInMToken);
     }
 
     /**
@@ -264,7 +282,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
                 "RV: tokenOut = fiat"
             );
             _requireVariationTolerance(request.mTokenRate, newMTokenRate);
-        }            
+        }
 
         mToken.burn(address(this), request.amountMToken);
 
@@ -313,7 +331,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function _redeemRequest(address tokenOut, uint256 amountMTokenIn)
         internal
-        returns (uint256 requestId)
+        returns (uint256)
     {
         address user = msg.sender;
 
@@ -330,11 +348,19 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
                 isFiat
             );
 
+        address tokenOutCopy = tokenOut;
+
         uint256 tokenOutRate;
-        if (!isFiat) {
-            TokenConfig storage config = tokensConfig[tokenOut];
+        if (isFiat) {
+            feeAmount += fiatFlatFee;
+            require(amountMTokenWithoutFee > fiatFlatFee, "RV: fiatFlatFee > mTokenAmount");
+            amountMTokenWithoutFee -= fiatFlatFee;
+        } else {
+            TokenConfig storage config = tokensConfig[tokenOutCopy];
             tokenOutRate = IDataFeed(config.dataFeed).getDataInBase18();
         }
+
+        uint256 amountMTokenInCopy = amountMTokenIn;
 
         uint256 mTokenRate = mTokenDataFeed.getDataInBase18();
 
@@ -347,19 +373,21 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         if (feeAmount > 0)
             _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
 
+        uint256 requestId = lastRequestId.current();
         lastRequestId.increment();
-        requestId = lastRequestId.current();
 
         redeemRequests[requestId] = Request({
             sender: user,
-            tokenOut: tokenOut,
+            tokenOut: tokenOutCopy,
             status: RequestStatus.Pending,
             amountMToken: amountMTokenWithoutFee,
             mTokenRate: mTokenRate,
             tokenOutRate: tokenOutRate
         });
 
-        emit RedeemRequest(requestId, user, tokenOut, amountMTokenIn);
+        emit RedeemRequest(requestId, user, tokenOutCopy, amountMTokenInCopy);
+
+        return requestId;
     }
 
     /**

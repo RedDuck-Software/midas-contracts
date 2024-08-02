@@ -47,7 +47,7 @@ import {
   MBasisRedemptionVault__factory,
 } from '../typechain-types';
 
-describe.only('RedemptionVault', function () {
+describe('RedemptionVault', function () {
   it('deployment', async () => {
     const {
       redemptionVault,
@@ -131,7 +131,7 @@ describe.only('RedemptionVault', function () {
           0,
           0,
           0,
-          0,
+          { fiatAdditionalFee: 0, fiatFlatFee: parseUnits('1') },
         ),
       ).revertedWith('Initializable: contract is already initialized');
     });
@@ -2261,7 +2261,7 @@ describe.only('RedemptionVault', function () {
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 0);
       await redeemFiatRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
-        1,
+        10,
         {
           revertMessage: 'DF: feed is deprecated',
         },
@@ -2637,7 +2637,7 @@ describe.only('RedemptionVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2681,7 +2681,7 @@ describe.only('RedemptionVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2718,7 +2718,7 @@ describe.only('RedemptionVault', function () {
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2792,7 +2792,7 @@ describe.only('RedemptionVault', function () {
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
       await safeApproveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
@@ -2832,7 +2832,7 @@ describe.only('RedemptionVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await safeApproveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2871,7 +2871,7 @@ describe.only('RedemptionVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await safeApproveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2916,7 +2916,7 @@ describe.only('RedemptionVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await safeApproveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2997,7 +2997,7 @@ describe.only('RedemptionVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await rejectRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -3040,7 +3040,7 @@ describe.only('RedemptionVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await rejectRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -3321,7 +3321,7 @@ describe.only('RedemptionVault', function () {
         100_000,
       );
 
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -3362,7 +3362,7 @@ describe.only('RedemptionVault', function () {
         100_000,
       );
 
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await safeApproveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -3403,7 +3403,7 @@ describe.only('RedemptionVault', function () {
         100_000,
       );
 
-      const requestId = await redemptionVault.lastRequestId();
+      const requestId = 0;
 
       await rejectRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },

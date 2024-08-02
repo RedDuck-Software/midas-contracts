@@ -224,7 +224,7 @@ export const depositRequestTest = async (
     feeReceiver,
   );
   const balanceAfterUser = await balanceOfBase18(tokenContract, sender.address);
-  const request = await depositVault.mintRequests(latestRequestIdAfter);
+  const request = await depositVault.mintRequests(latestRequestIdBefore);
 
   expect(request.depositedUsdAmount).eq(actualAmountInUsd);
   expect(request.tokenOutRate).eq(mTokenRate);

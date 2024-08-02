@@ -2145,7 +2145,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await depositVault.lastRequestId();
+      const requestId = 0;
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2188,7 +2188,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await depositVault.lastRequestId();
+      const requestId = 0
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2274,7 +2274,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await depositVault.lastRequestId();
+      const requestId = 0
       await safeApproveRequestTest(
         {
           depositVault,
@@ -2318,7 +2318,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await depositVault.lastRequestId();
+      const requestId = 0
 
       await safeApproveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2361,7 +2361,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await depositVault.lastRequestId();
+      const requestId = 0
 
       await safeApproveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2441,7 +2441,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      const requestId = await depositVault.lastRequestId();
+      const requestId = 0
 
       await rejectRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2748,7 +2748,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100_000,
       );
-      const requestId = await depositVault.lastRequestId();
+      const requestId = 0
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2787,7 +2787,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100_001,
       );
-      let requestId = await depositVault.lastRequestId();
+      let requestId = 0;
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2799,7 +2799,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      requestId = await depositVault.lastRequestId();
+      requestId = 1;
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2852,7 +2852,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         100,
       );
-      let requestId = await depositVault.lastRequestId();
+      let requestId = 0;
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2866,7 +2866,7 @@ describe('DepositVault', function () {
         stableCoins.usdc,
         125,
       );
-      requestId = await depositVault.lastRequestId();
+      requestId = 1;
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2880,7 +2880,7 @@ describe('DepositVault', function () {
         stableCoins.usdt,
         114,
       );
-      requestId = await depositVault.lastRequestId();
+      requestId = 2;
 
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },

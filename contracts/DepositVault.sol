@@ -156,7 +156,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
-        returns (uint256 requestId)
+        returns (uint256)
     {
         address user = msg.sender;
 
@@ -189,11 +189,10 @@ contract DepositVault is ManageableVault, IDepositVault {
                 tokenDecimals
             );
 
+        uint256 requestId = lastRequestId.current();
         lastRequestId.increment();
-        uint256 newRequestId = lastRequestId.current();
-        requestId = newRequestId;
 
-        mintRequests[newRequestId] = Request({
+        mintRequests[requestId] = Request({
             sender: user,
             tokenIn: tokenInCopy,
             status: RequestStatus.Pending,
@@ -202,7 +201,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         });
 
         emit DepositRequest(
-            newRequestId,
+            requestId,
             user,
             tokenInCopy,
             tokenAmountInUsd,
@@ -210,6 +209,8 @@ contract DepositVault is ManageableVault, IDepositVault {
             tokenOutRate,
             referrerIdCopy
         );
+
+        return requestId;
     }
 
     /**

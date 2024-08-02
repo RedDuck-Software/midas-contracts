@@ -169,7 +169,7 @@ export const redeemRequestTest = async (
     .not.reverted;
 
   const latestRequestIdAfter = await redemptionVault.lastRequestId();
-  const request = await redemptionVault.redeemRequests(latestRequestIdAfter);
+  const request = await redemptionVault.redeemRequests(latestRequestIdBefore);
 
   expect(request.sender).eq(sender.address);
   expect(request.tokenOut).eq(tokenOut);
@@ -235,6 +235,7 @@ export const redeemFiatRequestTest = async (
   const manualToken = await redemptionVault.MANUAL_FULLFILMENT_TOKEN();
   const fiatAdditionalFee = await redemptionVault.fiatAdditionalFee();
   const hundredPercent = await redemptionVault.ONE_HUNDRED_PERCENT();
+  const flatFee = await redemptionVault.fiatFlatFee();
 
   const mTokenRate = await mTokenToUsdDataFeed.getDataInBase18();
 
@@ -245,7 +246,7 @@ export const redeemFiatRequestTest = async (
     false,
     fiatAdditionalFee,
   );
-  const fee = amountIn.mul(feePercent).div(hundredPercent);
+  const fee = amountIn.mul(feePercent).div(hundredPercent).add(flatFee);
   const amountInWithoutFee = amountIn.sub(fee);
 
   await expect(redemptionVault.connect(sender).redeemFiatRequest(amountIn))
@@ -259,7 +260,7 @@ export const redeemFiatRequestTest = async (
     .to.not.reverted;
 
   const latestRequestIdAfter = await redemptionVault.lastRequestId();
-  const request = await redemptionVault.redeemRequests(latestRequestIdAfter);
+  const request = await redemptionVault.redeemRequests(latestRequestIdBefore);
 
   expect(request.sender).eq(sender.address);
   expect(request.tokenOut).eq(manualToken);
@@ -283,7 +284,7 @@ export const redeemFiatRequestTest = async (
   expect(balanceAfterReceiver).eq(balanceBeforeReceiver);
   expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver.add(fee));
   if (waivedFee) {
-    expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
+    expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver.add(flatFee));
   }
 };
 
