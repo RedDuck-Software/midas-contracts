@@ -122,17 +122,26 @@ describe('RedemptionVault', function () {
       await expect(
         redemptionVault.initialize(
           constants.AddressZero,
-          constants.AddressZero,
-          constants.AddressZero,
+          {
+            mToken: constants.AddressZero,
+            mTokenDataFeed: constants.AddressZero,
+          },
+          {
+            feeReceiver: constants.AddressZero,
+            tokensReceiver: constants.AddressZero,
+          },
+          {
+            instantFee: 0,
+            instantDailyLimit: 0,
+          },
           constants.AddressZero,
           0,
           0,
-          constants.AddressZero,
-          constants.AddressZero,
-          0,
-          0,
-          0,
-          { fiatAdditionalFee: 0, fiatFlatFee: parseUnits('1') },
+          {
+            fiatAdditionalFee: 0,
+            fiatFlatFee: 0,
+            minFiatRedeemAmount: 0,
+          },
         ),
       ).revertedWith('Initializable: contract is already initialized');
     });
@@ -153,15 +162,21 @@ describe('RedemptionVault', function () {
       await expect(
         vault.initializeWithoutInitializer(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          feeReceiver.address,
-          100,
-          10000,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
-          100,
-          0,
+          1,
+          1000,
         ),
       ).revertedWith('Initializable: contract is not initializing');
     });
@@ -181,15 +196,21 @@ describe('RedemptionVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          vault.address,
-          feeReceiver.address,
-          100,
-          100000,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: vault.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
-          100,
-          0,
+          1,
+          1000,
         ),
       ).revertedWith('invalid address');
     });
@@ -208,15 +229,21 @@ describe('RedemptionVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          vault.address,
-          100,
-          100000,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: vault.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
           1,
-          0,
+          1000,
         ),
       ).revertedWith('invalid address');
     });
@@ -236,15 +263,21 @@ describe('RedemptionVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          feeReceiver.address,
-          100,
-          0,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: 0,
+          },
           mockedSanctionsList.address,
           1,
-          0,
+          1000,
         ),
       ).revertedWith('zero limit');
     });
@@ -263,15 +296,21 @@ describe('RedemptionVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          feeReceiver.address,
-          100,
-          0,
-          constants.AddressZero,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: constants.AddressZero,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
           1,
-          0,
+          1000,
         ),
       ).revertedWith('zero address');
     });
@@ -291,15 +330,21 @@ describe('RedemptionVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          feeReceiver.address,
-          100,
-          100,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
           0,
-          0,
+          1000,
         ),
       ).revertedWith('fee == 0');
     });

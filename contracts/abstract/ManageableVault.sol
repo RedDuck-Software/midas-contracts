@@ -156,12 +156,12 @@ abstract contract ManageableVault is
         uint256 _minAmount
     ) internal onlyInitializing {
         _validateAddress(_mTokenInitParams.mToken, false);
+        _validateAddress(_mTokenInitParams.mTokenDataFeed, false);
         _validateAddress(_receiversInitParams.tokensReceiver, true);
         _validateAddress(_receiversInitParams.feeReceiver, true);
-        _validateAddress(_mTokenInitParams.mTokenDataFeed, false);
         require(_instantInitParams.instantDailyLimit > 0, "zero limit");
         _validateFee(_variationTolerance, true);
-        _validateFee(instantFee, false);
+        _validateFee(_instantInitParams.instantFee, false);
 
         mToken = IMTbill(_mTokenInitParams.mToken);
         __Pausable_init(_ac);
