@@ -26,7 +26,7 @@ describe('WithSanctionsList', function () {
   });
 
   it('onlyInitializing', async () => {
-    const { accessControl, owner } = await loadFixture(defaultDeploy);
+    const { owner } = await loadFixture(defaultDeploy);
 
     const withSanctionsList = await new WithSanctionsListTester__factory(
       owner,
@@ -86,7 +86,7 @@ describe('WithSanctionsList', function () {
     });
 
     it('call from user with `sanctionsListAdminRole` role', async () => {
-      const { accessControl, withSanctionsListTester, owner, regularAccounts } =
+      const { accessControl, withSanctionsListTester, owner } =
         await loadFixture(defaultDeploy);
 
       await accessControl.grantRole(

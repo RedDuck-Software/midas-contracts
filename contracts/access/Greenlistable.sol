@@ -59,9 +59,7 @@ abstract contract Greenlistable is WithMidasAccessControl {
      * can be called only from permissioned actor.
      * @param enable enable
      */
-    function setGreenlistEnable(bool enable)
-        external
-    {   
+    function setGreenlistEnable(bool enable) external {
         _onlyGreenlistToggler(msg.sender);
         require(greenlistEnabled != enable, "GL: same enable status");
         greenlistEnabled = enable;
