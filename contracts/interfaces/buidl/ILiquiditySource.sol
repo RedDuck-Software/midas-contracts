@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity ^0.8.16;
+pragma solidity 0.8.9;
 
 /**
  * @title ILiquiditySource
@@ -39,4 +39,6 @@ interface ILiquiditySource {
      * @return The available liquidity amount
      */
     function availableLiquidity() external view returns (uint256);
+
+    function token() external view returns (address);
 }

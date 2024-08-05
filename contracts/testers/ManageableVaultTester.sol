@@ -7,25 +7,19 @@ contract ManageableVaultTester is ManageableVault {
     function _disableInitializers() internal override {}
 
     function initialize(
-        address _accessControl,
-        address _mTbill,
-        address _tokensReceiver,
-        address _feeReciever,
-        uint256 _instantFee,
-        uint256 _instantDailyLimit,
-        address _mTokenDataFeed,
+        address _ac,
+        MTokenInitParams calldata _mTokenInitParams,
+        ReceiversInitParams calldata _receiversInitParams,
+        InstantInitParams calldata _instantInitParams,
         address _sanctionsList,
         uint256 _variationTolerance,
         uint256 _minAmount
     ) external initializer {
         __ManageableVault_init(
-            _accessControl,
-            _mTbill,
-            _tokensReceiver,
-            _feeReciever,
-            _instantFee,
-            _instantDailyLimit,
-            _mTokenDataFeed,
+            _ac,
+            _mTokenInitParams,
+            _receiversInitParams,
+            _instantInitParams,
             _sanctionsList,
             _variationTolerance,
             _minAmount
@@ -33,25 +27,19 @@ contract ManageableVaultTester is ManageableVault {
     }
 
     function initializeWithoutInitializer(
-        address _accessControl,
-        address _mTbill,
-        address _tokensReceiver,
-        address _feeReciever,
-        uint256 _instantFee,
-        uint256 _instantDailyLimit,
-        address _mTokenDataFeed,
+        address _ac,
+        MTokenInitParams calldata _mTokenInitParams,
+        ReceiversInitParams calldata _receiversInitParams,
+        InstantInitParams calldata _instantInitParams,
         address _sanctionsList,
         uint256 _variationTolerance,
         uint256 _minAmount
     ) external {
         __ManageableVault_init(
-            _accessControl,
-            _mTbill,
-            _tokensReceiver,
-            _feeReciever,
-            _instantFee,
-            _instantDailyLimit,
-            _mTokenDataFeed,
+            _ac,
+            _mTokenInitParams,
+            _receiversInitParams,
+            _instantInitParams,
             _sanctionsList,
             _variationTolerance,
             _minAmount

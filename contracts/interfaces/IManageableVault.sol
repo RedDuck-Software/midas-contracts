@@ -18,6 +18,19 @@ enum RequestStatus {
     Canceled
 }
 
+struct MTokenInitParams {
+    address mToken;
+    address mTokenDataFeed;
+}
+struct ReceiversInitParams {
+    address tokensReceiver;
+    address feeReceiver;
+}
+struct InstantInitParams {
+    uint256 instantFee;
+    uint256 instantDailyLimit;
+}
+
 /**
  * @title IManageableVault
  * @author RedDuck Software
