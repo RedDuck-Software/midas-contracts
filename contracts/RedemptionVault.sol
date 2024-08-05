@@ -89,7 +89,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _minAmount
         );
         _validateFee(_fiatRedemptionInitParams.fiatAdditionalFee, false);
-       
+
         minFiatRedeemAmount = _minFiatRedeemAmount;
         fiatAdditionalFee = _fiatRedemptionInitParams.fiatAdditionalFee;
         fiatFlatFee = _fiatRedemptionInitParams.fiatFlatFee;
@@ -197,7 +197,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     /**
      * @inheritdoc IRedemptionVault
-     * @dev revert if tokenOut is fiat
      */
     function safeApproveRequest(uint256 requestId, uint256 newMTokenRate)
         external
@@ -276,10 +275,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         _validateRequest(request.sender, request.status);
 
         if (isSafe) {
-            require(
-                request.tokenOut != MANUAL_FULLFILMENT_TOKEN,
-                "RV: tokenOut = fiat"
-            );
             _requireVariationTolerance(request.mTokenRate, newMTokenRate);
         }
 
@@ -470,11 +465,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
                 tokenOut == MANUAL_FULLFILMENT_TOKEN,
                 "RV: tokenOut != fiat"
             );
-            if(!waivedFeeRestriction[user]) feeAmount += fiatFlatFee;
+            if (!waivedFeeRestriction[user]) feeAmount += fiatFlatFee;
         } else {
             _requireTokenExists(tokenOut);
         }
-        
+
         require(amountMTokenIn > feeAmount, "RV: amountMTokenIn < fee");
 
         amountMTokenWithoutFee = amountMTokenIn - feeAmount;

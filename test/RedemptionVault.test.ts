@@ -2776,37 +2776,6 @@ describe('RedemptionVault', function () {
       );
     });
 
-    it('should fail: request tokenOut is fiat', async () => {
-      const {
-        owner,
-        redemptionVault,
-        mTBILL,
-        mTokenToUsdDataFeed,
-        greenListableTester,
-        accessControl,
-      } = await loadFixture(defaultDeploy);
-
-      await greenList(
-        { greenlistable: greenListableTester, accessControl, owner },
-        owner,
-      );
-      await mintToken(mTBILL, owner, 100);
-      await approveBase18(owner, mTBILL, redemptionVault, 100);
-      await redeemFiatRequestTest(
-        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
-        100,
-      );
-      const requestId = 0;
-      await safeApproveRedeemRequestTest(
-        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
-        requestId,
-        parseUnits('1'),
-        {
-          revertMessage: 'RV: tokenOut = fiat',
-        },
-      );
-    });
-
     it('should fail: if new rate greater then variabilityTolerance', async () => {
       const {
         owner,

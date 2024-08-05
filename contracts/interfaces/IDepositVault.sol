@@ -28,7 +28,10 @@ interface IDepositVault is IManageableVault {
      * @param caller function caller (msg.sender)
      * @param newValue new min amount to deposit value
      */
-    event SetMinMTokenAmountForFirstDeposit(address indexed caller, uint256 newValue);
+    event SetMinMTokenAmountForFirstDeposit(
+        address indexed caller,
+        uint256 newValue
+    );
 
     /**
      * @param user function caller (msg.sender)
@@ -78,10 +81,7 @@ interface IDepositVault is IManageableVault {
      * @param requestId mint request id
      * @param newOutRate mToken rate inputted by admin
      */
-    event SafeApproveRequest(
-        uint256 indexed requestId,
-        uint256 newOutRate
-    );
+    event SafeApproveRequest(uint256 indexed requestId, uint256 newOutRate);
 
     /**
      * @param requestId mint request id

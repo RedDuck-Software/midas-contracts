@@ -255,7 +255,9 @@ export const setMinAmountToDepositTest = async (
   }
 
   await expect(
-    depositVault.connect(opt?.from ?? owner).setMinMTokenAmountForFirstDeposit(value),
+    depositVault
+      .connect(opt?.from ?? owner)
+      .setMinMTokenAmountForFirstDeposit(value),
   ).to.emit(
     depositVault,
     depositVault.interface.events[

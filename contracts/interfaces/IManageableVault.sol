@@ -177,8 +177,7 @@ interface IManageableVault {
      * @param token token address
      * @param fee new fee
      */
-    function changeTokenFee(address token, uint256 fee)
-        external;
+    function changeTokenFee(address token, uint256 fee) external;
 
     /**
      * @notice set new prices diviation percent.

@@ -11,7 +11,6 @@ import "../access/WithMidasAccessControl.sol";
  * @author RedDuck Software
  */
 abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
-
     mapping(bytes4 => bool) public fnPaused;
 
     /**

@@ -263,7 +263,7 @@ abstract contract ManageableVault is
      */
     function setVariationTolerance(uint256 tolerance) external onlyVaultAdmin {
         _validateFee(tolerance, true);
-        
+
         variationTolerance = tolerance;
         emit SetVariationTolerance(msg.sender, tolerance);
     }
@@ -469,7 +469,7 @@ abstract contract ManageableVault is
     function _requireAndUpdateAllowance(address token, uint256 amount)
         internal
     {
-       uint256 prevAllowance = tokensConfig[token].allowance;
+        uint256 prevAllowance = tokensConfig[token].allowance;
         if (prevAllowance == MAX_UINT) return;
 
         require(prevAllowance >= amount, "MV: exceed allowance");
@@ -554,7 +554,7 @@ abstract contract ManageableVault is
      */
     function _validateFee(uint256 fee, bool checkMin) internal pure {
         require(fee <= ONE_HUNDRED_PERCENT, "fee > 100%");
-        if(checkMin) require(fee > 0, "fee == 0");
+        if (checkMin) require(fee > 0, "fee == 0");
     }
 
     /**
@@ -564,6 +564,6 @@ abstract contract ManageableVault is
      */
     function _validateAddress(address addr, bool selfCheck) internal view {
         require(addr != address(0), "zero address");
-        if(selfCheck) require(addr != address(this), "invalid address");
+        if (selfCheck) require(addr != address(this), "invalid address");
     }
 }

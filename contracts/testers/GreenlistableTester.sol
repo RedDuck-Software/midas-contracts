@@ -17,10 +17,7 @@ contract GreenlistableTester is Greenlistable {
         onlyGreenlisted(account)
     {}
 
-    function onlyGreenlistTogglerTester(address account)
-        external
-        view
-    {
+    function onlyGreenlistTogglerTester(address account) external view {
         _onlyGreenlistToggler(account);
     }
 

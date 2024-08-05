@@ -21,7 +21,7 @@ struct Request {
     uint256 tokenOutRate;
 }
 
-struct FiatRedeptionInitParams{
+struct FiatRedeptionInitParams {
     uint256 fiatAdditionalFee;
     uint256 fiatFlatFee;
 }
@@ -63,19 +63,13 @@ interface IRedemptionVault is IManageableVault {
      * @param requestId mint request id
      * @param newMTokenRate net mToken rate
      */
-    event ApproveRequest(
-        uint256 indexed requestId,
-        uint256 newMTokenRate
-    );
+    event ApproveRequest(uint256 indexed requestId, uint256 newMTokenRate);
 
     /**
      * @param requestId mint request id
      * @param newMTokenRate net mToken rate
      */
-    event SafeApproveRequest(
-        uint256 indexed requestId,
-        uint256 newMTokenRate
-    );
+    event SafeApproveRequest(uint256 indexed requestId, uint256 newMTokenRate);
 
     /**
      * @param requestId mint request id

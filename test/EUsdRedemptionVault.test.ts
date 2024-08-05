@@ -1,13 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { constants } from 'ethers';
 import { ethers } from 'hardhat';
 
 import { acErrors, greenList } from './common/ac.helpers';
 import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
-import { redeemInstantTest } from './common/redemption-vault.helpers';
 import { addPaymentTokenTest } from './common/manageable-vault.helpers';
+import { redeemInstantTest } from './common/redemption-vault.helpers';
 
 describe('EUsdRedemptionVault', function () {
   it('deployment', async () => {
@@ -44,12 +43,11 @@ describe('EUsdRedemptionVault', function () {
         eUSdRedemptionVault: redemptionVault,
         regularAccounts,
         eUsdOwner: owner,
-        owner: otherOwner,
         eUSD: mTBILL,
         stableCoins,
         accessControl,
         mTokenToUsdDataFeed,
-        dataFeed
+        dataFeed,
       } = await loadFixture(defaultDeploy);
 
       await redemptionVault.setGreenlistEnable(true);
@@ -96,11 +94,8 @@ describe('EUsdRedemptionVault', function () {
     it('vault admin access', async () => {
       const {
         eUSdRedemptionVault: redemptionVault,
-        regularAccounts,
         eUsdOwner: owner,
         owner: otherOwner,
-        eUSD: mTBILL,
-        stableCoins,
         accessControl,
       } = await loadFixture(defaultDeploy);
 

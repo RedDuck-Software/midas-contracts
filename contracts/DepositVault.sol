@@ -228,7 +228,10 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @inheritdoc IDepositVault
      */
-    function approveRequest(uint256 requestId, uint256 newOutRate) external onlyVaultAdmin {
+    function approveRequest(uint256 requestId, uint256 newOutRate)
+        external
+        onlyVaultAdmin
+    {
         _approveRequest(requestId, newOutRate, false);
 
         emit ApproveRequest(requestId, newOutRate);
@@ -284,7 +287,10 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         if (totalMinted[user] != 0) return;
 
-        require(amountMTokenWithoutFee >= minMTokenAmountForFirstDeposit, "DV: mint amount < min");
+        require(
+            amountMTokenWithoutFee >= minMTokenAmountForFirstDeposit,
+            "DV: mint amount < min"
+        );
     }
 
     /**
@@ -295,7 +301,9 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param newOutRate mToken rate
      */
     function _approveRequest(
-        uint256 requestId, uint256 newOutRate, bool isSafe
+        uint256 requestId,
+        uint256 newOutRate,
+        bool isSafe
     ) private {
         Request memory request = mintRequests[requestId];
 
@@ -305,7 +313,8 @@ contract DepositVault is ManageableVault, IDepositVault {
             "DV: request not pending"
         );
 
-        if(isSafe) _requireVariationTolerance(request.tokenOutRate, newOutRate);
+        if (isSafe)
+            _requireVariationTolerance(request.tokenOutRate, newOutRate);
 
         uint256 feeUsdAmount = _getFeeAmount(
             request.sender,
@@ -315,8 +324,8 @@ contract DepositVault is ManageableVault, IDepositVault {
             0
         );
 
-        uint256 amountMToken = ((request.depositedUsdAmount - feeUsdAmount) * (10**18)) /
-            newOutRate;
+        uint256 amountMToken = ((request.depositedUsdAmount - feeUsdAmount) *
+            (10**18)) / newOutRate;
 
         mToken.mint(request.sender, amountMToken);
 

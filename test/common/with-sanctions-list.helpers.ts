@@ -3,11 +3,7 @@ import { expect } from 'chai';
 
 import { Account, OptionalCommonParams, getAccount } from './common.helpers';
 
-import {
-  ISanctionsList,
-  SanctionsListMock,
-  WithSanctionsList,
-} from '../../typechain-types';
+import { SanctionsListMock, WithSanctionsList } from '../../typechain-types';
 
 type CommonParamsSetSanctionsList = {
   owner: SignerWithAddress;
