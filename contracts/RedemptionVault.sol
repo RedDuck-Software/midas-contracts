@@ -197,7 +197,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     /**
      * @inheritdoc IRedemptionVault
-     * @dev revert if tokenOut is fiat
      */
     function safeApproveRequest(uint256 requestId, uint256 newMTokenRate)
         external
@@ -276,10 +275,6 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         _validateRequest(request.sender, request.status);
 
         if (isSafe) {
-            require(
-                request.tokenOut != MANUAL_FULLFILMENT_TOKEN,
-                "RV: tokenOut = fiat"
-            );
             _requireVariationTolerance(request.mTokenRate, newMTokenRate);
         }
 
