@@ -46,6 +46,10 @@ import {
   SanctionsListMock__factory,
   // eslint-disable-next-line camelcase
   WithSanctionsListTester__factory,
+  LiquiditySourceTest__factory,
+  RedemptionTest__factory,
+  RedemptionVaultWithBUIDLTest__factory,
+  SettlementTest__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -521,6 +525,83 @@ export const defaultDeploy = async () => {
     dai: await new ERC20Mock__factory(owner).deploy(9),
   };
 
+  const buidl = await new ERC20Mock__factory(owner).deploy(8);
+
+  const liquiditySource = await new LiquiditySourceTest__factory(owner).deploy(
+    stableCoins.usdc.address,
+  );
+  const settlement = await new SettlementTest__factory(owner).deploy(
+    regularAccounts[5].address,
+  );
+  const buidlRedemption = await new RedemptionTest__factory(owner).deploy(
+    buidl.address,
+    liquiditySource.address,
+    settlement.address,
+  );
+  await stableCoins.usdc.mint(buidlRedemption.address, parseUnits('1000000'));
+
+  const redemptionVaultWithBUIDL =
+    await new RedemptionVaultWithBUIDLTest__factory(owner).deploy();
+
+  await expect(
+    redemptionVaultWithBUIDL[
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+    ](
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 10000,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      constants.AddressZero,
+    ),
+  ).to.be.reverted;
+  await redemptionVaultWithBUIDL[
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+  ](
+    accessControl.address,
+    {
+      mToken: mTBILL.address,
+      mTokenDataFeed: mTokenToUsdDataFeed.address,
+    },
+    {
+      feeReceiver: feeReceiver.address,
+      tokensReceiver: tokensReceiver.address,
+    },
+    {
+      instantFee: 100,
+      instantDailyLimit: parseUnits('100000'),
+    },
+    mockedSanctionsList.address,
+    1,
+    1000,
+    {
+      fiatAdditionalFee: 100,
+      fiatFlatFee: parseUnits('1'),
+      minFiatRedeemAmount: 1000,
+    },
+    buidlRedemption.address,
+  );
+  await accessControl.grantRole(
+    mTBILL.M_TBILL_BURN_OPERATOR_ROLE(),
+    redemptionVaultWithBUIDL.address,
+  );
+
   // eslint-disable-next-line camelcase
   const customFeed = await new CustomAggregatorV3CompatibleFeedTester__factory(
     owner,
@@ -676,5 +757,10 @@ export const defaultDeploy = async () => {
     dataFeedUnhealthy,
     withSanctionsListTester,
     mockedSanctionsList,
+    buidl,
+    liquiditySource,
+    buidlRedemption,
+    redemptionVaultWithBUIDL,
+    settlement,
   };
 };

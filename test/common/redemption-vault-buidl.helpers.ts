@@ -18,18 +18,16 @@ import {
 
 type CommonParamsRedeem = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'owner' | 'mTBILL' | 'mTokenToUsdDataFeed'
-> & {
-  redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL;
-};
+  'redemptionVaultWithBUIDL' | 'owner' | 'mTBILL' | 'mTokenToUsdDataFeed'
+>;
 
 type CommonParams = Pick<Awaited<ReturnType<typeof defaultDeploy>>, 'owner'> & {
-  redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL;
+  redemptionVault: RedemptionVaultWIthBUIDL;
 };
 
 export const redeemInstantTest = async (
   {
-    redemptionVault,
+    redemptionVaultWithBUIDL,
     owner,
     mTBILL,
     mTokenToUsdDataFeed,
@@ -585,7 +583,7 @@ export const setFiatAdditionalFeeTest = async (
 const getFeePercent = async (
   sender: string,
   token: string,
-  redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL,
+  redemptionVault: RedemptionVault,
   isInstant: boolean,
   additionalFee?: BigNumber,
 ) => {
@@ -605,7 +603,7 @@ const getFeePercent = async (
 const calcExpectedTokenOutAmount = async (
   sender: SignerWithAddress,
   token: ERC20,
-  redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL,
+  redemptionVault: RedemptionVault,
   mTokenRate: BigNumber,
   amountIn: BigNumber,
   isInstant: boolean,

@@ -2,11 +2,14 @@
 pragma solidity 0.8.9;
 
 import {IERC20Upgradeable as IERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 import "./RedemptionVault.sol";
 
 import "./interfaces/buidl/IRedemption.sol";
 import "./interfaces/buidl/ILiquiditySource.sol";
+import "./interfaces/buidl/ISettlement.sol";
+import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
  * @title RedemptionVault
@@ -14,9 +17,18 @@ import "./interfaces/buidl/ILiquiditySource.sol";
  * @author RedDuck Software
  */
 contract RedemptionVaultWIthBUIDL is RedemptionVault {
+    using DecimalsCorrectionLibrary for uint256;
+    using SafeERC20 for IERC20;
+
     IRedemption public buidlRedemption;
 
+    IERC20 public buidl;
+
     ILiquiditySource public buidlLiquiditySource;
+
+    ISettlement public buidlSettlement;
+
+    uint256[50] private __gap;
 
     /**
      * @notice upgradeable pattern contract`s initializer
@@ -50,8 +62,11 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
             _minAmount,
             _fiatRedemptionInitParams
         );
+        _validateAddress(_buidlRedemption, false);
         buidlRedemption = IRedemption(_buidlRedemption);
+        buidlSettlement = ISettlement(buidlRedemption.settlement());
         buidlLiquiditySource = ILiquiditySource(buidlRedemption.liquidity());
+        buidl = IERC20(buidlRedemption.asset());
     }
 
     function redeemInstant(address tokenOut, uint256 amountMTokenIn)
@@ -92,17 +107,15 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         if (feeAmount > 0)
             _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
 
-        uint256 amountTokenOutWithoutFee = _truncate(
-            (amountMTokenWithoutFee * mTokenRate) / tokenOutRate,
-            tokenDecimals
-        );
+        uint256 amountTokenOutWithoutFee = (amountMTokenWithoutFee * mTokenRate) / tokenOutRate;
+        uint256 amountTokenOutWithoutFeeFrom18 = amountTokenOutWithoutFee.convertFromBase18(tokenDecimals);
 
-        _checkAndRedeemBUIDL(tokenOutCopy, amountTokenOutWithoutFee);
+        _checkAndRedeemBUIDL(tokenOutCopy, amountTokenOutWithoutFeeFrom18);
 
         _tokenTransferToUser(
             tokenOutCopy,
             user,
-            amountTokenOutWithoutFee,
+            amountTokenOutWithoutFeeFrom18.convertToBase18(tokenDecimals),
             tokenDecimals
         );
 
@@ -123,7 +136,9 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         );
         if (contractBalanceTokenOut >= amountTokenOut) return;
 
-        uint256 buidlToRedeem = contractBalanceTokenOut - amountTokenOut;
+        uint256 buidlToRedeem = amountTokenOut - contractBalanceTokenOut;
+        
+        buidl.safeIncreaseAllowance(address(buidlRedemption), buidlToRedeem);
         buidlRedemption.redeem(buidlToRedeem);
     }
 }

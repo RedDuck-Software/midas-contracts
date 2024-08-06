@@ -35,6 +35,12 @@ interface IRedemption {
     function liquidity() external view returns (address);
 
     /**
+     * @notice The settlement contract address.
+     * @return The address of the settlement contract.
+     */
+    function settlement() external view returns (address);
+
+    /**
      * @notice Redeems an amount of asset for liquidity
      * @param amount The amount of the asset token to redeem
      */
