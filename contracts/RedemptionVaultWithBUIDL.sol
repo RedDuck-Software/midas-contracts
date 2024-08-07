@@ -44,6 +44,8 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
      * @param _variationTolerance percent of prices diviation 1% = 100
      * @param _minAmount basic min amount for operations
      * @param _fiatRedemptionInitParams params fiatAdditionalFee, fiatFlatFee, minFiatRedeemAmount
+     * @param _buidlRedemption BUIDL redemption contract address
+     * @param _mBasisInitParams params mBasis, mBasisDataFeed
      */
     function initialize(
         address _ac,
@@ -80,6 +82,16 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         mBasisDataFeed = IDataFeed(_mBasisInitParams.mBasisDataFeed);
     }
 
+    /**
+     * @notice redeem mToken to USDC if daily limit and allowance not exceeded
+     * If contract don't have enough USDC, BUIDL redemption flow will be triggered
+     * Burns mTBILL from the user.
+     * Transfers fee in mToken to feeReceiver
+     * Transfers tokenOut to user.
+     * @param tokenIn token in address, if mBasis will be triggered swap mBasis to mToken flow,
+     * if not ignored
+     * @param amountMTokenIn amount of mTBILL to redeem
+     */
     function redeemInstant(address tokenIn, uint256 amountMTokenIn)
         external
         override
@@ -164,6 +176,12 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         );
     }
 
+    /**
+     * @notice Check if contract have enough USDC balance for redeem
+     * if don't have trigger BUIDL redemption flow
+     * @param tokenOut tokenOut address
+     * @param amountTokenOut amount of tokenOut
+     */
     function _checkAndRedeemBUIDL(address tokenOut, uint256 amountTokenOut)
         internal
     {
@@ -178,6 +196,11 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         buidlRedemption.redeem(buidlToRedeem);
     }
 
+    /**
+     * @notice Transfers mBasis to contract
+     * Returns amount on mToken using exchange rates
+     * @param mBasisAmount mBasis token amount
+     */
     function _swapMBasisToMToken(uint256 mBasisAmount)
         internal
         returns (uint256)
