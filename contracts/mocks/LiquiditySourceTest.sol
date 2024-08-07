@@ -6,7 +6,7 @@ import "../interfaces/buidl/ILiquiditySource.sol";
 contract LiquiditySourceTest is ILiquiditySource {
     address public token;
 
-    constructor(address _token){
+    constructor(address _token) {
         token = _token;
     }
 

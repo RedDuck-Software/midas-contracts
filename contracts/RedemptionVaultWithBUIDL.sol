@@ -28,6 +28,10 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
 
     ISettlement public buidlSettlement;
 
+    IERC20 public mBasis;
+
+    IDataFeed public mBasisDataFeed;
+
     uint256[50] private __gap;
 
     /**
@@ -50,7 +54,8 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         uint256 _variationTolerance,
         uint256 _minAmount,
         FiatRedeptionInitParams calldata _fiatRedemptionInitParams,
-        address _buidlRedemption
+        address _buidlRedemption,
+        MBasisInitParams calldata _mBasisInitParams
     ) external initializer {
         __RedemptionVault_init(
             _ac,
@@ -63,13 +68,19 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
             _fiatRedemptionInitParams
         );
         _validateAddress(_buidlRedemption, false);
+        _validateAddress(_mBasisInitParams.mBasis, false);
+        _validateAddress(_mBasisInitParams.mBasisDataFeed, false);
+
         buidlRedemption = IRedemption(_buidlRedemption);
         buidlSettlement = ISettlement(buidlRedemption.settlement());
         buidlLiquiditySource = ILiquiditySource(buidlRedemption.liquidity());
         buidl = IERC20(buidlRedemption.asset());
+
+        mBasis = IERC20(_mBasisInitParams.mBasis);
+        mBasisDataFeed = IDataFeed(_mBasisInitParams.mBasisDataFeed);
     }
 
-    function redeemInstant(address tokenOut, uint256 amountMTokenIn)
+    function redeemInstant(address tokenIn, uint256 amountMTokenIn)
         external
         override
         whenFnNotPaused(this.redeemInstant.selector)
@@ -79,7 +90,11 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
     {
         address user = msg.sender;
 
-        tokenOut = buidlLiquiditySource.token();
+        if (tokenIn == address(mBasis)) {
+            amountMTokenIn = _swapMBasisToMToken(amountMTokenIn);
+        }
+
+        address tokenOut = buidlLiquiditySource.token();
 
         (
             uint256 feeAmount,
@@ -91,29 +106,50 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         uint256 tokenDecimals = _tokenDecimals(tokenOut);
 
         uint256 amountMTokenInCopy = amountMTokenIn;
-        address tokenOutCopy = tokenOut;
+        address tokenInCopy = tokenIn;
 
         (uint256 amountMTokenInUsd, uint256 mTokenRate) = _convertMTokenToUsd(
             amountMTokenInCopy
         );
         (uint256 amountTokenOut, uint256 tokenOutRate) = _convertUsdToToken(
             amountMTokenInUsd,
-            tokenOutCopy
+            tokenOut
         );
 
-        _requireAndUpdateAllowance(tokenOutCopy, amountTokenOut);
+        _requireAndUpdateAllowance(tokenOut, amountTokenOut);
 
-        mToken.burn(user, amountMTokenWithoutFee);
-        if (feeAmount > 0)
-            _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
+        address burnFrom = tokenInCopy == address(mBasis)
+            ? address(this)
+            : user;
+        mToken.burn(burnFrom, amountMTokenWithoutFee);
 
-        uint256 amountTokenOutWithoutFee = (amountMTokenWithoutFee * mTokenRate) / tokenOutRate;
-        uint256 amountTokenOutWithoutFeeFrom18 = amountTokenOutWithoutFee.convertFromBase18(tokenDecimals);
+        if (feeAmount > 0) {
+            if (tokenInCopy == address(mBasis)) {
+                _tokenTransferToUser(
+                    address(mToken),
+                    feeReceiver,
+                    feeAmount,
+                    18
+                );
+            } else {
+                _tokenTransferFromUser(
+                    address(mToken),
+                    feeReceiver,
+                    feeAmount,
+                    18
+                );
+            }
+        }
 
-        _checkAndRedeemBUIDL(tokenOutCopy, amountTokenOutWithoutFeeFrom18);
+        uint256 amountTokenOutWithoutFee = (amountMTokenWithoutFee *
+            mTokenRate) / tokenOutRate;
+        uint256 amountTokenOutWithoutFeeFrom18 = amountTokenOutWithoutFee
+            .convertFromBase18(tokenDecimals);
+
+        _checkAndRedeemBUIDL(tokenOut, amountTokenOutWithoutFeeFrom18);
 
         _tokenTransferToUser(
-            tokenOutCopy,
+            tokenOut,
             user,
             amountTokenOutWithoutFeeFrom18.convertToBase18(tokenDecimals),
             tokenDecimals
@@ -121,7 +157,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
 
         emit RedeemInstant(
             user,
-            tokenOutCopy,
+            tokenOut,
             amountMTokenInCopy,
             feeAmount,
             amountTokenOutWithoutFee
@@ -137,8 +173,27 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         if (contractBalanceTokenOut >= amountTokenOut) return;
 
         uint256 buidlToRedeem = amountTokenOut - contractBalanceTokenOut;
-        
+
         buidl.safeIncreaseAllowance(address(buidlRedemption), buidlToRedeem);
         buidlRedemption.redeem(buidlToRedeem);
+    }
+
+    function _swapMBasisToMToken(uint256 mBasisAmount)
+        internal
+        returns (uint256)
+    {
+        require(mBasisAmount > 0, "RVB: mBasisAmount zero");
+
+        _tokenTransferFromUser(
+            address(mBasis),
+            address(this),
+            mBasisAmount,
+            18
+        );
+
+        uint256 mBasisRate = mBasisDataFeed.getDataInBase18();
+        uint256 mTokenRate = mTokenDataFeed.getDataInBase18();
+
+        return (mBasisAmount * mBasisRate) / mTokenRate;
     }
 }

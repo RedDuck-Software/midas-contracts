@@ -6,7 +6,7 @@ import "../interfaces/buidl/ISettlement.sol";
 contract SettlementTest is ISettlement {
     address public recipient;
 
-    constructor(address _recipient){
+    constructor(address _recipient) {
         recipient = _recipient;
     }
 }

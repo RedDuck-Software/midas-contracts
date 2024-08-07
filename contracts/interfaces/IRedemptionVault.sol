@@ -27,6 +27,11 @@ struct FiatRedeptionInitParams {
     uint256 minFiatRedeemAmount;
 }
 
+struct MBasisInitParams {
+    address mBasis;
+    address mBasisDataFeed;
+}
+
 /**
  * @title IRedemptionVault
  * @author RedDuck Software

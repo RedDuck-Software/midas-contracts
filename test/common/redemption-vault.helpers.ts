@@ -23,6 +23,16 @@ type CommonParamsRedeem = Pick<
   redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL;
 };
 
+type CommonParamsRedeemMBasis = Pick<
+  Awaited<ReturnType<typeof defaultDeploy>>,
+  | 'owner'
+  | 'mBASIS'
+  | 'mTBILL'
+  | 'mTokenToUsdDataFeed'
+  | 'redemptionVaultWithBUIDL'
+  | 'stableCoins'
+>;
+
 type CommonParams = Pick<Awaited<ReturnType<typeof defaultDeploy>>, 'owner'> & {
   redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL;
 };
@@ -98,6 +108,108 @@ export const redeemInstantTest = async (
 
   expect(supplyAfter).eq(supplyBefore.sub(amountInWithoutFee));
   expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+  expect(balanceAfterReceiver).eq(balanceBeforeReceiver);
+  expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver.add(fee));
+  expect(balanceAfterTokenOut).eq(balanceBeforeTokenOut.add(amountOut));
+  if (waivedFee) {
+    expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver);
+  }
+};
+
+export const redeemInstantWithMBasisTest = async (
+  {
+    redemptionVaultWithBUIDL,
+    owner,
+    mBASIS,
+    mTBILL,
+    mTokenToUsdDataFeed,
+    waivedFee,
+    stableCoins,
+  }: CommonParamsRedeemMBasis & { waivedFee?: boolean },
+  amountTokenIn: number,
+  opt?: OptionalCommonParams,
+) => {
+  const sender = opt?.from ?? owner;
+
+  const amountIn = parseUnits(amountTokenIn.toString());
+  const tokensReceiver = await redemptionVaultWithBUIDL.tokensReceiver();
+  const feeReceiver = await redemptionVaultWithBUIDL.feeReceiver();
+
+  if (opt?.revertMessage) {
+    await expect(
+      redemptionVaultWithBUIDL
+        .connect(sender)
+        .redeemInstant(mBASIS.address, amountIn),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  const balanceBeforeUser = await mBASIS.balanceOf(sender.address);
+  const balanceBeforeReceiver = await mBASIS.balanceOf(tokensReceiver);
+  const balanceBeforeFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+
+  const balanceMTBILLBeforeContract = await mTBILL.balanceOf(
+    redemptionVaultWithBUIDL.address,
+  );
+  const balanceMBASISBeforeContract = await mBASIS.balanceOf(
+    redemptionVaultWithBUIDL.address,
+  );
+
+  const balanceBeforeTokenOut = await stableCoins.usdc.balanceOf(
+    sender.address,
+  );
+
+  const supplyBefore = await mTBILL.totalSupply();
+
+  const mTokenRate = await mTokenToUsdDataFeed.getDataInBase18();
+
+  const { fee, amountOut, amountInWithoutFee } =
+    await calcExpectedTokenOutAmount(
+      sender,
+      stableCoins.usdc,
+      redemptionVaultWithBUIDL,
+      mTokenRate,
+      amountIn,
+      true,
+    );
+
+  await expect(
+    redemptionVaultWithBUIDL
+      .connect(sender)
+      .redeemInstant(mBASIS.address, amountIn),
+  )
+    .to.emit(
+      redemptionVaultWithBUIDL,
+      redemptionVaultWithBUIDL.interface.events[
+        'RedeemInstant(address,address,uint256,uint256,uint256)'
+      ].name,
+    )
+    .withArgs(sender, stableCoins.usdc, amountTokenIn, fee, amountOut).to.not
+    .reverted;
+
+  const balanceAfterUser = await mBASIS.balanceOf(sender.address);
+  const balanceAfterReceiver = await mBASIS.balanceOf(tokensReceiver);
+  const balanceAfterFeeReceiver = await mTBILL.balanceOf(feeReceiver);
+
+  const balanceMTBILLAfterContract = await mTBILL.balanceOf(
+    redemptionVaultWithBUIDL.address,
+  );
+  const balanceMBASISAfterContract = await mBASIS.balanceOf(
+    redemptionVaultWithBUIDL.address,
+  );
+
+  const balanceAfterTokenOut = await stableCoins.usdc.balanceOf(sender.address);
+
+  const supplyAfter = await mTBILL.totalSupply();
+
+  expect(supplyAfter).eq(supplyBefore.sub(amountInWithoutFee));
+  expect(balanceAfterUser).eq(balanceBeforeUser.sub(amountIn));
+  expect(balanceMBASISAfterContract).eq(
+    balanceMBASISBeforeContract.add(amountIn),
+  );
+  expect(balanceMTBILLAfterContract).eq(
+    balanceMTBILLBeforeContract.sub(amountIn),
+  );
   expect(balanceAfterReceiver).eq(balanceBeforeReceiver);
   expect(balanceAfterFeeReceiver).eq(balanceBeforeFeeReceiver.add(fee));
   expect(balanceAfterTokenOut).eq(balanceBeforeTokenOut.add(amountOut));

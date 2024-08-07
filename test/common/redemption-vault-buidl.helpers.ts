@@ -27,7 +27,6 @@ type CommonParams = Pick<Awaited<ReturnType<typeof defaultDeploy>>, 'owner'> & {
 
 export const redeemInstantTest = async (
   {
-    redemptionVaultWithBUIDL,
     owner,
     mTBILL,
     mTokenToUsdDataFeed,

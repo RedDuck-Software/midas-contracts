@@ -30,6 +30,7 @@ import {
   approveRedeemRequestTest,
   redeemFiatRequestTest,
   redeemInstantTest,
+  redeemInstantWithMBasisTest,
   redeemRequestTest,
   rejectRedeemRequestTest,
   safeApproveRedeemRequestTest,
@@ -139,7 +140,7 @@ describe('RedemptionVaultWithBUIDL', function () {
 
       await expect(
         redemptionVaultWithBUIDL[
-          'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+          'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,(address,address))'
         ](
           constants.AddressZero,
           {
@@ -163,6 +164,10 @@ describe('RedemptionVaultWithBUIDL', function () {
             minFiatRedeemAmount: 0,
           },
           constants.AddressZero,
+          {
+            mBasis: constants.AddressZero,
+            mBasisDataFeed: constants.AddressZero,
+          },
         ),
       ).revertedWith('Initializable: contract is already initialized');
     });
@@ -1129,6 +1134,257 @@ describe('RedemptionVaultWithBUIDL', function () {
         { vault: redemptionVaultWithBUIDL, owner },
         stableCoins.dai.address,
         100,
+      );
+    });
+  });
+
+  describe('redeemInstant() with mBASIS', () => {
+    it('should fail: user try to instant redeem zero with mBasis', async () => {
+      const {
+        owner,
+        redemptionVaultWithBUIDL,
+        stableCoins,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        dataFeed,
+        buidl,
+        mBASIS,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(mTBILL, owner, 100000);
+      await mintToken(stableCoins.usdc, redemptionVaultWithBUIDL, 100);
+      await mintToken(buidl, redemptionVaultWithBUIDL, 100);
+
+      await approveBase18(owner, mTBILL, redemptionVaultWithBUIDL, 100000);
+
+      await addPaymentTokenTest(
+        { vault: redemptionVaultWithBUIDL, owner },
+        stableCoins.usdc,
+        dataFeed.address,
+        100,
+      );
+
+      await redeemInstantTest(
+        {
+          redemptionVault: redemptionVaultWithBUIDL,
+          owner,
+          mTBILL,
+          mTokenToUsdDataFeed,
+        },
+        mBASIS.address,
+        0,
+        {
+          revertMessage: 'RVB: mBasisAmount zero',
+        },
+      );
+    });
+
+    it('should fail: user do not have enough allowance of mBasis where token in mBasis', async () => {
+      const {
+        owner,
+        redemptionVaultWithBUIDL,
+        stableCoins,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        dataFeed,
+        buidl,
+        mBASIS,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(stableCoins.usdc, redemptionVaultWithBUIDL, 100);
+      await mintToken(buidl, redemptionVaultWithBUIDL, 100);
+
+      await addPaymentTokenTest(
+        { vault: redemptionVaultWithBUIDL, owner },
+        stableCoins.usdc,
+        dataFeed.address,
+        100,
+      );
+
+      await redeemInstantTest(
+        {
+          redemptionVault: redemptionVaultWithBUIDL,
+          owner,
+          mTBILL,
+          mTokenToUsdDataFeed,
+        },
+        mBASIS.address,
+        1000,
+        {
+          revertMessage: 'ERC20: insufficient allowance',
+        },
+      );
+    });
+
+    it('should fail: user do not have enough balance of mBasis where token in mBasis', async () => {
+      const {
+        owner,
+        redemptionVaultWithBUIDL,
+        stableCoins,
+        mTBILL,
+        mTokenToUsdDataFeed,
+        dataFeed,
+        buidl,
+        mBASIS,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(stableCoins.usdc, redemptionVaultWithBUIDL, 100);
+      await mintToken(buidl, redemptionVaultWithBUIDL, 100);
+
+      await approveBase18(owner, mBASIS, redemptionVaultWithBUIDL, 100000);
+
+      await addPaymentTokenTest(
+        { vault: redemptionVaultWithBUIDL, owner },
+        stableCoins.usdc,
+        dataFeed.address,
+        100,
+      );
+
+      await redeemInstantTest(
+        {
+          redemptionVault: redemptionVaultWithBUIDL,
+          owner,
+          mTBILL,
+          mTokenToUsdDataFeed,
+        },
+        mBASIS.address,
+        1000,
+        {
+          revertMessage: 'ERC20: transfer amount exceeds balance',
+        },
+      );
+    });
+
+    it('should fail: redeem 100 mBasis, when price of stable is 1$, mToken price is 1$ and mBasis price 1$, contract do not have mTBILL', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        mockedAggregatorMToken,
+        redemptionVaultWithBUIDL,
+        stableCoins,
+        mTBILL,
+        mBASIS,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        mockedAggregatorMBasis,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(stableCoins.usdc, redemptionVaultWithBUIDL, 100);
+      await mintToken(mBASIS, owner, 100);
+      await approveBase18(owner, mBASIS, redemptionVaultWithBUIDL, 100);
+      await addPaymentTokenTest(
+        { vault: redemptionVaultWithBUIDL, owner },
+        stableCoins.usdc,
+        dataFeed.address,
+        0,
+      );
+      await setRoundData({ mockedAggregator }, 1);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
+      await setRoundData({ mockedAggregator: mockedAggregatorMBasis }, 1);
+      await redeemInstantWithMBasisTest(
+        {
+          redemptionVaultWithBUIDL,
+          owner,
+          mTBILL,
+          mBASIS,
+          mTokenToUsdDataFeed,
+          stableCoins,
+        },
+        100,
+        { revertMessage: 'ERC20: burn amount exceeds balance' },
+      );
+    });
+
+    it('redeem 100 mBasis, when price of stable is 1$, mToken price is 1$ and mBasis price 1$, contract have 100 USDC', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        mockedAggregatorMToken,
+        redemptionVaultWithBUIDL,
+        stableCoins,
+        mTBILL,
+        mBASIS,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        mockedAggregatorMBasis,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(stableCoins.usdc, redemptionVaultWithBUIDL, 100);
+      await mintToken(mTBILL, redemptionVaultWithBUIDL, 100);
+      await mintToken(mBASIS, owner, 100);
+      await approveBase18(owner, mBASIS, redemptionVaultWithBUIDL, 100);
+      await addPaymentTokenTest(
+        { vault: redemptionVaultWithBUIDL, owner },
+        stableCoins.usdc,
+        dataFeed.address,
+        0,
+      );
+      await setRoundData({ mockedAggregator }, 1);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
+      await setRoundData({ mockedAggregator: mockedAggregatorMBasis }, 1);
+      await redeemInstantWithMBasisTest(
+        {
+          redemptionVaultWithBUIDL,
+          owner,
+          mTBILL,
+          mBASIS,
+          mTokenToUsdDataFeed,
+          stableCoins,
+        },
+        100,
+      );
+    });
+
+    it('redeem 1000 mBasis, when price of stable is 1$, mToken price is 1$ and mBasis price 1$, contract have 100 USDC and 10000 BUIDL', async () => {
+      const {
+        owner,
+        mockedAggregator,
+        mockedAggregatorMToken,
+        redemptionVaultWithBUIDL,
+        stableCoins,
+        mTBILL,
+        mBASIS,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        mockedAggregatorMBasis,
+        buidl,
+      } = await loadFixture(defaultDeploy);
+
+      await mintToken(stableCoins.usdc, redemptionVaultWithBUIDL, 100);
+      await mintToken(mTBILL, redemptionVaultWithBUIDL, 1000);
+      await mintToken(buidl, redemptionVaultWithBUIDL, 10000);
+      await mintToken(mBASIS, owner, 1000);
+      await approveBase18(owner, mBASIS, redemptionVaultWithBUIDL, 1000);
+      await addPaymentTokenTest(
+        { vault: redemptionVaultWithBUIDL, owner },
+        stableCoins.usdc,
+        dataFeed.address,
+        0,
+      );
+      await setRoundData({ mockedAggregator }, 1);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
+      await setRoundData({ mockedAggregator: mockedAggregatorMBasis }, 1);
+      const buidlBalanceBefore = await buidl.balanceOf(
+        redemptionVaultWithBUIDL.address,
+      );
+      await redeemInstantWithMBasisTest(
+        {
+          redemptionVaultWithBUIDL,
+          owner,
+          mTBILL,
+          mBASIS,
+          mTokenToUsdDataFeed,
+          stableCoins,
+        },
+        1000,
+      );
+      const buidlBalanceAfter = await buidl.balanceOf(
+        redemptionVaultWithBUIDL.address,
+      );
+      expect(buidlBalanceAfter).eq(
+        buidlBalanceBefore
+          .sub(parseUnits('900', 8))
+          .add(parseUnits('1000', 8).mul(100).div(10000)),
       );
     });
   });

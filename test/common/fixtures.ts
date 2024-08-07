@@ -46,9 +46,13 @@ import {
   SanctionsListMock__factory,
   // eslint-disable-next-line camelcase
   WithSanctionsListTester__factory,
+  // eslint-disable-next-line camelcase
   LiquiditySourceTest__factory,
+  // eslint-disable-next-line camelcase
   RedemptionTest__factory,
+  // eslint-disable-next-line camelcase
   RedemptionVaultWithBUIDLTest__factory,
+  // eslint-disable-next-line camelcase
   SettlementTest__factory,
 } from '../../typechain-types';
 
@@ -114,12 +118,22 @@ export const defaultDeploy = async () => {
   const mockedAggregatorMTokenDecimals =
     await mockedAggregatorMToken.decimals();
 
+  const mockedAggregatorMBasis = await new AggregatorV3Mock__factory(
+    owner,
+  ).deploy();
+  const mockedAggregatorMBasisDecimals =
+    await mockedAggregatorMBasis.decimals();
+
   await mockedAggregator.setRoundData(
     parseUnits('1.02', mockedAggregatorDecimals),
   );
 
   await mockedAggregatorMToken.setRoundData(
     parseUnits('5', mockedAggregatorMTokenDecimals),
+  );
+
+  await mockedAggregatorMBasis.setRoundData(
+    parseUnits('5', mockedAggregatorMBasisDecimals),
   );
 
   const dataFeed = await new DataFeedTest__factory(owner).deploy();
@@ -138,6 +152,15 @@ export const defaultDeploy = async () => {
     3 * 24 * 3600,
     parseUnits('0.1', mockedAggregatorMTokenDecimals),
     parseUnits('10000', mockedAggregatorMTokenDecimals),
+  );
+
+  const mBasisToUsdDataFeed = await new DataFeedTest__factory(owner).deploy();
+  await mBasisToUsdDataFeed.initialize(
+    accessControl.address,
+    mockedAggregatorMBasis.address,
+    3 * 24 * 3600,
+    parseUnits('0.1', mockedAggregatorMBasisDecimals),
+    parseUnits('10000', mockedAggregatorMBasisDecimals),
   );
 
   const depositVault = await new DepositVaultTest__factory(owner).deploy();
@@ -545,7 +568,7 @@ export const defaultDeploy = async () => {
 
   await expect(
     redemptionVaultWithBUIDL[
-      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,(address,address))'
     ](
       accessControl.address,
       {
@@ -569,10 +592,78 @@ export const defaultDeploy = async () => {
         minFiatRedeemAmount: parseUnits('100'),
       },
       constants.AddressZero,
+      {
+        mBasis: mBASIS.address,
+        mBasisDataFeed: mBasisToUsdDataFeed.address,
+      },
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVaultWithBUIDL[
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,(address,address))'
+    ](
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 10000,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      buidlRedemption.address,
+      {
+        mBasis: constants.AddressZero,
+        mBasisDataFeed: mBasisToUsdDataFeed.address,
+      },
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVaultWithBUIDL[
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,(address,address))'
+    ](
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 10000,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      buidlRedemption.address,
+      {
+        mBasis: mBASIS.address,
+        mBasisDataFeed: constants.AddressZero,
+      },
     ),
   ).to.be.reverted;
   await redemptionVaultWithBUIDL[
-    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,(address,address))'
   ](
     accessControl.address,
     {
@@ -596,6 +687,10 @@ export const defaultDeploy = async () => {
       minFiatRedeemAmount: 1000,
     },
     buidlRedemption.address,
+    {
+      mBasis: mBASIS.address,
+      mBasisDataFeed: mBasisToUsdDataFeed.address,
+    },
   );
   await accessControl.grantRole(
     mTBILL.M_TBILL_BURN_OPERATOR_ROLE(),
@@ -762,5 +857,7 @@ export const defaultDeploy = async () => {
     buidlRedemption,
     redemptionVaultWithBUIDL,
     settlement,
+    mockedAggregatorMBasis,
+    mBasisToUsdDataFeed,
   };
 };
