@@ -26,7 +26,11 @@ contract RedemptionTest is IRedemption {
     }
 
     function redeem(uint256 amount) external {
-        IERC20(asset).transferFrom(msg.sender, ISettlement(settlement).recipient(), amount);
+        IERC20(asset).transferFrom(
+            msg.sender,
+            ISettlement(settlement).recipient(),
+            amount
+        );
         address token = ILiquiditySource(liquidity).token();
         IERC20(token).transfer(msg.sender, amount);
     }

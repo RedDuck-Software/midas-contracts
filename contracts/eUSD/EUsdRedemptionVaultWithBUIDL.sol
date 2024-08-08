@@ -9,7 +9,10 @@ import "../RedemptionVaultWithBUIDL.sol";
  * @notice Smart contract that handles eUSD redeeming
  * @author RedDuck Software
  */
-contract EUsdRedemptionVaultWithBUIDL is RedemptionVaultWIthBUIDL, EUsdMidasAccessControlRoles {
+contract EUsdRedemptionVaultWithBUIDL is
+    RedemptionVaultWIthBUIDL,
+    EUsdMidasAccessControlRoles
+{
     /**
      * @dev leaving a storage gap for futures updates
      */

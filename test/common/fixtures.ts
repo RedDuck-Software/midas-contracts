@@ -46,10 +46,16 @@ import {
   SanctionsListMock__factory,
   // eslint-disable-next-line camelcase
   WithSanctionsListTester__factory,
+  // eslint-disable-next-line camelcase
   LiquiditySourceTest__factory,
+  // eslint-disable-next-line camelcase
   RedemptionTest__factory,
+  // eslint-disable-next-line camelcase
   RedemptionVaultWithBUIDLTest__factory,
+  // eslint-disable-next-line camelcase
   SettlementTest__factory,
+  // eslint-disable-next-line camelcase
+  MBasisRedemptionVaultWithSwapperTest__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
@@ -114,12 +120,22 @@ export const defaultDeploy = async () => {
   const mockedAggregatorMTokenDecimals =
     await mockedAggregatorMToken.decimals();
 
+  const mockedAggregatorMBASIS = await new AggregatorV3Mock__factory(
+    owner,
+  ).deploy();
+  const mockedAggregatorMBASISDecimals =
+    await mockedAggregatorMBASIS.decimals();
+
   await mockedAggregator.setRoundData(
     parseUnits('1.02', mockedAggregatorDecimals),
   );
 
   await mockedAggregatorMToken.setRoundData(
     parseUnits('5', mockedAggregatorMTokenDecimals),
+  );
+
+  await mockedAggregatorMBASIS.setRoundData(
+    parseUnits('3', mockedAggregatorMBASISDecimals),
   );
 
   const dataFeed = await new DataFeedTest__factory(owner).deploy();
@@ -138,6 +154,15 @@ export const defaultDeploy = async () => {
     3 * 24 * 3600,
     parseUnits('0.1', mockedAggregatorMTokenDecimals),
     parseUnits('10000', mockedAggregatorMTokenDecimals),
+  );
+
+  const mBASISToUsdDataFeed = await new DataFeedTest__factory(owner).deploy();
+  await mBASISToUsdDataFeed.initialize(
+    accessControl.address,
+    mockedAggregatorMBASIS.address,
+    3 * 24 * 3600,
+    parseUnits('0.1', mockedAggregatorMBASISDecimals),
+    parseUnits('10000', mockedAggregatorMBASISDecimals),
   );
 
   const depositVault = await new DepositVaultTest__factory(owner).deploy();
@@ -504,6 +529,82 @@ export const defaultDeploy = async () => {
     },
   );
 
+  const mBasisRedemptionVaultWithSwapper =
+    await new MBasisRedemptionVaultWithSwapperTest__factory(owner).deploy();
+
+  await expect(
+    mBasisRedemptionVaultWithSwapper[
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+    ](
+      accessControl.address,
+      {
+        mToken: mBASIS.address,
+        mTokenDataFeed: mBASISToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      1000,
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: 1000,
+      },
+      constants.AddressZero,
+    ),
+  ).to.be.reverted;
+
+  await mBasisRedemptionVaultWithSwapper[
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+  ](
+    accessControl.address,
+    {
+      mToken: mBASIS.address,
+      mTokenDataFeed: mBASISToUsdDataFeed.address,
+    },
+    {
+      feeReceiver: feeReceiver.address,
+      tokensReceiver: tokensReceiver.address,
+    },
+    {
+      instantFee: 100,
+      instantDailyLimit: parseUnits('100000'),
+    },
+    mockedSanctionsList.address,
+    1,
+    1000,
+    {
+      fiatAdditionalFee: 100,
+      fiatFlatFee: parseUnits('1'),
+      minFiatRedeemAmount: 1000,
+    },
+    redemptionVault.address,
+  );
+
+  await accessControl.grantRole(
+    mBASIS.M_BASIS_BURN_OPERATOR_ROLE(),
+    mBasisRedemptionVaultWithSwapper.address,
+  );
+  await accessControl.grantRole(
+    mBasisRedemptionVaultWithSwapper.M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE(),
+    owner.address,
+  );
+
+  await redemptionVault.addWaivedFeeAccount(
+    mBasisRedemptionVaultWithSwapper.address,
+  );
+  await redemptionVault.freeFromMinAmount(
+    mBasisRedemptionVaultWithSwapper.address,
+    true,
+  );
+
   await accessControl.grantRoleMult(
     [
       await eUSdRedemptionVault.DEFAULT_ADMIN_ROLE(),
@@ -762,5 +863,8 @@ export const defaultDeploy = async () => {
     buidlRedemption,
     redemptionVaultWithBUIDL,
     settlement,
+    mBasisRedemptionVaultWithSwapper,
+    mBASISToUsdDataFeed,
+    mockedAggregatorMBASIS,
   };
 };

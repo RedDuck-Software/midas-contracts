@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
+import "./IMTbill.sol";
+import "./IDataFeed.sol";
+
 /**
  * @param dataFeed data feed token/USD address
  * @param fee fee by token, 1% = 100
@@ -140,6 +143,18 @@ interface IManageableVault {
      * @param enable is enabled
      */
     event FreeFromMinAmount(address indexed user, bool enable);
+
+    /**
+     * @notice The mTokenDataFeed contract address.
+     * @return The address of the mTokenDataFeed contract.
+     */
+    function mTokenDataFeed() external view returns (IDataFeed);
+
+    /**
+     * @notice The mToken contract address.
+     * @return The address of the mToken contract.
+     */
+    function mToken() external view returns (IMTbill);
 
     /**
      * @notice withdraws `amount` of a given `token` from the contract.

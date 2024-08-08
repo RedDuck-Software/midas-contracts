@@ -4,30 +4,24 @@ pragma solidity 0.8.9;
 import {IERC20Upgradeable as IERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-import "./RedemptionVault.sol";
-
-import "./interfaces/buidl/IRedemption.sol";
-import "./interfaces/buidl/ILiquiditySource.sol";
-import "./interfaces/buidl/ISettlement.sol";
-import "./libraries/DecimalsCorrectionLibrary.sol";
+import "./MBasisRedemptionVault.sol";
+import "../interfaces/IRedemptionVault.sol";
+import "../libraries/DecimalsCorrectionLibrary.sol";
 
 /**
- * @title RedemptionVault
- * @notice Smart contract that handles mTBILL redemptions
+ * @title MBasisRedemptionVault
+ * @notice Smart contract that handles mBASIS minting
  * @author RedDuck Software
  */
-contract RedemptionVaultWIthBUIDL is RedemptionVault {
+contract MBasisRedemptionVaultWithSwapper is MBasisRedemptionVault {
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
-    IRedemption public buidlRedemption;
+    IRedemptionVault public mTbillRedemptionVault;
 
-    IERC20 public buidl;
-
-    ILiquiditySource public buidlLiquiditySource;
-
-    ISettlement public buidlSettlement;
-
+    /**
+     * @dev leaving a storage gap for futures updates
+     */
     uint256[50] private __gap;
 
     /**
@@ -40,7 +34,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
      * @param _variationTolerance percent of prices diviation 1% = 100
      * @param _minAmount basic min amount for operations
      * @param _fiatRedemptionInitParams params fiatAdditionalFee, fiatFlatFee, minFiatRedeemAmount
-     * @param _buidlRedemption BUIDL redemption contract address
+     * @param _mTbillRedemptionVault mTBILL redemptionVault address
      */
     function initialize(
         address _ac,
@@ -51,7 +45,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         uint256 _variationTolerance,
         uint256 _minAmount,
         FiatRedeptionInitParams calldata _fiatRedemptionInitParams,
-        address _buidlRedemption
+        address _mTbillRedemptionVault
     ) external initializer {
         __RedemptionVault_init(
             _ac,
@@ -63,17 +57,14 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
             _minAmount,
             _fiatRedemptionInitParams
         );
-        _validateAddress(_buidlRedemption, false);
-        buidlRedemption = IRedemption(_buidlRedemption);
-        buidlSettlement = ISettlement(buidlRedemption.settlement());
-        buidlLiquiditySource = ILiquiditySource(buidlRedemption.liquidity());
-        buidl = IERC20(buidlRedemption.asset());
+        _validateAddress(_mTbillRedemptionVault, true);
+        mTbillRedemptionVault = IRedemptionVault(_mTbillRedemptionVault);
     }
 
     /**
-     * @notice redeem mToken to USDC if daily limit and allowance not exceeded
-     * If contract don't have enough USDC, BUIDL redemption flow will be triggered
-     * Burns mToken from the user.
+     * @notice redeem mToken to tokenOut if daily limit and allowance not exceeded
+     * If contract don't have enough tokenOut, mBasis will swap to mTBILL and redeem on mTBILL vault
+     * Burns mToken from the user, if swap need mToken just tranfers to contract.
      * Transfers fee in mToken to feeReceiver
      * Transfers tokenOut to user.
      * @param tokenOut token out address, always ignored
@@ -90,14 +81,10 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
     {
         address user = msg.sender;
 
-        tokenOut = buidlLiquiditySource.token();
-
         (
             uint256 feeAmount,
             uint256 amountMTokenWithoutFee
         ) = _calcAndValidateRedeem(user, tokenOut, amountMTokenIn, true, false);
-
-        _requireAndUpdateLimit(amountMTokenIn);
 
         uint256 tokenDecimals = _tokenDecimals(tokenOut);
 
@@ -112,23 +99,46 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
             tokenOutCopy
         );
 
-        _requireAndUpdateAllowance(tokenOutCopy, amountTokenOut);
+        uint256 amountTokenOutWithoutFee = _truncate(
+            (amountMTokenWithoutFee * mTokenRate) / tokenOutRate,
+            tokenDecimals
+        );
 
-        mToken.burn(user, amountMTokenWithoutFee);
         if (feeAmount > 0)
             _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
 
-        uint256 amountTokenOutWithoutFee = (amountMTokenWithoutFee *
-            mTokenRate) / tokenOutRate;
-        uint256 amountTokenOutWithoutFeeFrom18 = amountTokenOutWithoutFee
-            .convertFromBase18(tokenDecimals);
+        uint256 contractTokenOutBalance = IERC20(tokenOutCopy).balanceOf(
+            address(this)
+        );
 
-        _checkAndRedeemBUIDL(tokenOutCopy, amountTokenOutWithoutFeeFrom18);
+        if (
+            contractTokenOutBalance >=
+            amountTokenOutWithoutFee.convertFromBase18(tokenDecimals)
+        ) {
+            _requireAndUpdateLimit(amountMTokenInCopy);
+            _requireAndUpdateAllowance(tokenOutCopy, amountTokenOut);
+
+            mToken.burn(user, amountMTokenWithoutFee);
+        } else {
+            uint256 mTbillAmount = _swapMBasisToMToken(amountMTokenWithoutFee);
+
+            IERC20(mTbillRedemptionVault.mToken()).safeIncreaseAllowance(
+                address(mTbillRedemptionVault),
+                mTbillAmount
+            );
+
+            mTbillRedemptionVault.redeemInstant(tokenOutCopy, mTbillAmount);
+
+            uint256 contractTokenOutBalanceAfterRedeem = IERC20(tokenOutCopy)
+                .balanceOf(address(this));
+            amountTokenOutWithoutFee = (contractTokenOutBalanceAfterRedeem -
+                contractTokenOutBalance).convertToBase18(tokenDecimals);
+        }
 
         _tokenTransferToUser(
             tokenOutCopy,
             user,
-            amountTokenOutWithoutFeeFrom18.convertToBase18(tokenDecimals),
+            amountTokenOutWithoutFee,
             tokenDecimals
         );
 
@@ -142,22 +152,24 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
     }
 
     /**
-     * @notice Check if contract have enough USDC balance for redeem
-     * if don't have trigger BUIDL redemption flow
-     * @param tokenOut tokenOut address
-     * @param amountTokenOut amount of tokenOut
+     * @notice Transfers mBasis to contract
+     * Returns amount on mToken using exchange rates
+     * @param mBasisAmount mBasis token amount
      */
-    function _checkAndRedeemBUIDL(address tokenOut, uint256 amountTokenOut)
+    function _swapMBasisToMToken(uint256 mBasisAmount)
         internal
+        returns (uint256)
     {
-        uint256 contractBalanceTokenOut = IERC20(tokenOut).balanceOf(
-            address(this)
+        _tokenTransferFromUser(
+            address(mToken),
+            address(this),
+            mBasisAmount,
+            18
         );
-        if (contractBalanceTokenOut >= amountTokenOut) return;
-
-        uint256 buidlToRedeem = amountTokenOut - contractBalanceTokenOut;
-
-        buidl.safeIncreaseAllowance(address(buidlRedemption), buidlToRedeem);
-        buidlRedemption.redeem(buidlToRedeem);
+        uint256 mTbillRate = mTbillRedemptionVault
+            .mTokenDataFeed()
+            .getDataInBase18();
+        uint256 mTokenRate = mTokenDataFeed.getDataInBase18();
+        return (mBasisAmount * mTokenRate) / mTbillRate;
     }
 }

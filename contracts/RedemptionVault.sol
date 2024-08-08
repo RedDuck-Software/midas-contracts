@@ -80,6 +80,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         );
     }
 
+    // solhint-disable func-name-mixedcase
     function __RedemptionVault_init(
         address _ac,
         MTokenInitParams calldata _mTokenInitParams,

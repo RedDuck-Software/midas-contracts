@@ -11,12 +11,17 @@ import {
   ERC20,
   // eslint-disable-next-line camelcase
   ERC20__factory,
+  MBasisRedemptionVaultWithSwapper,
   RedemptionVault,
   RedemptionVaultWIthBUIDL,
 } from '../../typechain-types';
 
 type CommonParamsChangePaymentToken = {
-  vault: DepositVault | RedemptionVault | RedemptionVaultWIthBUIDL;
+  vault:
+    | DepositVault
+    | RedemptionVault
+    | RedemptionVaultWIthBUIDL
+    | MBasisRedemptionVaultWithSwapper;
   owner: SignerWithAddress;
 };
 type CommonParams = Pick<
