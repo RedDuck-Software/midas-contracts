@@ -24,6 +24,10 @@ type CommonParamsRedeem = Pick<
   | 'mBASISToUsdDataFeed'
   | 'mTokenToUsdDataFeed'
 >;
+type CommonParamsProvider = {
+  vault: MBasisRedemptionVaultWithSwapper;
+  owner: SignerWithAddress;
+};
 
 export const redeemInstantWithSwapperTest = async (
   {
@@ -50,6 +54,8 @@ export const redeemInstantWithSwapperTest = async (
   const tokensReceiver =
     await mBasisRedemptionVaultWithSwapper.tokensReceiver();
   const feeReceiver = await mBasisRedemptionVaultWithSwapper.feeReceiver();
+  const liquidityProvider =
+    await mBasisRedemptionVaultWithSwapper.liquidityProvider();
 
   if (opt?.revertMessage) {
     await expect(
@@ -69,6 +75,9 @@ export const redeemInstantWithSwapperTest = async (
   const balanceBeforeContractMBASIS = await mBASIS.balanceOf(
     mBasisRedemptionVaultWithSwapper.address,
   );
+
+  const balanceBeforeProviderMTBILL = await mTBILL.balanceOf(liquidityProvider);
+  const balanceBeforeProviderMBASIS = await mBASIS.balanceOf(liquidityProvider);
 
   const balanceBeforeReceiverMTBILL = await mTBILL.balanceOf(tokensReceiver);
   const balanceBeforeReceiverMBASIS = await mBASIS.balanceOf(tokensReceiver);
@@ -119,6 +128,9 @@ export const redeemInstantWithSwapperTest = async (
     mBasisRedemptionVaultWithSwapper.address,
   );
 
+  const balanceAfterProviderMTBILL = await mTBILL.balanceOf(liquidityProvider);
+  const balanceAfterProviderMBASIS = await mBASIS.balanceOf(liquidityProvider);
+
   const balanceAfterReceiverMTBILL = await mTBILL.balanceOf(tokensReceiver);
   const balanceAfterReceiverMBASIS = await mBASIS.balanceOf(tokensReceiver);
 
@@ -138,6 +150,9 @@ export const redeemInstantWithSwapperTest = async (
   expect(balanceAfterReceiverMTBILL).eq(balanceBeforeReceiverMTBILL);
   expect(balanceAfterReceiverMBASIS).eq(balanceBeforeReceiverMBASIS);
 
+  expect(balanceAfterContractMTBILL).eq(balanceBeforeContractMTBILL);
+  expect(balanceAfterContractMBASIS).eq(balanceBeforeContractMBASIS);
+
   expect(balanceAfterFeeReceiverMTBILL).eq(balanceBeforeFeeReceiverMTBILL);
   expect(balanceAfterFeeReceiverMBASIS).eq(
     balanceBeforeFeeReceiverMBASIS.add(fee),
@@ -145,17 +160,42 @@ export const redeemInstantWithSwapperTest = async (
 
   if (swap) {
     expect(supplyAfterMTBILL).eq(supplyBeforeMTBILL.sub(expectedMToken));
-    expect(balanceAfterContractMBASIS).eq(
-      balanceBeforeContractMBASIS.add(amountInWithoutFee),
+    expect(balanceAfterProviderMBASIS).eq(
+      balanceBeforeProviderMBASIS.add(amountInWithoutFee),
     );
-    expect(balanceAfterContractMTBILL).eq(
-      balanceBeforeContractMTBILL.sub(expectedMToken),
+    expect(balanceAfterProviderMTBILL).eq(
+      balanceBeforeProviderMTBILL.sub(expectedMToken),
     );
   } else {
     expect(supplyAfterMBASIS).eq(supplyBeforeMBASIS.sub(amountInWithoutFee));
-    expect(balanceAfterContractMBASIS).eq(balanceBeforeContractMBASIS);
-    expect(balanceAfterContractMTBILL).eq(balanceBeforeContractMTBILL);
+    expect(balanceAfterProviderMBASIS).eq(balanceBeforeProviderMBASIS);
+    expect(balanceAfterProviderMTBILL).eq(balanceBeforeProviderMTBILL);
   }
+};
+
+export const setLiquidityProviderTest = async (
+  { vault, owner }: CommonParamsProvider,
+  newProvider: string,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      vault.connect(opt?.from ?? owner).setLiquidityProvider(newProvider),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(
+    vault.connect(opt?.from ?? owner).setLiquidityProvider(newProvider),
+  )
+    .to.emit(
+      vault,
+      vault.interface.events['SetLiquidityProvider(address,address)'].name,
+    )
+    .withArgs((opt?.from ?? owner).address, newProvider).to.not.reverted;
+
+  const provider = await vault.liquidityProvider();
+  expect(provider).eq(newProvider);
 };
 
 const getFeePercent = async (

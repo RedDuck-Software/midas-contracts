@@ -59,8 +59,14 @@ import {
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
-  const [owner, eUsdOwner, tokensReceiver, feeReceiver, ...regularAccounts] =
-    await ethers.getSigners();
+  const [
+    owner,
+    eUsdOwner,
+    tokensReceiver,
+    feeReceiver,
+    liquidityProvider,
+    ...regularAccounts
+  ] = await ethers.getSigners();
 
   // main contracts
   const accessControl = await new MidasAccessControlTest__factory(
@@ -534,7 +540,7 @@ export const defaultDeploy = async () => {
 
   await expect(
     mBasisRedemptionVaultWithSwapper[
-      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
     ](
       accessControl.address,
       {
@@ -558,11 +564,42 @@ export const defaultDeploy = async () => {
         minFiatRedeemAmount: 1000,
       },
       constants.AddressZero,
+      liquidityProvider.address,
+    ),
+  ).to.be.reverted;
+
+  await expect(
+    mBasisRedemptionVaultWithSwapper[
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
+    ](
+      accessControl.address,
+      {
+        mToken: mBASIS.address,
+        mTokenDataFeed: mBASISToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      1000,
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: 1000,
+      },
+      redemptionVault.address,
+      constants.AddressZero,
     ),
   ).to.be.reverted;
 
   await mBasisRedemptionVaultWithSwapper[
-    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
   ](
     accessControl.address,
     {
@@ -586,6 +623,7 @@ export const defaultDeploy = async () => {
       minFiatRedeemAmount: 1000,
     },
     redemptionVault.address,
+    liquidityProvider.address,
   );
 
   await accessControl.grantRole(
@@ -866,5 +904,6 @@ export const defaultDeploy = async () => {
     mBasisRedemptionVaultWithSwapper,
     mBASISToUsdDataFeed,
     mockedAggregatorMBASIS,
+    liquidityProvider,
   };
 };

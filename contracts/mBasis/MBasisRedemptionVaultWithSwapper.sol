@@ -6,6 +6,7 @@ import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgrade
 
 import "./MBasisRedemptionVault.sol";
 import "../interfaces/IRedemptionVault.sol";
+import "../interfaces/IMBASISRedemptionVaultWithSwapper.sol";
 import "../libraries/DecimalsCorrectionLibrary.sol";
 
 /**
@@ -13,11 +14,16 @@ import "../libraries/DecimalsCorrectionLibrary.sol";
  * @notice Smart contract that handles mBASIS minting
  * @author RedDuck Software
  */
-contract MBasisRedemptionVaultWithSwapper is MBasisRedemptionVault {
+contract MBasisRedemptionVaultWithSwapper is
+    IMBASISRedemptionVaultWithSwapper,
+    MBasisRedemptionVault
+{
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
     IRedemptionVault public mTbillRedemptionVault;
+
+    address public liquidityProvider;
 
     /**
      * @dev leaving a storage gap for futures updates
@@ -45,7 +51,8 @@ contract MBasisRedemptionVaultWithSwapper is MBasisRedemptionVault {
         uint256 _variationTolerance,
         uint256 _minAmount,
         FiatRedeptionInitParams calldata _fiatRedemptionInitParams,
-        address _mTbillRedemptionVault
+        address _mTbillRedemptionVault,
+        address _liquidityProvider
     ) external initializer {
         __RedemptionVault_init(
             _ac,
@@ -58,7 +65,10 @@ contract MBasisRedemptionVaultWithSwapper is MBasisRedemptionVault {
             _fiatRedemptionInitParams
         );
         _validateAddress(_mTbillRedemptionVault, true);
+        _validateAddress(_liquidityProvider, false);
+
         mTbillRedemptionVault = IRedemptionVault(_mTbillRedemptionVault);
+        liquidityProvider = _liquidityProvider;
     }
 
     /**
@@ -73,7 +83,7 @@ contract MBasisRedemptionVaultWithSwapper is MBasisRedemptionVault {
      */
     function redeemInstant(address tokenOut, uint256 amountMTokenIn)
         external
-        override
+        override(IRedemptionVault, RedemptionVault)
         whenFnNotPaused(this.redeemInstant.selector)
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
@@ -152,24 +162,46 @@ contract MBasisRedemptionVaultWithSwapper is MBasisRedemptionVault {
     }
 
     /**
-     * @notice Transfers mBasis to contract
+     * @inheritdoc IMBASISRedemptionVaultWithSwapper
+     */
+    function setLiquidityProvider(address provider) external onlyVaultAdmin {
+        require(liquidityProvider != provider, "MRVS: already provider");
+        _validateAddress(provider, false);
+
+        liquidityProvider = provider;
+
+        emit SetLiquidityProvider(msg.sender, provider);
+    }
+
+    /**
+     * @notice Transfers mBasis to liquidity provider
+     * Transfers mTBILL from liquidity provider to contract
      * Returns amount on mToken using exchange rates
      * @param mBasisAmount mBasis token amount
      */
     function _swapMBasisToMToken(uint256 mBasisAmount)
         internal
-        returns (uint256)
+        returns (uint256 mTokenAmount)
     {
         _tokenTransferFromUser(
             address(mToken),
-            address(this),
+            liquidityProvider,
             mBasisAmount,
             18
         );
+
         uint256 mTbillRate = mTbillRedemptionVault
             .mTokenDataFeed()
             .getDataInBase18();
         uint256 mTokenRate = mTokenDataFeed.getDataInBase18();
-        return (mBasisAmount * mTokenRate) / mTbillRate;
+        mTokenAmount = (mBasisAmount * mTokenRate) / mTbillRate;
+
+        _tokenTransferFromTo(
+            address(mTbillRedemptionVault.mToken()),
+            liquidityProvider,
+            address(this),
+            mTokenAmount,
+            18
+        );
     }
 }

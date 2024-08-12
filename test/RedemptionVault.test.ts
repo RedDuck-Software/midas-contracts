@@ -26,7 +26,10 @@ import {
   withdrawTest,
   changeTokenFeeTest,
 } from './common/manageable-vault.helpers';
-import { redeemInstantWithSwapperTest } from './common/mbasis-redemption-vault.helpers';
+import {
+  redeemInstantWithSwapperTest,
+  setLiquidityProviderTest,
+} from './common/mbasis-redemption-vault.helpers';
 import {
   approveRedeemRequestTest,
   redeemFiatRequestTest,
@@ -100,7 +103,49 @@ describe('RedemptionVault', function () {
     );
   });
 
-  describe('MBasisRedemptionVaultWithSwapper redeemInstant()', () => {
+  describe.only('MBasisRedemptionVaultWithSwapper redeemInstant()', () => {
+    describe('setLiquidityProvider()', () => {
+      it('should fail: call from address without M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+        const { mBasisRedemptionVaultWithSwapper, regularAccounts, owner } =
+          await loadFixture(defaultDeploy);
+        await setLiquidityProviderTest(
+          { vault: mBasisRedemptionVaultWithSwapper, owner },
+          constants.AddressZero,
+          { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
+        );
+      });
+
+      it('should fail: if provider address zero', async () => {
+        const { mBasisRedemptionVaultWithSwapper, owner } = await loadFixture(
+          defaultDeploy,
+        );
+        await setLiquidityProviderTest(
+          { vault: mBasisRedemptionVaultWithSwapper, owner },
+          constants.AddressZero,
+          { revertMessage: 'zero address' },
+        );
+      });
+
+      it('should fail: if provider address equal current provider address', async () => {
+        const { mBasisRedemptionVaultWithSwapper, liquidityProvider, owner } =
+          await loadFixture(defaultDeploy);
+        await setLiquidityProviderTest(
+          { vault: mBasisRedemptionVaultWithSwapper, owner },
+          liquidityProvider.address,
+          { revertMessage: 'MRVS: already provider' },
+        );
+      });
+
+      it('call from address with M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+        const { mBasisRedemptionVaultWithSwapper, regularAccounts, owner } =
+          await loadFixture(defaultDeploy);
+        await setLiquidityProviderTest(
+          { vault: mBasisRedemptionVaultWithSwapper, owner },
+          regularAccounts[0].address,
+        );
+      });
+    });
+
     it('should fail: when there is no token in vault', async () => {
       const {
         owner,
@@ -770,7 +815,7 @@ describe('RedemptionVault', function () {
       );
     });
 
-    it('should fail: contract do not have mTBILL to swap', async () => {
+    it('should fail: liquidity provider do not have mTBILL to swap', async () => {
       const {
         owner,
         mBasisRedemptionVaultWithSwapper,
@@ -781,6 +826,7 @@ describe('RedemptionVault', function () {
         mBASISToUsdDataFeed,
         dataFeed,
         redemptionVault,
+        liquidityProvider,
       } = await loadFixture(defaultDeploy);
 
       await mintToken(mBASIS, owner, 100_000);
@@ -788,6 +834,12 @@ describe('RedemptionVault', function () {
       await approveBase18(
         owner,
         mBASIS,
+        mBasisRedemptionVaultWithSwapper,
+        100_000,
+      );
+      await approveBase18(
+        liquidityProvider,
+        mTBILL,
         mBasisRedemptionVaultWithSwapper,
         100_000,
       );
@@ -818,7 +870,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         200,
         {
-          revertMessage: 'ERC20: burn amount exceeds balance',
+          revertMessage: 'ERC20: transfer amount exceeds balance',
         },
       );
     });
@@ -883,6 +935,7 @@ describe('RedemptionVault', function () {
         mBASISToUsdDataFeed,
         dataFeed,
         redemptionVault,
+        liquidityProvider,
       } = await loadFixture(defaultDeploy);
 
       await addPaymentTokenTest(
@@ -899,7 +952,7 @@ describe('RedemptionVault', function () {
       );
 
       await mintToken(mBASIS, owner, 100_000);
-      await mintToken(mTBILL, mBasisRedemptionVaultWithSwapper, 100_000);
+      await mintToken(mTBILL, liquidityProvider, 100_000);
       await mintToken(stableCoins.dai, mBasisRedemptionVaultWithSwapper, 10);
       await mintToken(stableCoins.dai, redemptionVault, 1_000_000);
       await approveBase18(
@@ -907,6 +960,12 @@ describe('RedemptionVault', function () {
         mBASIS,
         mBasisRedemptionVaultWithSwapper,
         100_000,
+      );
+      await approveBase18(
+        liquidityProvider,
+        mTBILL,
+        mBasisRedemptionVaultWithSwapper,
+        1000000,
       );
 
       await redeemInstantWithSwapperTest(
