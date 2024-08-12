@@ -156,7 +156,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
         onlyNotSanctioned(msg.sender)
-        returns (uint256)
+        returns (uint256 requestId)
     {
         address user = msg.sender;
 
@@ -164,12 +164,16 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountTokenCopy = amountToken;
         bytes32 referrerIdCopy = referrerId;
 
+        uint256 currentId = lastRequestId.current();
+        requestId = currentId;
+        lastRequestId.increment();
+
         (
             uint256 tokenAmountInUsd,
             uint256 feeAmount,
             uint256 amountTokenWithoutFee,
             ,
-            ,
+            uint256 tokenInRate,
             uint256 tokenOutRate,
             uint256 tokenDecimals
         ) = _calcAndValidateDeposit(user, tokenInCopy, amountTokenCopy, false);
@@ -189,19 +193,18 @@ contract DepositVault is ManageableVault, IDepositVault {
                 tokenDecimals
             );
 
-        uint256 requestId = lastRequestId.current();
-        lastRequestId.increment();
-
-        mintRequests[requestId] = Request({
+        mintRequests[currentId] = Request({
             sender: user,
             tokenIn: tokenInCopy,
             status: RequestStatus.Pending,
             depositedUsdAmount: tokenAmountInUsd,
+            usdAmountWithoutFees: (amountTokenWithoutFee * tokenInRate) /
+                10**18,
             tokenOutRate: tokenOutRate
         });
 
         emit DepositRequest(
-            requestId,
+            currentId,
             user,
             tokenInCopy,
             tokenAmountInUsd,
@@ -209,8 +212,6 @@ contract DepositVault is ManageableVault, IDepositVault {
             tokenOutRate,
             referrerIdCopy
         );
-
-        return requestId;
     }
 
     /**
@@ -316,16 +317,8 @@ contract DepositVault is ManageableVault, IDepositVault {
         if (isSafe)
             _requireVariationTolerance(request.tokenOutRate, newOutRate);
 
-        uint256 feeUsdAmount = _getFeeAmount(
-            request.sender,
-            request.tokenIn,
-            request.depositedUsdAmount,
-            false,
-            0
-        );
-
-        uint256 amountMToken = ((request.depositedUsdAmount - feeUsdAmount) *
-            (10**18)) / newOutRate;
+        uint256 amountMToken = (request.usdAmountWithoutFees * (10**18)) /
+            newOutRate;
 
         mToken.mint(request.sender, amountMToken);
 

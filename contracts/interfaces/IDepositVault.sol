@@ -9,6 +9,7 @@ import "./IManageableVault.sol";
  * @param tokenIn tokenIn address
  * @param status request status
  * @param depositedUsdAmount amout USD, tokenIn -> USD
+ * @param usdAmountWithoutFees amout USD, tokenIn - fees -> USD
  * @param tokenOutRate rate of mToken at request creation time
  */
 struct Request {
@@ -16,6 +17,7 @@ struct Request {
     address tokenIn;
     RequestStatus status;
     uint256 depositedUsdAmount;
+    uint256 usdAmountWithoutFees;
     uint256 tokenOutRate;
 }
 
