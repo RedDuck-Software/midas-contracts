@@ -386,7 +386,7 @@ abstract contract ManageableVault is
      * from `msg.sender` to `tokensReceiver`
      * @param token address of token
      * @param to address of user
-     * @param amount amount of `token` to transfer from `user`
+     * @param amount amount of `token` to transfer from `user` (decimals 18)
      * @param tokenDecimals token decimals
      */
     function _tokenTransferFromUser(
@@ -412,7 +412,7 @@ abstract contract ManageableVault is
      * from `contract` to `user`
      * @param token address of token
      * @param to address of user
-     * @param amount amount of `token` to transfer from `user`
+     * @param amount amount of `token` to transfer from `user` (decimals 18)
      * @param tokenDecimals token decimals
      */
     function _tokenTransferToUser(
@@ -450,7 +450,7 @@ abstract contract ManageableVault is
 
     /**
      * @dev check if operation exceed daily limit and update limit data
-     * @param amount operation amount
+     * @param amount operation amount (decimals 18)
      */
     function _requireAndUpdateLimit(uint256 amount) internal {
         uint256 currentDayNumber = block.timestamp / 1 days;
@@ -464,7 +464,7 @@ abstract contract ManageableVault is
     /**
      * @dev check if operation exceed token allowance and update allowance
      * @param token address of token
-     * @param amount operation amount
+     * @param amount operation amount (decimals 18)
      */
     function _requireAndUpdateAllowance(address token, uint256 amount)
         internal
@@ -482,7 +482,7 @@ abstract contract ManageableVault is
      * if additionalFee not zero, token fee replaced with additionalFee
      * @param sender sender address
      * @param token token address
-     * @param amount amount of token
+     * @param amount amount of token (decimals 18)
      * @param isInstant is instant operation
      * @param additionalFee fee for fiat operations
      * @return fee amount of input token

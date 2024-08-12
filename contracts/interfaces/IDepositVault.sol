@@ -101,7 +101,7 @@ interface IDepositVault is IManageableVault {
      * Transfers fee in tokenIn to feeReceiver.
      * Mints mToken to user.
      * @param tokenIn address of tokenIn
-     * @param amountToken amount of `tokenIn` that will be taken from user
+     * @param amountToken amount of `tokenIn` that will be taken from user (decimals 18)
      * @param referrerId referrer id
      */
     function depositInstant(
@@ -117,7 +117,7 @@ interface IDepositVault is IManageableVault {
      * Transfers fee in tokenIn to feeReceiver.
      * Creates mint request.
      * @param tokenIn address of tokenIn
-     * @param amountToken amount of `tokenIn` that will be taken from user
+     * @param amountToken amount of `tokenIn` that will be taken from user (decimals 18)
      * @param referrerId referrer id
      * @return request id
      */

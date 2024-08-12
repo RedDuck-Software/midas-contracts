@@ -319,7 +319,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @notice Creating request depends on tokenOut
      * @param tokenOut tokenOut address
-     * @param amountMTokenIn request status
+     * @param amountMTokenIn amount of mToken (decimals 18)
      *
      * @return requestId request id
      */
@@ -382,7 +382,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     /**
      * @dev calculates tokenOut amount from USD amount
-     * @param amountUsd amount of USD
+     * @param amountUsd amount of USD (decimals 18)
      * @param tokenOut tokenOut address
      *
      * @return amountToken converted USD to tokenOut
@@ -405,7 +405,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
     /**
      * @dev calculates USD amount from mToken amount
-     * @param amountMToken amount of mToken
+     * @param amountMToken amount of mToken (decimals 18)
      *
      * @return amountUsd converted amount to USD
      * @return mTokenRate conversion rate
@@ -427,7 +427,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @dev validate redeem and calculate fee
      * @param user user address
      * @param tokenOut tokenOut address
-     * @param amountMTokenIn mToken amount
+     * @param amountMTokenIn mToken amount (decimals 18)
      * @param isInstant is instant operation
      * @param isFiat is fiat operation
      *

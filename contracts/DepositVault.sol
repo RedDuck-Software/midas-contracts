@@ -277,7 +277,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev validates that inputted USD amount >= minAmountToDepositInUsd()
      * and amount >= minAmount()
      * @param user user address
-     * @param amountMTokenWithoutFee amount of mToken without fee
+     * @param amountMTokenWithoutFee amount of mToken without fee (decimals 18)
      */
     function _validateMinAmount(address user, uint256 amountMTokenWithoutFee)
         internal
@@ -340,7 +340,7 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @dev validate deposit and calculate mint amount
      * @param user user address
      * @param tokenIn tokenIn address
-     * @param amountToken tokenIn amount
+     * @param amountToken tokenIn amount (decimals 18)
      * @param isInstant is instant operation
      *
      * @return tokenAmountInUsd tokenIn amount converted to USD
@@ -407,7 +407,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @dev calculates USD amount from tokenIn amount
      * @param tokenIn tokenIn address
-     * @param amount amount of tokenIn
+     * @param amount amount of tokenIn (decimals 18)
      *
      * @return amountInUsd converted amount to USD
      * @return rate conversion rate
@@ -429,7 +429,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
     /**
      * @dev calculates mToken amount from USD amount
-     * @param amountUsd amount of USD
+     * @param amountUsd amount of USD (decimals 18)
      *
      * @return amountMToken converted USD to mToken
      * @return mTokenRate conversion rate

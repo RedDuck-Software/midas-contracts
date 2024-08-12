@@ -101,7 +101,7 @@ interface IRedemptionVault is IManageableVault {
      * Transfers fee in mToken to feeReceiver
      * Transfers tokenOut to user.
      * @param tokenOut stable coin token address to redeem to
-     * @param amountMTokenIn amount of mTBILL to redeem
+     * @param amountMTokenIn amount of mTBILL to redeem (decimals 18)
      */
     function redeemInstant(address tokenOut, uint256 amountMTokenIn) external;
 
@@ -110,7 +110,7 @@ interface IRedemptionVault is IManageableVault {
      * Transfers amount in mToken to contract
      * Transfers fee in mToken to feeReceiver
      * @param tokenOut stable coin token address to redeem to
-     * @param amountMTokenIn amount of mTBILL to redeem
+     * @param amountMTokenIn amount of mTBILL to redeem (decimals 18)
      * @return request id
      */
     function redeemRequest(address tokenOut, uint256 amountMTokenIn)
@@ -121,7 +121,7 @@ interface IRedemptionVault is IManageableVault {
      * @notice creating redeem request if tokenOut is fiat
      * Transfers amount in mToken to contract
      * Transfers fee in mToken to feeReceiver
-     * @param amountMTokenIn amount of mTBILL to redeem
+     * @param amountMTokenIn amount of mTBILL to redeem (decimals 18)
      * @return request id
      */
     function redeemFiatRequest(uint256 amountMTokenIn)

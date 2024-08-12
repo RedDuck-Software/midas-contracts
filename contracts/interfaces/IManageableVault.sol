@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 /**
  * @param dataFeed data feed token/USD address
  * @param fee fee by token, 1% = 100
- * @param allowance token allowance
+ * @param allowance token allowance (decimals 18)
  */
 struct TokenConfig {
     address dataFeed;
@@ -167,7 +167,7 @@ interface IManageableVault {
      * prev allowance rewrites by new
      * can be called only from permissioned actor.
      * @param token token address
-     * @param allowance new allowance
+     * @param allowance new allowance (decimals 18)
      */
     function changeTokenAllowance(address token, uint256 allowance) external;
 
@@ -189,7 +189,7 @@ interface IManageableVault {
     /**
      * @notice set new min amount.
      * can be called only from permissioned actor.
-     * @param newAmount min amount for operations in tokenIn
+     * @param newAmount min amount for operations in mToken
      */
     function setMinAmount(uint256 newAmount) external;
 
@@ -224,7 +224,7 @@ interface IManageableVault {
     /**
      * @notice set operation daily limit.
      * can be called only from permissioned actor.
-     * @param newInstantDailyLimit new operation daily limit
+     * @param newInstantDailyLimit new operation daily limit (decimals 18)
      */
     function setInstantDailyLimit(uint256 newInstantDailyLimit) external;
 
