@@ -52,7 +52,14 @@ abstract contract Greenlistable is WithMidasAccessControl {
         onlyInitializing
     {
         __WithMidasAccessControl_init(_accessControl);
+        __Greenlistable_init_unchained();
     }
+
+    /**
+     * @dev upgradeable pattern contract`s initializer unchained
+     */
+    // solhint-disable func-name-mixedcase
+    function __Greenlistable_init_unchained() internal onlyInitializing {}
 
     /**
      * @notice enable or disable greenlist.

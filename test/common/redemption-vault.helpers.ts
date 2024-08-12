@@ -143,7 +143,7 @@ export const redeemRequestTest = async (
 
   const supplyBefore = await mTBILL.totalSupply();
 
-  const latestRequestIdBefore = await redemptionVault.lastRequestId();
+  const latestRequestIdBefore = await redemptionVault.currentRequestId();
   const mTokenRate = await mTokenToUsdDataFeed.getDataInBase18();
 
   const { fee, currentStableRate, amountInWithoutFee } =
@@ -168,7 +168,7 @@ export const redeemRequestTest = async (
     .withArgs(latestRequestIdBefore.add(1), sender, tokenOut, amountTBillIn).to
     .not.reverted;
 
-  const latestRequestIdAfter = await redemptionVault.lastRequestId();
+  const latestRequestIdAfter = await redemptionVault.currentRequestId();
   const request = await redemptionVault.redeemRequests(latestRequestIdBefore);
 
   expect(request.sender).eq(sender.address);
@@ -231,7 +231,7 @@ export const redeemFiatRequestTest = async (
 
   const supplyBefore = await mTBILL.totalSupply();
 
-  const latestRequestIdBefore = await redemptionVault.lastRequestId();
+  const latestRequestIdBefore = await redemptionVault.currentRequestId();
   const manualToken = await redemptionVault.MANUAL_FULLFILMENT_TOKEN();
   const fiatAdditionalFee = await redemptionVault.fiatAdditionalFee();
   const hundredPercent = await redemptionVault.ONE_HUNDRED_PERCENT();
@@ -262,7 +262,7 @@ export const redeemFiatRequestTest = async (
     .withArgs(latestRequestIdBefore.add(1), sender, manualToken, amountTBillIn)
     .to.not.reverted;
 
-  const latestRequestIdAfter = await redemptionVault.lastRequestId();
+  const latestRequestIdAfter = await redemptionVault.currentRequestId();
   const request = await redemptionVault.redeemRequests(latestRequestIdBefore);
 
   expect(request.sender).eq(sender.address);

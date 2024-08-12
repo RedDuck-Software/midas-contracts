@@ -363,8 +363,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         if (feeAmount > 0)
             _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
 
-        uint256 requestId = lastRequestId.current();
-        lastRequestId.increment();
+        uint256 requestId = currentRequestId.current();
+        currentRequestId.increment();
 
         redeemRequests[requestId] = Request({
             sender: user,

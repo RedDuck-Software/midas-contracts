@@ -45,7 +45,7 @@ abstract contract ManageableVault is
     /**
      * @notice last request id
      */
-    Counters.Counter public lastRequestId;
+    Counters.Counter public currentRequestId;
 
     /**
      * @notice 100 percent with base 100
@@ -171,8 +171,8 @@ abstract contract ManageableVault is
 
         mToken = IMTbill(_mToken);
         __Pausable_init(_ac);
-        __Greenlistable_init(_ac);
-        __Blacklistable_init(_ac);
+        __Greenlistable_init_unchained();
+        __Blacklistable_init_unchained();
         __WithSanctionsList_init_unchained(_sanctionsList);
 
         tokensReceiver = _tokensReceiver;

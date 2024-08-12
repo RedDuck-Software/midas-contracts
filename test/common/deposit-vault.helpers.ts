@@ -178,7 +178,7 @@ export const depositRequestTest = async (
     sender.address,
   );
 
-  const latestRequestIdBefore = await depositVault.lastRequestId();
+  const latestRequestIdBefore = await depositVault.currentRequestId();
   const mTokenRate = await mTokenToUsdDataFeed.getDataInBase18();
 
   const { fee, mintAmount, amountInWithoutFee, actualAmountInUsd } =
@@ -212,7 +212,7 @@ export const depositRequestTest = async (
       constants.HashZero,
     ).to.not.reverted;
 
-  const latestRequestIdAfter = await depositVault.lastRequestId();
+  const latestRequestIdAfter = await depositVault.currentRequestId();
   const balanceAfterContract = await balanceOfBase18(
     tokenContract,
     tokensReceiver,

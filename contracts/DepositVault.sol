@@ -164,9 +164,9 @@ contract DepositVault is ManageableVault, IDepositVault {
         uint256 amountTokenCopy = amountToken;
         bytes32 referrerIdCopy = referrerId;
 
-        uint256 currentId = lastRequestId.current();
+        uint256 currentId = currentRequestId.current();
         requestId = currentId;
-        lastRequestId.increment();
+        currentRequestId.increment();
 
         (
             uint256 tokenAmountInUsd,
