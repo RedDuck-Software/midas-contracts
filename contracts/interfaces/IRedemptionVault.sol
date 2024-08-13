@@ -109,8 +109,13 @@ interface IRedemptionVault is IManageableVault {
      * Transfers tokenOut to user.
      * @param tokenOut stable coin token address to redeem to
      * @param amountMTokenIn amount of mTBILL to redeem (decimals 18)
+     * @param minReceiveAmount minimum expected amount of tokenOut to receive (decimals 18)
      */
-    function redeemInstant(address tokenOut, uint256 amountMTokenIn) external;
+    function redeemInstant(
+        address tokenOut,
+        uint256 amountMTokenIn,
+        uint256 minReceiveAmount
+    ) external;
 
     /**
      * @notice creating redeem request if tokenOut not fiat

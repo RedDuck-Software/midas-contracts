@@ -1177,7 +1177,9 @@ describe('RedemptionVault', function () {
         0,
         true,
       );
-      const selector = encodeFnSelector('redeemInstant(address,uint256)');
+      const selector = encodeFnSelector(
+        'redeemInstant(address,uint256,uint256)',
+      );
       await pauseVaultFn(redemptionVault, selector);
       await redeemInstantTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1389,6 +1391,45 @@ describe('RedemptionVault', function () {
         99_999,
         {
           revertMessage: 'MV: exceed limit',
+        },
+      );
+    });
+
+    it('should fail: if min receive amount greater then actual', async () => {
+      const {
+        redemptionVault,
+        mockedAggregator,
+        owner,
+        mTBILL,
+        stableCoins,
+        dataFeed,
+        mTokenToUsdDataFeed,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+        true,
+      );
+      await setRoundData({ mockedAggregator }, 4);
+
+      await mintToken(mTBILL, owner, 100_000);
+
+      await approveBase18(owner, mTBILL, redemptionVault, 100_000);
+
+      await redeemInstantTest(
+        {
+          redemptionVault,
+          owner,
+          mTBILL,
+          mTokenToUsdDataFeed,
+          minAmount: parseUnits('1000000'),
+        },
+        stableCoins.dai,
+        99_999,
+        {
+          revertMessage: 'RV: minReceiveAmount > actual',
         },
       );
     });

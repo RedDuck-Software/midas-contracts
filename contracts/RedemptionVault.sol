@@ -120,7 +120,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     /**
      * @inheritdoc IRedemptionVault
      */
-    function redeemInstant(address tokenOut, uint256 amountMTokenIn)
+    function redeemInstant(
+        address tokenOut,
+        uint256 amountMTokenIn,
+        uint256 minReceiveAmount
+    )
         external
         virtual
         whenFnNotPaused(this.redeemInstant.selector)
@@ -141,6 +145,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         uint256 amountMTokenInCopy = amountMTokenIn;
         address tokenOutCopy = tokenOut;
+        uint256 minReceiveAmountCopy = minReceiveAmount;
 
         (uint256 amountMTokenInUsd, uint256 mTokenRate) = _convertMTokenToUsd(
             amountMTokenInCopy
@@ -150,16 +155,21 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             tokenOutCopy
         );
 
+        uint256 amountTokenOutWithoutFee = _truncate(
+            (amountMTokenWithoutFee * mTokenRate) / tokenOutRate,
+            tokenDecimals
+        );
+
+        require(
+            minReceiveAmountCopy <= amountTokenOutWithoutFee,
+            "RV: minReceiveAmount > actual"
+        );
+
         _requireAndUpdateAllowance(tokenOutCopy, amountTokenOut);
 
         mToken.burn(user, amountMTokenWithoutFee);
         if (feeAmount > 0)
             _tokenTransferFromUser(address(mToken), feeReceiver, feeAmount, 18);
-
-        uint256 amountTokenOutWithoutFee = _truncate(
-            (amountMTokenWithoutFee * mTokenRate) / tokenOutRate,
-            tokenDecimals
-        );
 
         _tokenTransferToUser(
             tokenOutCopy,

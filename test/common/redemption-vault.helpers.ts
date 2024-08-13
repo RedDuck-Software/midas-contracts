@@ -32,7 +32,8 @@ export const redeemInstantTest = async (
     mTBILL,
     mTokenToUsdDataFeed,
     waivedFee,
-  }: CommonParamsRedeem & { waivedFee?: boolean },
+    minAmount,
+  }: CommonParamsRedeem & { waivedFee?: boolean; minAmount?: BigNumberish },
   tokenOut: ERC20 | string,
   amountTBillIn: number,
   opt?: OptionalCommonParams,
@@ -50,7 +51,9 @@ export const redeemInstantTest = async (
 
   if (opt?.revertMessage) {
     await expect(
-      redemptionVault.connect(sender).redeemInstant(tokenOut, amountIn),
+      redemptionVault
+        .connect(sender)
+        .redeemInstant(tokenOut, amountIn, minAmount ?? constants.Zero),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -76,7 +79,9 @@ export const redeemInstantTest = async (
     );
 
   await expect(
-    redemptionVault.connect(sender).redeemInstant(tokenOut, amountIn),
+    redemptionVault
+      .connect(sender)
+      .redeemInstant(tokenOut, amountIn, minAmount ?? constants.Zero),
   )
     .to.emit(
       redemptionVault,

@@ -411,7 +411,7 @@ abstract contract ManageableVault is
      * and converts `amount` from base18
      * to amount with a correct precision.
      * @param token address of token
-     * @param from address 
+     * @param from address
      * @param to address
      * @param amount amount of `token` to transfer from `user`
      * @param tokenDecimals token decimals

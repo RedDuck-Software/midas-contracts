@@ -104,11 +104,13 @@ interface IDepositVault is IManageableVault {
      * Mints mToken to user.
      * @param tokenIn address of tokenIn
      * @param amountToken amount of `tokenIn` that will be taken from user (decimals 18)
+     * @param minReceiveAmount minimum expected amount of tokenOut to receive (decimals 18)
      * @param referrerId referrer id
      */
     function depositInstant(
         address tokenIn,
         uint256 amountToken,
+        uint256 minReceiveAmount,
         bytes32 referrerId
     ) external;
 

@@ -1101,7 +1101,7 @@ describe('DepositVault', function () {
         true,
       );
       const selector = encodeFnSelector(
-        'depositInstant(address,uint256,bytes32)',
+        'depositInstant(address,uint256,uint256,bytes32)',
       );
       await pauseVaultFn(depositVault, selector);
       await depositInstantTest(
@@ -1369,6 +1369,45 @@ describe('DepositVault', function () {
         99_999,
         {
           revertMessage: 'MV: exceed limit',
+        },
+      );
+    });
+
+    it('should fail: if min receive amount greater then actual', async () => {
+      const {
+        depositVault,
+        mockedAggregator,
+        owner,
+        mTBILL,
+        stableCoins,
+        dataFeed,
+        mTokenToUsdDataFeed,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+        true,
+      );
+      await setRoundData({ mockedAggregator }, 4);
+
+      await mintToken(stableCoins.dai, owner, 100_000);
+
+      await approveBase18(owner, stableCoins.dai, depositVault, 100_000);
+
+      await depositInstantTest(
+        {
+          depositVault,
+          owner,
+          mTBILL,
+          mTokenToUsdDataFeed,
+          minAmount: parseUnits('100000'),
+        },
+        stableCoins.dai,
+        99_999,
+        {
+          revertMessage: 'DV: minReceiveAmount > actual',
         },
       );
     });

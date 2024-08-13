@@ -31,7 +31,8 @@ export const depositInstantTest = async (
     mTBILL,
     mTokenToUsdDataFeed,
     waivedFee,
-  }: CommonParamsDeposit & { waivedFee?: boolean },
+    minAmount,
+  }: CommonParamsDeposit & { waivedFee?: boolean; minAmount?: BigNumberish },
   tokenIn: ERC20 | string,
   amountUsdIn: number,
   opt?: OptionalCommonParams,
@@ -51,7 +52,12 @@ export const depositInstantTest = async (
     await expect(
       depositVault
         .connect(sender)
-        .depositInstant(tokenIn, amountIn, constants.HashZero),
+        .depositInstant(
+          tokenIn,
+          amountIn,
+          minAmount ?? constants.Zero,
+          constants.HashZero,
+        ),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -87,7 +93,12 @@ export const depositInstantTest = async (
   await expect(
     depositVault
       .connect(sender)
-      .depositInstant(tokenIn, amountIn, constants.HashZero),
+      .depositInstant(
+        tokenIn,
+        amountIn,
+        minAmount ?? constants.Zero,
+        constants.HashZero,
+      ),
   )
     .to.emit(
       depositVault,

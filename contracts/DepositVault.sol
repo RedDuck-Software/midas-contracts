@@ -78,6 +78,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function depositInstant(
         address tokenIn,
         uint256 amountToken,
+        uint256 minReceiveAmount,
         bytes32 referrerId
     )
         external
@@ -88,6 +89,9 @@ contract DepositVault is ManageableVault, IDepositVault {
     {
         address user = msg.sender;
 
+        address tokenInCopy = tokenIn;
+        uint256 amountTokenCopy = amountToken;
+
         (
             uint256 tokenAmountInUsd,
             uint256 feeTokenAmount,
@@ -96,35 +100,39 @@ contract DepositVault is ManageableVault, IDepositVault {
             ,
             ,
             uint256 tokenDecimals
-        ) = _calcAndValidateDeposit(user, tokenIn, amountToken, true);
+        ) = _calcAndValidateDeposit(user, tokenInCopy, amountTokenCopy, true);
+
+        require(
+            minReceiveAmount <= mintAmount,
+            "DV: minReceiveAmount > actual"
+        );
 
         totalMinted[user] += mintAmount;
 
         _requireAndUpdateLimit(mintAmount);
 
         _tokenTransferFromUser(
-            tokenIn,
+            tokenInCopy,
             tokensReceiver,
             amountTokenWithoutFee,
             tokenDecimals
         );
 
-        mToken.mint(user, mintAmount);
-
         if (feeTokenAmount > 0)
             _tokenTransferFromUser(
-                tokenIn,
+                tokenInCopy,
                 feeReceiver,
                 feeTokenAmount,
                 tokenDecimals
             );
 
+        mToken.mint(user, mintAmount);
+
         bytes32 referrerIdCopy = referrerId;
-        uint256 amountTokenCopy = amountToken;
 
         emit DepositInstant(
             user,
-            tokenIn,
+            tokenInCopy,
             tokenAmountInUsd,
             amountTokenCopy,
             feeTokenAmount,
