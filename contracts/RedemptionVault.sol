@@ -347,7 +347,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         uint256 tokenOutRate;
         if (!isFiat) {
             TokenConfig storage config = tokensConfig[tokenOutCopy];
-            tokenOutRate = IDataFeed(config.dataFeed).getDataInBase18();
+            tokenOutRate = _getTokenRate(config.dataFeed, config.stable);
         }
 
         uint256 amountMTokenInCopy = amountMTokenIn;
@@ -397,7 +397,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         TokenConfig storage tokenConfig = tokensConfig[tokenOut];
 
-        tokenRate = IDataFeed(tokenConfig.dataFeed).getDataInBase18();
+        tokenRate = _getTokenRate(tokenConfig.dataFeed, tokenConfig.stable);
         require(tokenRate > 0, "RV: rate zero");
 
         amountToken = (amountUsd * (10**18)) / tokenRate;

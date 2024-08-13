@@ -10,6 +10,7 @@ struct TokenConfig {
     address dataFeed;
     uint256 fee;
     uint256 allowance;
+    bool stable;
 }
 
 enum RequestStatus {
@@ -37,16 +38,18 @@ interface IManageableVault {
     );
 
     /**
+     * @param caller function caller (msg.sender)
      * @param token address of token that
      * @param dataFeed token dataFeed address
      * @param fee fee 1% = 100
-     * @param caller function caller (msg.sender)
+     * @param stable is stablecoin
      */
     event AddPaymentToken(
+        address indexed caller,
         address indexed token,
         address indexed dataFeed,
         uint256 fee,
-        address indexed caller
+        bool stable
     );
 
     /**
@@ -147,11 +150,13 @@ interface IManageableVault {
      * @param token token address
      * @param dataFeed dataFeed address
      * @param fee 1% = 100
+     * @param stable is stablecoin
      */
     function addPaymentToken(
         address token,
         address dataFeed,
-        uint256 fee
+        uint256 fee,
+        bool stable
     ) external;
 
     /**

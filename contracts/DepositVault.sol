@@ -414,7 +414,7 @@ contract DepositVault is ManageableVault, IDepositVault {
 
         TokenConfig storage tokenConfig = tokensConfig[tokenIn];
 
-        rate = IDataFeed(tokenConfig.dataFeed).getDataInBase18();
+        rate = _getTokenRate(tokenConfig.dataFeed, tokenConfig.stable);
         require(rate > 0, "DV: rate zero");
 
         amountInUsd = (amount * rate) / (10**18);

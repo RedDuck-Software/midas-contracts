@@ -614,8 +614,10 @@ const calcExpectedTokenOutAmount = async (
     tokenConfig.dataFeed,
     sender,
   );
-  const currentStableRate = await dataFeedContract.getDataInBase18();
-  if (currentStableRate.isZero())
+  const currentTokenInRate = tokenConfig.stable
+    ? constants.WeiPerEther
+    : await dataFeedContract.getDataInBase18();
+  if (currentTokenInRate.isZero())
     return {
       amountOut: constants.Zero,
       amountInWithoutFee: constants.Zero,
@@ -639,13 +641,13 @@ const calcExpectedTokenOutAmount = async (
 
   const amountOut = amountInWithoutFee
     .mul(mTokenRate)
-    .div(currentStableRate)
+    .div(currentTokenInRate)
     .div(10 ** (18 - tokenDecimals));
 
   return {
     amountOut,
     amountInWithoutFee,
     fee,
-    currentStableRate,
+    currentStableRate: currentTokenInRate,
   };
 };

@@ -406,6 +406,7 @@ describe('RedemptionVault', function () {
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         0,
+        true,
         { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
       );
     });
@@ -418,12 +419,14 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
         {
           revertMessage: 'MV: already added',
         },
@@ -439,6 +442,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         constants.AddressZero,
         0,
+        true,
         {
           revertMessage: 'zero address',
         },
@@ -453,6 +457,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
     });
 
@@ -465,18 +470,21 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.usdc,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.usdt,
         dataFeed.address,
         0,
+        true,
       );
     });
   });
@@ -638,6 +646,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await removePaymentTokenTest(
         { vault: redemptionVault, owner },
@@ -654,18 +663,21 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.usdc,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.usdt,
         dataFeed.address,
         0,
+        true,
       );
 
       await removePaymentTokenTest(
@@ -800,6 +812,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: redemptionVault, owner },
@@ -824,6 +837,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: redemptionVault, owner },
@@ -857,6 +871,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: redemptionVault, owner },
@@ -884,6 +899,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: redemptionVault, owner },
@@ -931,6 +947,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: redemptionVault, owner },
@@ -990,6 +1007,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenFeeTest(
         { vault: redemptionVault, owner },
@@ -1006,6 +1024,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenFeeTest(
         { vault: redemptionVault, owner },
@@ -1049,6 +1068,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await redeemInstantTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1082,6 +1102,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       const selector = encodeFnSelector('redeemInstant(address,uint256)');
       await pauseVaultFn(redemptionVault, selector);
@@ -1112,6 +1133,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await redeemInstantTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1139,6 +1161,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await redeemInstantTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1168,6 +1191,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await mintToken(mTBILL, owner, 100_000);
       await setRoundData({ mockedAggregator }, 0);
@@ -1206,6 +1230,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -1239,6 +1264,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 4);
 
@@ -1275,6 +1301,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 4);
 
@@ -1310,6 +1337,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         10000,
+        true,
       );
       await redeemInstantTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1329,6 +1357,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setInstantFeeTest({ vault: redemptionVault, owner }, 10000);
       await redeemInstantTest(
@@ -1433,6 +1462,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
 
       await redeemInstantTest(
@@ -1473,6 +1503,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await redeemInstantTest(
@@ -1505,6 +1536,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -1536,6 +1568,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -1566,6 +1599,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -1597,6 +1631,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -1652,6 +1687,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await redeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1685,6 +1721,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       const selector = encodeFnSelector('redeemRequest(address,uint256)');
       await pauseVaultFn(redemptionVault, selector);
@@ -1715,6 +1752,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await redeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1742,6 +1780,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await redeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1771,6 +1810,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await mintToken(mTBILL, owner, 100_000);
       await setRoundData({ mockedAggregator }, 0);
@@ -1809,6 +1849,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -1844,6 +1885,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         10000,
+        true,
       );
       await redeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1949,6 +1991,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
 
       await redeemRequestTest(
@@ -1989,6 +2032,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await redeemRequestTest(
@@ -2021,6 +2065,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2052,6 +2097,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2082,6 +2128,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2113,6 +2160,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2206,6 +2254,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       const selector = encodeFnSelector('redeemFiatRequest(uint256)');
       await pauseVaultFn(redemptionVault, selector);
@@ -2601,6 +2650,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2632,6 +2682,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2676,6 +2727,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2765,6 +2817,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await safeApproveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2796,6 +2849,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.001);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2835,6 +2889,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.001);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2879,6 +2934,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await setRoundData({ mockedAggregator }, 1.03);
@@ -2931,6 +2987,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await rejectRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2961,6 +3018,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.001);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -3003,6 +3061,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await setRoundData({ mockedAggregator }, 1.03);
@@ -3048,6 +3107,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await redeemInstantTest(
@@ -3081,6 +3141,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await redeemInstantTest(
@@ -3109,6 +3170,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -3153,18 +3215,21 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.usdc,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
         stableCoins.usdt,
         dataFeed.address,
         0,
+        true,
       );
 
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
@@ -3217,6 +3282,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await redeemRequestTest(
@@ -3250,6 +3316,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await redeemRequestTest(
@@ -3278,6 +3345,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -3319,6 +3387,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -3360,6 +3429,7 @@ describe('RedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 

@@ -439,8 +439,10 @@ const calcExpectedMintAmount = async (
     tokenConfig.dataFeed,
     sender,
   );
-  const currentStableRate = await dataFeedContract.getDataInBase18();
-  if (currentStableRate.isZero())
+  const currentTokenIn = tokenConfig.stable
+    ? constants.WeiPerEther
+    : await dataFeedContract.getDataInBase18();
+  if (currentTokenIn.isZero())
     return {
       mintAmount: constants.Zero,
       amountInWithoutFee: constants.Zero,
@@ -460,10 +462,10 @@ const calcExpectedMintAmount = async (
 
   const amountInWithoutFee = amountIn.sub(fee);
 
-  const feeInUsd = fee.mul(currentStableRate).div(constants.WeiPerEther);
+  const feeInUsd = fee.mul(currentTokenIn).div(constants.WeiPerEther);
 
   const actualAmountInUsd = amountIn
-    .mul(currentStableRate)
+    .mul(currentTokenIn)
     .div(constants.WeiPerEther);
 
   const usdForMintConvertion = actualAmountInUsd.sub(feeInUsd);

@@ -297,23 +297,29 @@ export const addPaymentTokenTest = async (
   token: ERC20 | string,
   dataFeed: string,
   fee: BigNumberish,
+  isStable: boolean,
   opt?: OptionalCommonParams,
 ) => {
   token = (token as ERC20).address ?? (token as string);
 
   if (opt?.revertMessage) {
     await expect(
-      vault.connect(opt?.from ?? owner).addPaymentToken(token, dataFeed, fee),
+      vault
+        .connect(opt?.from ?? owner)
+        .addPaymentToken(token, dataFeed, fee, isStable),
     ).revertedWith(opt?.revertMessage);
     return;
   }
 
   await expect(
-    vault.connect(opt?.from ?? owner).addPaymentToken(token, dataFeed, fee),
+    vault
+      .connect(opt?.from ?? owner)
+      .addPaymentToken(token, dataFeed, fee, isStable),
   ).to.emit(
     vault,
-    vault.interface.events['AddPaymentToken(address,address,uint256,address)']
-      .name,
+    vault.interface.events[
+      'AddPaymentToken(address,address,address,uint256,bool)'
+    ].name,
   ).to.not.reverted;
 
   const paymentTokens = await vault.getPaymentTokens();

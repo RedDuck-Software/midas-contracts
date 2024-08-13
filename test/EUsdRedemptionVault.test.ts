@@ -79,6 +79,7 @@ describe('EUsdRedemptionVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await redeemInstantTest(

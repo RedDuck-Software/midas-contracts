@@ -378,6 +378,7 @@ describe('DepositVault', function () {
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         0,
+        false,
         { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
       );
     });
@@ -391,12 +392,14 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        false,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.dai,
         dataFeed.address,
         0,
+        false,
         {
           revertMessage: 'MV: already added',
         },
@@ -412,6 +415,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         constants.AddressZero,
         0,
+        false,
         {
           revertMessage: 'zero address',
         },
@@ -427,6 +431,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        false,
       );
     });
 
@@ -440,18 +445,21 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdc,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdt,
         dataFeed.address,
         0,
+        true,
       );
     });
   });
@@ -605,6 +613,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await removePaymentTokenTest(
         { vault: depositVault, owner },
@@ -622,18 +631,21 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdc,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdt,
         dataFeed.address,
         0,
+        true,
       );
 
       await removePaymentTokenTest(
@@ -769,6 +781,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: depositVault, owner },
@@ -793,6 +806,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: depositVault, owner },
@@ -827,6 +841,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: depositVault, owner },
@@ -850,6 +865,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: depositVault, owner },
@@ -891,6 +907,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenAllowanceTest(
         { vault: depositVault, owner },
@@ -948,6 +965,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenFeeTest(
         { vault: depositVault, owner },
@@ -965,6 +983,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await changeTokenFeeTest(
         { vault: depositVault, owner },
@@ -1003,6 +1022,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1036,6 +1056,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       const selector = encodeFnSelector(
         'depositInstant(address,uint256,bytes32)',
@@ -1067,6 +1088,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositInstantTest(
@@ -1095,6 +1117,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositInstantTest(
@@ -1123,6 +1146,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositInstantTest(
@@ -1152,6 +1176,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await mintToken(stableCoins.dai, owner, 100_000);
       await setRoundData({ mockedAggregator }, 0);
@@ -1180,6 +1205,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -1214,6 +1240,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -1248,6 +1275,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 4);
 
@@ -1284,6 +1312,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 4);
 
@@ -1319,6 +1348,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         10000,
+        true,
       );
       await depositInstantTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1338,6 +1368,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setInstantFeeTest({ vault: depositVault, owner }, 10000);
       await depositInstantTest(
@@ -1451,6 +1482,53 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
+      );
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
+
+      await depositInstantTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        100,
+        {
+          from: regularAccounts[0],
+        },
+      );
+    });
+
+    it('deposit 100 DAI, greenlist enabled and user in greenlist, tokenIn not stablecoin', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        greenListableTester,
+        mTokenToUsdDataFeed,
+        accessControl,
+        regularAccounts,
+        dataFeed,
+      } = await loadFixture(defaultDeploy);
+
+      await depositVault.setGreenlistEnable(true);
+
+      await greenList(
+        { greenlistable: greenListableTester, accessControl, owner },
+        regularAccounts[0],
+      );
+
+      await mintToken(stableCoins.dai, regularAccounts[0], 100);
+      await approveBase18(
+        regularAccounts[0],
+        stableCoins.dai,
+        depositVault,
+        100,
+      );
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+        false,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
 
@@ -1483,6 +1561,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -1514,6 +1593,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -1544,6 +1624,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -1574,6 +1655,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -1619,6 +1701,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1652,6 +1735,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       const selector = encodeFnSelector(
         'depositRequest(address,uint256,bytes32)',
@@ -1683,6 +1767,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositRequestTest(
@@ -1711,6 +1796,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositRequestTest(
@@ -1739,6 +1825,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await depositRequestTest(
@@ -1768,6 +1855,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await mintToken(stableCoins.dai, owner, 100_000);
       await setRoundData({ mockedAggregator }, 0);
@@ -1796,6 +1884,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -1829,6 +1918,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 4);
 
@@ -1867,6 +1957,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         10000,
+        true,
       );
       await depositRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -1957,6 +2048,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
 
@@ -1989,6 +2081,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await setRoundData({ mockedAggregator }, 1.03);
@@ -2020,6 +2113,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await setRoundData({ mockedAggregator }, 1.03);
@@ -2050,6 +2144,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2080,6 +2175,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         100,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
       await setRoundData({ mockedAggregator }, 1.03);
@@ -2129,6 +2225,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await approveRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2159,6 +2256,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2203,6 +2301,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2256,6 +2355,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await safeApproveRequestTest(
         {
@@ -2290,6 +2390,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2335,6 +2436,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2379,6 +2481,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2431,6 +2534,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await rejectRequestTest(
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
@@ -2460,6 +2564,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1.03);
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
@@ -2504,6 +2609,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await depositInstantTest(
@@ -2536,6 +2642,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await depositInstantTest(
@@ -2564,6 +2671,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -2600,6 +2708,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -2651,18 +2760,21 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdc,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdt,
         dataFeed.address,
         0,
+        true,
       );
 
       await setRoundData({ mockedAggregator }, 1.04);
@@ -2713,6 +2825,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await depositRequestTest(
@@ -2745,6 +2858,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
 
       await depositRequestTest(
@@ -2773,6 +2887,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -2813,6 +2928,7 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await setRoundData({ mockedAggregator }, 1);
 
@@ -2873,18 +2989,21 @@ describe('DepositVault', function () {
         stableCoins.dai,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdc,
         dataFeed.address,
         0,
+        true,
       );
       await addPaymentTokenTest(
         { vault: depositVault, owner },
         stableCoins.usdt,
         dataFeed.address,
         0,
+        true,
       );
       await setMinAmountTest({ vault: depositVault, owner }, 10);
 

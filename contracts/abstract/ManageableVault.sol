@@ -43,6 +43,11 @@ abstract contract ManageableVault is
     address public constant MANUAL_FULLFILMENT_TOKEN = address(0x0);
 
     /**
+     * @notice stable coin static rate 1:1 USD in 18 decimals
+     */
+    uint256 public constant STABLECOIN_RATE = 10**18;
+
+    /**
      * @notice last request id
      */
     Counters.Counter public currentRequestId;
@@ -204,7 +209,8 @@ abstract contract ManageableVault is
     function addPaymentToken(
         address token,
         address dataFeed,
-        uint256 tokenFee
+        uint256 tokenFee,
+        bool stable
     ) external onlyVaultAdmin {
         require(_paymentTokens.add(token), "MV: already added");
         _validateAddress(dataFeed, false);
@@ -213,9 +219,10 @@ abstract contract ManageableVault is
         tokensConfig[token] = TokenConfig({
             dataFeed: dataFeed,
             fee: tokenFee,
-            allowance: MAX_UINT
+            allowance: MAX_UINT,
+            stable: stable
         });
-        emit AddPaymentToken(token, dataFeed, tokenFee, msg.sender);
+        emit AddPaymentToken(msg.sender, token, dataFeed, tokenFee, stable);
     }
 
     /**
@@ -565,5 +572,23 @@ abstract contract ManageableVault is
     function _validateAddress(address addr, bool selfCheck) internal view {
         require(addr != address(0), "zero address");
         if (selfCheck) require(addr != address(this), "invalid address");
+    }
+
+    /**
+     * @dev get token rate depends on data feed and stablecoin flag
+     * @param dataFeed address of dataFeed from token config
+     * @param stable is stablecoin
+     */
+    function _getTokenRate(address dataFeed, bool stable)
+        internal
+        view
+        returns (uint256)
+    {
+        // @dev if dataFeed returns rate, all peg checks passed
+        uint256 rate = IDataFeed(dataFeed).getDataInBase18();
+
+        if (stable) return STABLECOIN_RATE;
+
+        return rate;
     }
 }
