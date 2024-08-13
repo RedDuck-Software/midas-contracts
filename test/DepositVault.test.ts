@@ -112,15 +112,21 @@ describe('DepositVault', function () {
 
       await expect(
         depositVault.initialize(
-          ethers.constants.AddressZero,
-          ethers.constants.AddressZero,
+          constants.AddressZero,
+          {
+            mToken: constants.AddressZero,
+            mTokenDataFeed: constants.AddressZero,
+          },
+          {
+            feeReceiver: constants.AddressZero,
+            tokensReceiver: constants.AddressZero,
+          },
+          {
+            instantFee: 0,
+            instantDailyLimit: 0,
+          },
+          constants.AddressZero,
           0,
-          ethers.constants.AddressZero,
-          ethers.constants.AddressZero,
-          0,
-          0,
-          ethers.constants.AddressZero,
-          ethers.constants.AddressZero,
           0,
           0,
         ),
@@ -143,14 +149,20 @@ describe('DepositVault', function () {
       await expect(
         vault.initializeWithoutInitializer(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          feeReceiver.address,
-          100,
-          10000,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
-          100,
+          1,
           parseUnits('100'),
         ),
       ).revertedWith('Initializable: contract is not initializing');
@@ -171,14 +183,20 @@ describe('DepositVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          vault.address,
-          feeReceiver.address,
-          100,
-          100000,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: vault.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
-          100,
+          1,
           parseUnits('100'),
         ),
       ).revertedWith('invalid address');
@@ -198,12 +216,18 @@ describe('DepositVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          vault.address,
-          100,
-          100000,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: vault.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
           1,
           parseUnits('100'),
@@ -226,12 +250,18 @@ describe('DepositVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          feeReceiver.address,
-          100,
-          0,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: 0,
+          },
           mockedSanctionsList.address,
           1,
           parseUnits('100'),
@@ -253,12 +283,18 @@ describe('DepositVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          feeReceiver.address,
-          100,
-          0,
-          constants.AddressZero,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: constants.AddressZero,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
           1,
           parseUnits('100'),
@@ -281,12 +317,18 @@ describe('DepositVault', function () {
       await expect(
         vault.initialize(
           accessControl.address,
-          mTBILL.address,
-          tokensReceiver.address,
-          feeReceiver.address,
-          100,
-          100,
-          mTokenToUsdDataFeed.address,
+          {
+            mToken: mTBILL.address,
+            mTokenDataFeed: mTokenToUsdDataFeed.address,
+          },
+          {
+            feeReceiver: feeReceiver.address,
+            tokensReceiver: tokensReceiver.address,
+          },
+          {
+            instantFee: 100,
+            instantDailyLimit: parseUnits('100000'),
+          },
           mockedSanctionsList.address,
           0,
           parseUnits('100'),
