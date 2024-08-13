@@ -49,8 +49,14 @@ import {
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
-  const [owner, eUsdOwner, tokensReceiver, feeReceiver, ...regularAccounts] =
-    await ethers.getSigners();
+  const [
+    owner,
+    eUsdOwner,
+    tokensReceiver,
+    feeReceiver,
+    requestRedeemer,
+    ...regularAccounts
+  ] = await ethers.getSigners();
 
   // main contracts
   const accessControl = await new MidasAccessControlTest__factory(
@@ -315,6 +321,7 @@ export const defaultDeploy = async () => {
         fiatFlatFee: parseUnits('1'),
         minFiatRedeemAmount: parseUnits('100'),
       },
+      requestRedeemer.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -340,6 +347,7 @@ export const defaultDeploy = async () => {
         fiatFlatFee: parseUnits('1'),
         minFiatRedeemAmount: parseUnits('100'),
       },
+      requestRedeemer.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -365,6 +373,7 @@ export const defaultDeploy = async () => {
         fiatFlatFee: parseUnits('1'),
         minFiatRedeemAmount: parseUnits('100'),
       },
+      requestRedeemer.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -390,6 +399,7 @@ export const defaultDeploy = async () => {
         fiatFlatFee: parseUnits('1'),
         minFiatRedeemAmount: parseUnits('100'),
       },
+      requestRedeemer.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -415,6 +425,7 @@ export const defaultDeploy = async () => {
         fiatFlatFee: parseUnits('1'),
         minFiatRedeemAmount: parseUnits('100'),
       },
+      requestRedeemer.address,
     ),
   ).to.be.reverted;
   await expect(
@@ -440,6 +451,34 @@ export const defaultDeploy = async () => {
         fiatFlatFee: parseUnits('1'),
         minFiatRedeemAmount: parseUnits('100'),
       },
+      requestRedeemer.address,
+    ),
+  ).to.be.reverted;
+
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      constants.AddressZero,
     ),
   ).to.be.reverted;
 
@@ -465,6 +504,7 @@ export const defaultDeploy = async () => {
       fiatFlatFee: parseUnits('1'),
       minFiatRedeemAmount: 1000,
     },
+    requestRedeemer.address,
   );
 
   await accessControl.grantRole(
@@ -498,6 +538,7 @@ export const defaultDeploy = async () => {
       fiatFlatFee: parseUnits('1'),
       minFiatRedeemAmount: 1000,
     },
+    requestRedeemer.address,
   );
 
   await accessControl.grantRoleMult(
@@ -676,5 +717,6 @@ export const defaultDeploy = async () => {
     dataFeedUnhealthy,
     withSanctionsListTester,
     mockedSanctionsList,
+    requestRedeemer,
   };
 };

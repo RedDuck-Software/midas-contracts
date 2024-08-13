@@ -43,6 +43,11 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     mapping(uint256 => Request) public redeemRequests;
 
     /**
+     * @notice address is designated for standard redemptions, allowing tokens to be pulled from this address
+     */
+    address public requestRedeemer;
+
+    /**
      * @dev leaving a storage gap for futures updates
      */
     uint256[50] private __gap;
@@ -57,6 +62,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      * @param _variationTolerance percent of prices diviation 1% = 100
      * @param _minAmount basic min amount for operations
      * @param _fiatRedemptionInitParams params fiatAdditionalFee, fiatFlatFee, minFiatRedeemAmount
+     * @param _requestRedeemer address is designated for standard redemptions, allowing tokens to be pulled from this address
      */
     function initialize(
         address _ac,
@@ -66,7 +72,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address _sanctionsList,
         uint256 _variationTolerance,
         uint256 _minAmount,
-        FiatRedeptionInitParams calldata _fiatRedemptionInitParams
+        FiatRedeptionInitParams calldata _fiatRedemptionInitParams,
+        address _requestRedeemer
     ) external initializer {
         __RedemptionVault_init(
             _ac,
@@ -76,7 +83,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _sanctionsList,
             _variationTolerance,
             _minAmount,
-            _fiatRedemptionInitParams
+            _fiatRedemptionInitParams,
+            _requestRedeemer
         );
     }
 
@@ -88,7 +96,8 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         address _sanctionsList,
         uint256 _variationTolerance,
         uint256 _minAmount,
-        FiatRedeptionInitParams calldata _fiatRedemptionInitParams
+        FiatRedeptionInitParams calldata _fiatRedemptionInitParams,
+        address _requestRedeemer
     ) internal onlyInitializing {
         __ManageableVault_init(
             _ac,
@@ -100,10 +109,12 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             _minAmount
         );
         _validateFee(_fiatRedemptionInitParams.fiatAdditionalFee, false);
+        _validateAddress(_requestRedeemer, false);
 
         minFiatRedeemAmount = _fiatRedemptionInitParams.minFiatRedeemAmount;
         fiatAdditionalFee = _fiatRedemptionInitParams.fiatAdditionalFee;
         fiatFlatFee = _fiatRedemptionInitParams.fiatFlatFee;
+        requestRedeemer = _requestRedeemer;
     }
 
     /**
@@ -262,6 +273,17 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     }
 
     /**
+     * @inheritdoc IRedemptionVault
+     */
+    function setRequestRedeemer(address redeemer) external onlyVaultAdmin {
+        _validateAddress(redeemer, false);
+
+        requestRedeemer = redeemer;
+
+        emit SetRequestRedeemer(msg.sender, redeemer);
+    }
+
+    /**
      * @inheritdoc ManageableVault
      */
     function vaultRole() public pure virtual override returns (bytes32) {
@@ -300,8 +322,9 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
                 tokenDecimals
             );
 
-            _tokenTransferToUser(
+            _tokenTransferFromTo(
                 request.tokenOut,
+                requestRedeemer,
                 request.sender,
                 amountTokenOutWithoutFee,
                 tokenDecimals

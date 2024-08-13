@@ -580,6 +580,30 @@ export const setFiatAdditionalFeeTest = async (
   expect(newfee).eq(valueN);
 };
 
+export const setRequestRedeemerTest = async (
+  { redemptionVault, owner }: CommonParams,
+  redeemer: string,
+  opt?: OptionalCommonParams,
+) => {
+  if (opt?.revertMessage) {
+    await expect(
+      redemptionVault.connect(opt?.from ?? owner).setRequestRedeemer(redeemer),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(
+    redemptionVault.connect(opt?.from ?? owner).setRequestRedeemer(redeemer),
+  ).to.emit(
+    redemptionVault,
+    redemptionVault.interface.events['SetRequestRedeemer(address,address)']
+      .name,
+  ).to.not.reverted;
+
+  const newRedeemer = await redemptionVault.requestRedeemer();
+  expect(newRedeemer).eq(redeemer);
+};
+
 const getFeePercent = async (
   sender: string,
   token: string,

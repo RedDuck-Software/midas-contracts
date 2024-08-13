@@ -407,6 +407,33 @@ abstract contract ManageableVault is
     }
 
     /**
+     * @dev do safeTransferFrom on a given token
+     * and converts `amount` from base18
+     * to amount with a correct precision.
+     * @param token address of token
+     * @param from address 
+     * @param to address
+     * @param amount amount of `token` to transfer from `user`
+     * @param tokenDecimals token decimals
+     */
+    function _tokenTransferFromTo(
+        address token,
+        address from,
+        address to,
+        uint256 amount,
+        uint256 tokenDecimals
+    ) internal {
+        uint256 transferAmount = amount.convertFromBase18(tokenDecimals);
+
+        require(
+            amount == transferAmount.convertToBase18(tokenDecimals),
+            "MV: invalid rounding"
+        );
+
+        IERC20(token).safeTransferFrom(from, to, transferAmount);
+    }
+
+    /**
      * @dev do safeTransfer on a given token
      * and converts `amount` from base18
      * to amount with a correct precision. Sends tokens

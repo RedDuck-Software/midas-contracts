@@ -35,6 +35,7 @@ import {
   safeApproveRedeemRequestTest,
   setFiatAdditionalFeeTest,
   setMinFiatRedeemAmountTest,
+  setRequestRedeemerTest,
 } from './common/redemption-vault.helpers';
 import { sanctionUser } from './common/with-sanctions-list.helpers';
 
@@ -142,6 +143,7 @@ describe('RedemptionVault', function () {
             fiatFlatFee: 0,
             minFiatRedeemAmount: 0,
           },
+          constants.AddressZero,
         ),
       ).revertedWith('Initializable: contract is already initialized');
     });
@@ -657,6 +659,32 @@ describe('RedemptionVault', function () {
     it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
       const { redemptionVault, owner } = await loadFixture(defaultDeploy);
       await setVariabilityToleranceTest({ vault: redemptionVault, owner }, 100);
+    });
+  });
+
+  describe('setRequestRedeemer()', () => {
+    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { redemptionVault, regularAccounts, owner } = await loadFixture(
+        defaultDeploy,
+      );
+      await setRequestRedeemerTest(
+        { redemptionVault, owner },
+        ethers.constants.AddressZero,
+        { revertMessage: acErrors.WMAC_HASNT_ROLE, from: regularAccounts[0] },
+      );
+    });
+    it('should fail: if redeemer address zero', async () => {
+      const { redemptionVault, owner } = await loadFixture(defaultDeploy);
+      await setRequestRedeemerTest(
+        { redemptionVault, owner },
+        ethers.constants.AddressZero,
+        { revertMessage: 'zero address' },
+      );
+    });
+
+    it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { redemptionVault, owner } = await loadFixture(defaultDeploy);
+      await setRequestRedeemerTest({ redemptionVault, owner }, owner.address);
     });
   });
 
@@ -2717,9 +2745,17 @@ describe('RedemptionVault', function () {
         mTBILL,
         dataFeed,
         mTokenToUsdDataFeed,
+        requestRedeemer,
       } = await loadFixture(defaultDeploy);
 
-      await mintToken(stableCoins.dai, redemptionVault, 100000);
+      await mintToken(stableCoins.dai, requestRedeemer, 100000);
+      await approveBase18(
+        requestRedeemer,
+        stableCoins.dai,
+        redemptionVault,
+        100000,
+      );
+
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
       await addPaymentTokenTest(
@@ -2762,9 +2798,16 @@ describe('RedemptionVault', function () {
         mTBILL,
         dataFeed,
         mTokenToUsdDataFeed,
+        requestRedeemer,
       } = await loadFixture(defaultDeploy);
 
-      await mintToken(stableCoins.dai, redemptionVault, 100000);
+      await mintToken(stableCoins.dai, requestRedeemer, 100000);
+      await approveBase18(
+        requestRedeemer,
+        stableCoins.dai,
+        redemptionVault,
+        100000,
+      );
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
       await addPaymentTokenTest(
@@ -2884,9 +2927,16 @@ describe('RedemptionVault', function () {
         mTBILL,
         dataFeed,
         mTokenToUsdDataFeed,
+        requestRedeemer,
       } = await loadFixture(defaultDeploy);
 
-      await mintToken(stableCoins.dai, redemptionVault, 100000);
+      await mintToken(stableCoins.dai, requestRedeemer, 100000);
+      await approveBase18(
+        requestRedeemer,
+        stableCoins.dai,
+        redemptionVault,
+        100000,
+      );
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
       await addPaymentTokenTest(
@@ -2924,9 +2974,16 @@ describe('RedemptionVault', function () {
         mTBILL,
         dataFeed,
         mTokenToUsdDataFeed,
+        requestRedeemer,
       } = await loadFixture(defaultDeploy);
 
-      await mintToken(stableCoins.dai, redemptionVault, 100000);
+      await mintToken(stableCoins.dai, requestRedeemer, 100000);
+      await approveBase18(
+        requestRedeemer,
+        stableCoins.dai,
+        redemptionVault,
+        100000,
+      );
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
       await addPaymentTokenTest(
@@ -2969,9 +3026,16 @@ describe('RedemptionVault', function () {
         mTBILL,
         mTokenToUsdDataFeed,
         dataFeed,
+        requestRedeemer,
       } = await loadFixture(defaultDeploy);
 
-      await mintToken(stableCoins.dai, redemptionVault, 100000);
+      await mintToken(stableCoins.dai, requestRedeemer, 100000);
+      await approveBase18(
+        requestRedeemer,
+        stableCoins.dai,
+        redemptionVault,
+        100000,
+      );
       await mintToken(mTBILL, owner, 100);
       await approveBase18(owner, mTBILL, redemptionVault, 100);
       await addPaymentTokenTest(
@@ -3301,7 +3365,7 @@ describe('RedemptionVault', function () {
     });
   });
 
-  describe('depositRequest() complex', () => {
+  describe('redeemRequest() complex', () => {
     it('should fail: when is paused', async () => {
       const {
         redemptionVault,
@@ -3384,6 +3448,7 @@ describe('RedemptionVault', function () {
         stableCoins,
         dataFeed,
         mTokenToUsdDataFeed,
+        requestRedeemer,
       } = await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
@@ -3395,7 +3460,13 @@ describe('RedemptionVault', function () {
       await setRoundData({ mockedAggregator }, 1);
 
       await mintToken(mTBILL, owner, 100_000);
-      await mintToken(stableCoins.dai, redemptionVault, 100_000);
+      await mintToken(stableCoins.dai, requestRedeemer, 100000);
+      await approveBase18(
+        requestRedeemer,
+        stableCoins.dai,
+        redemptionVault,
+        100000,
+      );
       await approveBase18(owner, mTBILL, redemptionVault, 100_000);
 
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);
@@ -3426,6 +3497,7 @@ describe('RedemptionVault', function () {
         stableCoins,
         dataFeed,
         mTokenToUsdDataFeed,
+        requestRedeemer,
       } = await loadFixture(defaultDeploy);
       await addPaymentTokenTest(
         { vault: redemptionVault, owner },
@@ -3437,7 +3509,13 @@ describe('RedemptionVault', function () {
       await setRoundData({ mockedAggregator }, 1);
 
       await mintToken(mTBILL, owner, 100_000);
-      await mintToken(stableCoins.dai, redemptionVault, 100_100);
+      await mintToken(stableCoins.dai, requestRedeemer, 1000000);
+      await approveBase18(
+        requestRedeemer,
+        stableCoins.dai,
+        redemptionVault,
+        1000000,
+      );
       await approveBase18(owner, mTBILL, redemptionVault, 100_000);
 
       await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 1);

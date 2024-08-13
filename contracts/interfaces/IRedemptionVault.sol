@@ -97,6 +97,12 @@ interface IRedemptionVault is IManageableVault {
     event SetFiatAdditionalFee(address indexed caller, uint256 newfee);
 
     /**
+     * @param caller function caller (msg.sender)
+     * @param redeemer new address of request redeemer
+     */
+    event SetRequestRedeemer(address indexed caller, address redeemer);
+
+    /**
      * @notice redeem mToken to tokenOut if daily limit and allowance not exceeded
      * Burns mTBILL from the user.
      * Transfers fee in mToken to feeReceiver
@@ -174,4 +180,10 @@ interface IRedemptionVault is IManageableVault {
      * @param newFee new fee percent 1% = 100
      */
     function setFiatAdditionalFee(uint256 newFee) external;
+
+    /**
+     * @notice set address which is designated for standard redemptions, allowing tokens to be pulled from this address
+     * @param redeemer new address of request redeemer
+     */
+    function setRequestRedeemer(address redeemer) external;
 }
