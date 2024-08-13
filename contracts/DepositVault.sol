@@ -103,7 +103,7 @@ contract DepositVault is ManageableVault, IDepositVault {
         ) = _calcAndValidateDeposit(user, tokenInCopy, amountTokenCopy, true);
 
         require(
-            minReceiveAmount <= mintAmount,
+            mintAmount >= minReceiveAmount,
             "DV: minReceiveAmount > actual"
         );
 

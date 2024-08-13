@@ -161,7 +161,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
         );
 
         require(
-            minReceiveAmountCopy <= amountTokenOutWithoutFee,
+            amountTokenOutWithoutFee >= minReceiveAmountCopy,
             "RV: minReceiveAmount > actual"
         );
 
