@@ -24,6 +24,7 @@ struct Request {
 struct FiatRedeptionInitParams {
     uint256 fiatAdditionalFee;
     uint256 fiatFlatFee;
+    uint256 minFiatRedeemAmount;
 }
 
 /**

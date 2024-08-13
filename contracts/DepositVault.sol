@@ -43,38 +43,28 @@ contract DepositVault is ManageableVault, IDepositVault {
     /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _mToken address of mTBILL token
-     * @param _minMTokenAmountForFirstDeposit initial value for minMTokenAmountForFirstDeposit
-     * @param _tokensReceiver address to which USD and mTokens will be sent
-     * @param _feeReceiver address to which all fees will be sent
-     * @param _instantFee fee for instant operations
-     * @param _instantDailyLimit daily limit for instant operations
-     * @param _mTokenDataFeed address of mToken dataFeed contract
+     * @param _mTokenInitParams init params for mToken
+     * @param _receiversInitParams init params for receivers
+     * @param _instantInitParams init params for instant operations
      * @param _sanctionsList address of sanctionsList contract
      * @param _variationTolerance percent of prices diviation 1% = 100
      * @param _minAmount basic min amount for operations
      */
     function initialize(
         address _ac,
-        address _mToken,
-        uint256 _minMTokenAmountForFirstDeposit,
-        address _tokensReceiver,
-        address _feeReceiver,
-        uint256 _instantFee,
-        uint256 _instantDailyLimit,
-        address _mTokenDataFeed,
+        MTokenInitParams calldata _mTokenInitParams,
+        ReceiversInitParams calldata _receiversInitParams,
+        InstantInitParams calldata _instantInitParams,
         address _sanctionsList,
         uint256 _variationTolerance,
-        uint256 _minAmount
+        uint256 _minAmount,
+        uint256 _minMTokenAmountForFirstDeposit
     ) external initializer {
         __ManageableVault_init(
             _ac,
-            _mToken,
-            _tokensReceiver,
-            _feeReceiver,
-            _instantFee,
-            _instantDailyLimit,
-            _mTokenDataFeed,
+            _mTokenInitParams,
+            _receiversInitParams,
+            _instantInitParams,
             _sanctionsList,
             _variationTolerance,
             _minAmount

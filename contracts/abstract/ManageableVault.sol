@@ -143,12 +143,9 @@ abstract contract ManageableVault is
     /**
      * @dev upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _mToken address of mTBILL token
-     * @param _tokensReceiver address to which USD and mTokens will be sent
-     * @param _feeReceiver address to which all fees will be sent
-     * @param _instantFee fee for instant operations
-     * @param _instantDailyLimit daily limit for instant operations
-     * @param _mTokenDataFeed address of mToken dataFeed contract
+     * @param _mTokenInitParams init params for mToken
+     * @param _receiversInitParams init params for receivers
+     * @param _instantInitParams init params for instant operations
      * @param _sanctionsList address of sanctionsList contract
      * @param _variationTolerance percent of prices diviation 1% = 100
      * @param _minAmount basic min amount for operations
@@ -156,37 +153,34 @@ abstract contract ManageableVault is
     // solhint-disable func-name-mixedcase
     function __ManageableVault_init(
         address _ac,
-        address _mToken,
-        address _tokensReceiver,
-        address _feeReceiver,
-        uint256 _instantFee,
-        uint256 _instantDailyLimit,
-        address _mTokenDataFeed,
+        MTokenInitParams calldata _mTokenInitParams,
+        ReceiversInitParams calldata _receiversInitParams,
+        InstantInitParams calldata _instantInitParams,
         address _sanctionsList,
         uint256 _variationTolerance,
         uint256 _minAmount
     ) internal onlyInitializing {
-        _validateAddress(_mToken, false);
-        _validateAddress(_tokensReceiver, true);
-        _validateAddress(_feeReceiver, true);
-        _validateAddress(_mTokenDataFeed, false);
-        require(_instantDailyLimit > 0, "zero limit");
+        _validateAddress(_mTokenInitParams.mToken, false);
+        _validateAddress(_receiversInitParams.tokensReceiver, true);
+        _validateAddress(_receiversInitParams.feeReceiver, true);
+        _validateAddress(_mTokenInitParams.mTokenDataFeed, false);
+        require(_instantInitParams.instantDailyLimit > 0, "zero limit");
         _validateFee(_variationTolerance, true);
         _validateFee(instantFee, false);
 
-        mToken = IMTbill(_mToken);
+        mToken = IMTbill(_mTokenInitParams.mToken);
         __Pausable_init(_ac);
         __Greenlistable_init_unchained();
         __Blacklistable_init_unchained();
         __WithSanctionsList_init_unchained(_sanctionsList);
 
-        tokensReceiver = _tokensReceiver;
-        feeReceiver = _feeReceiver;
-        instantFee = _instantFee;
-        instantDailyLimit = _instantDailyLimit;
+        tokensReceiver = _receiversInitParams.tokensReceiver;
+        feeReceiver = _receiversInitParams.feeReceiver;
+        instantFee = _instantInitParams.instantFee;
+        instantDailyLimit = _instantInitParams.instantDailyLimit;
         minAmount = _minAmount;
         variationTolerance = _variationTolerance;
-        mTokenDataFeed = IDataFeed(_mTokenDataFeed);
+        mTokenDataFeed = IDataFeed(_mTokenInitParams.mTokenDataFeed);
     }
 
     /**

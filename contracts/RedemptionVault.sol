@@ -38,59 +38,70 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     uint256 public fiatFlatFee;
 
     /**
-     * @dev leaving a storage gap for futures updates
-     */
-    uint256[50] private __gap;
-
-    /**
      * @notice mapping, requestId to request data
      */
     mapping(uint256 => Request) public redeemRequests;
 
     /**
+     * @dev leaving a storage gap for futures updates
+     */
+    uint256[50] private __gap;
+
+    /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
-     * @param _mToken address of mTBILL token
-     * @param _tokensReceiver address to which USD and mTokens will be sent
-     * @param _feeReceiver address to which all fees will be sent
-     * @param _instantFee fee for instant operations
-     * @param _instantDailyLimit daily limit for instant operations
-     * @param _mTokenDataFeed address of mToken dataFeed contract
+     * @param _mTokenInitParams init params for mToken
+     * @param _receiversInitParams init params for receivers
+     * @param _instantInitParams init params for instant operations
      * @param _sanctionsList address of sanctionsList contract
      * @param _variationTolerance percent of prices diviation 1% = 100
      * @param _minAmount basic min amount for operations
-     * @param _minFiatRedeemAmount min amount for fiat requests
-     * @param _fiatRedemptionInitParams params fiatAdditionalFee, fiatFlatFee
+     * @param _fiatRedemptionInitParams params fiatAdditionalFee, fiatFlatFee, minFiatRedeemAmount
      */
     function initialize(
         address _ac,
-        address _mToken,
-        address _tokensReceiver,
-        address _feeReceiver,
-        uint256 _instantFee,
-        uint256 _instantDailyLimit,
-        address _mTokenDataFeed,
+        MTokenInitParams calldata _mTokenInitParams,
+        ReceiversInitParams calldata _receiversInitParams,
+        InstantInitParams calldata _instantInitParams,
         address _sanctionsList,
-        uint256 _minAmount,
-        uint256 _minFiatRedeemAmount,
         uint256 _variationTolerance,
+        uint256 _minAmount,
         FiatRedeptionInitParams calldata _fiatRedemptionInitParams
     ) external initializer {
+        __RedemptionVault_init(
+            _ac,
+            _mTokenInitParams,
+            _receiversInitParams,
+            _instantInitParams,
+            _sanctionsList,
+            _variationTolerance,
+            _minAmount,
+            _fiatRedemptionInitParams
+        );
+    }
+
+    function __RedemptionVault_init(
+        address _ac,
+        MTokenInitParams calldata _mTokenInitParams,
+        ReceiversInitParams calldata _receiversInitParams,
+        InstantInitParams calldata _instantInitParams,
+        address _sanctionsList,
+        uint256 _variationTolerance,
+        uint256 _minAmount,
+        FiatRedeptionInitParams calldata _fiatRedemptionInitParams
+    ) internal onlyInitializing {
         __ManageableVault_init(
             _ac,
-            _mToken,
-            _tokensReceiver,
-            _feeReceiver,
-            _instantFee,
-            _instantDailyLimit,
-            _mTokenDataFeed,
+            _mTokenInitParams,
+            _receiversInitParams,
+            _instantInitParams,
             _sanctionsList,
             _variationTolerance,
             _minAmount
         );
         _validateFee(_fiatRedemptionInitParams.fiatAdditionalFee, false);
 
-        minFiatRedeemAmount = _minFiatRedeemAmount;
+        minFiatRedeemAmount = _fiatRedemptionInitParams.minFiatRedeemAmount;
         fiatAdditionalFee = _fiatRedemptionInitParams.fiatAdditionalFee;
         fiatFlatFee = _fiatRedemptionInitParams.fiatFlatFee;
     }
@@ -100,6 +111,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
      */
     function redeemInstant(address tokenOut, uint256 amountMTokenIn)
         external
+        virtual
         whenFnNotPaused(this.redeemInstant.selector)
         onlyGreenlisted(msg.sender)
         onlyNotBlacklisted(msg.sender)
