@@ -58,7 +58,7 @@ interface IManageableVault {
      * @param token address of token that
      * @param dataFeed token dataFeed address
      * @param fee fee 1% = 100
-     * @param stable is stablecoin
+     * @param stable stablecoin flag
      */
     event AddPaymentToken(
         address indexed caller,
@@ -178,7 +178,7 @@ interface IManageableVault {
      * @param token token address
      * @param dataFeed dataFeed address
      * @param fee 1% = 100
-     * @param stable is stablecoin
+     * @param stable is stablecoin flag
      */
     function addPaymentToken(
         address token,
@@ -208,7 +208,7 @@ interface IManageableVault {
      * @notice set new token fee.
      * can be called only from permissioned actor.
      * @param token token address
-     * @param fee new fee
+     * @param fee new fee percent 1% = 100
      */
     function changeTokenFee(address token, uint256 fee) external;
 
@@ -250,7 +250,7 @@ interface IManageableVault {
     /**
      * @notice set operation fee percent.
      * can be called only from permissioned actor.
-     * @param newInstantFee new operation fee value
+     * @param newInstantFee new instant operations fee percent 1& = 100
      */
     function setInstantFee(uint256 newInstantFee) external;
 

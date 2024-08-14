@@ -104,7 +104,7 @@ interface IDepositVault is IManageableVault {
      * Mints mToken to user.
      * @param tokenIn address of tokenIn
      * @param amountToken amount of `tokenIn` that will be taken from user (decimals 18)
-     * @param minReceiveAmount minimum expected amount of tokenOut to receive (decimals 18)
+     * @param minReceiveAmount minimum expected amount of mToken to receive (decimals 18)
      * @param referrerId referrer id
      */
     function depositInstant(
@@ -136,7 +136,7 @@ interface IDepositVault is IManageableVault {
      * Mints mToken to user.
      * Sets request flag to Processed.
      * @param requestId request id
-     * @param newOutRate mToken rate
+     * @param newOutRate mToken rate inputted by vault admin
      */
     function safeApproveRequest(uint256 requestId, uint256 newOutRate) external;
 
@@ -145,7 +145,7 @@ interface IDepositVault is IManageableVault {
      * Mints mToken to user.
      * Sets request flag to Processed.
      * @param requestId request id
-     * @param newOutRate mToken rate
+     * @param newOutRate mToken rate inputted by vault admin
      */
     function approveRequest(uint256 requestId, uint256 newOutRate) external;
 

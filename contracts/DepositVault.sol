@@ -48,7 +48,8 @@ contract DepositVault is ManageableVault, IDepositVault {
      * @param _instantInitParams init params for instant operations
      * @param _sanctionsList address of sanctionsList contract
      * @param _variationTolerance percent of prices diviation 1% = 100
-     * @param _minAmount basic min amount for operations
+     * @param _minAmount basic min amount for operations in mToken
+     * @param _minMTokenAmountForFirstDeposit min amount for first deposit in mToken
      */
     function initialize(
         address _ac,

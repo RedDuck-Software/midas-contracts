@@ -81,8 +81,7 @@ contract MBasisRedemptionVaultWithSwapper is
      * Burns mToken from the user, if swap need mToken just tranfers to contract.
      * Transfers fee in mToken to feeReceiver
      * Transfers tokenOut to user.
-     * @param tokenOut token out address, always ignored
-     * if not ignored
+     * @param tokenOut token out address
      * @param amountMTokenIn amount of mToken to redeem
      * @param minReceiveAmount minimum expected amount of tokenOut to receive (decimals 18)
      */
@@ -152,7 +151,11 @@ contract MBasisRedemptionVaultWithSwapper is
                 mTbillAmount
             );
 
-            mTbillRedemptionVault.redeemInstant(tokenOutCopy, mTbillAmount, minReceiveAmountCopy);
+            mTbillRedemptionVault.redeemInstant(
+                tokenOutCopy,
+                mTbillAmount,
+                minReceiveAmountCopy
+            );
 
             uint256 contractTokenOutBalanceAfterRedeem = IERC20(tokenOutCopy)
                 .balanceOf(address(this));
@@ -192,7 +195,7 @@ contract MBasisRedemptionVaultWithSwapper is
      * @notice Transfers mBasis to liquidity provider
      * Transfers mTBILL from liquidity provider to contract
      * Returns amount on mToken using exchange rates
-     * @param mBasisAmount mBasis token amount
+     * @param mBasisAmount mBasis token amount (decimals 18)
      */
     function _swapMBasisToMToken(uint256 mBasisAmount)
         internal

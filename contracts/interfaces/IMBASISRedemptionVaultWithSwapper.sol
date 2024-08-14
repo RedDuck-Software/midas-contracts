@@ -8,12 +8,14 @@ import "./IRedemptionVault.sol";
  * @author RedDuck Software
  */
 interface IMBASISRedemptionVaultWithSwapper is IRedemptionVault {
-
     /**
      * @param caller caller address (msg.sender)
      * @param provider new LP address
      */
-    event SetLiquidityProvider(address indexed caller, address indexed provider);
+    event SetLiquidityProvider(
+        address indexed caller,
+        address indexed provider
+    );
 
     /**
      * @notice set new liquidity provider address

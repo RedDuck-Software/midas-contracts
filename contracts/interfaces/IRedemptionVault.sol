@@ -8,7 +8,7 @@ import "./IManageableVault.sol";
  * @param sender user address who create
  * @param tokenOut tokenOut address
  * @param status request status
- * @param amountMToken amout mToken
+ * @param amountMToken amount mToken
  * @param mTokenRate rate of mToken at request creation time
  * @param tokenOutRate rate of tokenOut at request creation time
  */
@@ -122,7 +122,7 @@ interface IRedemptionVault is IManageableVault {
      * Transfers amount in mToken to contract
      * Transfers fee in mToken to feeReceiver
      * @param tokenOut stable coin token address to redeem to
-     * @param amountMTokenIn amount of mTBILL to redeem (decimals 18)
+     * @param amountMTokenIn amount of mToken to redeem (decimals 18)
      * @return request id
      */
     function redeemRequest(address tokenOut, uint256 amountMTokenIn)
@@ -133,7 +133,7 @@ interface IRedemptionVault is IManageableVault {
      * @notice creating redeem request if tokenOut is fiat
      * Transfers amount in mToken to contract
      * Transfers fee in mToken to feeReceiver
-     * @param amountMTokenIn amount of mTBILL to redeem (decimals 18)
+     * @param amountMTokenIn amount of mToken to redeem (decimals 18)
      * @return request id
      */
     function redeemFiatRequest(uint256 amountMTokenIn)
@@ -146,7 +146,7 @@ interface IRedemptionVault is IManageableVault {
      * Transfers tokenOut to user
      * Sets flag Processed
      * @param requestId request id
-     * @param newMTokenRate new mToken rate
+     * @param newMTokenRate new mToken rate inputted by vault admin
      */
     function approveRequest(uint256 requestId, uint256 newMTokenRate) external;
 
@@ -156,7 +156,7 @@ interface IRedemptionVault is IManageableVault {
      * Transfers tokenOut to user
      * Sets flag Processed
      * @param requestId request id
-     * @param newMTokenRate new mToken rate
+     * @param newMTokenRate new mToken rate inputted by vault admin
      */
     function safeApproveRequest(uint256 requestId, uint256 newMTokenRate)
         external;

@@ -79,8 +79,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
      * Burns mToken from the user.
      * Transfers fee in mToken to feeReceiver
      * Transfers tokenOut to user.
-     * @param tokenOut token out address, always ignored
-     * if not ignored
+     * @param tokenOut token out address, always ignore
      * @param amountMTokenIn amount of mToken to redeem
      * @param minReceiveAmount minimum expected amount of tokenOut to receive (decimals 18)
      */
