@@ -13,17 +13,19 @@ import {
   // eslint-disable-next-line camelcase
   ERC20__factory,
   RedemptionVault,
+  RedemptionVaultWIthBUIDL,
 } from '../../typechain-types';
 
 type CommonParamsRedeem = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
-  'redemptionVault' | 'owner' | 'mTBILL' | 'mTokenToUsdDataFeed'
->;
+  'owner' | 'mTBILL' | 'mTokenToUsdDataFeed'
+> & {
+  redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL;
+};
 
-type CommonParams = Pick<
-  Awaited<ReturnType<typeof defaultDeploy>>,
-  'redemptionVault' | 'owner'
->;
+type CommonParams = Pick<Awaited<ReturnType<typeof defaultDeploy>>, 'owner'> & {
+  redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL;
+};
 
 export const redeemInstantTest = async (
   {
@@ -612,7 +614,7 @@ export const setRequestRedeemerTest = async (
 const getFeePercent = async (
   sender: string,
   token: string,
-  redemptionVault: RedemptionVault,
+  redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL,
   isInstant: boolean,
   additionalFee?: BigNumber,
 ) => {
@@ -632,7 +634,7 @@ const getFeePercent = async (
 const calcExpectedTokenOutAmount = async (
   sender: SignerWithAddress,
   token: ERC20,
-  redemptionVault: RedemptionVault,
+  redemptionVault: RedemptionVault | RedemptionVaultWIthBUIDL,
   mTokenRate: BigNumber,
   amountIn: BigNumber,
   isInstant: boolean,
