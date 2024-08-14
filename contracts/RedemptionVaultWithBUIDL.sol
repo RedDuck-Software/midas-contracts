@@ -41,6 +41,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
      * @param _minAmount basic min amount for operations
      * @param _fiatRedemptionInitParams params fiatAdditionalFee, fiatFlatFee, minFiatRedeemAmount
      * @param _buidlRedemption BUIDL redemption contract address
+     * @param _requestRedeemer address is designated for standard redemptions, allowing tokens to be pulled from this address
      */
     function initialize(
         address _ac,
@@ -51,6 +52,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         uint256 _variationTolerance,
         uint256 _minAmount,
         FiatRedeptionInitParams calldata _fiatRedemptionInitParams,
+        address _requestRedeemer,
         address _buidlRedemption
     ) external initializer {
         __RedemptionVault_init(
@@ -61,7 +63,8 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
             _sanctionsList,
             _variationTolerance,
             _minAmount,
-            _fiatRedemptionInitParams
+            _fiatRedemptionInitParams,
+            _requestRedeemer
         );
         _validateAddress(_buidlRedemption, false);
         buidlRedemption = IRedemption(_buidlRedemption);
@@ -79,8 +82,13 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
      * @param tokenOut token out address, always ignored
      * if not ignored
      * @param amountMTokenIn amount of mToken to redeem
+     * @param minReceiveAmount minimum expected amount of tokenOut to receive (decimals 18)
      */
-    function redeemInstant(address tokenOut, uint256 amountMTokenIn)
+    function redeemInstant(
+        address tokenOut,
+        uint256 amountMTokenIn,
+        uint256 minReceiveAmount
+    )
         external
         override
         whenFnNotPaused(this.redeemInstant.selector)
@@ -103,6 +111,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
 
         uint256 amountMTokenInCopy = amountMTokenIn;
         address tokenOutCopy = tokenOut;
+        uint256 minReceiveAmountCopy = minReceiveAmount;
 
         (uint256 amountMTokenInUsd, uint256 mTokenRate) = _convertMTokenToUsd(
             amountMTokenInCopy
@@ -120,6 +129,12 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
 
         uint256 amountTokenOutWithoutFee = (amountMTokenWithoutFee *
             mTokenRate) / tokenOutRate;
+
+        require(
+            amountTokenOutWithoutFee >= minReceiveAmountCopy,
+            "RVB: minReceiveAmount > actual"
+        );
+
         uint256 amountTokenOutWithoutFeeFrom18 = amountTokenOutWithoutFee
             .convertFromBase18(tokenDecimals);
 

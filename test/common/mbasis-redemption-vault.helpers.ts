@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumber, constants } from 'ethers';
+import { BigNumber, BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 
 import { OptionalCommonParams, getAccount } from './common.helpers';
@@ -38,7 +38,8 @@ export const redeemInstantWithSwapperTest = async (
     mBASISToUsdDataFeed,
     mTokenToUsdDataFeed,
     swap,
-  }: CommonParamsRedeem & { swap?: boolean },
+    minAmount,
+  }: CommonParamsRedeem & { swap?: boolean; minAmount?: BigNumberish },
   tokenOut: ERC20 | string,
   amountTBillIn: number,
   opt?: OptionalCommonParams,
@@ -61,7 +62,7 @@ export const redeemInstantWithSwapperTest = async (
     await expect(
       mBasisRedemptionVaultWithSwapper
         .connect(sender)
-        .redeemInstant(tokenOut, amountIn),
+        .redeemInstant(tokenOut, amountIn, minAmount ?? constants.Zero),
     ).revertedWith(opt?.revertMessage);
     return;
   }
@@ -108,7 +109,7 @@ export const redeemInstantWithSwapperTest = async (
   await expect(
     mBasisRedemptionVaultWithSwapper
       .connect(sender)
-      .redeemInstant(tokenOut, amountIn),
+      .redeemInstant(tokenOut, amountIn, minAmount ?? constants.Zero),
   )
     .to.emit(
       mBasisRedemptionVaultWithSwapper,
@@ -232,7 +233,9 @@ const calcExpectedTokenOutAmount = async (
     tokenConfig.dataFeed,
     sender,
   );
-  const currentStableRate = await dataFeedContract.getDataInBase18();
+  const currentStableRate = tokenConfig.stable
+    ? constants.WeiPerEther
+    : await dataFeedContract.getDataInBase18();
   if (currentStableRate.isZero())
     return {
       amountOut: constants.Zero,

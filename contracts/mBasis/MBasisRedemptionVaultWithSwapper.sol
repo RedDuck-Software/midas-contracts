@@ -40,7 +40,9 @@ contract MBasisRedemptionVaultWithSwapper is
      * @param _variationTolerance percent of prices diviation 1% = 100
      * @param _minAmount basic min amount for operations
      * @param _fiatRedemptionInitParams params fiatAdditionalFee, fiatFlatFee, minFiatRedeemAmount
+     * @param _requestRedeemer address is designated for standard redemptions, allowing tokens to be pulled from this address
      * @param _mTbillRedemptionVault mTBILL redemptionVault address
+     * @param _liquidityProvider liquidity provider for pull mTBILL
      */
     function initialize(
         address _ac,
@@ -51,6 +53,7 @@ contract MBasisRedemptionVaultWithSwapper is
         uint256 _variationTolerance,
         uint256 _minAmount,
         FiatRedeptionInitParams calldata _fiatRedemptionInitParams,
+        address _requestRedeemer,
         address _mTbillRedemptionVault,
         address _liquidityProvider
     ) external initializer {
@@ -62,7 +65,8 @@ contract MBasisRedemptionVaultWithSwapper is
             _sanctionsList,
             _variationTolerance,
             _minAmount,
-            _fiatRedemptionInitParams
+            _fiatRedemptionInitParams,
+            _requestRedeemer
         );
         _validateAddress(_mTbillRedemptionVault, true);
         _validateAddress(_liquidityProvider, false);
@@ -80,8 +84,13 @@ contract MBasisRedemptionVaultWithSwapper is
      * @param tokenOut token out address, always ignored
      * if not ignored
      * @param amountMTokenIn amount of mToken to redeem
+     * @param minReceiveAmount minimum expected amount of tokenOut to receive (decimals 18)
      */
-    function redeemInstant(address tokenOut, uint256 amountMTokenIn)
+    function redeemInstant(
+        address tokenOut,
+        uint256 amountMTokenIn,
+        uint256 minReceiveAmount
+    )
         external
         override(IRedemptionVault, RedemptionVault)
         whenFnNotPaused(this.redeemInstant.selector)
@@ -100,6 +109,7 @@ contract MBasisRedemptionVaultWithSwapper is
 
         uint256 amountMTokenInCopy = amountMTokenIn;
         address tokenOutCopy = tokenOut;
+        uint256 minReceiveAmountCopy = minReceiveAmount;
 
         (uint256 amountMTokenInUsd, uint256 mTokenRate) = _convertMTokenToUsd(
             amountMTokenInCopy
@@ -112,6 +122,11 @@ contract MBasisRedemptionVaultWithSwapper is
         uint256 amountTokenOutWithoutFee = _truncate(
             (amountMTokenWithoutFee * mTokenRate) / tokenOutRate,
             tokenDecimals
+        );
+
+        require(
+            amountTokenOutWithoutFee >= minReceiveAmountCopy,
+            "RVS: minReceiveAmount > actual"
         );
 
         if (feeAmount > 0)
@@ -137,7 +152,7 @@ contract MBasisRedemptionVaultWithSwapper is
                 mTbillAmount
             );
 
-            mTbillRedemptionVault.redeemInstant(tokenOutCopy, mTbillAmount);
+            mTbillRedemptionVault.redeemInstant(tokenOutCopy, mTbillAmount, minReceiveAmountCopy);
 
             uint256 contractTokenOutBalanceAfterRedeem = IERC20(tokenOutCopy)
                 .balanceOf(address(this));

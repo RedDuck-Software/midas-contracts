@@ -104,7 +104,7 @@ describe('RedemptionVault', function () {
     );
   });
 
-  describe.only('MBasisRedemptionVaultWithSwapper redeemInstant()', () => {
+  describe('MBasisRedemptionVaultWithSwapper redeemInstant()', () => {
     describe('setLiquidityProvider()', () => {
       it('should fail: call from address without M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
         const { mBasisRedemptionVaultWithSwapper, regularAccounts, owner } =
@@ -238,7 +238,9 @@ describe('RedemptionVault', function () {
         0,
         true,
       );
-      const selector = encodeFnSelector('redeemInstant(address,uint256)');
+      const selector = encodeFnSelector(
+        'redeemInstant(address,uint256,uint256)',
+      );
       await pauseVaultFn(mBasisRedemptionVaultWithSwapper, selector);
       await redeemInstantWithSwapperTest(
         {
@@ -433,6 +435,53 @@ describe('RedemptionVault', function () {
         10,
         {
           revertMessage: 'DF: feed is deprecated',
+        },
+      );
+    });
+
+    it('should fail: if min receive amount greater then actual', async () => {
+      const {
+        owner,
+        mBasisRedemptionVaultWithSwapper,
+        stableCoins,
+        mTBILL,
+        mBASIS,
+        mTokenToUsdDataFeed,
+        mBASISToUsdDataFeed,
+        dataFeed,
+        mockedAggregator,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest(
+        { vault: mBasisRedemptionVaultWithSwapper, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+        true,
+      );
+
+      await setRoundData({ mockedAggregator }, 1);
+
+      await mintToken(mBASIS, owner, 100_000);
+      await approveBase18(
+        owner,
+        mBASIS,
+        mBasisRedemptionVaultWithSwapper,
+        100_000,
+      );
+      await redeemInstantWithSwapperTest(
+        {
+          mBasisRedemptionVaultWithSwapper,
+          owner,
+          mTBILL,
+          mBASIS,
+          mBASISToUsdDataFeed,
+          mTokenToUsdDataFeed,
+          minAmount: parseUnits('10000'),
+        },
+        stableCoins.dai,
+        999,
+        {
+          revertMessage: 'RVS: minReceiveAmount > actual',
         },
       );
     });

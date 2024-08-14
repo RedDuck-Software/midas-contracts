@@ -576,7 +576,7 @@ export const defaultDeploy = async () => {
 
   await expect(
     mBasisRedemptionVaultWithSwapper[
-      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
     ](
       accessControl.address,
       {
@@ -599,6 +599,7 @@ export const defaultDeploy = async () => {
         fiatFlatFee: parseUnits('1'),
         minFiatRedeemAmount: 1000,
       },
+      requestRedeemer.address,
       constants.AddressZero,
       liquidityProvider.address,
     ),
@@ -606,7 +607,7 @@ export const defaultDeploy = async () => {
 
   await expect(
     mBasisRedemptionVaultWithSwapper[
-      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
     ](
       accessControl.address,
       {
@@ -629,13 +630,14 @@ export const defaultDeploy = async () => {
         fiatFlatFee: parseUnits('1'),
         minFiatRedeemAmount: 1000,
       },
+      requestRedeemer.address,
       redemptionVault.address,
       constants.AddressZero,
     ),
   ).to.be.reverted;
 
   await mBasisRedemptionVaultWithSwapper[
-    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
   ](
     accessControl.address,
     {
@@ -748,7 +750,7 @@ export const defaultDeploy = async () => {
     ),
   ).to.be.reverted;
   await redemptionVaultWithBUIDL[
-    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
   ](
     accessControl.address,
     {
@@ -771,6 +773,7 @@ export const defaultDeploy = async () => {
       fiatFlatFee: parseUnits('1'),
       minFiatRedeemAmount: 1000,
     },
+    requestRedeemer.address,
     buidlRedemption.address,
   );
   await accessControl.grantRole(
