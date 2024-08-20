@@ -28,7 +28,7 @@ contract mTBILL is ERC20PausableUpgradeable, Blacklistable, IMTbill {
      */
     function initialize(address _accessControl) external initializer {
         __Blacklistable_init(_accessControl);
-        __ERC20_init("mTBILL", "mTBILL");
+        __ERC20_init("Midas US Treasury Bill Token", "mTBILL");
     }
 
     /**
