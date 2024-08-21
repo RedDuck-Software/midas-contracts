@@ -34,6 +34,11 @@ export const M_BASIS_DEPLOY_TAG = 'mBASIS';
 export const E_USD_CONTRACT_NAME = 'eUSD';
 export const E_USD_DEPLOY_TAG = 'eUSD';
 
+export const M_TBILL_CUSTOM_AGGREGATOR_CONTRACT_NAME =
+  'MTBillCustomAggregatorFeed' as const
+export const M_BASIS_CUSTOM_AGGREGATOR_CONTRACT_NAME =
+  'MBasisCustomAggregatorFeed' as const;
+
 export const GRANT_ROLES_TAG = 'GANT_ROLES';
 
 export const POST_DEPLOY_TAG = 'POST_DEPLOY';
