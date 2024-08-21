@@ -18,72 +18,40 @@ import {
 // eslint-disable-next-line camelcase
 import { AggregatorV3Mock__factory } from '../../typechain-types';
 
-// EUR/USD: 0xb49f677943bc038e9857d61e7d053caa2c1734c1
-// IB01/USD: 0x32d1463eb53b73c095625719afa544d5426354cb
-
-const aggregatorsByNetwork: Record<number, string> = {
-  1: '0x32d1463eb53b73c095625719afa544d5426354cb',
-  11155111: '',
-};
+const forToken: 'mTBILL' | 'mBASIS' = 'mTBILL';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
 
-  let aggregator: string;
-
-  if (hre.network.tags[MOCK_AGGREGATOR_NETWORK_TAG]) {
-    console.log(
-      chalk.bold.yellow(
-        'MOCK_AGGREGATOR_NETWORK_TAG is true, deploying mocked data aggregator',
-      ),
-    );
-    console.log('Deploying AggregatorV3Mock...');
-    const aggregatorDeploy = await (
-      await (
-        await hre.ethers.getContractFactory('AggregatorV3Mock', owner)
-      ).deploy()
-    ).deployed();
-    console.log('Deployed AggregatorV3Mock:', aggregatorDeploy.address);
-
-    // eslint-disable-next-line camelcase
-    const aggregatorContract = AggregatorV3Mock__factory.connect(
-      aggregatorDeploy.address,
-      owner,
-    );
-
-    if ((await aggregatorContract.latestRoundData()).answer.eq('0')) {
-      const newData = parseUnits(
-        '5',
-        await aggregatorContract.decimals(),
-      ).toString();
-      await aggregatorContract.setRoundData(newData);
-    }
-
-    aggregator = aggregatorContract.address;
-
-    logDeploy('AggregatorV3Mock', undefined, aggregatorContract.address);
-  } else {
-    console.log(
-      chalk.bold.yellow(
-        'MOCK_AGGREGATOR_NETWORK_TAG is false, using production aggregator',
-      ),
-    );
-
-    aggregator = aggregatorsByNetwork[hre.network.config.chainId ?? 1];
-    expect(aggregator).not.eq(undefined);
-  }
-
   const addresses = getCurrentAddresses(hre);
 
-  console.log('Deploying DataFeed...', aggregator);
+  const customAggregator = addresses?.[forToken]?.customFeed;
+
+  if (!addresses) {
+    throw new Error('Addresses for network are not defined');
+  }
+
+  if (!customAggregator) {
+    throw new Error('Custom aggregator is not defined');
+  }
+
+  console.log('Deploying DataFeed...', customAggregator);
+
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(DATA_FEED_CONTRACT_NAME, owner),
-    [addresses?.accessControl, aggregator],
+    [
+      addresses?.accessControl,
+      customAggregator,
+      2592000,
+      1,
+      parseUnits('100000', 8),
+    ],
     {
       unsafeAllow: ['constructor'],
     },
   );
+
   console.log('Deployed DataFeed:', deployment.address);
 
   if (deployment.deployTransaction) {
