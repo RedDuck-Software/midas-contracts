@@ -5,20 +5,15 @@ import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import {
-  DATA_FEED_CONTRACT_NAME,
-  MOCK_AGGREGATOR_NETWORK_TAG,
-} from '../../config';
-import { getCurrentAddresses } from '../../config/constants/addresses';
+import { M_BASIS_DATA_FEED_CONTRACT_NAME } from '../../../config';
+import { getCurrentAddresses } from '../../../config/constants/addresses';
 import {
   logDeploy,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
-} from '../../helpers/utils';
+} from '../../../helpers/utils';
 // eslint-disable-next-line camelcase
-import { AggregatorV3Mock__factory } from '../../typechain-types';
-
-const forToken: 'mTBILL' | 'mBASIS' = 'mTBILL';
+import { AggregatorV3Mock__factory } from '../../../typechain-types';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
@@ -26,7 +21,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getCurrentAddresses(hre);
 
-  const customAggregator = addresses?.[forToken]?.customFeed;
+  const customAggregator = addresses?.mBASIS?.customFeed;
 
   if (!addresses) {
     throw new Error('Addresses for network are not defined');
@@ -39,7 +34,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   console.log('Deploying DataFeed...', customAggregator);
 
   const deployment = await hre.upgrades.deployProxy(
-    await hre.ethers.getContractFactory(DATA_FEED_CONTRACT_NAME, owner),
+    await hre.ethers.getContractFactory(M_BASIS_DATA_FEED_CONTRACT_NAME, owner),
     [
       addresses?.accessControl,
       customAggregator,
@@ -59,7 +54,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     await deployment.deployTransaction.wait(5);
     console.log('Waited.');
   }
-  await logDeployProxy(hre, DATA_FEED_CONTRACT_NAME, deployment.address);
+  await logDeployProxy(
+    hre,
+    M_BASIS_DATA_FEED_CONTRACT_NAME,
+    deployment.address,
+  );
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };
 

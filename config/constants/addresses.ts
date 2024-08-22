@@ -4,6 +4,7 @@ import { ConfigPerNetwork } from '../types/index';
 
 type TokenAddresses = {
   customFeed?: string;
+  dataFeed?: string;
   token?: string;
   depositVault?: string;
   redemptionVault?: string;
@@ -32,6 +33,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       redemptionVault: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
     },
     mBASIS: {
+      dataFeed: '0x1615cBC603192ae8A9FF20E98dd0e40a405d76e4',
       customFeed: '0xE4f2AE539442e1D3Fb40F03ceEbF4A372a390d24',
       token: '0x2a8c22E3b10036f3AEF5875d04f8441d4188b656',
       tokensReceiver: '0xB8633297f9D9A8eaD48f1335ab04b14C189639f0',
