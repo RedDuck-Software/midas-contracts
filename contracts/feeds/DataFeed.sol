@@ -73,7 +73,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
      */
     function changeAggregator(address _aggregator)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE, msg.sender)
+        onlyRole(feedAdminRole(), msg.sender)
     {
         require(_aggregator != address(0), "DF: invalid address");
 
@@ -85,6 +85,13 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
      */
     function getDataInBase18() external view returns (uint256 answer) {
         (, answer) = _getDataInBase18();
+    }
+
+    /**
+     * @inheritdoc IDataFeed
+     */
+    function feedAdminRole() public pure virtual override returns (bytes32) {
+        return DEFAULT_ADMIN_ROLE;
     }
 
     /**
