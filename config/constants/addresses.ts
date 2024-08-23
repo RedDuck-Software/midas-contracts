@@ -26,6 +26,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
     etfDataFeed: '0xc747FdDFC46CDC915bEA866D519dFc5Eae5c947f',
     eurToUsdFeed: '0x6022a020Ca5c611304B9E97F37AEE0C38455081A',
     mTBILL: {
+      dataFeed: '0xfCEE9754E8C375e145303b7cE7BEca3201734A2B',
       customFeed: '0x056339C044055819E8Db84E71f5f2E1F536b2E5b',
       token: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
       tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
