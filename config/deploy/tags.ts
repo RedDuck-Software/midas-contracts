@@ -8,8 +8,9 @@ export const DEPOSIT_VAULT_CONTRACT_NAME = 'DepositVault';
 
 export const M_BASIS_DEPOSIT_VAULT_CONTRACT_NAME = 'MBasisDepositVault';
 
-export const M_BASIS_REDEMPTION_VAULT_DEPLOY_TAG = 'MBasisRedemptionVault';
 export const M_BASIS_REDEMPTION_VAULT_CONTRACT_NAME = 'MBasisRedemptionVault';
+export const M_BASIS_REDEMPTION_SWAPPER_VAULT_CONTRACT_NAME =
+  'MBasisRedemptionVaultWithSwapper';
 
 export const E_USD_REDEMPTION_VAULT_DEPLOY_TAG = 'EUsdRedemptionVault';
 export const E_USD_REDEMPTION_VAULT_CONTRACT_NAME = 'EUsdRedemptionVault';
@@ -20,8 +21,8 @@ export const E_USD_DEPOSIT_VAULT_CONTRACT_NAME = 'EUsdDepositVault';
 export const MIDAS_AC_DEPLOY_TAG = 'MidasAccessControl';
 export const MIDAS_AC_CONTRACT_NAME = 'MidasAccessControl';
 
-export const REDEMPTION_VAULT_DEPLOY_TAG = 'RedemptionVault';
 export const REDEMPTION_VAULT_CONTRACT_NAME = 'RedemptionVault';
+export const REDEMPTION_VAULT_BUIDL_CONTRACT_NAME = 'RedemptionVaultWIthBUIDL';
 
 export const M_BASIS_CUSTOM_FEED_CONTRACT_NAME = 'MBasisCustomAggregatorFeed';
 export const M_TBILL_CUSTOM_FEED_CONTRACT_NAME = 'MTBillCustomAggregatorFeed';
