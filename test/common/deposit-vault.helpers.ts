@@ -210,13 +210,14 @@ export const depositRequestTest = async (
     .to.emit(
       depositVault,
       depositVault.interface.events[
-        'DepositRequest(uint256,address,address,uint256,uint256,uint256,bytes32)'
+        'DepositRequest(uint256,address,address,uint256,uint256,uint256,uint256,bytes32)'
       ].name,
     )
     .withArgs(
       latestRequestIdBefore.add(1),
       sender.address,
       tokenContract.address,
+      amountIn,
       actualAmountInUsd,
       fee,
       mintAmount,
