@@ -4,10 +4,8 @@ export const DATA_FEED_CONTRACT_NAME = 'DataFeed';
 export const M_TBILL_DATA_FEED_CONTRACT_NAME = 'MTBillDataFeed';
 export const M_BASIS_DATA_FEED_CONTRACT_NAME = 'MBasisDataFeed';
 
-export const DEPOSIT_VAULT_DEPLOY_TAG = 'DepositVault';
 export const DEPOSIT_VAULT_CONTRACT_NAME = 'DepositVault';
 
-export const M_BASIS_DEPOSIT_VAULT_DEPLOY_TAG = 'MBasisDepositVault';
 export const M_BASIS_DEPOSIT_VAULT_CONTRACT_NAME = 'MBasisDepositVault';
 
 export const M_BASIS_REDEMPTION_VAULT_DEPLOY_TAG = 'MBasisRedemptionVault';
