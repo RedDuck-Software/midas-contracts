@@ -169,11 +169,16 @@ export const redeemRequestTest = async (
     .to.emit(
       redemptionVault,
       redemptionVault.interface.events[
-        'RedeemRequest(uint256,address,address,uint256)'
+        'RedeemRequest(uint256,address,address,uint256,uint256)'
       ].name,
     )
-    .withArgs(latestRequestIdBefore.add(1), sender, tokenOut, amountTBillIn).to
-    .not.reverted;
+    .withArgs(
+      latestRequestIdBefore.add(1),
+      sender,
+      tokenOut,
+      amountTBillIn,
+      fee,
+    ).to.not.reverted;
 
   const latestRequestIdAfter = await redemptionVault.currentRequestId();
   const request = await redemptionVault.redeemRequests(latestRequestIdBefore);
@@ -263,11 +268,16 @@ export const redeemFiatRequestTest = async (
     .to.emit(
       redemptionVault,
       redemptionVault.interface.events[
-        'RedeemRequest(uint256,address,address,uint256)'
+        'RedeemRequest(uint256,address,address,uint256,uint256)'
       ].name,
     )
-    .withArgs(latestRequestIdBefore.add(1), sender, manualToken, amountTBillIn)
-    .to.not.reverted;
+    .withArgs(
+      latestRequestIdBefore.add(1),
+      sender,
+      manualToken,
+      amountTBillIn,
+      fee,
+    ).to.not.reverted;
 
   const latestRequestIdAfter = await redemptionVault.currentRequestId();
   const request = await redemptionVault.redeemRequests(latestRequestIdBefore);
