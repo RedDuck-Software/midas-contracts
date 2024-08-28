@@ -17,6 +17,11 @@ export interface MidasAddresses {
   etfDataFeed?: string;
   eurToUsdFeed?: string;
   accessControl?: string;
+  dataFeeds?: Record<string, {
+    token?: string;
+    dataFeed?: string;
+    aggregator?: string
+  }>
 }
 
 export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefined> = {
@@ -49,17 +54,27 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
     },
   },
   sepolia: {
+    dataFeeds: {
+      usdc: {
+        dataFeed: '0x0e0eb6cdad90174f1Db606EC186ddD0B5eD80847',
+        aggregator: '0x7811C1Bf5db28630F303267Cc613797EB9A81188',
+        token: '0xF55588f2f8CF8E1D9C702D169AF43c15f5c85f12',
+      },
+    },
     mTBILL: {
-      redemptionVault: '0xf3482c80d1A2883611De939Af7b0a970d5fcdC06',
+      dataFeed: '0x4E677F7FE252DE44682a913f609EA3eb6F29DC3E',
       tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
-      depositVault: '0xE85f2B707Ec5Ae8e07238F99562264f304E30109',
+      depositVault: '0x1615cBC603192ae8A9FF20E98dd0e40a405d76e4',
+      redemptionVault: '0x2fD18B0878967E19292E9a8BF38Bb1415F6ad653',
       token: '0xefED40D1eb1577d1073e9C4F277463486D39b084',
     },
     mBASIS: {
+      customFeed: '0x263A7AcE5E77986b77DcA125859248fEED52383c',
+      dataFeed: '0x3aAc6fd73fA4e16Ec683BD4aaF5Ec89bb2C0EdC2',
       token: '0x4089dC8b6637218f13465d28950A82a7E90cBE27',
       tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
-      depositVault: '0x8459f6e174deE33FC72BDAE74a3080751eC92c27',
-      redemptionVault: '0x141f0E9ed8bA2295254C9DF9476ccE7bC29172B1',
+      depositVault: '0xE1998045AD0cFd38aBd274f2E1A4abA4278e2288',
+      redemptionVault: '0xF6e51d24F4793Ac5e71e0502213a9BBE3A6d4517',
     },
     eUSD: {
       token: '0xDd5a54bA2aB379A5e642c58F98aD793A183960E2',

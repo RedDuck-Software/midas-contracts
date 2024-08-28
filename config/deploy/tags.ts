@@ -1,4 +1,3 @@
-export const DATA_FEED_DEPLOY_TAG = 'DataFeed';
 export const DATA_FEED_CONTRACT_NAME = 'DataFeed';
 
 export const M_TBILL_DATA_FEED_CONTRACT_NAME = 'MTBillDataFeed';

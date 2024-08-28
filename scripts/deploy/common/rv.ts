@@ -45,7 +45,6 @@ export type DeployRvConfigCommon = {
   sanctionsList?: string;
   variationTolerance: BigNumberish;
   minAmount: BigNumberish;
-  minMTokenAmountForFirstDeposit: BigNumberish;
   fiatAdditionalFee: BigNumberish;
   fiatFlatFee: BigNumberish;
   minFiatRedeemAmount: BigNumberish;

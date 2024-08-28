@@ -21,15 +21,15 @@ const configs: Record<number, DeployDvConfig> = {
     minAmount: parseUnits('0.01'),
     variationTolerance: parseUnits('0.1', 2),
   },
-  1: {
-    feeReceiver: '0x',
-    tokensReceiver: '0x',
-    instantDailyLimit: parseUnits('TODO'),
-    instantFee: parseUnits('TODO', 2),
-    minMTokenAmountForFirstDeposit: parseUnits('TODO'),
-    minAmount: parseUnits('TODO'),
-    variationTolerance: parseUnits('TODO', 2),
-  },
+  // 1: {
+  //   feeReceiver: '0x',
+  //   tokensReceiver: '0x',
+  //   instantDailyLimit: parseUnits('TODO'),
+  //   instantFee: parseUnits('TODO', 2),
+  //   minMTokenAmountForFirstDeposit: parseUnits('TODO'),
+  //   minAmount: parseUnits('TODO'),
+  //   variationTolerance: parseUnits('TODO', 2),
+  // },
 };
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
