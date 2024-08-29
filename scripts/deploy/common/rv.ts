@@ -1,5 +1,6 @@
 import { BigNumberish, constants, ContractFactory } from 'ethers';
 import {
+  MBasisRedemptionVaultWithSwapper,
   RedemptionVault,
   RedemptionVaultWIthBUIDL,
 } from '../../../typechain-types';
@@ -139,6 +140,9 @@ export const deployRedemptionVault = async (
     | Parameters<RedemptionVault['initialize']>
     | Parameters<
         RedemptionVaultWIthBUIDL['initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)']
+      >
+    | Parameters<
+        MBasisRedemptionVaultWithSwapper['initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)']
       >;
 
   const deployment = await hre.upgrades.deployProxy(
@@ -146,6 +150,10 @@ export const deployRedemptionVault = async (
     params,
     {
       unsafeAllow: ['constructor'],
+      initializer:
+        networkConfig.type === 'SWAPPER'
+          ? 'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
+          : 'initialize',
     },
   );
 

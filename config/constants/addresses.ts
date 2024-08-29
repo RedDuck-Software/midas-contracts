@@ -8,6 +8,8 @@ type TokenAddresses = {
   token?: string;
   depositVault?: string;
   redemptionVault?: string;
+  redemptionVaultBuidl?: string;
+  redemptionVaultSwapper?: string;
   tokensReceiver?: string;
 };
 export interface MidasAddresses {
@@ -75,6 +77,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       depositVault: '0xE1998045AD0cFd38aBd274f2E1A4abA4278e2288',
       redemptionVault: '0xF6e51d24F4793Ac5e71e0502213a9BBE3A6d4517',
+      redemptionVaultSwapper: '0x3897445701132efb82362324D59D0f35c23B0170',
     },
     eUSD: {
       token: '0xDd5a54bA2aB379A5e642c58F98aD793A183960E2',
