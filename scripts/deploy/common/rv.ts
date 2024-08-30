@@ -153,6 +153,8 @@ export const deployRedemptionVault = async (
       initializer:
         networkConfig.type === 'SWAPPER'
           ? 'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
+          : networkConfig.type === 'BUIDL'
+          ? 'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
           : 'initialize',
     },
   );
