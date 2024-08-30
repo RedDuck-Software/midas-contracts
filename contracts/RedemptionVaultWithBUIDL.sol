@@ -7,8 +7,6 @@ import {SafeERC20Upgradeable as SafeERC20} from "@openzeppelin/contracts-upgrade
 import "./RedemptionVault.sol";
 
 import "./interfaces/buidl/IRedemption.sol";
-import "./interfaces/buidl/ILiquiditySource.sol";
-import "./interfaces/buidl/ISettlement.sol";
 import "./libraries/DecimalsCorrectionLibrary.sol";
 
 /**
@@ -21,12 +19,6 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
     using SafeERC20 for IERC20;
 
     IRedemption public buidlRedemption;
-
-    IERC20 public buidl;
-
-    ILiquiditySource public buidlLiquiditySource;
-
-    ISettlement public buidlSettlement;
 
     uint256[50] private __gap;
 
@@ -68,9 +60,6 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         );
         _validateAddress(_buidlRedemption, false);
         buidlRedemption = IRedemption(_buidlRedemption);
-        buidlSettlement = ISettlement(buidlRedemption.settlement());
-        buidlLiquiditySource = ILiquiditySource(buidlRedemption.liquidity());
-        buidl = IERC20(buidlRedemption.asset());
     }
 
     /**
@@ -97,7 +86,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
     {
         address user = msg.sender;
 
-        tokenOut = buidlLiquiditySource.token();
+        tokenOut = buidlRedemption.liquidity();
 
         (
             uint256 feeAmount,
@@ -170,8 +159,8 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         if (contractBalanceTokenOut >= amountTokenOut) return;
 
         uint256 buidlToRedeem = amountTokenOut - contractBalanceTokenOut;
-
-        buidl.safeIncreaseAllowance(address(buidlRedemption), buidlToRedeem);
-        buidlRedemption.redeem(buidlToRedeem);
+        IRedemption _buidlRedemption = buidlRedemption; 
+        IERC20(_buidlRedemption.asset()).safeIncreaseAllowance(address(buidlRedemption), buidlToRedeem);
+        _buidlRedemption.redeem(buidlToRedeem);
     }
 }
