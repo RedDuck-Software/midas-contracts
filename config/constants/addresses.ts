@@ -68,6 +68,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       depositVault: '0x1615cBC603192ae8A9FF20E98dd0e40a405d76e4',
       redemptionVault: '0x2fD18B0878967E19292E9a8BF38Bb1415F6ad653',
+      redemptionVaultBuidl: '0xc4Fb2B5Ddd40764914B1A3C38a01079259Ab31C5',
       token: '0xefED40D1eb1577d1073e9C4F277463486D39b084',
     },
     mBASIS: {
