@@ -65,6 +65,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
     },
     mTBILL: {
       dataFeed: '0x4E677F7FE252DE44682a913f609EA3eb6F29DC3E',
+      customFeed: '0x5CB155D19696ED296dc4942BEDB6EEc69367c332',
       tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       depositVault: '0x1615cBC603192ae8A9FF20E98dd0e40a405d76e4',
       redemptionVault: '0x2fD18B0878967E19292E9a8BF38Bb1415F6ad653',
