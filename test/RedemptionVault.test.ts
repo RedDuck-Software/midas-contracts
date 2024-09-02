@@ -25,6 +25,7 @@ import {
   setVariabilityToleranceTest,
   withdrawTest,
   changeTokenFeeTest,
+  setTokensReceiverTest,
 } from './common/manageable-vault.helpers';
 import {
   redeemInstantWithSwapperTest,
@@ -1297,6 +1298,58 @@ describe('RedemptionVault', function () {
           1000,
         ),
       ).revertedWith('fee == 0');
+    });
+  });
+
+  describe('setTokensReceiver()', () => {
+    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await setTokensReceiverTest(
+        { vault: redemptionVault, owner },
+        regularAccounts[0].address,
+        {
+          from: regularAccounts[0],
+          revertMessage: acErrors.WMAC_HASNT_ROLE,
+        },
+      );
+    });
+
+    it('should fail: call with zero address receiver', async () => {
+      const { owner, redemptionVault } = await loadFixture(defaultDeploy);
+
+      await setTokensReceiverTest(
+        { vault: redemptionVault, owner },
+        constants.AddressZero,
+        {
+          revertMessage: 'zero address',
+        },
+      );
+    });
+
+    it('should fail: call with address(this) receiver', async () => {
+      const { owner, redemptionVault } = await loadFixture(defaultDeploy);
+
+      await setTokensReceiverTest(
+        { vault: redemptionVault, owner },
+        redemptionVault.address,
+        {
+          revertMessage: 'invalid address',
+        },
+      );
+    });
+
+    it('call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await setTokensReceiverTest(
+        { vault: redemptionVault, owner },
+        regularAccounts[0].address,
+      );
     });
   });
 
