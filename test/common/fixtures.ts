@@ -703,7 +703,7 @@ export const defaultDeploy = async () => {
 
   const buidlRedemption = await new RedemptionTest__factory(owner).deploy(
     buidl.address,
-    stableCoins.usdc.address
+    stableCoins.usdc.address,
   );
 
   await stableCoins.usdc.mint(buidlRedemption.address, parseUnits('1000000'));

@@ -159,8 +159,11 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         if (contractBalanceTokenOut >= amountTokenOut) return;
 
         uint256 buidlToRedeem = amountTokenOut - contractBalanceTokenOut;
-        IRedemption _buidlRedemption = buidlRedemption; 
-        IERC20(_buidlRedemption.asset()).safeIncreaseAllowance(address(buidlRedemption), buidlToRedeem);
+        IRedemption _buidlRedemption = buidlRedemption;
+        IERC20(_buidlRedemption.asset()).safeIncreaseAllowance(
+            address(buidlRedemption),
+            buidlToRedeem
+        );
         _buidlRedemption.redeem(buidlToRedeem);
     }
 }
