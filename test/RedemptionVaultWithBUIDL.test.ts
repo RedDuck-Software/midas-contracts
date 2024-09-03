@@ -1683,7 +1683,7 @@ describe('RedemptionVaultWithBUIDL', function () {
         constants.AddressZero,
         100000,
         {
-          revertMessage: 'ERC20: transfer amount exceeds balance',
+          revertMessage: 'RVB: buidlToRedeem > balance',
         },
       );
     });
@@ -1767,7 +1767,7 @@ describe('RedemptionVaultWithBUIDL', function () {
         redemptionVaultWithBUIDL.address,
       );
       expect(buidlBalanceAfter).eq(
-        buidlBalanceBefore.sub(parseUnits('1000', 8)),
+        buidlBalanceBefore.sub(parseUnits('250000', 6)),
       );
     });
 
