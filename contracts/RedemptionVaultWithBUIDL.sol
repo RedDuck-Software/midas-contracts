@@ -184,21 +184,17 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         );
         if (contractBalanceTokenOut >= amountTokenOut) return;
 
-        uint256 buidlDiff = amountTokenOut - contractBalanceTokenOut;
-        uint256 buidlToRedeem = buidlDiff > minBuidlToRedeem
-            ? buidlDiff
-            : minBuidlToRedeem;
+        uint256 buidlToRedeem = amountTokenOut - contractBalanceTokenOut;
+        if (buidlToRedeem < minBuidlToRedeem) {
+            buidlToRedeem = minBuidlToRedeem;
+        }
         IERC20 buidl = IERC20(buidlRedemption.asset());
         uint256 buidlBalance = buidl.balanceOf(address(this));
         require(buidlBalance >= buidlToRedeem, "RVB: buidlToRedeem > balance");
         if (buidlBalance - buidlToRedeem <= minBuidlToRedeem) {
             buidlToRedeem = buidlBalance;
         }
-        IRedemption _buidlRedemption = buidlRedemption;
-        IERC20(_buidlRedemption.asset()).safeIncreaseAllowance(
-            address(buidlRedemption),
-            buidlToRedeem
-        );
-        _buidlRedemption.redeem(buidlToRedeem);
+        buidl.safeIncreaseAllowance(address(buidlRedemption), buidlToRedeem);
+        buidlRedemption.redeem(buidlToRedeem);
     }
 }
