@@ -311,6 +311,18 @@ abstract contract ManageableVault is
 
     /**
      * @inheritdoc IManageableVault
+     * @dev reverts address zero or equal address(this)
+     */
+    function setTokensReceiver(address receiver) external onlyVaultAdmin {
+        _validateAddress(receiver, true);
+
+        tokensReceiver = receiver;
+
+        emit SetTokensReceiver(msg.sender, receiver);
+    }
+
+    /**
+     * @inheritdoc IManageableVault
      */
     function setInstantFee(uint256 newInstantFee) external onlyVaultAdmin {
         _validateFee(newInstantFee, false);
