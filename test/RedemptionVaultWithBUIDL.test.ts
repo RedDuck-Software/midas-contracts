@@ -52,7 +52,6 @@ describe('RedemptionVaultWithBUIDL', function () {
   it('deployment', async () => {
     const {
       redemptionVaultWithBUIDL,
-      liquiditySource,
       buidlRedemption,
       mTBILL,
       tokensReceiver,
@@ -94,10 +93,6 @@ describe('RedemptionVaultWithBUIDL', function () {
 
     expect(await redemptionVaultWithBUIDL.MANUAL_FULLFILMENT_TOKEN()).eq(
       ethers.constants.AddressZero,
-    );
-
-    expect(await redemptionVaultWithBUIDL.buidlLiquiditySource()).eq(
-      liquiditySource.address,
     );
 
     expect(await redemptionVaultWithBUIDL.buidlRedemption()).eq(
