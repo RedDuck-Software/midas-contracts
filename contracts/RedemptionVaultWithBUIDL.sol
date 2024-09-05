@@ -18,9 +18,19 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
     using DecimalsCorrectionLibrary for uint256;
     using SafeERC20 for IERC20;
 
+    /**
+     * @notice minimum amount of BUIDL to redeem. Will redeem at least this amount of BUIDL.
+     */
+    uint256 public minBuidlToRedeem;
     IRedemption public buidlRedemption;
 
     uint256[50] private __gap;
+
+    /**
+     * @param minBuidlToRedeem new min amount of BUIDL to redeem
+     * @param sender address who set new min amount of BUIDL to redeem
+     */
+    event SetMinBuidlToRedeem(uint256 minBuidlToRedeem, address sender);
 
     /**
      * @notice upgradeable pattern contract`s initializer
@@ -45,7 +55,8 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         uint256 _minAmount,
         FiatRedeptionInitParams calldata _fiatRedemptionInitParams,
         address _requestRedeemer,
-        address _buidlRedemption
+        address _buidlRedemption,
+        uint256 _minBuidlToRedeem
     ) external initializer {
         __RedemptionVault_init(
             _ac,
@@ -60,6 +71,21 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         );
         _validateAddress(_buidlRedemption, false);
         buidlRedemption = IRedemption(_buidlRedemption);
+        minBuidlToRedeem = _minBuidlToRedeem;
+    }
+
+    /**
+     * @notice set min amount of BUIDL to redeem.
+     * @param _minBuidlToRedeem min amount of BUIDL to redeem
+     */
+    function setMinBuidlToRedeem(uint256 _minBuidlToRedeem)
+        external
+        whenFnNotPaused(this.setMinBuidlToRedeem.selector)
+        onlyVaultAdmin
+    {
+        minBuidlToRedeem = _minBuidlToRedeem;
+
+        emit SetMinBuidlToRedeem(_minBuidlToRedeem, msg.sender);
     }
 
     /**
@@ -159,11 +185,16 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         if (contractBalanceTokenOut >= amountTokenOut) return;
 
         uint256 buidlToRedeem = amountTokenOut - contractBalanceTokenOut;
-        IRedemption _buidlRedemption = buidlRedemption;
-        IERC20(_buidlRedemption.asset()).safeIncreaseAllowance(
-            address(buidlRedemption),
-            buidlToRedeem
-        );
-        _buidlRedemption.redeem(buidlToRedeem);
+        if (buidlToRedeem < minBuidlToRedeem) {
+            buidlToRedeem = minBuidlToRedeem;
+        }
+        IERC20 buidl = IERC20(buidlRedemption.asset());
+        uint256 buidlBalance = buidl.balanceOf(address(this));
+        require(buidlBalance >= buidlToRedeem, "RVB: buidlToRedeem > balance");
+        if (buidlBalance - buidlToRedeem <= minBuidlToRedeem) {
+            buidlToRedeem = buidlBalance;
+        }
+        buidl.safeIncreaseAllowance(address(buidlRedemption), buidlToRedeem);
+        buidlRedemption.redeem(buidlToRedeem);
     }
 }

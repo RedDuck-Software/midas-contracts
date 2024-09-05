@@ -25,6 +25,7 @@ import {
   setVariabilityToleranceTest,
   withdrawTest,
   changeTokenFeeTest,
+  setMinBuidlToRedeem,
 } from './common/manageable-vault.helpers';
 import {
   approveRedeemRequestTest,
@@ -97,6 +98,9 @@ describe('RedemptionVaultWithBUIDL', function () {
 
     expect(await redemptionVaultWithBUIDL.buidlRedemption()).eq(
       buidlRedemption.address,
+    );
+    expect(await redemptionVaultWithBUIDL.minBuidlToRedeem()).eq(
+      parseUnits('250000', 6),
     );
   });
 
@@ -363,6 +367,32 @@ describe('RedemptionVaultWithBUIDL', function () {
           1000,
         ),
       ).revertedWith('fee == 0');
+    });
+  });
+
+  describe('setMinBuidlToRedeem()', () => {
+    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVaultWithBUIDL, regularAccounts } =
+        await loadFixture(defaultDeploy);
+
+      await setMinBuidlToRedeem(
+        { vault: redemptionVaultWithBUIDL, owner },
+        parseUnits('100000', 6),
+        {
+          from: regularAccounts[0],
+          revertMessage: acErrors.WMAC_HASNT_ROLE,
+        },
+      );
+    });
+
+    it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVaultWithBUIDL } = await loadFixture(
+        defaultDeploy,
+      );
+      await setMinBuidlToRedeem(
+        { vault: redemptionVaultWithBUIDL, owner },
+        parseUnits('100000', 6),
+      );
     });
   });
 
@@ -1683,7 +1713,7 @@ describe('RedemptionVaultWithBUIDL', function () {
         constants.AddressZero,
         100000,
         {
-          revertMessage: 'ERC20: transfer amount exceeds balance',
+          revertMessage: 'RVB: buidlToRedeem > balance',
         },
       );
     });
@@ -1767,7 +1797,7 @@ describe('RedemptionVaultWithBUIDL', function () {
         redemptionVaultWithBUIDL.address,
       );
       expect(buidlBalanceAfter).eq(
-        buidlBalanceBefore.sub(parseUnits('1000', 8)),
+        buidlBalanceBefore.sub(parseUnits('250000', 6)),
       );
     });
 
