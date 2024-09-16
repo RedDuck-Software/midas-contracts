@@ -5,4 +5,23 @@ import "../DepositVault.sol";
 
 contract DepositVaultTest is DepositVault {
     function _disableInitializers() internal override {}
+
+    function tokenTransferFromToTester(
+        address token,
+        address from,
+        address to,
+        uint256 amount,
+        uint256 tokenDecimals
+    ) external {
+        _tokenTransferFromTo(token, from, to, amount, tokenDecimals);
+    }
+
+    function tokenTransferToUserTester(
+        address token,
+        address to,
+        uint256 amount,
+        uint256 tokenDecimals
+    ) external {
+        _tokenTransferToUser(token, to, amount, tokenDecimals);
+    }
 }

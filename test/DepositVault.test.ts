@@ -2498,6 +2498,51 @@ describe('DepositVault', function () {
       );
     });
 
+    it('should fail: if new rate lower then variabilityTolerance', async () => {
+      const {
+        owner,
+        depositVault,
+        stableCoins,
+        mTBILL,
+        dataFeed,
+        mTokenToUsdDataFeed,
+        mockedAggregator,
+        mockedAggregatorMToken,
+      } = await loadFixture(defaultDeploy);
+      await mintToken(stableCoins.dai, owner, 100);
+      await approveBase18(owner, stableCoins.dai, depositVault, 100);
+      await addPaymentTokenTest(
+        { vault: depositVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+        true,
+      );
+      await setRoundData({ mockedAggregator }, 1.03);
+      await setRoundData({ mockedAggregator: mockedAggregatorMToken }, 5);
+      await setMinAmountTest({ vault: depositVault, owner }, 10);
+
+      await depositRequestTest(
+        { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        100,
+      );
+      const requestId = 0;
+      await safeApproveRequestTest(
+        {
+          depositVault,
+          owner,
+          mTBILL,
+          mTokenToUsdDataFeed,
+        },
+        requestId,
+        parseUnits('4'),
+        {
+          revertMessage: 'MV: exceed price diviation',
+        },
+      );
+    });
+
     it('should fail: request already precessed', async () => {
       const {
         owner,
@@ -3129,6 +3174,45 @@ describe('DepositVault', function () {
         requestId,
         parseUnits('5'),
       );
+    });
+  });
+
+  describe('ManageableVault internal functions', () => {
+    it('should fail: invalid rounding tokenTransferFromToTester()', async () => {
+      const { depositVault, stableCoins, owner } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await mintToken(stableCoins.usdc, owner, 1000);
+
+      await approveBase18(owner, stableCoins.usdc, depositVault, 1000);
+
+      await expect(
+        depositVault.tokenTransferFromToTester(
+          stableCoins.usdc.address,
+          owner.address,
+          depositVault.address,
+          parseUnits('999.999999999'),
+          8,
+        ),
+      ).revertedWith('MV: invalid rounding');
+    });
+
+    it('should fail: invalid rounding tokenTransferToUserTester()', async () => {
+      const { depositVault, stableCoins, owner } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await mintToken(stableCoins.usdc, depositVault, 1000);
+
+      await expect(
+        depositVault.tokenTransferToUserTester(
+          stableCoins.usdc.address,
+          owner.address,
+          parseUnits('999.999999999'),
+          8,
+        ),
+      ).revertedWith('MV: invalid rounding');
     });
   });
 });

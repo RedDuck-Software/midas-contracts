@@ -534,7 +534,6 @@ abstract contract ManageableVault is
         bool isInstant,
         uint256 additionalFee
     ) internal view returns (uint256) {
-        if (amount == 0) return 0;
         if (waivedFeeRestriction[sender]) return 0;
 
         uint256 feePercent;

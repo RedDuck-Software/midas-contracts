@@ -26,6 +26,7 @@ import {
   withdrawTest,
   changeTokenFeeTest,
   setTokensReceiverTest,
+  setFeeReceiverTest,
 } from './common/manageable-vault.helpers';
 import {
   redeemInstantWithSwapperTest,
@@ -39,6 +40,7 @@ import {
   rejectRedeemRequestTest,
   safeApproveRedeemRequestTest,
   setFiatAdditionalFeeTest,
+  setFiatFlatFeeTest,
   setMinFiatRedeemAmountTest,
   setRequestRedeemerTest,
 } from './common/redemption-vault.helpers';
@@ -1386,6 +1388,62 @@ describe('RedemptionVault', function () {
     it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
       const { owner, redemptionVault } = await loadFixture(defaultDeploy);
       await setMinFiatRedeemAmountTest({ redemptionVault, owner }, 1.1);
+    });
+  });
+
+  describe('setFeeReceiver()', () => {
+    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await setFeeReceiverTest(
+        { vault: redemptionVault, owner },
+        regularAccounts[0].address,
+        {
+          from: regularAccounts[0],
+          revertMessage: acErrors.WMAC_HASNT_ROLE,
+        },
+      );
+    });
+
+    it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+      await setFeeReceiverTest(
+        { vault: redemptionVault, owner },
+        regularAccounts[0].address,
+      );
+    });
+  });
+
+  describe('sanctionsListAdminRole()', () => {
+    it('should return same role as vaultRole()', async () => {
+      const { redemptionVault } = await loadFixture(defaultDeploy);
+      const vaultRole = await redemptionVault.vaultRole();
+      const sanctionsListAdminRole =
+        await redemptionVault.sanctionsListAdminRole();
+
+      expect(sanctionsListAdminRole).eq(vaultRole);
+    });
+  });
+
+  describe('setFiatFlatFee()', () => {
+    it('should fail: call from address without REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVault, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      await setFiatFlatFeeTest({ redemptionVault, owner }, 100, {
+        from: regularAccounts[0],
+        revertMessage: acErrors.WMAC_HASNT_ROLE,
+      });
+    });
+
+    it('call from address with REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
+      const { owner, redemptionVault } = await loadFixture(defaultDeploy);
+      await setFiatFlatFeeTest({ redemptionVault, owner }, 100);
     });
   });
 
