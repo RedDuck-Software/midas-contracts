@@ -95,6 +95,44 @@ describe('RedemptionVault', function () {
     );
   });
 
+  it('failing deployment', async () => {
+    const {
+      redemptionVault,
+      mTokenToUsdDataFeed,
+      feeReceiver,
+      tokensReceiver,
+      mockedSanctionsList,
+      requestRedeemer,
+    } = await loadFixture(defaultDeploy);
+
+    await expect(
+      redemptionVault.initializeWithoutInitializer(
+        ethers.constants.AddressZero,
+        {
+          mToken: ethers.constants.AddressZero,
+          mTokenDataFeed: mTokenToUsdDataFeed.address,
+        },
+        {
+          feeReceiver: feeReceiver.address,
+          tokensReceiver: tokensReceiver.address,
+        },
+        {
+          instantFee: 100,
+          instantDailyLimit: parseUnits('100000'),
+        },
+        mockedSanctionsList.address,
+        1,
+        parseUnits('100'),
+        {
+          fiatAdditionalFee: 100,
+          fiatFlatFee: parseUnits('1'),
+          minFiatRedeemAmount: parseUnits('100'),
+        },
+        requestRedeemer.address,
+      ),
+    ).to.be.revertedWith('Initializable: contract is not initializing');
+  });
+
   it('MBasisRedemptionVault', async () => {
     const fixture = await loadFixture(defaultDeploy);
 
