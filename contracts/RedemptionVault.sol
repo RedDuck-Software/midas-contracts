@@ -332,6 +332,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
                 (request.amountMToken * newMTokenRate) / request.tokenOutRate,
                 tokenDecimals
             );
+            _requireAndUpdateAllowance(
+                request.tokenOut,
+                amountTokenOutWithoutFee
+            );
 
             _tokenTransferFromTo(
                 request.tokenOut,
