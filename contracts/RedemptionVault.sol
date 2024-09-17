@@ -325,18 +325,18 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         mToken.burn(address(this), request.amountMToken);
 
-        if (request.tokenOut != MANUAL_FULLFILMENT_TOKEN) {
-            uint256 tokenDecimals = _tokenDecimals(request.tokenOut);
+        bool isFiat = request.tokenOut == MANUAL_FULLFILMENT_TOKEN;
 
-            uint256 amountTokenOutWithoutFee = _truncate(
-                (request.amountMToken * newMTokenRate) / request.tokenOutRate,
-                tokenDecimals
-            );
-            _requireAndUpdateAllowance(
-                request.tokenOut,
-                amountTokenOutWithoutFee
-            );
+        uint256 tokenDecimals = isFiat ? 18 : _tokenDecimals(request.tokenOut);
 
+        uint256 amountTokenOutWithoutFee = _truncate(
+            (request.amountMToken * newMTokenRate) / request.tokenOutRate,
+            tokenDecimals
+        );
+
+        _requireAndUpdateAllowance(request.tokenOut, amountTokenOutWithoutFee);
+
+        if (!isFiat) {
             _tokenTransferFromTo(
                 request.tokenOut,
                 requestRedeemer,
@@ -394,7 +394,10 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
 
         address tokenOutCopy = tokenOut;
 
-        uint256 tokenOutRate;
+        // assigning the default value which is gonna be used
+        // only for fiat redemptions
+        uint256 tokenOutRate = 1e18;
+
         if (!isFiat) {
             TokenConfig storage config = tokensConfig[tokenOutCopy];
             tokenOutRate = _getTokenRate(config.dataFeed, config.stable);

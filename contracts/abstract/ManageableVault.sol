@@ -237,7 +237,10 @@ abstract contract ManageableVault is
         external
         onlyVaultAdmin
     {
-        _requireTokenExists(token);
+        if (token != MANUAL_FULLFILMENT_TOKEN) {
+            _requireTokenExists(token);
+        }
+
         require(allowance > 0, "MV: zero allowance");
         tokensConfig[token].allowance = allowance;
         emit ChangeTokenAllowance(token, msg.sender, allowance);
