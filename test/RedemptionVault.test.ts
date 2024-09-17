@@ -4002,6 +4002,12 @@ describe('RedemptionVault', function () {
       );
       const requestId = 0;
 
+      await changeTokenAllowanceTest(
+        { vault: redemptionVault, owner },
+        constants.AddressZero,
+        parseUnits('100'),
+      );
+
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
         +requestId,
