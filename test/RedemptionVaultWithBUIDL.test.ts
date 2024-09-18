@@ -138,7 +138,7 @@ describe('RedemptionVaultWithBUIDL', function () {
 
       await expect(
         redemptionVaultWithBUIDL[
-          'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+          'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256)'
         ](
           constants.AddressZero,
           {
@@ -162,6 +162,8 @@ describe('RedemptionVaultWithBUIDL', function () {
             minFiatRedeemAmount: 0,
           },
           constants.AddressZero,
+          constants.AddressZero,
+          0,
         ),
       ).revertedWith('Initializable: contract is already initialized');
     });
@@ -1396,6 +1398,45 @@ describe('RedemptionVaultWithBUIDL', function () {
         1,
         {
           revertMessage: 'DF: feed is deprecated',
+        },
+      );
+    });
+
+    it('should fail: if min receive amount greater then actual', async () => {
+      const {
+        redemptionVaultWithBUIDL,
+        mockedAggregator,
+        owner,
+        mTBILL,
+        stableCoins,
+        dataFeed,
+        mTokenToUsdDataFeed,
+      } = await loadFixture(defaultDeploy);
+      await addPaymentTokenTest(
+        { vault: redemptionVaultWithBUIDL, owner },
+        stableCoins.usdc,
+        dataFeed.address,
+        0,
+        true,
+      );
+      await setRoundData({ mockedAggregator }, 4);
+
+      await mintToken(mTBILL, owner, 100_000);
+
+      await approveBase18(owner, mTBILL, redemptionVaultWithBUIDL, 100_000);
+
+      await redeemInstantTest(
+        {
+          redemptionVault: redemptionVaultWithBUIDL,
+          owner,
+          mTBILL,
+          mTokenToUsdDataFeed,
+          minAmount: parseUnits('1000000'),
+        },
+        stableCoins.usdc,
+        99_999,
+        {
+          revertMessage: 'RVB: minReceiveAmount > actual',
         },
       );
     });
@@ -3162,6 +3203,11 @@ describe('RedemptionVaultWithBUIDL', function () {
         100,
       );
       const requestId = 0;
+      await changeTokenAllowanceTest(
+        { vault: redemptionVault, owner },
+        constants.AddressZero,
+        parseUnits('100'),
+      );
 
       await approveRedeemRequestTest(
         { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
