@@ -163,7 +163,7 @@ describe('RedemptionVaultWithBUIDL', function () {
           },
           constants.AddressZero,
           constants.AddressZero,
-          0
+          0,
         ),
       ).revertedWith('Initializable: contract is already initialized');
     });

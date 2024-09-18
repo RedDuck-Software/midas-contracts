@@ -616,8 +616,8 @@ abstract contract ManageableVault is
      */
     function _getTokenRate(address dataFeed, bool stable)
         internal
-        virtual
         view
+        virtual
         returns (uint256)
     {
         // @dev if dataFeed returns rate, all peg checks passed

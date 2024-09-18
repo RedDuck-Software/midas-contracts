@@ -4,8 +4,8 @@ pragma solidity 0.8.9;
 import "../DepositVault.sol";
 
 contract DepositVaultTest is DepositVault {
-    bool private overrideGetTokenRate;
-    uint256 public getTokenRateValue;
+    bool private _overrideGetTokenRate;
+    uint256 private _getTokenRateValue;
 
     function _disableInitializers() internal override {}
 
@@ -29,11 +29,11 @@ contract DepositVaultTest is DepositVault {
     }
 
     function setOverrideGetTokenRate(bool val) external {
-        overrideGetTokenRate = val;
+        _overrideGetTokenRate = val;
     }
 
     function setGetTokenRateValue(uint256 val) external {
-        getTokenRateValue = val;
+        _getTokenRateValue = val;
     }
 
     function calcAndValidateDeposit(
@@ -56,25 +56,28 @@ contract DepositVaultTest is DepositVault {
         return _calcAndValidateDeposit(user, tokenIn, amountToken, isInstant);
     }
 
-    function convertTokenToUsdTest(
-        address tokenIn,
-        uint256 amount
-    ) external returns (uint256 amountInUsd, uint256 rate) {
+    function convertTokenToUsdTest(address tokenIn, uint256 amount)
+        external
+        returns (uint256 amountInUsd, uint256 rate)
+    {
         return _convertTokenToUsd(tokenIn, amount);
     }
 
-    function convertUsdToMTokenTest(
-        uint256 amountUsd
-    ) external returns (uint256 amountMToken, uint256 mTokenRate) {
+    function convertUsdToMTokenTest(uint256 amountUsd)
+        external
+        returns (uint256 amountMToken, uint256 mTokenRate)
+    {
         return _convertUsdToMToken(amountUsd);
     }
 
-    function _getTokenRate(
-        address dataFeed,
-        bool stable
-    ) internal view override returns (uint256) {
-        if (overrideGetTokenRate) {
-            return getTokenRateValue;
+    function _getTokenRate(address dataFeed, bool stable)
+        internal
+        view
+        override
+        returns (uint256)
+    {
+        if (_overrideGetTokenRate) {
+            return _getTokenRateValue;
         }
 
         return super._getTokenRate(dataFeed, stable);

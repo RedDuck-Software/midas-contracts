@@ -145,19 +145,21 @@ describe('RedemptionVault', function () {
         expect(await tester.vaultRole()).eq(
           await tester.M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE(),
         );
-      })
-    })
+      });
+    });
   });
 
   describe('MBasisRedemptionVaultWithSwapper', () => {
     describe('deployment', () => {
-
       it('should fail: cal; initialize() when already initialized', async () => {
-        const { mBasisRedemptionVaultWithSwapper } = await loadFixture(defaultDeploy);
-
+        const { mBasisRedemptionVaultWithSwapper } = await loadFixture(
+          defaultDeploy,
+        );
 
         await expect(
-          mBasisRedemptionVaultWithSwapper['initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'](
+          mBasisRedemptionVaultWithSwapper[
+            'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
+          ](
             constants.AddressZero,
             {
               mToken: constants.AddressZero,
@@ -185,7 +187,7 @@ describe('RedemptionVault', function () {
           ),
         ).revertedWith('Initializable: contract is already initialized');
       });
-    })
+    });
 
     describe('setLiquidityProvider()', () => {
       it('should fail: call from address without M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE role', async () => {
@@ -393,7 +395,12 @@ describe('RedemptionVault', function () {
           dataFeed,
         } = await loadFixture(defaultDeploy);
 
-        await approveBase18(owner, mBASIS, mBasisRedemptionVaultWithSwapper, 15);
+        await approveBase18(
+          owner,
+          mBASIS,
+          mBasisRedemptionVaultWithSwapper,
+          15,
+        );
 
         await addPaymentTokenTest(
           { vault: mBasisRedemptionVaultWithSwapper, owner },
@@ -1055,10 +1062,13 @@ describe('RedemptionVault', function () {
           100_000,
         );
 
-        await setInstantFeeTest({
-          vault: mBasisRedemptionVaultWithSwapper,
-          owner,
-        }, 0);
+        await setInstantFeeTest(
+          {
+            vault: mBasisRedemptionVaultWithSwapper,
+            owner,
+          },
+          0,
+        );
 
         await redeemInstantWithSwapperTest(
           {
@@ -1185,9 +1195,7 @@ describe('RedemptionVault', function () {
         );
       });
     });
-  })
-
-
+  });
 
   it('EUsdRedemptionVault', async () => {
     const fixture = await loadFixture(defaultDeploy);
@@ -4826,10 +4834,10 @@ describe('RedemptionVault', function () {
     it('should fail: when amountUsd == 0', async () => {
       const { redemptionVault } = await loadFixture(defaultDeploy);
 
-      await expect(redemptionVault.convertUsdToTokenTest(
-        0, constants.AddressZero
-      )).revertedWith('RV: amount zero');
-    })
+      await expect(
+        redemptionVault.convertUsdToTokenTest(0, constants.AddressZero),
+      ).revertedWith('RV: amount zero');
+    });
 
     it('should fail: when tokenRate == 0', async () => {
       const { redemptionVault } = await loadFixture(defaultDeploy);
@@ -4837,20 +4845,20 @@ describe('RedemptionVault', function () {
       await redemptionVault.setOverrideGetTokenRate(true);
       await redemptionVault.setGetTokenRateValue(0);
 
-      await expect(redemptionVault.convertUsdToTokenTest(
-        1, constants.AddressZero
-      )).revertedWith('RV: rate zero');
-    })
-  })
+      await expect(
+        redemptionVault.convertUsdToTokenTest(1, constants.AddressZero),
+      ).revertedWith('RV: rate zero');
+    });
+  });
 
   describe('_convertMTokenToUsd', () => {
     it('should fail: when amountMToken == 0', async () => {
       const { redemptionVault } = await loadFixture(defaultDeploy);
 
-      await expect(redemptionVault.convertMTokenToUsdTest(
-        0
-      )).revertedWith('RV: amount zero');
-    })
+      await expect(redemptionVault.convertMTokenToUsdTest(0)).revertedWith(
+        'RV: amount zero',
+      );
+    });
 
     it('should fail: when amountMToken == 0', async () => {
       const { redemptionVault } = await loadFixture(defaultDeploy);
@@ -4858,24 +4866,26 @@ describe('RedemptionVault', function () {
       await redemptionVault.setOverrideGetTokenRate(true);
       await redemptionVault.setGetTokenRateValue(0);
 
-      await expect(redemptionVault.convertMTokenToUsdTest(
-        1
-      )).revertedWith('RV: rate zero');
-    })
-  })
+      await expect(redemptionVault.convertMTokenToUsdTest(1)).revertedWith(
+        'RV: rate zero',
+      );
+    });
+  });
 
   describe('_calcAndValidateRedeem', () => {
     it('should fail: when tokenOut is not MANUAL_FULLFILMENT_TOKEN but isFiat = true', async () => {
-      const { redemptionVault, stableCoins, owner, dataFeed } = await loadFixture(defaultDeploy);
+      const { redemptionVault, stableCoins, owner, dataFeed } =
+        await loadFixture(defaultDeploy);
 
-      await expect(redemptionVault.calcAndValidateRedeemTest(
-        constants.AddressZero,
-        stableCoins.dai.address,
-        parseUnits('100'),
-        false,
-        true
-      )).revertedWith('RV: tokenOut != fiat');
-    })
-  })
-
+      await expect(
+        redemptionVault.calcAndValidateRedeemTest(
+          constants.AddressZero,
+          stableCoins.dai.address,
+          parseUnits('100'),
+          false,
+          true,
+        ),
+      ).revertedWith('RV: tokenOut != fiat');
+    });
+  });
 });

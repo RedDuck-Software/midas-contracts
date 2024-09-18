@@ -2094,7 +2094,6 @@ describe('DepositVault', function () {
       );
     });
 
-
     it('should fail: user in sanctionlist ', async () => {
       const {
         owner,
@@ -2103,7 +2102,7 @@ describe('DepositVault', function () {
         mTBILL,
         mTokenToUsdDataFeed,
         regularAccounts,
-        mockedSanctionsList
+        mockedSanctionsList,
       } = await loadFixture(defaultDeploy);
 
       await mockedSanctionsList.setSunctioned(regularAccounts[0].address, true);
@@ -2737,8 +2736,8 @@ describe('DepositVault', function () {
         { depositVault, owner, mTBILL, mTokenToUsdDataFeed },
         requestId,
         {
-          revertMessage: 'DV: request not pending'
-        }
+          revertMessage: 'DV: request not pending',
+        },
       );
     });
 
@@ -3291,10 +3290,10 @@ describe('DepositVault', function () {
     it('should fail: when amountUsd == 0', async () => {
       const { depositVault } = await loadFixture(defaultDeploy);
 
-      await expect(depositVault.convertTokenToUsdTest(
-        constants.AddressZero, 0
-      )).revertedWith('DV: amount zero');
-    })
+      await expect(
+        depositVault.convertTokenToUsdTest(constants.AddressZero, 0),
+      ).revertedWith('DV: amount zero');
+    });
 
     it('should fail: when tokenRate == 0', async () => {
       const { depositVault } = await loadFixture(defaultDeploy);
@@ -3302,11 +3301,11 @@ describe('DepositVault', function () {
       await depositVault.setOverrideGetTokenRate(true);
       await depositVault.setGetTokenRateValue(0);
 
-      await expect(depositVault.convertTokenToUsdTest(
-        constants.AddressZero, 1
-      )).revertedWith('DV: rate zero');
-    })
-  })
+      await expect(
+        depositVault.convertTokenToUsdTest(constants.AddressZero, 1),
+      ).revertedWith('DV: rate zero');
+    });
+  });
 
   describe('_convertUsdToMToken', () => {
     it('should fail: when rate == 0', async () => {
@@ -3315,15 +3314,17 @@ describe('DepositVault', function () {
       await depositVault.setOverrideGetTokenRate(true);
       await depositVault.setGetTokenRateValue(0);
 
-      await expect(depositVault.convertUsdToMTokenTest(
-        1
-      )).revertedWith('DV: rate zero');
-    })
-  })
+      await expect(depositVault.convertUsdToMTokenTest(1)).revertedWith(
+        'DV: rate zero',
+      );
+    });
+  });
 
   describe('_calcAndValidateDeposit', () => {
     it('should fail: when tokenOut is not MANUAL_FULLFILMENT_TOKEN but isFiat = true', async () => {
-      const { depositVault, stableCoins, owner, dataFeed } = await loadFixture(defaultDeploy);
+      const { depositVault, stableCoins, owner, dataFeed } = await loadFixture(
+        defaultDeploy,
+      );
 
       await addPaymentTokenTest(
         { vault: depositVault, owner },
@@ -3335,12 +3336,14 @@ describe('DepositVault', function () {
 
       await setMinAmountTest({ vault: depositVault, owner }, 0);
 
-      await expect(depositVault.calcAndValidateDeposit(
-        constants.AddressZero,
-        stableCoins.dai.address,
-        parseUnits('100'),
-        true
-      )).revertedWith('DV: invalid mint amount');
-    })
-  })
+      await expect(
+        depositVault.calcAndValidateDeposit(
+          constants.AddressZero,
+          stableCoins.dai.address,
+          parseUnits('100'),
+          true,
+        ),
+      ).revertedWith('DV: invalid mint amount');
+    });
+  });
 });

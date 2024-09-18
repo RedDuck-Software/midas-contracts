@@ -47,7 +47,6 @@ describe('Blacklistable', function () {
     ).revertedWith('Initializable: contract is not initializing');
   });
 
-
   describe('modifier onlyNotBlacklisted', () => {
     it('should fail: call from blacklisted user', async () => {
       const { accessControl, blackListableTester, owner, regularAccounts } =

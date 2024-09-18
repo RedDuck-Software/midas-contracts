@@ -4,8 +4,8 @@ pragma solidity 0.8.9;
 import "../RedemptionVault.sol";
 
 contract RedemptionVaultTest is RedemptionVault {
-    bool private overrideGetTokenRate;
-    uint256 public getTokenRateValue;
+    bool private _overrideGetTokenRate;
+    uint256 private _getTokenRateValue;
 
     function _disableInitializers() internal override {}
 
@@ -34,11 +34,11 @@ contract RedemptionVaultTest is RedemptionVault {
     }
 
     function setOverrideGetTokenRate(bool val) external {
-        overrideGetTokenRate = val;
+        _overrideGetTokenRate = val;
     }
 
     function setGetTokenRateValue(uint256 val) external {
-        getTokenRateValue = val;
+        _getTokenRateValue = val;
     }
 
     function calcAndValidateRedeemTest(
@@ -58,25 +58,28 @@ contract RedemptionVaultTest is RedemptionVault {
             );
     }
 
-    function convertUsdToTokenTest(
-        uint256 amountUsd,
-        address tokenOut
-    ) external returns (uint256 amountToken, uint256 tokenRate) {
+    function convertUsdToTokenTest(uint256 amountUsd, address tokenOut)
+        external
+        returns (uint256 amountToken, uint256 tokenRate)
+    {
         return _convertUsdToToken(amountUsd, tokenOut);
     }
 
-    function convertMTokenToUsdTest(
-        uint256 amountMToken
-    ) external returns (uint256 amountUsd, uint256 mTokenRate) {
+    function convertMTokenToUsdTest(uint256 amountMToken)
+        external
+        returns (uint256 amountUsd, uint256 mTokenRate)
+    {
         return _convertMTokenToUsd(amountMToken);
     }
 
-    function _getTokenRate(
-        address dataFeed,
-        bool stable
-    ) internal view override returns (uint256) {
-        if (overrideGetTokenRate) {
-            return getTokenRateValue;
+    function _getTokenRate(address dataFeed, bool stable)
+        internal
+        view
+        override
+        returns (uint256)
+    {
+        if (_overrideGetTokenRate) {
+            return _getTokenRateValue;
         }
 
         return super._getTokenRate(dataFeed, stable);
