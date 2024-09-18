@@ -470,7 +470,7 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
     {
         require(amountMToken > 0, "RV: amount zero");
 
-        mTokenRate = mTokenDataFeed.getDataInBase18();
+        mTokenRate = _getTokenRate(address(mTokenDataFeed), false);
         require(mTokenRate > 0, "RV: rate zero");
 
         amountUsd = (amountMToken * mTokenRate) / (10**18);

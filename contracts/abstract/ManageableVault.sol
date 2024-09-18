@@ -616,6 +616,7 @@ abstract contract ManageableVault is
      */
     function _getTokenRate(address dataFeed, bool stable)
         internal
+        virtual
         view
         returns (uint256)
     {

@@ -4,6 +4,9 @@ pragma solidity 0.8.9;
 import "../RedemptionVault.sol";
 
 contract RedemptionVaultTest is RedemptionVault {
+    bool private overrideGetTokenRate;
+    uint256 public getTokenRateValue;
+
     function _disableInitializers() internal override {}
 
     function initializeWithoutInitializer(
@@ -28,5 +31,54 @@ contract RedemptionVaultTest is RedemptionVault {
             _fiatRedemptionInitParams,
             _requestRedeemer
         );
+    }
+
+    function setOverrideGetTokenRate(bool val) external {
+        overrideGetTokenRate = val;
+    }
+
+    function setGetTokenRateValue(uint256 val) external {
+        getTokenRateValue = val;
+    }
+
+    function calcAndValidateRedeemTest(
+        address user,
+        address tokenOut,
+        uint256 amountMTokenIn,
+        bool isInstant,
+        bool isFiat
+    ) external returns (uint256 feeAmount, uint256 amountMTokenWithoutFee) {
+        return
+            _calcAndValidateRedeem(
+                user,
+                tokenOut,
+                amountMTokenIn,
+                isInstant,
+                isFiat
+            );
+    }
+
+    function convertUsdToTokenTest(
+        uint256 amountUsd,
+        address tokenOut
+    ) external returns (uint256 amountToken, uint256 tokenRate) {
+        return _convertUsdToToken(amountUsd, tokenOut);
+    }
+
+    function convertMTokenToUsdTest(
+        uint256 amountMToken
+    ) external returns (uint256 amountUsd, uint256 mTokenRate) {
+        return _convertMTokenToUsd(amountMToken);
+    }
+
+    function _getTokenRate(
+        address dataFeed,
+        bool stable
+    ) internal view override returns (uint256) {
+        if (overrideGetTokenRate) {
+            return getTokenRateValue;
+        }
+
+        return super._getTokenRate(dataFeed, stable);
     }
 }

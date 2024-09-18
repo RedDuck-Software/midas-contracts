@@ -4,6 +4,9 @@ pragma solidity 0.8.9;
 import "../DepositVault.sol";
 
 contract DepositVaultTest is DepositVault {
+    bool private overrideGetTokenRate;
+    uint256 public getTokenRateValue;
+
     function _disableInitializers() internal override {}
 
     function tokenTransferFromToTester(
@@ -23,5 +26,57 @@ contract DepositVaultTest is DepositVault {
         uint256 tokenDecimals
     ) external {
         _tokenTransferToUser(token, to, amount, tokenDecimals);
+    }
+
+    function setOverrideGetTokenRate(bool val) external {
+        overrideGetTokenRate = val;
+    }
+
+    function setGetTokenRateValue(uint256 val) external {
+        getTokenRateValue = val;
+    }
+
+    function calcAndValidateDeposit(
+        address user,
+        address tokenIn,
+        uint256 amountToken,
+        bool isInstant
+    )
+        external
+        returns (
+            uint256 tokenAmountInUsd,
+            uint256 feeTokenAmount,
+            uint256 amountTokenWithoutFee,
+            uint256 mintAmount,
+            uint256 tokenInRate,
+            uint256 tokenOutRate,
+            uint256 tokenDecimals
+        )
+    {
+        return _calcAndValidateDeposit(user, tokenIn, amountToken, isInstant);
+    }
+
+    function convertTokenToUsdTest(
+        address tokenIn,
+        uint256 amount
+    ) external returns (uint256 amountInUsd, uint256 rate) {
+        return _convertTokenToUsd(tokenIn, amount);
+    }
+
+    function convertUsdToMTokenTest(
+        uint256 amountUsd
+    ) external returns (uint256 amountMToken, uint256 mTokenRate) {
+        return _convertUsdToMToken(amountUsd);
+    }
+
+    function _getTokenRate(
+        address dataFeed,
+        bool stable
+    ) internal view override returns (uint256) {
+        if (overrideGetTokenRate) {
+            return getTokenRateValue;
+        }
+
+        return super._getTokenRate(dataFeed, stable);
     }
 }

@@ -80,7 +80,6 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
      */
     function setMinBuidlToRedeem(uint256 _minBuidlToRedeem)
         external
-        whenFnNotPaused(this.setMinBuidlToRedeem.selector)
         onlyVaultAdmin
     {
         minBuidlToRedeem = _minBuidlToRedeem;
