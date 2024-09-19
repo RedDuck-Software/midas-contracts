@@ -11,19 +11,10 @@ import { BigNumber, BigNumberish, constants } from 'ethers';
 import { DeployDataFeedConfig, deployTokenDataFeed } from '../common/data-feed';
 
 const configs: Record<number, DeployDataFeedConfig> = {
-    //   11155111: {
-    //     feeReceiver: undefined,
-    //     tokensReceiver: undefined,
-    //     instantDailyLimit: constants.MaxUint256,
-    //     instantFee: parseUnits('1', 2),
-    //     minMTokenAmountForFirstDeposit: parseUnits('100'),
-    //     minAmount: parseUnits('0.01'),
-    //     variationTolerance: parseUnits('0.1', 2),
-    //   },
     1: {
         healthyDiff: 24 * 60 * 60,
-        minPrice: parseUnits('0.97', 8),
-        maxPrice: parseUnits('1.04', 8)
+        minPrice: parseUnits('0.997', 8),
+        maxPrice: parseUnits('1.003', 8)
     }
 };
 

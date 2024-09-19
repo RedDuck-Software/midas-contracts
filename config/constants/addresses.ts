@@ -32,12 +32,12 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       usdt: {
         aggregator: '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D',
         token: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-        dataFeed: '0x263A7AcE5E77986b77DcA125859248fEED52383c'
+        dataFeed: '0x7811C1Bf5db28630F303267Cc613797EB9A81188'
       },
       usdc: {
         aggregator: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
         token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        dataFeed: '0x2f319E9B2c1675D0DE1A968AD42624067Be1F4E0'
+        dataFeed: '0x3aAc6fd73fA4e16Ec683BD4aaF5Ec89bb2C0EdC2'
       }
     },
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',

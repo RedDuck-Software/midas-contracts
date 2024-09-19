@@ -43,8 +43,8 @@ export const deployTokenDataFeed = async (
             addresses?.accessControl,
             tokenAddresses.aggregator,
             networkConfig.healthyDiff,
-            networkConfig.minPrice, //parseUnits('0.97', 8),
-            networkConfig.maxPrice  // parseUnits('1.04', 8),
+            networkConfig.minPrice,
+            networkConfig.maxPrice
         ],
         {
             unsafeAllow: ['constructor'],
