@@ -16,7 +16,7 @@ export const rpcUrls: ConfigPerNetwork<RpcUrl> = {
   etherlink: 'https://etherlink-testnet.rpc.thirdweb.com',
   hardhat: 'http://localhost:8545',
   localhost: 'http://localhost:8545',
-  base: 'https://base.llamarpc.com',
+  base: 'https://base.meowrpc.com',
 };
 
 export const gasPrices: ConfigPerNetwork<number | 'auto' | undefined> = {
