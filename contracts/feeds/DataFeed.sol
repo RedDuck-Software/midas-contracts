@@ -80,6 +80,54 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         aggregator = AggregatorV3Interface(_aggregator);
     }
 
+
+    /**
+     * @dev updates `healthyDiff` value
+     * @param _healthyDiff new value
+     */
+    function setHealthyDiff(uint256 _healthyDiff)
+        external
+        onlyRole(feedAdminRole(), msg.sender)
+    {
+        require(_healthyDiff > 0, "DF: invalid diff");
+
+        healthyDiff = _healthyDiff;
+    }
+
+    /**
+     * @dev updates `minExpectedAnswer` value
+     * @param _minExpectedAnswer min value
+     */
+    function setMinExpectedAnswer(int256 _minExpectedAnswer)
+        external
+        onlyRole(feedAdminRole(), msg.sender)
+    {   
+        require(_minExpectedAnswer > 0, "DF: invalid min exp. price");
+        require(
+            maxExpectedAnswer > _minExpectedAnswer,
+            "DF: invalid exp. prices"
+        );
+
+        minExpectedAnswer = _minExpectedAnswer;
+    }
+
+    /**
+     * @dev updates `maxExpectedAnswer` value
+     * @param _maxExpectedAnswer max value
+     */
+    function setMaxExpectedAnswer(int256 _maxExpectedAnswer)
+        external
+        onlyRole(feedAdminRole(), msg.sender)
+    {
+        require(_maxExpectedAnswer > 0, "DF: invalid max exp. price");
+        require(
+            _maxExpectedAnswer > minExpectedAnswer,
+            "DF: invalid exp. prices"
+        );
+
+        maxExpectedAnswer = _maxExpectedAnswer;
+    }
+
     /**
      * @inheritdoc IDataFeed
      */
