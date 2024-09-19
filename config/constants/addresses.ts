@@ -28,6 +28,17 @@ export interface MidasAddresses {
 
 export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefined> = {
   main: {
+    dataFeeds: {
+      usdt: {
+        aggregator: '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D',
+        token: '0xdac17f958d2ee523a2206206994597c13d831ec7'
+      },
+      usdc: {
+        aggregator: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
+        token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        dataFeed: '0x2f319E9B2c1675D0DE1A968AD42624067Be1F4E0'
+      }
+    },
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
     // TODO: remove this data feed
     etfDataFeed: '0xc747FdDFC46CDC915bEA866D519dFc5Eae5c947f',
