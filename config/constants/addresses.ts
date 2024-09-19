@@ -117,6 +117,9 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
   },
   base: {
     accessControl: '0x0312a9d1ff2372ddedcbb21e4b6389afc919ac4b',
+    mTBILL: {
+      token: '0xDD629E5241CbC5919847783e6C96B2De4754e438'
+    }
   }
 };
 
