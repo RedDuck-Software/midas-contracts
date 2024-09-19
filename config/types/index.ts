@@ -5,7 +5,8 @@ export type Network =
   | 'main'
   | 'hardhat'
   | 'localhost'
-  | 'etherlink';
+  | 'etherlink'
+  | 'base';
 export type RpcUrl =
   | `https://eth-${RpcNetwork}.g.alchemy.com/v2/${string}`
   | `https://${RpcNetwork}.infura.io/v3/${string}`

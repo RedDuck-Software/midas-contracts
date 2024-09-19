@@ -115,6 +115,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
     etfDataFeed: '0xc747FdDFC46CDC915bEA866D519dFc5Eae5c947f',
     eurToUsdFeed: '0x6022a020Ca5c611304B9E97F37AEE0C38455081A',
   },
+  base: undefined
 };
 
 export const getCurrentAddresses = (hre: HardhatRuntimeEnvironment) => {

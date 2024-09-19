@@ -16,6 +16,7 @@ export const rpcUrls: ConfigPerNetwork<RpcUrl> = {
   etherlink: 'https://etherlink-testnet.rpc.thirdweb.com',
   hardhat: 'http://localhost:8545',
   localhost: 'http://localhost:8545',
+  base: 'https://base.llamarpc.com',
 };
 
 export const gasPrices: ConfigPerNetwork<number | 'auto' | undefined> = {
@@ -23,11 +24,13 @@ export const gasPrices: ConfigPerNetwork<number | 'auto' | undefined> = {
   main: 'auto',
   sepolia: 'auto',
   hardhat: 'auto',
+  base: 'auto',
   localhost: 70 * GWEI,
 };
 
 export const chainIds: ConfigPerNetwork<number> = {
   main: 1,
+  base: 8453,
   sepolia: 11155111,
   etherlink: 128123,
   hardhat: 31337,
@@ -37,6 +40,7 @@ export const chainIds: ConfigPerNetwork<number> = {
 export const mnemonics: ConfigPerNetwork<string | undefined> = {
   main: MNEMONIC_PROD,
   sepolia: MNEMONIC_DEV,
+  base: MNEMONIC_PROD,
   etherlink: MNEMONIC_PROD,
   hardhat: MNEMONIC_DEV,
   localhost: MNEMONIC_DEV,
@@ -48,6 +52,7 @@ export const gases: ConfigPerNetwork<number | undefined> = {
   hardhat: undefined,
   etherlink: undefined,
   localhost: undefined,
+  base: undefined
 };
 
 export const timeouts: ConfigPerNetwork<number | undefined> = {
@@ -56,6 +61,8 @@ export const timeouts: ConfigPerNetwork<number | undefined> = {
   hardhat: undefined,
   localhost: 999999,
   etherlink: undefined,
+  base: undefined
+
 };
 
 export const blockGasLimits: ConfigPerNetwork<number | undefined> = {
@@ -64,6 +71,7 @@ export const blockGasLimits: ConfigPerNetwork<number | undefined> = {
   etherlink: undefined,
   hardhat: 300 * 10 ** 6,
   localhost: undefined,
+  base: undefined
 };
 
 export const initialBasesFeePerGas: ConfigPerNetwork<number | undefined> = {
@@ -72,6 +80,7 @@ export const initialBasesFeePerGas: ConfigPerNetwork<number | undefined> = {
   sepolia: undefined,
   hardhat: 0,
   localhost: undefined,
+  base: undefined
 };
 
 export const getBaseNetworkConfig = (
