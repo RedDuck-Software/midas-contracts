@@ -703,7 +703,7 @@ export const defaultDeploy = async () => {
 
   const buidlRedemption = await new RedemptionTest__factory(owner).deploy(
     buidl.address,
-    stableCoins.usdc.address
+    stableCoins.usdc.address,
   );
 
   await stableCoins.usdc.mint(buidlRedemption.address, parseUnits('1000000'));
@@ -740,7 +740,7 @@ export const defaultDeploy = async () => {
     ),
   ).to.be.reverted;
   await redemptionVaultWithBUIDL[
-    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256)'
   ](
     accessControl.address,
     {
@@ -765,6 +765,7 @@ export const defaultDeploy = async () => {
     },
     requestRedeemer.address,
     buidlRedemption.address,
+    parseUnits('250000', 6),
   );
   await accessControl.grantRole(
     mTBILL.M_TBILL_BURN_OPERATOR_ROLE(),

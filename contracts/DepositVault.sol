@@ -408,6 +408,7 @@ contract DepositVault is ManageableVault, IDepositVault {
     function _convertTokenToUsd(address tokenIn, uint256 amount)
         internal
         view
+        virtual
         returns (uint256 amountInUsd, uint256 rate)
     {
         require(amount > 0, "DV: amount zero");
@@ -430,11 +431,10 @@ contract DepositVault is ManageableVault, IDepositVault {
     function _convertUsdToMToken(uint256 amountUsd)
         internal
         view
+        virtual
         returns (uint256 amountMToken, uint256 mTokenRate)
     {
-        require(amountUsd > 0, "DV: amount zero");
-
-        mTokenRate = mTokenDataFeed.getDataInBase18();
+        mTokenRate = _getTokenRate(address(mTokenDataFeed), false);
         require(mTokenRate > 0, "DV: rate zero");
 
         amountMToken = (amountUsd * (10**18)) / mTokenRate;
