@@ -31,7 +31,8 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
     dataFeeds: {
       usdt: {
         aggregator: '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D',
-        token: '0xdac17f958d2ee523a2206206994597c13d831ec7'
+        token: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+        dataFeed: '0x263A7AcE5E77986b77DcA125859248fEED52383c'
       },
       usdc: {
         aggregator: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
