@@ -138,7 +138,7 @@ describe('RedemptionVaultWithBUIDL', function () {
 
       await expect(
         redemptionVaultWithBUIDL[
-          'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256)'
+          'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256,uint256)'
         ](
           constants.AddressZero,
           {
@@ -163,6 +163,7 @@ describe('RedemptionVaultWithBUIDL', function () {
           },
           constants.AddressZero,
           constants.AddressZero,
+          0,
           0,
         ),
       ).revertedWith('Initializable: contract is already initialized');
