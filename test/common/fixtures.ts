@@ -740,7 +740,7 @@ export const defaultDeploy = async () => {
     ),
   ).to.be.reverted;
   await redemptionVaultWithBUIDL[
-    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256)'
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256,uint256)'
   ](
     accessControl.address,
     {
@@ -765,6 +765,7 @@ export const defaultDeploy = async () => {
     },
     requestRedeemer.address,
     buidlRedemption.address,
+    parseUnits('250000', 6),
     parseUnits('250000', 6),
   );
   await accessControl.grantRole(
