@@ -36,6 +36,12 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
     event SetMinBuidlToRedeem(uint256 minBuidlToRedeem, address sender);
 
     /**
+     * @param minBuidlBalance new `minBuidlBalance` value
+     * @param sender address who set new `minBuidlBalance`
+     */
+    event SetMinBuidlBalance(uint256 minBuidlBalance, address sender);
+
+    /**
      * @notice upgradeable pattern contract`s initializer
      * @param _ac address of MidasAccessControll contract
      * @param _mTokenInitParams init params for mToken
@@ -90,6 +96,19 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
         minBuidlToRedeem = _minBuidlToRedeem;
 
         emit SetMinBuidlToRedeem(_minBuidlToRedeem, msg.sender);
+    }
+
+    /**
+     * @notice set new `minBuidlBalance` value.
+     * @param _minBuidlBalance new `minBuidlBalance` value
+     */
+    function setMinBuidlBalance(uint256 _minBuidlBalance)
+        external
+        onlyVaultAdmin
+    {
+        minBuidlBalance = _minBuidlBalance;
+
+        emit SetMinBuidlBalance(_minBuidlBalance, msg.sender);
     }
 
     /**
