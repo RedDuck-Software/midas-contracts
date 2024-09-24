@@ -49,7 +49,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       customFeed: '0x056339C044055819E8Db84E71f5f2E1F536b2E5b',
       token: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
       tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
-      depositVault: '0xcbCf1e67F1988e2572a2A620321Aef2ff73369f0',
+      depositVault: '0x99361435420711723aF805F08187c9E6bF796683',
       redemptionVault: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
     },
     mBASIS: {
