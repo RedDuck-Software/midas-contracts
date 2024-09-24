@@ -26,6 +26,8 @@ const configs: Record<number, DeployRvConfig> = {
     minFiatRedeemAmount: parseUnits('1', 18),
     requestRedeemer: undefined,
     buidlRedemption: '0x4cb1479705EA6F0dD63415111aF56eaCfBa019bb', // mocked BUIDL redemption 
+    minBuidlBalance: parseUnits('250000', 18),
+    minBuidlToRedeem: parseUnits('250000', 18),
   },
   // 1: {
   //   type: 'BUIDL',
