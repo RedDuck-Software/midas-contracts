@@ -30,6 +30,8 @@ export type DeployRvRegularConfig = {
 export type DeployRvBuidlConfig = {
   type: 'BUIDL';
   buidlRedemption: string;
+  minBuidlBalance: BigNumberish;
+  minBuidlToRedeem: BigNumberish;
 } & DeployRvConfigCommon;
 
 export type DeployRvSwapperConfig = {
@@ -105,6 +107,8 @@ export const deployRedemptionVault = async (
 
   if (networkConfig.type === 'BUIDL') {
     extraParams.push(networkConfig.buidlRedemption);
+    extraParams.push(networkConfig.minBuidlToRedeem);
+    extraParams.push(networkConfig.minBuidlBalance);
   } else if (networkConfig.type === 'SWAPPER') {
     extraParams.push(
       networkConfig.mTbillRedemptionVault ?? addresses.mTBILL?.redemptionVault,
@@ -139,7 +143,7 @@ export const deployRedemptionVault = async (
   ] as
     | Parameters<RedemptionVault['initialize']>
     | Parameters<
-        RedemptionVaultWIthBUIDL['initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)']
+        RedemptionVaultWIthBUIDL['initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256,uint256)']
       >
     | Parameters<
         MBasisRedemptionVaultWithSwapper['initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)']
@@ -154,7 +158,7 @@ export const deployRedemptionVault = async (
         networkConfig.type === 'SWAPPER'
           ? 'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
           : networkConfig.type === 'BUIDL'
-          ? 'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address)'
+          ? 'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256,uint256)'
           : 'initialize',
     },
   );

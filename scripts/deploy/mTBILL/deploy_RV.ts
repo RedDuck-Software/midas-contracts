@@ -26,20 +26,20 @@ const configs: Record<number, DeployRvConfig> = {
     minFiatRedeemAmount: parseUnits('1', 18),
     requestRedeemer: undefined,
   },
-  // 1: {
-  //   type: 'REGULAR',
-  //   feeReceiver: '0x',
-  //   tokensReceiver: '0x',
-  //   instantDailyLimit: parseUnits('TODO'),
-  //   instantFee: parseUnits('TODO', 2),
-  //   minMTokenAmountForFirstDeposit: parseUnits('TODO'),
-  //   minAmount: parseUnits('TODO'),
-  //   variationTolerance: parseUnits('TODO', 2),
-  //   fiatAdditionalFee: parseUnits('TODO', 2),
-  //   fiatFlatFee: parseUnits('TODO', 18),
-  //   minFiatRedeemAmount: parseUnits('TODO', 18),
-  //   requestRedeemer: '0x',
-  // },
+  1: {
+    type: 'REGULAR',
+    feeReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
+    tokensReceiver: '0x1Bd4d8D25Ec7EBA10e94BE71Fd9c6BF672e31E06',
+    instantDailyLimit: parseUnits('1000'),
+    instantFee: parseUnits('0.07', 2),
+    minAmount: parseUnits('0.1'),
+    variationTolerance: parseUnits('0.1', 2),
+    fiatAdditionalFee: parseUnits('0.1', 2),
+    fiatFlatFee: parseUnits('30', 18),
+    minFiatRedeemAmount: parseUnits('1000', 18),
+    requestRedeemer: '0x1Bd4d8D25Ec7EBA10e94BE71Fd9c6BF672e31E06',
+    sanctionsList: '0x40C57923924B5c5c5455c48D93317139ADDaC8fb'
+  },
 };
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
