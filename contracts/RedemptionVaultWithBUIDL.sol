@@ -111,7 +111,7 @@ contract RedemptionVaultWIthBUIDL is RedemptionVault {
     {
         address user = msg.sender;
 
-        tokenOut = buidlRedemption.liquidity();
+        require(buidlRedemption.liquidity() == tokenOut, "RVB: invalid token");
 
         (
             uint256 feeAmount,
