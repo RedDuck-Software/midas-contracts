@@ -29,6 +29,7 @@ const configs: Record<number, DeployDvConfig> = {
     minMTokenAmountForFirstDeposit: parseUnits('0'),
     minAmount: parseUnits('0.1'),
     variationTolerance: parseUnits('0.1', 2),
+    sanctionsList: '0x40C57923924B5c5c5455c48D93317139ADDaC8fb'
   },
 };
 
