@@ -50,7 +50,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       token: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
       tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
       depositVault: '0x99361435420711723aF805F08187c9E6bF796683',
-      redemptionVault: '0x8978e327FE7C72Fa4eaF4649C23147E279ae1470',
+      redemptionVault: '0xF6e51d24F4793Ac5e71e0502213a9BBE3A6d4517',
     },
     mBASIS: {
       dataFeed: '0x1615cBC603192ae8A9FF20E98dd0e40a405d76e4',
