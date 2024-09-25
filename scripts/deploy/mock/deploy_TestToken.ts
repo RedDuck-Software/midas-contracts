@@ -18,9 +18,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   console.log('Deploying ERC20MockWithName...');
 
   const deployment = await new ERC20MockWithName__factory(owner).deploy(
-    18,
-    'BUIDL',
-    'BUIDL',
+    9,
+    'USDT',
+    'USDT',
   );
 
   console.log('Deployed ERC20MockWithName:', deployment.address);

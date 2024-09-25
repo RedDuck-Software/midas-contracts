@@ -74,6 +74,11 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
         aggregator: '0x7811C1Bf5db28630F303267Cc613797EB9A81188',
         token: '0xF55588f2f8CF8E1D9C702D169AF43c15f5c85f12',
       },
+      usdt: {
+        dataFeed: '0x0e0eb6cdad90174f1Db606EC186ddD0B5eD80847',
+        aggregator: '0x7811C1Bf5db28630F303267Cc613797EB9A81188',
+        token: '0xEa22F8C1624c17C1B58727235292684831A08d56',
+      },
     },
     mTBILL: {
       dataFeed: '0x4E677F7FE252DE44682a913f609EA3eb6F29DC3E',
@@ -91,7 +96,8 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       tokensReceiver: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       depositVault: '0xE1998045AD0cFd38aBd274f2E1A4abA4278e2288',
       redemptionVault: '0xF6e51d24F4793Ac5e71e0502213a9BBE3A6d4517',
-      redemptionVaultSwapper: '0x3897445701132efb82362324D59D0f35c23B0170',
+      redemptionVaultSwapper: '0x460cec7f88e7813D7b0a297160e6718D9fE33908',
+      // swapper with regular mTBILL rv: 0x3897445701132efb82362324D59D0f35c23B0170
     },
     eUSD: {
       token: '0xDd5a54bA2aB379A5e642c58F98aD793A183960E2',
