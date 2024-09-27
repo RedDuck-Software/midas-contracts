@@ -19,7 +19,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   console.log('Deploying BuidlRedemptionMock...');
 
   const deployment = await new RedemptionTest__factory(owner).deploy(
-    '0xeDBA9943FC91983D1BF53d6F8Af346a5E162747D', // test BUIDL token on sepolia
+    '0xE6e05cf306d41585BEE8Ae48F9f2DD7E0955e6D3', // test BUIDL token on sepolia
     addresses?.dataFeeds?.['usdc']?.token!,
   );
 
