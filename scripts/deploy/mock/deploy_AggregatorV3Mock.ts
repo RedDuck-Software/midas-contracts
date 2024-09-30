@@ -1,14 +1,12 @@
-import { expect } from 'chai';
-import chalk from 'chalk';
-import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
+import { etherscanVerify } from '../../../helpers/utils';
 import {
-  etherscanVerify,
-} from '../../../helpers/utils';
-import { AggregatorV3Mock__factory } from '../../../typechain-types';
+  // eslint-disable-next-line camelcase
+  AggregatorV3Mock__factory,
+} from '../../../typechain-types';
 // 0x7811C1Bf5db28630F303267Cc613797EB9A81188
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();

@@ -1,15 +1,6 @@
 import { BigNumberish, constants, ContractFactory } from 'ethers';
-import {
-  MBasisRedemptionVaultWithSwapper,
-  RedemptionVault,
-  RedemptionVaultWIthBUIDL,
-} from '../../../typechain-types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { getCurrentAddresses } from '../../../config/constants/addresses';
-import {
-  logDeployProxy,
-  tryEtherscanVerifyImplementation,
-} from '../../../helpers/utils';
+
 import {
   M_BASIS_DEPOSIT_VAULT_CONTRACT_NAME,
   M_BASIS_REDEMPTION_SWAPPER_VAULT_CONTRACT_NAME,
@@ -17,11 +8,30 @@ import {
   REDEMPTION_VAULT_BUIDL_CONTRACT_NAME,
   REDEMPTION_VAULT_CONTRACT_NAME,
 } from '../../../config';
+import { getCurrentAddresses } from '../../../config/constants/addresses';
+import {
+  logDeployProxy,
+  tryEtherscanVerifyImplementation,
+} from '../../../helpers/utils';
+import {
+  MBasisRedemptionVaultWithSwapper,
+  RedemptionVault,
+  RedemptionVaultWIthBUIDL,
+} from '../../../typechain-types';
 
-export type DeployRvConfig =
-  | DeployRvRegularConfig
-  | DeployRvBuidlConfig
-  | DeployRvSwapperConfig;
+export type DeployRvConfigCommon = {
+  feeReceiver?: string;
+  tokensReceiver?: string;
+  instantDailyLimit: BigNumberish;
+  instantFee: BigNumberish;
+  sanctionsList?: string;
+  variationTolerance: BigNumberish;
+  minAmount: BigNumberish;
+  fiatAdditionalFee: BigNumberish;
+  fiatFlatFee: BigNumberish;
+  minFiatRedeemAmount: BigNumberish;
+  requestRedeemer?: string;
+};
 
 export type DeployRvRegularConfig = {
   type: 'REGULAR';
@@ -40,19 +50,10 @@ export type DeployRvSwapperConfig = {
   liquidityProvider?: string;
 } & DeployRvConfigCommon;
 
-export type DeployRvConfigCommon = {
-  feeReceiver?: string;
-  tokensReceiver?: string;
-  instantDailyLimit: BigNumberish;
-  instantFee: BigNumberish;
-  sanctionsList?: string;
-  variationTolerance: BigNumberish;
-  minAmount: BigNumberish;
-  fiatAdditionalFee: BigNumberish;
-  fiatFlatFee: BigNumberish;
-  minFiatRedeemAmount: BigNumberish;
-  requestRedeemer?: string;
-};
+export type DeployRvConfig =
+  | DeployRvRegularConfig
+  | DeployRvBuidlConfig
+  | DeployRvSwapperConfig;
 
 export const deployRedemptionVault = async (
   hre: HardhatRuntimeEnvironment,

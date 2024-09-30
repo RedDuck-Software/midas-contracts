@@ -428,7 +428,13 @@ contract RedemptionVault is ManageableVault, IRedemptionVault {
             tokenOutRate: tokenOutRate
         });
 
-        emit RedeemRequest(requestId, user, tokenOutCopy, amountMTokenInCopy, feeAmount);
+        emit RedeemRequest(
+            requestId,
+            user,
+            tokenOutCopy,
+            amountMTokenInCopy,
+            feeAmount
+        );
 
         return requestId;
     }

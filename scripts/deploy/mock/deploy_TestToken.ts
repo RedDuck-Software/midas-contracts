@@ -1,13 +1,10 @@
-import { expect } from 'chai';
-import chalk from 'chalk';
-import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { etherscanVerify } from '../../../helpers/utils';
 import {
-  AggregatorV3Mock__factory,
+  // eslint-disable-next-line camelcase
   ERC20MockWithName__factory,
 } from '../../../typechain-types';
 

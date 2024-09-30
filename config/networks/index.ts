@@ -52,7 +52,7 @@ export const gases: ConfigPerNetwork<number | undefined> = {
   hardhat: undefined,
   etherlink: undefined,
   localhost: undefined,
-  base: undefined
+  base: undefined,
 };
 
 export const timeouts: ConfigPerNetwork<number | undefined> = {
@@ -61,8 +61,7 @@ export const timeouts: ConfigPerNetwork<number | undefined> = {
   hardhat: undefined,
   localhost: 999999,
   etherlink: undefined,
-  base: undefined
-
+  base: undefined,
 };
 
 export const blockGasLimits: ConfigPerNetwork<number | undefined> = {
@@ -71,7 +70,7 @@ export const blockGasLimits: ConfigPerNetwork<number | undefined> = {
   etherlink: undefined,
   hardhat: 300 * 10 ** 6,
   localhost: undefined,
-  base: undefined
+  base: undefined,
 };
 
 export const initialBasesFeePerGas: ConfigPerNetwork<number | undefined> = {
@@ -80,7 +79,7 @@ export const initialBasesFeePerGas: ConfigPerNetwork<number | undefined> = {
   sepolia: undefined,
   hardhat: 0,
   localhost: undefined,
-  base: undefined
+  base: undefined,
 };
 
 export const getBaseNetworkConfig = (

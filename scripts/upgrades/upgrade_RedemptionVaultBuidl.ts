@@ -2,7 +2,10 @@ import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { REDEMPTION_VAULT_BUIDL_CONTRACT_NAME, REDEMPTION_VAULT_CONTRACT_NAME } from '../../config';
+import {
+  REDEMPTION_VAULT_BUIDL_CONTRACT_NAME,
+  REDEMPTION_VAULT_CONTRACT_NAME,
+} from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
   logDeployProxy,
@@ -17,14 +20,17 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const deployment = await hre.upgrades.upgradeProxy(
     addresses?.mTBILL?.redemptionVaultBuidl ?? '',
-    await hre.ethers.getContractFactory(REDEMPTION_VAULT_BUIDL_CONTRACT_NAME, owner),
+    await hre.ethers.getContractFactory(
+      REDEMPTION_VAULT_BUIDL_CONTRACT_NAME,
+      owner,
+    ),
     {
-     unsafeAllow:['constructor'], 
-      call:{
+      unsafeAllow: ['constructor'],
+      call: {
         fn: 'upgradeV2',
-        args: ['0x0391508a7CF5CF30c233d08849813C2959c0eA2f']
-      }
-    }
+        args: ['0x0391508a7CF5CF30c233d08849813C2959c0eA2f'],
+      },
+    },
   );
 
   if (deployment.deployTransaction) {

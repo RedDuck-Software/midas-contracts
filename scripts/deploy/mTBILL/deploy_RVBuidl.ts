@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import chalk from 'chalk';
+import { BigNumber, BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
@@ -7,9 +8,8 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { M_BASIS_DEPOSIT_VAULT_CONTRACT_NAME } from '../../../config';
 import { getCurrentAddresses } from '../../../config/constants/addresses';
-import { deployDepositVault, DeployDvConfig } from '../common';
 import { MBasisDepositVault } from '../../../typechain-types';
-import { BigNumber, BigNumberish, constants } from 'ethers';
+import { deployDepositVault, DeployDvConfig } from '../common';
 import { deployRedemptionVault, DeployRvConfig } from '../common/rv';
 
 const configs: Record<number, DeployRvConfig> = {
@@ -25,7 +25,7 @@ const configs: Record<number, DeployRvConfig> = {
     fiatFlatFee: parseUnits('0.1', 18),
     minFiatRedeemAmount: parseUnits('1', 18),
     requestRedeemer: undefined,
-    buidlRedemption: '0x4cb1479705EA6F0dD63415111aF56eaCfBa019bb', // mocked BUIDL redemption 
+    buidlRedemption: '0x4cb1479705EA6F0dD63415111aF56eaCfBa019bb', // mocked BUIDL redemption
     minBuidlBalance: parseUnits('250000', 18),
     minBuidlToRedeem: parseUnits('250000', 18),
   },
@@ -44,7 +44,7 @@ const configs: Record<number, DeployRvConfig> = {
     sanctionsList: '0x40C57923924B5c5c5455c48D93317139ADDaC8fb',
     buidlRedemption: '0x31D3F59Ad4aAC0eeE2247c65EBE8Bf6E9E470a53',
     minBuidlBalance: parseUnits('1', 6),
-    minBuidlToRedeem: parseUnits('1', 6)
+    minBuidlToRedeem: parseUnits('1', 6),
   },
 };
 

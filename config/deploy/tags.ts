@@ -36,7 +36,7 @@ export const E_USD_CONTRACT_NAME = 'eUSD';
 export const E_USD_DEPLOY_TAG = 'eUSD';
 
 export const M_TBILL_CUSTOM_AGGREGATOR_CONTRACT_NAME =
-  'MTBillCustomAggregatorFeed' as const
+  'MTBillCustomAggregatorFeed' as const;
 export const M_BASIS_CUSTOM_AGGREGATOR_CONTRACT_NAME =
   'MBasisCustomAggregatorFeed' as const;
 

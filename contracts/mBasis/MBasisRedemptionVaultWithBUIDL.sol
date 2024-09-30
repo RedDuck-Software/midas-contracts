@@ -9,7 +9,10 @@ import "./MBasisMidasAccessControlRoles.sol";
  * @notice Smart contract that handles mBASIS minting
  * @author RedDuck Software
  */
-contract MBasisRedemptionVaultWithBUIDL is RedemptionVaultWIthBUIDL, MBasisMidasAccessControlRoles {
+contract MBasisRedemptionVaultWithBUIDL is
+    RedemptionVaultWIthBUIDL,
+    MBasisMidasAccessControlRoles
+{
     /**
      * @dev leaving a storage gap for futures updates
      */

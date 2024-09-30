@@ -19,26 +19,31 @@ export interface MidasAddresses {
   etfDataFeed?: string;
   eurToUsdFeed?: string;
   accessControl?: string;
-  dataFeeds?: Record<string, {
-    token?: string;
-    dataFeed?: string;
-    aggregator?: string
-  }>
+  dataFeeds?: Record<
+    string,
+    {
+      token?: string;
+      dataFeed?: string;
+      aggregator?: string;
+    }
+  >;
 }
 
-export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefined> = {
+export const midasAddressesPerNetwork: ConfigPerNetwork<
+  MidasAddresses | undefined
+> = {
   main: {
     dataFeeds: {
       usdt: {
         aggregator: '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D',
         token: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-        dataFeed: '0x7811C1Bf5db28630F303267Cc613797EB9A81188'
+        dataFeed: '0x7811C1Bf5db28630F303267Cc613797EB9A81188',
       },
       usdc: {
         aggregator: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
         token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        dataFeed: '0x3aAc6fd73fA4e16Ec683BD4aaF5Ec89bb2C0EdC2'
-      }
+        dataFeed: '0x3aAc6fd73fA4e16Ec683BD4aaF5Ec89bb2C0EdC2',
+      },
     },
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
     // TODO: remove this data feed
@@ -51,7 +56,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       tokensReceiver: '0x875c06A295C41c27840b9C9dfDA7f3d819d8bC6A',
       depositVault: '0x99361435420711723aF805F08187c9E6bF796683',
       redemptionVault: '0xF6e51d24F4793Ac5e71e0502213a9BBE3A6d4517',
-      redemptionVaultBuidl: '0x569D7dccBF6923350521ecBC28A555A500c4f0Ec'
+      redemptionVaultBuidl: '0x569D7dccBF6923350521ecBC28A555A500c4f0Ec',
     },
     mBASIS: {
       dataFeed: '0x1615cBC603192ae8A9FF20E98dd0e40a405d76e4',
@@ -60,7 +65,7 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       tokensReceiver: '0xB8633297f9D9A8eaD48f1335ab04b14C189639f0',
       depositVault: '0xa8a5c4FF4c86a459EBbDC39c5BE77833B3A15d88',
       redemptionVault: '0x19AB19e61A930bc5C7B75Bf06cDd954218Ca9F0b',
-      redemptionVaultSwapper: '0x0D89C1C4799353F3805A3E6C4e1Cbbb83217D123'
+      redemptionVaultSwapper: '0x0D89C1C4799353F3805A3E6C4e1Cbbb83217D123',
     },
     eUSD: {
       tokensReceiver: '0x9d13371c8DeA0361ac78B4c109ea3CB748427CF5',
@@ -125,13 +130,13 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
       usdt: {
         aggregator: '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D',
         token: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-        dataFeed: '0x7811C1Bf5db28630F303267Cc613797EB9A81188'
+        dataFeed: '0x7811C1Bf5db28630F303267Cc613797EB9A81188',
       },
       usdc: {
         aggregator: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
         token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        dataFeed: '0x3aAc6fd73fA4e16Ec683BD4aaF5Ec89bb2C0EdC2'
-      }
+        dataFeed: '0x3aAc6fd73fA4e16Ec683BD4aaF5Ec89bb2C0EdC2',
+      },
     },
     accessControl: '0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B',
     // TODO: remove this data feed
@@ -163,9 +168,9 @@ export const midasAddressesPerNetwork: ConfigPerNetwork<MidasAddresses | undefin
   base: {
     accessControl: '0x0312a9d1ff2372ddedcbb21e4b6389afc919ac4b',
     mTBILL: {
-      token: '0xDD629E5241CbC5919847783e6C96B2De4754e438'
-    }
-  }
+      token: '0xDD629E5241CbC5919847783e6C96B2De4754e438',
+    },
+  },
 };
 
 export const getCurrentAddresses = (hre: HardhatRuntimeEnvironment) => {

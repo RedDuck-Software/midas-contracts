@@ -1,3 +1,5 @@
+import { BigNumber } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
@@ -11,8 +13,6 @@ import {
   logDeployProxy,
   tryEtherscanVerifyImplementation,
 } from '../../../helpers/utils';
-import { parseUnits } from 'ethers/lib/utils';
-import { BigNumber } from 'ethers';
 
 const config = {
   minAnswer: parseUnits('0', 8),

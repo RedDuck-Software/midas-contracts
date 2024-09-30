@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import chalk from 'chalk';
+import { BigNumber, BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
@@ -7,9 +8,8 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { M_BASIS_DEPOSIT_VAULT_CONTRACT_NAME } from '../../../config';
 import { getCurrentAddresses } from '../../../config/constants/addresses';
-import { deployDepositVault, DeployDvConfig } from '../common';
 import { MBasisDepositVault } from '../../../typechain-types';
-import { BigNumber, BigNumberish, constants } from 'ethers';
+import { deployDepositVault, DeployDvConfig } from '../common';
 import { deployRedemptionVault, DeployRvConfig } from '../common/rv';
 
 const configs: Record<number, DeployRvConfig> = {
@@ -39,7 +39,7 @@ const configs: Record<number, DeployRvConfig> = {
     fiatFlatFee: parseUnits('30', 18),
     minFiatRedeemAmount: parseUnits('1000', 18),
     requestRedeemer: '0x1Bd4d8D25Ec7EBA10e94BE71Fd9c6BF672e31E06',
-    sanctionsList: '0x40C57923924B5c5c5455c48D93317139ADDaC8fb'
+    sanctionsList: '0x40C57923924B5c5c5455c48D93317139ADDaC8fb',
   },
 };
 

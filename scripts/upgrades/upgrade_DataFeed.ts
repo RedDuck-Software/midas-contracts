@@ -2,7 +2,10 @@ import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { DATA_FEED_CONTRACT_NAME, DEPOSIT_VAULT_CONTRACT_NAME } from '../../config';
+import {
+  DATA_FEED_CONTRACT_NAME,
+  DEPOSIT_VAULT_CONTRACT_NAME,
+} from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
   logDeployProxy,
@@ -20,8 +23,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     addresses?.dataFeeds?.usdc?.dataFeed ?? '',
     await hre.ethers.getContractFactory(DATA_FEED_CONTRACT_NAME, owner),
     {
-      unsafeAllow: ['constructor']
-    }
+      unsafeAllow: ['constructor'],
+    },
   );
   console.log('Upgraded DataFeed:', deployment.address);
 

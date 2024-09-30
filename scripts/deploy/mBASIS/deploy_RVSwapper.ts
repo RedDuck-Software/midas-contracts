@@ -1,10 +1,11 @@
 import { expect } from 'chai';
 import chalk from 'chalk';
+import { constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { constants } from 'ethers';
+
 import { deployRedemptionVault, DeployRvConfig } from '../common/rv';
 
 const configs: Record<number, DeployRvConfig> = {
@@ -37,7 +38,7 @@ const configs: Record<number, DeployRvConfig> = {
     requestRedeemer: '0x1Bd4d8D25Ec7EBA10e94BE71Fd9c6BF672e31E06',
     sanctionsList: '0x40C57923924B5c5c5455c48D93317139ADDaC8fb',
     liquidityProvider: '0x7388e98baCfFF1B3618d7d5bEbeDe483C9526FEd',
-    mTbillRedemptionVault: '0x569D7dccBF6923350521ecBC28A555A500c4f0Ec'
+    mTbillRedemptionVault: '0x569D7dccBF6923350521ecBC28A555A500c4f0Ec',
   },
 };
 

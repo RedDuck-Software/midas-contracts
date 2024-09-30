@@ -1,11 +1,12 @@
 import { BigNumberish, constants, ContractFactory } from 'ethers';
-import { DepositVault, MBasisDepositVault } from '../../../typechain-types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
 import { getCurrentAddresses } from '../../../config/constants/addresses';
 import {
   logDeployProxy,
   tryEtherscanVerifyImplementation,
 } from '../../../helpers/utils';
+import { DepositVault, MBasisDepositVault } from '../../../typechain-types';
 
 export type DeployDvConfig = {
   feeReceiver?: string;

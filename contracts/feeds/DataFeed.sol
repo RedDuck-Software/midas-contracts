@@ -80,7 +80,6 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
         aggregator = AggregatorV3Interface(_aggregator);
     }
 
-
     /**
      * @dev updates `healthyDiff` value
      * @param _healthyDiff new value
@@ -101,7 +100,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     function setMinExpectedAnswer(int256 _minExpectedAnswer)
         external
         onlyRole(feedAdminRole(), msg.sender)
-    {   
+    {
         require(_minExpectedAnswer > 0, "DF: invalid min exp. price");
         require(
             maxExpectedAnswer > _minExpectedAnswer,

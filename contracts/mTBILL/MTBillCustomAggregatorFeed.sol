@@ -10,7 +10,10 @@ import "./MTBillMidasAccessControlRoles.sol";
  * where price is submitted manually by feed admins
  * @author RedDuck Software
  */
-contract MTBillCustomAggregatorFeed is CustomAggregatorV3CompatibleFeed, MTBillMidasAccessControlRoles {
+contract MTBillCustomAggregatorFeed is
+    CustomAggregatorV3CompatibleFeed,
+    MTBillMidasAccessControlRoles
+{
     /**
      * @inheritdoc CustomAggregatorV3CompatibleFeed
      */

@@ -1,15 +1,13 @@
-import { expect } from 'chai';
-import chalk from 'chalk';
-import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import {
-  etherscanVerify,
-} from '../../../helpers/utils';
-import { AggregatorV3Mock__factory, RedemptionTest__factory } from '../../../typechain-types';
 import { getCurrentAddresses } from '../../../config/constants/addresses';
+import { etherscanVerify } from '../../../helpers/utils';
+import {
+  // eslint-disable-next-line camelcase
+  RedemptionTest__factory,
+} from '../../../typechain-types';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
@@ -20,7 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const deployment = await new RedemptionTest__factory(owner).deploy(
     '0xE6e05cf306d41585BEE8Ae48F9f2DD7E0955e6D3', // test BUIDL token on sepolia
-    addresses?.dataFeeds?.['usdc']?.token!,
+    addresses!.dataFeeds!.usdc!.token!,
   );
 
   console.log('Deployed BuidlRedemptionMock :', deployment.address);

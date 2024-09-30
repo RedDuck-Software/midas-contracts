@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import chalk from 'chalk';
+import { BigNumber, BigNumberish, constants } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
@@ -7,9 +8,8 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { DEPOSIT_VAULT_CONTRACT_NAME } from '../../../config';
 import { getCurrentAddresses } from '../../../config/constants/addresses';
-import { deployDepositVault, DeployDvConfig } from '../common';
 import { MBasisDepositVault } from '../../../typechain-types';
-import { BigNumber, BigNumberish, constants } from 'ethers';
+import { deployDepositVault, DeployDvConfig } from '../common';
 
 const configs: Record<number, DeployDvConfig> = {
   11155111: {
@@ -29,7 +29,7 @@ const configs: Record<number, DeployDvConfig> = {
     minMTokenAmountForFirstDeposit: parseUnits('0'),
     minAmount: parseUnits('0.1'),
     variationTolerance: parseUnits('0.1', 2),
-    sanctionsList: '0x40C57923924B5c5c5455c48D93317139ADDaC8fb'
+    sanctionsList: '0x40C57923924B5c5c5455c48D93317139ADDaC8fb',
   },
 };
 

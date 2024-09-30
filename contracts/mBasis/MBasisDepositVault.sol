@@ -10,7 +10,6 @@ import "./MBasisMidasAccessControlRoles.sol";
  * @author RedDuck Software
  */
 contract MBasisDepositVault is DepositVault, MBasisMidasAccessControlRoles {
-
     /**
      * @dev leaving a storage gap for futures updates
      */
