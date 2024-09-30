@@ -1,4 +1,5 @@
 import { getImplementationAddress } from '@openzeppelin/upgrades-core';
+import { ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 export function delay(ms: number) {
@@ -94,3 +95,6 @@ export const verify = async (
     constructorArguments,
   });
 };
+
+export const encodeFnSelector = (selector: string) =>
+  ethers.utils.id(selector).substring(0, 10);

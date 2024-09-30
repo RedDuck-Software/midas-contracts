@@ -1,12 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { constants } from 'ethers';
 import { ethers } from 'hardhat';
 
 import { acErrors, greenList } from './common/ac.helpers';
 import { approveBase18, mintToken, pauseVault } from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
-import { redeem } from './common/redemption-vault.helpers';
+import { addPaymentTokenTest } from './common/manageable-vault.helpers';
+import { redeemInstantTest } from './common/redemption-vault.helpers';
 
 describe('EUsdRedemptionVault', function () {
   it('deployment', async () => {
@@ -14,7 +14,7 @@ describe('EUsdRedemptionVault', function () {
       defaultDeploy,
     );
 
-    expect(await eUSdRedemptionVault.mTBILL()).eq(eUSD.address);
+    expect(await eUSdRedemptionVault.mToken()).eq(eUSD.address);
 
     expect(await eUSdRedemptionVault.paused()).eq(false);
 
@@ -43,16 +43,24 @@ describe('EUsdRedemptionVault', function () {
         eUSdRedemptionVault: redemptionVault,
         regularAccounts,
         eUsdOwner: owner,
-        owner: otherOwner,
         eUSD: mTBILL,
         stableCoins,
         accessControl,
+        mTokenToUsdDataFeed,
+        dataFeed,
       } = await loadFixture(defaultDeploy);
 
-      await redeem({ redemptionVault, owner, mTBILL }, stableCoins.dai, 0, {
-        revertMessage: acErrors.WMAC_HASNT_ROLE,
-        from: regularAccounts[0],
-      });
+      await redemptionVault.setGreenlistEnable(true);
+
+      await redeemInstantTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
+        0,
+        {
+          revertMessage: acErrors.WMAC_HASNT_ROLE,
+          from: regularAccounts[0],
+        },
+      );
 
       await greenList(
         {
@@ -63,14 +71,23 @@ describe('EUsdRedemptionVault', function () {
         },
         regularAccounts[0],
       );
-      await mintToken(mTBILL, regularAccounts[0], 1);
-      await approveBase18(regularAccounts[0], mTBILL, redemptionVault, 1);
+      await mintToken(stableCoins.dai, redemptionVault, 100000);
+      await mintToken(mTBILL, regularAccounts[0], 100);
+      await approveBase18(regularAccounts[0], mTBILL, redemptionVault, 100);
+      await addPaymentTokenTest(
+        { vault: redemptionVault, owner },
+        stableCoins.dai,
+        dataFeed.address,
+        0,
+        true,
+      );
 
-      await redeem(
-        { redemptionVault, owner, mTBILL },
-        constants.AddressZero,
+      await redeemInstantTest(
+        { redemptionVault, owner, mTBILL, mTokenToUsdDataFeed },
+        stableCoins.dai,
         1,
         {
+          revertMessage: acErrors.WMAC_HASNT_ROLE,
           from: regularAccounts[0],
         },
       );
@@ -78,21 +95,10 @@ describe('EUsdRedemptionVault', function () {
     it('vault admin access', async () => {
       const {
         eUSdRedemptionVault: redemptionVault,
-        regularAccounts,
         eUsdOwner: owner,
         owner: otherOwner,
-        eUSD: mTBILL,
-        stableCoins,
         accessControl,
       } = await loadFixture(defaultDeploy);
-
-      console.log(
-        'have role',
-        await accessControl.hasRole(
-          await redemptionVault.E_USD_REDEMPTION_VAULT_ADMIN_ROLE(),
-          owner.address,
-        ),
-      );
 
       await pauseVault(redemptionVault, {
         from: otherOwner,

@@ -12,10 +12,18 @@ contract GreenlistableTester is Greenlistable {
         __Greenlistable_init(_accessControl);
     }
 
+    function initializeUnchainedWithoutInitializer() external {
+        __Greenlistable_init_unchained();
+    }
+
     function onlyGreenlistedTester(address account)
         external
         onlyGreenlisted(account)
     {}
+
+    function onlyGreenlistTogglerTester(address account) external view {
+        _onlyGreenlistToggler(account);
+    }
 
     function _disableInitializers() internal override {}
 }

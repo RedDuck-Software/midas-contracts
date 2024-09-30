@@ -11,6 +11,30 @@ import "../access/WithMidasAccessControl.sol";
  * @author RedDuck Software
  */
 abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
+    mapping(bytes4 => bool) public fnPaused;
+
+    /**
+     * @dev leaving a storage gap for futures updates
+     */
+    uint256[50] private __gap;
+
+    /**
+     * @param caller caller address (msg.sender)
+     * @param fn function id
+     */
+    event PauseFn(address indexed caller, bytes4 fn);
+
+    /**
+     * @param caller caller address (msg.sender)
+     * @param fn function id
+     */
+    event UnpauseFn(address indexed caller, bytes4 fn);
+
+    modifier whenFnNotPaused(bytes4 fn) {
+        _requireNotPaused();
+        require(!fnPaused[fn], "Pausable: fn paused");
+        _;
+    }
     /**
      * @dev checks that a given `account`
      * has a determinedPauseAdminRole
@@ -36,6 +60,26 @@ abstract contract Pausable is WithMidasAccessControl, PausableUpgradeable {
 
     function unpause() external onlyPauseAdmin {
         _unpause();
+    }
+
+    /**
+     * @dev pause specific function
+     * @param fn function id
+     */
+    function pauseFn(bytes4 fn) external onlyPauseAdmin {
+        require(!fnPaused[fn], "Pausable: fn paused");
+        fnPaused[fn] = true;
+        emit PauseFn(msg.sender, fn);
+    }
+
+    /**
+     * @dev unpause specific function
+     * @param fn function id
+     */
+    function unpauseFn(bytes4 fn) external onlyPauseAdmin {
+        require(fnPaused[fn], "Pausable: fn unpaused");
+        fnPaused[fn] = false;
+        emit UnpauseFn(msg.sender, fn);
     }
 
     /**

@@ -7,19 +7,43 @@ contract ManageableVaultTester is ManageableVault {
     function _disableInitializers() internal override {}
 
     function initialize(
-        address _accessControl,
-        address _mTbill,
-        address _tokensReceiver
+        address _ac,
+        MTokenInitParams calldata _mTokenInitParams,
+        ReceiversInitParams calldata _receiversInitParams,
+        InstantInitParams calldata _instantInitParams,
+        address _sanctionsList,
+        uint256 _variationTolerance,
+        uint256 _minAmount
     ) external initializer {
-        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver);
+        __ManageableVault_init(
+            _ac,
+            _mTokenInitParams,
+            _receiversInitParams,
+            _instantInitParams,
+            _sanctionsList,
+            _variationTolerance,
+            _minAmount
+        );
     }
 
     function initializeWithoutInitializer(
-        address _accessControl,
-        address _mTbill,
-        address _tokensReceiver
+        address _ac,
+        MTokenInitParams calldata _mTokenInitParams,
+        ReceiversInitParams calldata _receiversInitParams,
+        InstantInitParams calldata _instantInitParams,
+        address _sanctionsList,
+        uint256 _variationTolerance,
+        uint256 _minAmount
     ) external {
-        __ManageableVault_init(_accessControl, _mTbill, _tokensReceiver);
+        __ManageableVault_init(
+            _ac,
+            _mTokenInitParams,
+            _receiversInitParams,
+            _instantInitParams,
+            _sanctionsList,
+            _variationTolerance,
+            _minAmount
+        );
     }
 
     function vaultRole() public view virtual override returns (bytes32) {}

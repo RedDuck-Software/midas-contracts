@@ -2,14 +2,17 @@
 pragma solidity 0.8.9;
 
 import "./EUsdMidasAccessControlRoles.sol";
-import "../DepositVault.sol";
+import "../RedemptionVaultWithBUIDL.sol";
 
 /**
- * @title EUsdDepositVault
- * @notice Smart contract that handles eUSD minting
+ * @title EUsdRedemptionVaultWithBUIDL
+ * @notice Smart contract that handles eUSD redeeming
  * @author RedDuck Software
  */
-contract EUsdDepositVault is DepositVault, EUsdMidasAccessControlRoles {
+contract EUsdRedemptionVaultWithBUIDL is
+    RedemptionVaultWIthBUIDL,
+    EUsdMidasAccessControlRoles
+{
     /**
      * @dev leaving a storage gap for futures updates
      */
@@ -19,7 +22,7 @@ contract EUsdDepositVault is DepositVault, EUsdMidasAccessControlRoles {
      * @inheritdoc ManageableVault
      */
     function vaultRole() public pure override returns (bytes32) {
-        return E_USD_DEPOSIT_VAULT_ADMIN_ROLE;
+        return E_USD_REDEMPTION_VAULT_ADMIN_ROLE;
     }
 
     function greenlistedRole() public pure override returns (bytes32) {

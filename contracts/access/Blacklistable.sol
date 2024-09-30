@@ -11,6 +11,11 @@ import "./WithMidasAccessControl.sol";
  */
 abstract contract Blacklistable is WithMidasAccessControl {
     /**
+     * @dev leaving a storage gap for futures updates
+     */
+    uint256[50] private __gap;
+
+    /**
      * @dev checks that a given `account` doesnt
      * have BLACKLISTED_ROLE
      */
@@ -29,7 +34,14 @@ abstract contract Blacklistable is WithMidasAccessControl {
         onlyInitializing
     {
         __WithMidasAccessControl_init(_accessControl);
+        __Blacklistable_init_unchained();
     }
+
+    /**
+     * @dev upgradeable pattern contract`s initializer unchained
+     */
+    // solhint-disable func-name-mixedcase
+    function __Blacklistable_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev checks that a given `account` doesnt

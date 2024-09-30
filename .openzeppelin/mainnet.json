@@ -532,7 +532,7 @@
             "src": "contracts/DepositVault.sol:35"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "106",
             "type": "t_struct(Counter)4184_storage",
@@ -754,7 +754,7 @@
             "src": "contracts/abstract/ManageableVault.sol:52"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "105",
             "type": "t_struct(Counter)4184_storage",
@@ -1172,7 +1172,7 @@
             "src": "contracts/DepositVault.sol:35"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "206",
             "type": "t_struct(Counter)4896_storage",
@@ -1418,7 +1418,7 @@
             "src": "contracts/abstract/ManageableVault.sol:57"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "205",
             "type": "t_struct(Counter)4896_storage",
@@ -1628,7 +1628,7 @@
             "src": "contracts/abstract/ManageableVault.sol:57"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "205",
             "type": "t_struct(Counter)4896_storage",
@@ -2050,7 +2050,7 @@
             "src": "contracts/DepositVault.sol:35"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "206",
             "type": "t_struct(Counter)4896_storage",

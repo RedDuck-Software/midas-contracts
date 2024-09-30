@@ -4,9 +4,8 @@ import { BigNumberish } from 'ethers';
 import { defaultAbiCoder, solidityKeccak256 } from 'ethers/lib/utils';
 
 import { Account, OptionalCommonParams, getAccount } from './common.helpers';
-import { defaultDeploy } from './fixtures';
 
-import { MBASISTest, MTBILL, MTBILLTest } from '../../typechain-types';
+import { MTBILL } from '../../typechain-types';
 
 type CommonParams = {
   mTBILL?: MTBILL;

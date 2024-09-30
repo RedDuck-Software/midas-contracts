@@ -723,7 +723,7 @@
             "src": "contracts\\DepositVault.sol:59"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "10",
             "type": "t_struct(Counter)4184_storage",
@@ -947,7 +947,7 @@
             "src": "contracts\\RedemptionVault.sol:44"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "7",
             "type": "t_struct(Counter)4184_storage",
@@ -1215,7 +1215,7 @@
             "src": "contracts\\DepositVault.sol:60"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "60",
             "type": "t_struct(Counter)4268_storage",
@@ -1477,7 +1477,7 @@
             "src": "contracts\\RedemptionVault.sol:45"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "57",
             "type": "t_struct(Counter)4268_storage",
@@ -1759,7 +1759,7 @@
             "src": "contracts\\DepositVault.sol:60"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "60",
             "type": "t_struct(Counter)4980_storage",
@@ -2021,7 +2021,7 @@
             "src": "contracts\\RedemptionVault.sol:45"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "57",
             "type": "t_struct(Counter)4268_storage",
@@ -2279,7 +2279,7 @@
             "src": "contracts\\RedemptionVault.sol:45"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "57",
             "type": "t_struct(Counter)4268_storage",
@@ -2831,7 +2831,7 @@
             "src": "contracts/abstract/ManageableVault.sol:57"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "106",
             "type": "t_struct(Counter)4896_storage",
@@ -3041,7 +3041,7 @@
             "src": "contracts/DepositVault.sol:35"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "107",
             "type": "t_struct(Counter)4896_storage",
@@ -3491,7 +3491,7 @@
             "src": "contracts/DepositVault.sol:35"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "206",
             "type": "t_struct(Counter)4896_storage",
@@ -3729,7 +3729,7 @@
             "src": "contracts/abstract/ManageableVault.sol:57"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "205",
             "type": "t_struct(Counter)4896_storage",
@@ -3939,7 +3939,7 @@
             "src": "contracts/DepositVault.sol:35"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "206",
             "type": "t_struct(Counter)4184_storage",
@@ -4185,7 +4185,7 @@
             "src": "contracts/abstract/ManageableVault.sol:57"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "205",
             "type": "t_struct(Counter)4184_storage",
@@ -4607,7 +4607,7 @@
             "src": "contracts/DepositVault.sol:35"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "206",
             "type": "t_struct(Counter)4184_storage",
@@ -4853,7 +4853,7 @@
             "src": "contracts/abstract/ManageableVault.sol:57"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "205",
             "type": "t_struct(Counter)4184_storage",

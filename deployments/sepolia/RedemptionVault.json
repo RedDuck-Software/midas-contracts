@@ -707,7 +707,7 @@
     },
     {
       "inputs": [],
-      "name": "lastRequestId",
+      "name": "currentRequestId",
       "outputs": [
         {
           "internalType": "uint256",

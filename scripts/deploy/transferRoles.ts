@@ -1,19 +1,11 @@
-import chalk from 'chalk';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { getCurrentAddresses } from '../../config/constants/addresses';
-import { initGrantRoles } from '../../test/common/post-deploy.helpers';
 import {
   // eslint-disable-next-line camelcase
-  DepositVault__factory,
-  // eslint-disable-next-line camelcase
   MidasAccessControl__factory,
-  // eslint-disable-next-line camelcase
-  RedemptionVault__factory,
-  // eslint-disable-next-line camelcase
-  MTBILL__factory,
   // eslint-disable-next-line camelcase
   EUSD__factory,
 } from '../../typechain-types';
