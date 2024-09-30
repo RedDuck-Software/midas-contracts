@@ -2,19 +2,17 @@
 pragma solidity 0.8.9;
 
 import "../RedemptionVaultWithBUIDL.sol";
+import "./MBasisMidasAccessControlRoles.sol";
 
 /**
  * @title MBasisRedemptionVaultWithBUIDL
  * @notice Smart contract that handles mBASIS minting
  * @author RedDuck Software
  */
-contract MBasisRedemptionVaultWithBUIDL is RedemptionVaultWIthBUIDL {
-    /**
-     * @notice actor that can manage MBasisRedemptionVault
-     */
-    bytes32 public constant M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE =
-        keccak256("M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE");
-
+contract MBasisRedemptionVaultWithBUIDL is
+    RedemptionVaultWIthBUIDL,
+    MBasisMidasAccessControlRoles
+{
     /**
      * @dev leaving a storage gap for futures updates
      */

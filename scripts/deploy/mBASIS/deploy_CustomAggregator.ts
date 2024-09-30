@@ -1,3 +1,5 @@
+import { BigNumber } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
@@ -9,44 +11,48 @@ import {
   tryEtherscanVerifyImplementation,
 } from '../../../helpers/utils';
 
-const forToken = 'mBASIS';
+const config = {
+  minAnswer: parseUnits('0', 8),
+  maxAnswer: parseUnits('100000', 8),
+  maxAnswerDeviation: parseUnits('0.35', 8),
+  description: 'mBASIS/USD',
+  healthyDiff: BigNumber.from(2592000),
+};
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+  const addresses = getCurrentAddresses(hre);
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
 
-  const addresses = getCurrentAddresses(hre);
+  console.log('Deploying CustomAggregatorV3CompatibleFeed...', { addresses });
 
-  if (!addresses) throw new Error('Addresses are not set');
-  const tokenAddresses = addresses[forToken];
+  if (!addresses?.accessControl)
+    throw new Error('Access control address is not set');
 
-  if (!tokenAddresses) throw new Error('Token addresses are not set');
-
-  console.log('Deploying MBasisCustomAggregatorFeed...');
   const deployment = await hre.upgrades.deployProxy(
     await hre.ethers.getContractFactory(
       M_BASIS_CUSTOM_FEED_CONTRACT_NAME,
       owner,
     ),
     [
-      addresses?.accessControl,
-      0, // FIXME
-      1, // FIXME
-      hre.ethers.utils.parseUnits('100', 8),
-      'mBASIS custom data feed',
+      addresses.accessControl,
+      config.minAnswer,
+      config.maxAnswer,
+      config.maxAnswerDeviation,
+      config.description,
     ],
     {
       unsafeAllow: ['constructor'],
     },
   );
-  console.log('Deployed MBasisCustomAggregatorFeed:', deployment.address);
+
+  console.log('Deployed CustomAggregatorV3CompatibleFeed:', deployment.address);
 
   if (deployment.deployTransaction) {
     console.log('Waiting 5 blocks...');
     await deployment.deployTransaction.wait(5);
     console.log('Waited.');
   }
-
   await logDeployProxy(
     hre,
     M_BASIS_CUSTOM_FEED_CONTRACT_NAME,

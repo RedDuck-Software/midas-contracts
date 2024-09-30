@@ -57,7 +57,8 @@ interface IRedemptionVault is IManageableVault {
         uint256 indexed requestId,
         address indexed user,
         address indexed tokenOut,
-        uint256 amountMTokenIn
+        uint256 amountMTokenIn,
+        uint256 feeAmount
     );
 
     /**

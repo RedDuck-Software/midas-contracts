@@ -40,6 +40,7 @@ const config: HardhatUserConfig = {
       localhost: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       sepolia: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
       etherlink: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
+      base: '0xa0819ae43115420beb161193b8D8Ba64C9f9faCC',
     },
   },
   verify: {
@@ -51,6 +52,7 @@ const config: HardhatUserConfig = {
     main: getNetworkConfig('main', []),
     etherlink: getNetworkConfig('etherlink', []),
     sepolia: getNetworkConfig('sepolia'),
+    base: getNetworkConfig('base'),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hardhat: FORKING_NETWORK
       ? getForkNetworkConfig(FORKING_NETWORK)
@@ -75,6 +77,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://testnet-explorer.etherlink.com/api',
           browserURL: 'https://testnet-explorer.etherlink.com',
+        },
+      },
+      {
+        chainId: chainIds.base,
+        network: 'base',
+        urls: {
+          apiURL: 'https://api.basescan.org/api',
+          browserURL: 'https://basescan.org',
         },
       },
     ],

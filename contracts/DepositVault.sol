@@ -206,6 +206,7 @@ contract DepositVault is ManageableVault, IDepositVault {
             currentId,
             user,
             tokenInCopy,
+            amountTokenCopy,
             tokenAmountInUsd,
             feeAmount,
             tokenOutRate,

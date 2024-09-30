@@ -85,7 +85,7 @@ export const postDeploymentTest = async (
   const roles = await getAllRoles(accessControl);
 
   /** mTBILL tests start */
-  expect(await mTBILL.name()).eq('mTBILL');
+  expect(await mTBILL.name()).eq('Midas US Treasury Bill Token');
   expect(await mTBILL.symbol()).eq('mTBILL');
   expect(await mTBILL.paused()).eq(false);
 

@@ -58,6 +58,7 @@ interface IDepositVault is IManageableVault {
      * @param requestId mint request id
      * @param user function caller (msg.sender)
      * @param tokenIn address of tokenIn
+     * @param amountToken amount of tokenIn
      * @param amountUsd amount of tokenIn converted to USD
      * @param fee fee amount in tokenIn
      * @param tokenOutRate mToken rate
@@ -67,6 +68,7 @@ interface IDepositVault is IManageableVault {
         uint256 indexed requestId,
         address indexed user,
         address indexed tokenIn,
+        uint256 amountToken,
         uint256 amountUsd,
         uint256 fee,
         uint256 tokenOutRate,

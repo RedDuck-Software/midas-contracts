@@ -1,27 +1,39 @@
-import { expect } from 'chai';
-import chalk from 'chalk';
+import { BigNumberish } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { DATA_FEED_CONTRACT_NAME } from '../../config';
-import { getCurrentAddresses } from '../../config/constants/addresses';
+import { DATA_FEED_CONTRACT_NAME } from '../../../config';
+import { getCurrentAddresses } from '../../../config/constants/addresses';
 import {
-  logDeploy,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
-} from '../../helpers/utils';
-// eslint-disable-next-line camelcase
-import { AggregatorV3Mock__factory } from '../../typechain-types';
+} from '../../../helpers/utils';
 
-// 0x0e0eb6cdad90174f1Db606EC186ddD0B5eD80847
+export type DeployDataFeedConfig = {
+  minPrice: BigNumberish;
+  maxPrice: BigNumberish;
+  healthyDiff: BigNumberish;
+};
 
-const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+export const deployTokenDataFeed = async (
+  hre: HardhatRuntimeEnvironment,
+  token: 'usdc' | 'usdt',
+  networkConfig?: DeployDataFeedConfig,
+) => {
+  const addresses = getCurrentAddresses(hre);
   const { deployer } = await hre.getNamedAccounts();
   const owner = await hre.ethers.getSigner(deployer);
+  const tokenAddresses = addresses?.dataFeeds?.[token];
 
-  const addresses = getCurrentAddresses(hre);
+  if (!tokenAddresses) {
+    throw new Error('Token config is not found');
+  }
+
+  if (!networkConfig) {
+    throw new Error('Network config is not found');
+  }
 
   console.log('Deploying DataFeed...');
 
@@ -29,10 +41,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     await hre.ethers.getContractFactory(DATA_FEED_CONTRACT_NAME, owner),
     [
       addresses?.accessControl,
-      '0x7811C1Bf5db28630F303267Cc613797EB9A81188',
-      2592000,
-      parseUnits('0.97', 8),
-      parseUnits('1.04', 8),
+      tokenAddresses.aggregator,
+      networkConfig.healthyDiff,
+      networkConfig.minPrice,
+      networkConfig.maxPrice,
     ],
     {
       unsafeAllow: ['constructor'],
@@ -49,5 +61,3 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   await logDeployProxy(hre, DATA_FEED_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };
-
-func(hre).then(console.log).catch(console.error);

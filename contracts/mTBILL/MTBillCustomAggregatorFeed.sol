@@ -2,6 +2,7 @@
 pragma solidity 0.8.9;
 
 import "../feeds/CustomAggregatorV3CompatibleFeed.sol";
+import "./MTBillMidasAccessControlRoles.sol";
 
 /**
  * @title MTBillCustomAggregatorFeed
@@ -9,13 +10,10 @@ import "../feeds/CustomAggregatorV3CompatibleFeed.sol";
  * where price is submitted manually by feed admins
  * @author RedDuck Software
  */
-contract MTBillCustomAggregatorFeed is CustomAggregatorV3CompatibleFeed {
-    /**
-     * @notice actor that can manage MTBillCustomAggregatorFeed
-     */
-    bytes32 public constant M_TBILL_CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE =
-        keccak256("M_TBILL_CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE");
-
+contract MTBillCustomAggregatorFeed is
+    CustomAggregatorV3CompatibleFeed,
+    MTBillMidasAccessControlRoles
+{
     /**
      * @inheritdoc CustomAggregatorV3CompatibleFeed
      */

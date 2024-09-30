@@ -5,17 +5,15 @@ import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { DATA_FEED_CONTRACT_NAME } from '../../config';
-import { getCurrentAddresses } from '../../config/constants/addresses';
+import { M_TBILL_DATA_FEED_CONTRACT_NAME } from '../../../config';
+import { getCurrentAddresses } from '../../../config/constants/addresses';
 import {
   logDeploy,
   logDeployProxy,
   tryEtherscanVerifyImplementation,
-} from '../../helpers/utils';
+} from '../../../helpers/utils';
 // eslint-disable-next-line camelcase
-import { AggregatorV3Mock__factory } from '../../typechain-types';
-
-// 0x0e0eb6cdad90174f1Db606EC186ddD0B5eD80847
+import { AggregatorV3Mock__factory } from '../../../typechain-types';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
@@ -23,16 +21,26 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getCurrentAddresses(hre);
 
-  console.log('Deploying DataFeed...');
+  const customAggregator = addresses?.mTBILL?.customFeed;
+
+  if (!addresses) {
+    throw new Error('Addresses for network are not defined');
+  }
+
+  if (!customAggregator) {
+    throw new Error('Custom aggregator is not defined');
+  }
+
+  console.log('Deploying DataFeed...', customAggregator);
 
   const deployment = await hre.upgrades.deployProxy(
-    await hre.ethers.getContractFactory(DATA_FEED_CONTRACT_NAME, owner),
+    await hre.ethers.getContractFactory(M_TBILL_DATA_FEED_CONTRACT_NAME, owner),
     [
       addresses?.accessControl,
-      '0x7811C1Bf5db28630F303267Cc613797EB9A81188',
+      customAggregator,
       2592000,
-      parseUnits('0.97', 8),
-      parseUnits('1.04', 8),
+      1,
+      parseUnits('100000', 8),
     ],
     {
       unsafeAllow: ['constructor'],
@@ -46,7 +54,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     await deployment.deployTransaction.wait(5);
     console.log('Waited.');
   }
-  await logDeployProxy(hre, DATA_FEED_CONTRACT_NAME, deployment.address);
+  await logDeployProxy(
+    hre,
+    M_TBILL_DATA_FEED_CONTRACT_NAME,
+    deployment.address,
+  );
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };
 
