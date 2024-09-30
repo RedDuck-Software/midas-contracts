@@ -12,10 +12,10 @@ uint256 minAmountToDepositInEuro
 
 minimal USD amount in EUR for first user`s deposit
 
-### lastRequestId
+### currentRequestId
 
 ```solidity
-struct Counters.Counter lastRequestId
+struct Counters.Counter currentRequestId
 ```
 
 last deposit request id
@@ -155,10 +155,10 @@ _validates that inputted USD amount >= minAmountToDepositInUsd()_
 
 Smart contract that handles mTBILL redemptions
 
-### lastRequestId
+### currentRequestId
 
 ```solidity
-struct Counters.Counter lastRequestId
+struct Counters.Counter currentRequestId
 ```
 
 last redemption request id

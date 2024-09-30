@@ -404,7 +404,7 @@
             "src": "contracts/abstract/ManageableVault.sol:52"
           },
           {
-            "label": "lastRequestId",
+            "label": "currentRequestId",
             "offset": 0,
             "slot": "105",
             "type": "t_struct(Counter)4896_storage",

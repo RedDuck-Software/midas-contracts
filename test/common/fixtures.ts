@@ -5,7 +5,7 @@ import { ethers } from 'hardhat';
 import * as hre from 'hardhat';
 
 import { getAllRoles } from './common.helpers';
-import { initGrantRoles, postDeploymentTest } from './post-deploy.helpers';
+import { postDeploymentTest } from './post-deploy.helpers';
 
 import {
   // eslint-disable-next-line camelcase
@@ -42,17 +42,47 @@ import {
   EUsdRedemptionVaultTest__factory,
   // eslint-disable-next-line camelcase
   CustomAggregatorV3CompatibleFeedTester__factory,
+  // eslint-disable-next-line camelcase
+  SanctionsListMock__factory,
+  // eslint-disable-next-line camelcase
+  WithSanctionsListTester__factory,
+  // eslint-disable-next-line camelcase
+  RedemptionTest__factory,
+  // eslint-disable-next-line camelcase
+  RedemptionVaultWithBUIDLTest__factory,
+  // eslint-disable-next-line camelcase
+  MBasisRedemptionVaultWithSwapperTest__factory,
 } from '../../typechain-types';
 
 export const defaultDeploy = async () => {
-  const [owner, eUsdOwner, tokensReceiver, ...regularAccounts] =
-    await ethers.getSigners();
+  const [
+    owner,
+    eUsdOwner,
+    tokensReceiver,
+    feeReceiver,
+    requestRedeemer,
+    liquidityProvider,
+    ...regularAccounts
+  ] = await ethers.getSigners();
 
   // main contracts
   const accessControl = await new MidasAccessControlTest__factory(
     owner,
   ).deploy();
   await accessControl.initialize();
+
+  const mockedSanctionsList = await new SanctionsListMock__factory(
+    owner,
+  ).deploy();
+
+  const withSanctionsListTester = await new WithSanctionsListTester__factory(
+    owner,
+  ).deploy();
+
+  await withSanctionsListTester.initialize(
+    accessControl.address,
+    mockedSanctionsList.address,
+  );
 
   const mTBILL = await new MTBILLTest__factory(owner).deploy();
   await expect(mTBILL.initialize(ethers.constants.AddressZero)).to.be.reverted;
@@ -87,17 +117,28 @@ export const defaultDeploy = async () => {
   const mockedAggregator = await new AggregatorV3Mock__factory(owner).deploy();
   const mockedAggregatorDecimals = await mockedAggregator.decimals();
 
-  const mockedAggregatorEur = await new AggregatorV3Mock__factory(
+  const mockedAggregatorMToken = await new AggregatorV3Mock__factory(
     owner,
   ).deploy();
-  const mockedAggregatorEurDecimals = await mockedAggregatorEur.decimals();
+  const mockedAggregatorMTokenDecimals =
+    await mockedAggregatorMToken.decimals();
+
+  const mockedAggregatorMBASIS = await new AggregatorV3Mock__factory(
+    owner,
+  ).deploy();
+  const mockedAggregatorMBASISDecimals =
+    await mockedAggregatorMBASIS.decimals();
 
   await mockedAggregator.setRoundData(
-    parseUnits('5', mockedAggregatorDecimals),
+    parseUnits('1.02', mockedAggregatorDecimals),
   );
 
-  await mockedAggregatorEur.setRoundData(
-    parseUnits('1.07778', mockedAggregatorEurDecimals),
+  await mockedAggregatorMToken.setRoundData(
+    parseUnits('5', mockedAggregatorMTokenDecimals),
+  );
+
+  await mockedAggregatorMBASIS.setRoundData(
+    parseUnits('3', mockedAggregatorMBASISDecimals),
   );
 
   const dataFeed = await new DataFeedTest__factory(owner).deploy();
@@ -109,58 +150,174 @@ export const defaultDeploy = async () => {
     parseUnits('10000', mockedAggregatorDecimals),
   );
 
-  const eurToUsdDataFeed = await new DataFeedTest__factory(owner).deploy();
-  await eurToUsdDataFeed.initialize(
+  const mTokenToUsdDataFeed = await new DataFeedTest__factory(owner).deploy();
+  await mTokenToUsdDataFeed.initialize(
     accessControl.address,
-    mockedAggregatorEur.address,
+    mockedAggregatorMToken.address,
     3 * 24 * 3600,
-    parseUnits('0.1', mockedAggregatorEurDecimals),
-    parseUnits('10000', mockedAggregatorEurDecimals),
+    parseUnits('0.1', mockedAggregatorMTokenDecimals),
+    parseUnits('10000', mockedAggregatorMTokenDecimals),
+  );
+
+  const mBASISToUsdDataFeed = await new DataFeedTest__factory(owner).deploy();
+  await mBASISToUsdDataFeed.initialize(
+    accessControl.address,
+    mockedAggregatorMBASIS.address,
+    3 * 24 * 3600,
+    parseUnits('0.1', mockedAggregatorMBASISDecimals),
+    parseUnits('10000', mockedAggregatorMBASISDecimals),
   );
 
   const depositVault = await new DepositVaultTest__factory(owner).deploy();
   await expect(
     depositVault.initialize(
       ethers.constants.AddressZero,
-      mTBILL.address,
-      eurToUsdDataFeed.address,
-      0,
-      tokensReceiver.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
     depositVault.initialize(
       accessControl.address,
-      ethers.constants.AddressZero,
-      eurToUsdDataFeed.address,
-      0,
-      tokensReceiver.address,
+      {
+        mToken: ethers.constants.AddressZero,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
     depositVault.initialize(
       accessControl.address,
-      mTBILL.address,
-      ethers.constants.AddressZero,
-      0,
-      tokensReceiver.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: ethers.constants.AddressZero,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await expect(
     depositVault.initialize(
       accessControl.address,
-      mTBILL.address,
-      eurToUsdDataFeed.address,
-      0,
-      ethers.constants.AddressZero,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: ethers.constants.AddressZero,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      parseUnits('100'),
+    ),
+  ).to.be.reverted;
+  await expect(
+    depositVault.initialize(
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: ethers.constants.AddressZero,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      parseUnits('100'),
+    ),
+  ).to.be.reverted;
+  await expect(
+    depositVault.initialize(
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100001,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      parseUnits('100'),
     ),
   ).to.be.reverted;
   await depositVault.initialize(
     accessControl.address,
-    mTBILL.address,
-    eurToUsdDataFeed.address,
+    {
+      mToken: mTBILL.address,
+      mTokenDataFeed: mTokenToUsdDataFeed.address,
+    },
+    {
+      feeReceiver: feeReceiver.address,
+      tokensReceiver: tokensReceiver.address,
+    },
+    {
+      instantFee: 100,
+      instantDailyLimit: parseUnits('100000'),
+    },
+    mockedSanctionsList.address,
+    1,
+    parseUnits('100'),
     0,
-    tokensReceiver.address,
+  );
+
+  await accessControl.grantRole(
+    mTBILL.M_TBILL_MINT_OPERATOR_ROLE(),
+    depositVault.address,
   );
 
   const redemptionVault = await new RedemptionVaultTest__factory(
@@ -170,29 +327,215 @@ export const defaultDeploy = async () => {
   await expect(
     redemptionVault.initialize(
       ethers.constants.AddressZero,
-      mTBILL.address,
-      tokensReceiver.address,
+      {
+        mToken: ethers.constants.AddressZero,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      requestRedeemer.address,
     ),
   ).to.be.reverted;
   await expect(
     redemptionVault.initialize(
       accessControl.address,
-      ethers.constants.AddressZero,
-      tokensReceiver.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: ethers.constants.AddressZero,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      requestRedeemer.address,
     ),
   ).to.be.reverted;
   await expect(
     redemptionVault.initialize(
       accessControl.address,
-      mTBILL.address,
-      ethers.constants.AddressZero,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: ethers.constants.AddressZero,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      requestRedeemer.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: ethers.constants.AddressZero,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      requestRedeemer.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 10001,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      requestRedeemer.address,
+    ),
+  ).to.be.reverted;
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 10001,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      requestRedeemer.address,
+    ),
+  ).to.be.reverted;
+
+  await expect(
+    redemptionVault.initialize(
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      constants.AddressZero,
     ),
   ).to.be.reverted;
 
   await redemptionVault.initialize(
     accessControl.address,
-    mTBILL.address,
-    tokensReceiver.address,
+    {
+      mToken: mTBILL.address,
+      mTokenDataFeed: mTokenToUsdDataFeed.address,
+    },
+    {
+      feeReceiver: feeReceiver.address,
+      tokensReceiver: tokensReceiver.address,
+    },
+    {
+      instantFee: 100,
+      instantDailyLimit: parseUnits('100000'),
+    },
+    mockedSanctionsList.address,
+    1,
+    1000,
+    {
+      fiatAdditionalFee: 100,
+      fiatFlatFee: parseUnits('1'),
+      minFiatRedeemAmount: 1000,
+    },
+    requestRedeemer.address,
+  );
+
+  await accessControl.grantRole(
+    mTBILL.M_TBILL_BURN_OPERATOR_ROLE(),
+    redemptionVault.address,
   );
 
   const eUSdRedemptionVault = await new EUsdRedemptionVaultTest__factory(
@@ -201,8 +544,138 @@ export const defaultDeploy = async () => {
 
   await eUSdRedemptionVault.initialize(
     accessControl.address,
-    eUSD.address,
-    tokensReceiver.address,
+    {
+      mToken: eUSD.address,
+      mTokenDataFeed: mTokenToUsdDataFeed.address,
+    },
+    {
+      feeReceiver: feeReceiver.address,
+      tokensReceiver: tokensReceiver.address,
+    },
+    {
+      instantFee: 100,
+      instantDailyLimit: parseUnits('100000'),
+    },
+    mockedSanctionsList.address,
+    1,
+    1000,
+    {
+      fiatAdditionalFee: 100,
+      fiatFlatFee: parseUnits('1'),
+      minFiatRedeemAmount: 1000,
+    },
+    requestRedeemer.address,
+  );
+
+  const mBasisRedemptionVaultWithSwapper =
+    await new MBasisRedemptionVaultWithSwapperTest__factory(owner).deploy();
+
+  await expect(
+    mBasisRedemptionVaultWithSwapper[
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
+    ](
+      accessControl.address,
+      {
+        mToken: mBASIS.address,
+        mTokenDataFeed: mBASISToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      1000,
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: 1000,
+      },
+      requestRedeemer.address,
+      constants.AddressZero,
+      liquidityProvider.address,
+    ),
+  ).to.be.reverted;
+
+  await expect(
+    mBasisRedemptionVaultWithSwapper[
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
+    ](
+      accessControl.address,
+      {
+        mToken: mBASIS.address,
+        mTokenDataFeed: mBASISToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      1000,
+      {
+        fiatAdditionalFee: 100,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: 1000,
+      },
+      requestRedeemer.address,
+      redemptionVault.address,
+      constants.AddressZero,
+    ),
+  ).to.be.reverted;
+
+  await mBasisRedemptionVaultWithSwapper[
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,address)'
+  ](
+    accessControl.address,
+    {
+      mToken: mBASIS.address,
+      mTokenDataFeed: mBASISToUsdDataFeed.address,
+    },
+    {
+      feeReceiver: feeReceiver.address,
+      tokensReceiver: tokensReceiver.address,
+    },
+    {
+      instantFee: 100,
+      instantDailyLimit: parseUnits('100000'),
+    },
+    mockedSanctionsList.address,
+    1,
+    1000,
+    {
+      fiatAdditionalFee: 100,
+      fiatFlatFee: parseUnits('1'),
+      minFiatRedeemAmount: 1000,
+    },
+    requestRedeemer.address,
+    redemptionVault.address,
+    liquidityProvider.address,
+  );
+
+  await accessControl.grantRole(
+    mBASIS.M_BASIS_BURN_OPERATOR_ROLE(),
+    mBasisRedemptionVaultWithSwapper.address,
+  );
+  await accessControl.grantRole(
+    mBasisRedemptionVaultWithSwapper.M_BASIS_REDEMPTION_VAULT_ADMIN_ROLE(),
+    owner.address,
+  );
+
+  await redemptionVault.addWaivedFeeAccount(
+    mBasisRedemptionVaultWithSwapper.address,
+  );
+  await redemptionVault.freeFromMinAmount(
+    mBasisRedemptionVaultWithSwapper.address,
+    true,
   );
 
   await accessControl.grantRoleMult(
@@ -225,6 +698,80 @@ export const defaultDeploy = async () => {
     usdt: await new ERC20Mock__factory(owner).deploy(18),
     dai: await new ERC20Mock__factory(owner).deploy(9),
   };
+
+  const buidl = await new ERC20Mock__factory(owner).deploy(8);
+
+  const buidlRedemption = await new RedemptionTest__factory(owner).deploy(
+    buidl.address,
+    stableCoins.usdc.address,
+  );
+
+  await stableCoins.usdc.mint(buidlRedemption.address, parseUnits('1000000'));
+
+  const redemptionVaultWithBUIDL =
+    await new RedemptionVaultWithBUIDLTest__factory(owner).deploy();
+
+  await expect(
+    redemptionVaultWithBUIDL[
+      'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address)'
+    ](
+      accessControl.address,
+      {
+        mToken: mTBILL.address,
+        mTokenDataFeed: mTokenToUsdDataFeed.address,
+      },
+      {
+        feeReceiver: feeReceiver.address,
+        tokensReceiver: tokensReceiver.address,
+      },
+      {
+        instantFee: 100,
+        instantDailyLimit: parseUnits('100000'),
+      },
+      mockedSanctionsList.address,
+      1,
+      parseUnits('100'),
+      {
+        fiatAdditionalFee: 10000,
+        fiatFlatFee: parseUnits('1'),
+        minFiatRedeemAmount: parseUnits('100'),
+      },
+      constants.AddressZero,
+    ),
+  ).to.be.reverted;
+  await redemptionVaultWithBUIDL[
+    'initialize(address,(address,address),(address,address),(uint256,uint256),address,uint256,uint256,(uint256,uint256,uint256),address,address,uint256,uint256)'
+  ](
+    accessControl.address,
+    {
+      mToken: mTBILL.address,
+      mTokenDataFeed: mTokenToUsdDataFeed.address,
+    },
+    {
+      feeReceiver: feeReceiver.address,
+      tokensReceiver: tokensReceiver.address,
+    },
+    {
+      instantFee: 100,
+      instantDailyLimit: parseUnits('100000'),
+    },
+    mockedSanctionsList.address,
+    1,
+    1000,
+    {
+      fiatAdditionalFee: 100,
+      fiatFlatFee: parseUnits('1'),
+      minFiatRedeemAmount: 1000,
+    },
+    requestRedeemer.address,
+    buidlRedemption.address,
+    parseUnits('250000', 6),
+    parseUnits('250000', 6),
+  );
+  await accessControl.grantRole(
+    mTBILL.M_TBILL_BURN_OPERATOR_ROLE(),
+    redemptionVaultWithBUIDL.address,
+  );
 
   // eslint-disable-next-line camelcase
   const customFeed = await new CustomAggregatorV3CompatibleFeedTester__factory(
@@ -272,13 +819,13 @@ export const defaultDeploy = async () => {
   const offChainUsdToken = constants.AddressZero;
 
   // role granting main
-  await initGrantRoles({
-    accessControl,
-    depositVault,
-    owner,
-    redemptionVault,
-    mTBILL,
-  });
+  // await initGrantRoles({
+  //   accessControl,
+  //   depositVault,
+  //   owner,
+  //   redemptionVault,
+  //   mTBILL,
+  // });
 
   // role granting testers
   await accessControl.grantRole(
@@ -289,6 +836,8 @@ export const defaultDeploy = async () => {
     roles.greenlistedOperator,
     greenListableTester.address,
   );
+  const greenlistToggler = await greenListableTester.GREENLIST_TOGGLER_ROLE();
+  await accessControl.grantRole(greenlistToggler, owner.address);
 
   await postDeploymentTest(hre, {
     accessControl,
@@ -297,10 +846,11 @@ export const defaultDeploy = async () => {
     depositVault,
     owner,
     redemptionVault,
-    aggregatorEur: mockedAggregatorEur,
-    dataFeedEur: eurToUsdDataFeed,
+    aggregatorMToken: mockedAggregatorMToken,
+    dataFeedMToken: mTokenToUsdDataFeed,
     mTBILL,
-    minAmountToDeposit: '0',
+    minMTokenAmountForFirstDeposit: '0',
+    minAmount: parseUnits('100'),
     tokensReceiver: tokensReceiver.address,
   });
 
@@ -314,7 +864,7 @@ export const defaultDeploy = async () => {
   );
 
   await mockedDeprecatedAggregator.setRoundData(
-    parseUnits('1.07778', mockedAggregatorEurDecimals),
+    parseUnits('1.07778', mockedAggregatorMTokenDecimals),
   );
   const dataFeedDeprecated = await new DataFeedTest__factory(owner).deploy();
   await dataFeedDeprecated.initialize(
@@ -335,7 +885,7 @@ export const defaultDeploy = async () => {
   );
 
   await mockedUnhealthyAggregator.setRoundData(
-    parseUnits('1.07778', mockedAggregatorEurDecimals),
+    parseUnits('1.07778', mockedAggregatorMTokenDecimals),
   );
   const dataFeedUnhealthy = await new DataFeedTest__factory(owner).deploy();
   await dataFeedUnhealthy.initialize(
@@ -355,7 +905,7 @@ export const defaultDeploy = async () => {
     eUSD,
     accessControl,
     wAccessControlTester,
-    roles,
+    roles: { ...roles, greenlistToggler },
     owner,
     regularAccounts,
     blackListableTester,
@@ -368,12 +918,23 @@ export const defaultDeploy = async () => {
     redemptionVault,
     stableCoins,
     manualFulfillmentToken,
-    eurToUsdDataFeed,
-    mockedAggregatorEur,
+    mTokenToUsdDataFeed,
+    mockedAggregatorMToken,
     offChainUsdToken,
-    mockedAggregatorEurDecimals,
+    mockedAggregatorMTokenDecimals,
     tokensReceiver,
+    feeReceiver,
     dataFeedDeprecated,
     dataFeedUnhealthy,
+    withSanctionsListTester,
+    mockedSanctionsList,
+    requestRedeemer,
+    buidl,
+    buidlRedemption,
+    redemptionVaultWithBUIDL,
+    mBasisRedemptionVaultWithSwapper,
+    mBASISToUsdDataFeed,
+    mockedAggregatorMBASIS,
+    liquidityProvider,
   };
 };

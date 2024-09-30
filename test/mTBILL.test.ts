@@ -11,7 +11,7 @@ describe('mTBILL', function () {
   it('deployment', async () => {
     const { mTBILL } = await loadFixture(defaultDeploy);
 
-    expect(await mTBILL.name()).eq('mTBILL');
+    expect(await mTBILL.name()).eq('Midas US Treasury Bill Token');
     expect(await mTBILL.symbol()).eq('mTBILL');
 
     expect(await mTBILL.paused()).eq(false);

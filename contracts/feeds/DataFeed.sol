@@ -73,7 +73,7 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
      */
     function changeAggregator(address _aggregator)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE, msg.sender)
+        onlyRole(feedAdminRole(), msg.sender)
     {
         require(_aggregator != address(0), "DF: invalid address");
 
@@ -81,10 +81,64 @@ contract DataFeed is WithMidasAccessControl, IDataFeed {
     }
 
     /**
+     * @dev updates `healthyDiff` value
+     * @param _healthyDiff new value
+     */
+    function setHealthyDiff(uint256 _healthyDiff)
+        external
+        onlyRole(feedAdminRole(), msg.sender)
+    {
+        require(_healthyDiff > 0, "DF: invalid diff");
+
+        healthyDiff = _healthyDiff;
+    }
+
+    /**
+     * @dev updates `minExpectedAnswer` value
+     * @param _minExpectedAnswer min value
+     */
+    function setMinExpectedAnswer(int256 _minExpectedAnswer)
+        external
+        onlyRole(feedAdminRole(), msg.sender)
+    {
+        require(_minExpectedAnswer > 0, "DF: invalid min exp. price");
+        require(
+            maxExpectedAnswer > _minExpectedAnswer,
+            "DF: invalid exp. prices"
+        );
+
+        minExpectedAnswer = _minExpectedAnswer;
+    }
+
+    /**
+     * @dev updates `maxExpectedAnswer` value
+     * @param _maxExpectedAnswer max value
+     */
+    function setMaxExpectedAnswer(int256 _maxExpectedAnswer)
+        external
+        onlyRole(feedAdminRole(), msg.sender)
+    {
+        require(_maxExpectedAnswer > 0, "DF: invalid max exp. price");
+        require(
+            _maxExpectedAnswer > minExpectedAnswer,
+            "DF: invalid exp. prices"
+        );
+
+        maxExpectedAnswer = _maxExpectedAnswer;
+    }
+
+    /**
      * @inheritdoc IDataFeed
      */
     function getDataInBase18() external view returns (uint256 answer) {
         (, answer) = _getDataInBase18();
+    }
+
+    /**
+     * @inheritdoc IDataFeed
+     */
+    function feedAdminRole() public pure virtual override returns (bytes32) {
+        return DEFAULT_ADMIN_ROLE;
     }
 
     /**

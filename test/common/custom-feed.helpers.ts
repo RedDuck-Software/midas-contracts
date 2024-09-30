@@ -1,20 +1,9 @@
 import { setNextBlockTimestamp } from '@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time';
 import { expect } from 'chai';
-import { providers } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 
-import {
-  OptionalCommonParams,
-  balanceOfBase18,
-  getAccount,
-} from './common.helpers';
+import { OptionalCommonParams } from './common.helpers';
 import { defaultDeploy } from './fixtures';
-
-import {
-  ERC20,
-  // eslint-disable-next-line camelcase
-  ERC20__factory,
-} from '../../typechain-types';
 
 type CommonParamsSetRoundData = Pick<
   Awaited<ReturnType<typeof defaultDeploy>>,
@@ -130,3 +119,6 @@ export const setRoundDataSafe = async (
   expect(await customFeed.lastTimestamp()).eq(lastRoundDataAfter.updatedAt);
   expect(await customFeed.lastAnswer()).eq(lastRoundDataAfter.answer);
 };
+
+export const calculatePriceDiviation = (last: number, next: number) =>
+  Math.abs(((next - last) * 100) / last);

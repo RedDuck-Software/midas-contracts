@@ -93,6 +93,45 @@ export const unBlackList = async (
   ).eq(false);
 };
 
+export const greenListToggler = async (
+  { greenlistable, accessControl, owner, role }: CommonParamsGreenList,
+  account: Account,
+  opt?: OptionalCommonParams,
+) => {
+  account = getAccount(account);
+
+  if (opt?.revertMessage) {
+    await expect(
+      accessControl
+        .connect(opt?.from ?? owner)
+        .grantRole(
+          role ?? (await greenlistable.GREENLIST_TOGGLER_ROLE()),
+          account,
+        ),
+    ).revertedWith(opt?.revertMessage);
+    return;
+  }
+
+  await expect(
+    accessControl
+      .connect(opt?.from ?? owner)
+      .grantRole(
+        role ?? (await greenlistable.GREENLIST_TOGGLER_ROLE()),
+        account,
+      ),
+  ).to.emit(
+    accessControl,
+    accessControl.interface.events['RoleGranted(bytes32,address,address)'].name,
+  ).to.not.reverted;
+
+  expect(
+    await accessControl.hasRole(
+      role ?? (await greenlistable.GREENLIST_TOGGLER_ROLE()),
+      account,
+    ),
+  ).eq(true);
+};
+
 export const greenList = async (
   { greenlistable, accessControl, owner, role }: CommonParamsGreenList,
   account: Account,

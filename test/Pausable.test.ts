@@ -1,9 +1,15 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 
-import { pauseVault, unpauseVault } from './common/common.helpers';
+import {
+  pauseVault,
+  pauseVaultFn,
+  unpauseVault,
+  unpauseVaultFn,
+} from './common/common.helpers';
 import { defaultDeploy } from './common/fixtures';
 
+import { encodeFnSelector } from '../helpers/utils';
 import {
   // eslint-disable-next-line camelcase
   PausableTester__factory,
@@ -72,6 +78,86 @@ describe('Pausable', () => {
       const { pausableTester } = await loadFixture(defaultDeploy);
 
       await pauseVault(pausableTester);
+    });
+  });
+
+  describe('pauseFn()', async () => {
+    it('fail: can`t pause if caller doesnt have admin role', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await pauseVaultFn(pausableTester, selector, {
+        from: regularAccounts[0],
+        revertMessage: 'WMAC: hasnt role',
+      });
+    });
+
+    it('fail: when paused', async () => {
+      const { pausableTester } = await loadFixture(defaultDeploy);
+
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await pauseVaultFn(pausableTester, selector);
+      await pauseVaultFn(pausableTester, selector, {
+        revertMessage: 'Pausable: fn paused',
+      });
+    });
+
+    it('when not paused and caller is admin', async () => {
+      const { pausableTester } = await loadFixture(defaultDeploy);
+
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await pauseVaultFn(pausableTester, selector);
+    });
+  });
+
+  describe('unpauseFn()', async () => {
+    it('fail: can`t pause if caller doesnt have admin role', async () => {
+      const { pausableTester, regularAccounts } = await loadFixture(
+        defaultDeploy,
+      );
+
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await unpauseVaultFn(pausableTester, selector, {
+        from: regularAccounts[0],
+        revertMessage: 'WMAC: hasnt role',
+      });
+    });
+
+    it('fail: when unpaused', async () => {
+      const { pausableTester } = await loadFixture(defaultDeploy);
+
+      const selector = encodeFnSelector(
+        'function depositRequest(address,uint256,bytes32)',
+      );
+
+      await unpauseVaultFn(pausableTester, selector, {
+        revertMessage: 'Pausable: fn unpaused',
+      });
+    });
+
+    it('when paused and caller is admin', async () => {
+      const { pausableTester } = await loadFixture(defaultDeploy);
+
+      const selector = encodeFnSelector(
+        'depositRequest(address,uint256,bytes32)',
+      );
+
+      await pauseVaultFn(pausableTester, selector);
+      await unpauseVaultFn(pausableTester, selector);
     });
   });
 

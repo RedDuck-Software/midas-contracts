@@ -2,19 +2,14 @@
 pragma solidity 0.8.9;
 
 import "../DepositVault.sol";
+import "./MBasisMidasAccessControlRoles.sol";
 
 /**
  * @title MBasisDepositVault
  * @notice Smart contract that handles mBASIS minting
  * @author RedDuck Software
  */
-contract MBasisDepositVault is DepositVault {
-    /**
-     * @notice actor that can manage MBasisDepositVault
-     */
-    bytes32 public constant M_BASIS_DEPOSIT_VAULT_ADMIN_ROLE =
-        keccak256("M_BASIS_DEPOSIT_VAULT_ADMIN_ROLE");
-
+contract MBasisDepositVault is DepositVault, MBasisMidasAccessControlRoles {
     /**
      * @dev leaving a storage gap for futures updates
      */

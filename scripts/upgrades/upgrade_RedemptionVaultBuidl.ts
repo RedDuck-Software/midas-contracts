@@ -2,7 +2,10 @@ import * as hre from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { M_BASIS_REDEMPTION_VAULT_CONTRACT_NAME } from '../../config';
+import {
+  REDEMPTION_VAULT_BUIDL_CONTRACT_NAME,
+  REDEMPTION_VAULT_CONTRACT_NAME,
+} from '../../config';
 import { getCurrentAddresses } from '../../config/constants/addresses';
 import {
   logDeployProxy,
@@ -12,44 +15,28 @@ import {
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const addresses = getCurrentAddresses(hre);
 
-  if (!addresses) throw new Error('Addresses are not set');
   const { deployer } = await hre.getNamedAccounts();
-
-  console.log({ deployer });
-
-  const tokenAddresses = addresses.mBASIS;
-
-  if (!tokenAddresses) throw new Error('Token addresses are not set');
-
   const owner = await hre.ethers.getSigner(deployer);
 
-  console.log('Deploying MBasisRedemptionVault...');
-  const deployment = await hre.upgrades.deployProxy(
+  const deployment = await hre.upgrades.upgradeProxy(
+    addresses?.mTBILL?.redemptionVaultBuidl ?? '',
     await hre.ethers.getContractFactory(
-      M_BASIS_REDEMPTION_VAULT_CONTRACT_NAME,
+      REDEMPTION_VAULT_BUIDL_CONTRACT_NAME,
       owner,
     ),
-    [
-      addresses?.accessControl,
-      tokenAddresses?.token,
-      tokenAddresses?.tokensReceiver,
-    ],
     {
       unsafeAllow: ['constructor'],
+      call: {
+        fn: 'upgradeV2',
+        args: ['0x0391508a7CF5CF30c233d08849813C2959c0eA2f'],
+      },
     },
   );
-  console.log('Deployed MBasisRedemptionVault:', deployment.address);
 
   if (deployment.deployTransaction) {
-    console.log('Waiting 5 blocks...');
     await deployment.deployTransaction.wait(5);
-    console.log('Waited.');
   }
-  await logDeployProxy(
-    hre,
-    M_BASIS_REDEMPTION_VAULT_CONTRACT_NAME,
-    deployment.address,
-  );
+  await logDeployProxy(hre, REDEMPTION_VAULT_CONTRACT_NAME, deployment.address);
   await tryEtherscanVerifyImplementation(hre, deployment.address);
 };
 
